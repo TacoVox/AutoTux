@@ -29,7 +29,7 @@ VehicleControl vehicleControl;
  */
 DecisionMaker::DecisionMaker(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "DecisionMaker"),
-        state(PARKING),ovt(), parker(), vd(), sbd(), dmMSG(), lrMSG(),
+        state(LANE_FOLLOWING),ovt(), parker(), vd(), sbd(), dmMSG(), lrMSG(),
         speed(), isStopLine(false), stopCounter(0), printCounter(0) {}
 
 DecisionMaker::~DecisionMaker() {}
@@ -60,7 +60,7 @@ void DecisionMaker::laneFollowing() {
         }
     }
 
-    else if(getDistanceToLine() < 30 && getDistanceToLine() != -1) {
+    else if(getDistanceToLine() < 40 && getDistanceToLine() != -1) {
         cout << "STOPPING!" << endl;
         vehicleControl.setBrakeLights(true);
         speed = 0;

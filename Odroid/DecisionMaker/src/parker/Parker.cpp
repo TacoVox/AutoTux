@@ -161,6 +161,7 @@ void Parker::objectBehind(SensorBoardData sbd, VehicleData vd) {
  * When it is parking in between two object this is executed
  */
 void Parker::inBetweenObjects(SensorBoardData sbd, VehicleData vd) {
+/*	cout << "Get into the middle" << endl;
     if ((sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) > SENSOR_SAFETY_MIN &&
          sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) < ULTRASENSOR_DISTANCE_MAX)
         && (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > SENSOR_SAFETY_MIN &&
@@ -169,11 +170,11 @@ void Parker::inBetweenObjects(SensorBoardData sbd, VehicleData vd) {
     }
     else
         isAccurate = 0;
-
+*/
     double frontSensor = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD);
     double backSensor = sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK);
 	
-    if (isAccurate == ACCURENCE) {
+   // if (isAccurate == ACCURENCE) {
 	cout << "Correct values" << endl;
         if(std::abs(frontSensor - backSensor) < SENSOR_DIFFERENCE_INBETWEEN) {
 	cout << "In the middle" << endl;            
@@ -182,6 +183,7 @@ controlTemp.setSpeed(0);
             carPosition = vd.getAbsTraveledPath();
             isParked = true;
             reversing = false;
+	cout << "Front sensor: " << frontSensor << " Back Sensor" << backSensor << endl;
         }
         else if(frontSensor >
                  backSensor) {
@@ -197,7 +199,7 @@ isAccurate = 0;
             controlTemp.setSpeed(-1);
             reversing = true;
         }
-    }
+ //   }
 }
 
 /**
@@ -208,25 +210,27 @@ bool isCloseToBack = false;
 VehicleControl Parker::getParallelInSpot(SensorBoardData sbd, VehicleData vd, double add){
         if(carPosition + add > vd.getAbsTraveledPath()){
             checkIfInSpot(sbd);
-            if(!isInSpot){
+            /*if(!isInSpot && sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > 0.1){
                 reversing = true;
                 controlTemp.setSteeringWheelAngle(-0.5); // 45
                 controlTemp.setBrakeLights(false);
                 controlTemp.setSpeed(-1);
-            }
-            else if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > IRSENSOR_DISTANCE_MIN && !isCloseToBack){
+            }*/
+            if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > 0.16 && !isCloseToBack){
                 reversing = true;
                 controlTemp.setSteeringWheelAngle(-0.5); // 45
                 controlTemp.setBrakeLights(false);
                 controlTemp.setSpeed(-1);
+		cout << "Going back now" << endl;
             }
             else
                 isCloseToBack = true;
-            if(sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) > ULTRASENSOR_DISTANCE_MIN && isCloseToBack){
+            if(sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) > 0.16 && isCloseToBack){
                 reversing = false;
                 controlTemp.setSteeringWheelAngle(0.5); // 45
                 controlTemp.setBrakeLights(false);
                 controlTemp.setSpeed(1);
+		cout << "Going forward now" << endl;
             }
             else
                 isCloseToBack = false;

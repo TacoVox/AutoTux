@@ -325,13 +325,13 @@ namespace lane {
 
 	    static int counter = 0;
 
-            if(counter < 4 && (left_dist - right_dist > -25) && (left_dist - right_dist < 25)) {
+            if(counter < 5 && (left_dist - right_dist > -15) && (left_dist - right_dist < 15)) {
                 counter ++;
             } else {
 		counter = 0;
 	    }
 
-	    if(counter > 3) {
+	    if(counter > 4) {
 		m_laneRecommendation.setDistance_to_line(left_dist);
             } 
 
