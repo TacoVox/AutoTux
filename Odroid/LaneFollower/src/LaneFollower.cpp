@@ -44,7 +44,7 @@ namespace lane {
                 m_eOld(0),
                 m_distance(220),
                 m_controlScanline(222),
-                m_stopScanline(110),
+                m_stopScanline(10),
                 m_threshold1(50),
                 m_threshold2(200),
                 P_GAIN(0.9),
@@ -312,7 +312,7 @@ namespace lane {
                 }
             }
 
-            if((left_dist - right_dist > -5) && (left_dist - right_dist < 5)) {
+            if((left_dist - right_dist > -10) && (left_dist - right_dist < 10)) {
                 m_laneRecommendation.setDistance_to_line(left_dist);
             }
 
@@ -356,7 +356,7 @@ namespace lane {
             if (desiredSteering > 0.5) desiredSteering = 0.5;
             if (desiredSteering < -0.5) desiredSteering = -0.5;
 
-            if(m_laneRecommendation.getDistance_to_line() < 5 || m_laneRecommendation.getDistance_to_line() > 150)
+            if(m_laneRecommendation.getDistance_to_line() < 10 || m_laneRecommendation.getDistance_to_line() > 50)
                 // Set distance to line to -1 if it's too far away or too close
                 m_laneRecommendation.setDistance_to_line(-1);
 
@@ -397,23 +397,23 @@ namespace lane {
                 Container image_container = getKeyValueDataStore().get(SharedImage::ID());
                 Container config_container = getKeyValueDataStore().get(LaneFollowerMSG::ID());
                 Container overtaking_container = getKeyValueDataStore().get(OvertakingMSG::ID());
-
+				//cout << "ts: "<< config_container.getReceivedTimeStamp() <<endl;
                 if(config_container.getReceivedTimeStamp() > configContainerTimeStamp) {
                     m_config = config_container.getData<LaneFollowerMSG>();
+					if (m_config.getThresholdD() > 0) {
+                    	m_threshold1 = m_config.getThresholdD();
+                    	m_threshold2 = m_config.getThresholdB();
+                    	m_distance = m_config.getRoadWidth();
 
-                    m_threshold1 = m_config.getThresholdD();
-                    m_threshold2 = m_config.getThresholdB();
-                    m_distance = m_config.getRoadWidth();
+                    	P_GAIN = m_config.getGainP();
+                    	I_GAIN = m_config.getGainI();
+                    	D_GAIN = m_config.getGainD();
 
-                    P_GAIN = m_config.getGainP();
-                    I_GAIN = m_config.getGainI();
-                    D_GAIN = m_config.getGainD();
+                    	configContainerTimeStamp = TimeStamp();
 
-                    configContainerTimeStamp = TimeStamp();
-
-                    LaneFollower::toLogger(LogMessage::DEBUG, m_config.toString());
-                }
-
+                    	LaneFollower::toLogger(LogMessage::DEBUG, m_config.toString());
+                	}
+				}
                 m_overtaking = overtaking_container.getData<OvertakingMSG>();
 
 
