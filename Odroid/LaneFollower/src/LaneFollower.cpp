@@ -46,6 +46,8 @@ namespace lane {
         // This method will run before body()
         void LaneFollower::setUp() {
             // Set up debug window
+	    cout << "Setup LaneFollower" << endl;
+	    cout << "LaneFollower Debug: " << m_debug << endl;
             if (m_debug) {
                 cvNamedWindow("Debug Window", CV_WINDOW_AUTOSIZE);
                 cvMoveWindow("Debug Window", 300, 100);
@@ -102,12 +104,12 @@ namespace lane {
             double e = 0;
 
             const int32_t CONTROL_SCANLINE = 462;
-            const int32_t distance = 280;
+            const int32_t distance = 220;
 
             Mat m_image_grey = m_image.clone();
             cvtColor(m_image, m_image_grey, COLOR_BGR2GRAY);
             threshold(m_image_grey, m_image_grey, 180, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
-
+            //imwrite("BW.jpg", m_image_grey);
             //adaptiveThreshold(m_image_grey, m_image_grey, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY_INV, 3, 5);
 
             vector<vector<Point>> contours;
@@ -170,7 +172,6 @@ namespace lane {
                 }
 
                 if (m_debug) {
-                    //line(m_image, Point(m_image.cols / 2, 0), Point(m_image.cols / 2, m_image.rows), Scalar(0,255,255));
                     if (left.x > 0) {
                         line(m_image, Point(m_image.cols / 2, y), left, Scalar(0, 255, 0));
                         stringstream sstr;
@@ -186,6 +187,9 @@ namespace lane {
                                 0.5, CV_RGB(255, 0, 0));
                     }
                 }
+		static int w;
+		//imwrite("./orig"+std::to_string(w)+".jpg", m_image);
+		w++;
             }
 
             TimeStamp currentTime;
@@ -202,12 +206,12 @@ namespace lane {
 			// https://www  .youtube.com/watch?v=4Y7zG48uHRo
 			// Proportional gain. Values above 1 amplifies e and vice versa.
 			// 1 too low for right curve, 4 too twitchy. 2-3 seems very good
-            const double Kp = 2.60;
+            const double Kp = 2.6;
             // Cross track error rate gain. Affects the angle based on how fast we
 			// are moving towards the desired center of the lane. Counters the primary
 	        // proportional correction. Increase if car wobbles around centerline 
 			// because of of overcorrection.
-			const double Kd = 0;
+			const double Kd = 0.0;
 			// Integral gain. Adjusts based on accumulated e values, to correct for
 			// offset. 
 			const double Ki = 0;
@@ -225,7 +229,7 @@ namespace lane {
                 desiredSteering = y;
             }
 
-            if (m_debug) {
+            if (false) {
                 if (m_image.data != NULL) {
                     imshow("Camera Original Image", m_image);
                     imshow("Camera BW Image", m_image_grey);
@@ -237,7 +241,7 @@ namespace lane {
 		if (desiredSteering > 0.5) desiredSteering = 0.5;
 		if (desiredSteering < -0.5) desiredSteering = -0.5;
 
-		cout << "\rDS: " << desiredSteering;
+		cout << "DS: " << desiredSteering;
 		laneRecommendation.setAngle(desiredSteering);
 //
 //            laneRecommendation.setAngle(laneRecommendation.getAngle());
@@ -298,7 +302,7 @@ namespace lane {
                 bool has_next_frame = false;
 
                 Container c = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
-
+	
                 if (c.getDataType() == odcore::data::image::SharedImage::ID()) {
                     has_next_frame = readSharedImage(c);
                 }
