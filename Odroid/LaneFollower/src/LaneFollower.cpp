@@ -47,9 +47,9 @@ namespace lane {
                 m_stopScanline(10),
                 m_threshold1(50),
                 m_threshold2(200),
-                P_GAIN(0.85),
-                I_GAIN(0),
-                D_GAIN(0),
+                P_GAIN(0.80),
+                I_GAIN(0.0),
+                D_GAIN(0.0),
                 printCounter(0) {}
 
         LaneFollower::~LaneFollower() { }
@@ -366,7 +366,6 @@ namespace lane {
         /**
          * Function that prints debug output every second instead of every iteration.
          */
-
         void LaneFollower::printDebug() {
             if(printCounter == 30) {
 
@@ -398,6 +397,10 @@ namespace lane {
                 Container config_container = getKeyValueDataStore().get(LaneFollowerMSG::ID());
                 Container overtaking_container = getKeyValueDataStore().get(OvertakingMSG::ID());
 				//cout << "ts: "<< config_container.getReceivedTimeStamp() <<endl;
+
+
+                // TODO We are receiving values all the time.
+                // Implement check if changed.
                 if(config_container.getReceivedTimeStamp() > configContainerTimeStamp) {
                     m_config = config_container.getData<LaneFollowerMSG>();
 					if (m_config.getThresholdD() > 0) {

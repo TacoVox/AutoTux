@@ -94,11 +94,11 @@ void ui::CamSettings::selRight(void) {
 
 void ui::CamSettings::incr(void) {
     if(selectedItem == 0) {
-        od::ConferenceData::instance()->setGainP(od::ConferenceData::instance()->getGainP() + 0.1);
+        od::ConferenceData::instance()->setGainP(od::ConferenceData::instance()->getGainP() + 0.01);
     } else if(selectedItem == 1) {
-        od::ConferenceData::instance()->setGainD(od::ConferenceData::instance()->getGainD() + 0.1);
+        od::ConferenceData::instance()->setGainD(od::ConferenceData::instance()->getGainD() + 0.01);
     } else if(selectedItem == 2) {
-        od::ConferenceData::instance()->setGainI(od::ConferenceData::instance()->getGainI() + 0.1);
+        od::ConferenceData::instance()->setGainI(od::ConferenceData::instance()->getGainI() + 0.01);
     } else if(selectedItem == 3) {
         od::ConferenceData::instance()->setRoadWidth((uint32)(od::ConferenceData::instance()->getRoadWidth() + 1));
     } else if(selectedItem == 4) {
@@ -106,17 +106,15 @@ void ui::CamSettings::incr(void) {
     } else if(selectedItem == 5) {
         od::ConferenceData::instance()->setThresholdB((uint8)(od::ConferenceData::instance()->getThresholdB() + 1));
     }
-
-    od::ConferenceData::instance()->setNewData(true);
 }
 
 void ui::CamSettings::decr(void) {
     if(selectedItem == 0) {
-        od::ConferenceData::instance()->setGainP(od::ConferenceData::instance()->getGainP() - 0.1);
+        od::ConferenceData::instance()->setGainP(od::ConferenceData::instance()->getGainP() - 0.01);
     } else if(selectedItem == 1) {
-        od::ConferenceData::instance()->setGainD(od::ConferenceData::instance()->getGainD() - 0.1);
+        od::ConferenceData::instance()->setGainD(od::ConferenceData::instance()->getGainD() - 0.01);
     } else if(selectedItem == 2) {
-        od::ConferenceData::instance()->setGainI(od::ConferenceData::instance()->getGainI() - 0.1);
+        od::ConferenceData::instance()->setGainI(od::ConferenceData::instance()->getGainI() - 0.01);
     } else if(selectedItem == 3) {
         od::ConferenceData::instance()->setRoadWidth((uint32)(od::ConferenceData::instance()->getRoadWidth() - 1));
     } else if(selectedItem == 4) {
@@ -124,8 +122,6 @@ void ui::CamSettings::decr(void) {
     } else if(selectedItem == 5) {
         od::ConferenceData::instance()->setThresholdB((uint8)(od::ConferenceData::instance()->getThresholdB() - 1));
     }
-
-    od::ConferenceData::instance()->setNewData(true);
 }
 
 

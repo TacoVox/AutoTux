@@ -54,10 +54,8 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode od::ConferenceModule::
         ConferenceData::instance()->setDistance_to_line(laneRecommendationMSG.getDistance_to_line());
         ConferenceData::instance()->setQuality(laneRecommendationMSG.getQuality());
 
-        if(od::ConferenceData::instance()->isNewData()) {
-            getConference().send(*od::ConferenceData::instance()->genLaneFollowerContainer());
-            od::ConferenceData::instance()->setNewData(false);
-        }
+        //Send out the configured vals
+        getConference().send(*od::ConferenceData::instance()->genLaneFollowerContainer());
     }
 
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
