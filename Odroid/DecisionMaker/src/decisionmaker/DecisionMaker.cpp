@@ -115,6 +115,9 @@ void DecisionMaker::printDebug() {
         cout << " | US FRONT: " << sbd.getValueForKey_MapOfDistances(3);
         cout << " | US FRONT RIGHT: " << sbd.getValueForKey_MapOfDistances(4);
         cout << " | TRAVELED: " << vd.getAbsTraveledPath() << endl;
+	
+	printf("%i\n", state);
+
         // Reset counter
         printCounter = 0;
     }
@@ -151,9 +154,8 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
         containerLaneRecommendationMSG = getKeyValueDataStore().get(autotux::LaneRecommendationMSG::ID());
         lrMSG = containerLaneRecommendationMSG.getData<LaneRecommendationMSG>();
 
-      //  state = static_cast<DecisionMaker::STATE>(dmMSG.getState());
+      	//state = static_cast<DecisionMaker::STATE>(dmMSG.getState());
 	
-	//	cout << "THis is State:  " << state << endl;
         if(!ovt.isLeftLane()){
             ovtMSG.setLeftlane(NOTLEFTLANE);
         }

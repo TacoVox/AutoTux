@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "opendavinci/odcore/data/Container.h"
+#include <cmath>
 
 #include "parker/Parker.h"
 
@@ -173,7 +174,7 @@ void Parker::inBetweenObjects(SensorBoardData sbd, VehicleData vd) {
     double backSensor = sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK);
 
     if (isAccurate == FREQUENCY) {
-        if((max(frontSensor, backSensor) - min(frontSensor, backSensor)) < SENSOR_DIFFERENCE_INBETWEEN) {
+        if(std::abs(frontSensor - backSensor) < SENSOR_DIFFERENCE_INBETWEEN) {
             controlTemp.setSpeed(0);
             controlTemp.setBrakeLights(true);
             carPosition = vd.getAbsTraveledPath();

@@ -40,7 +40,7 @@ void Overtaker::obstacleDetection(SensorBoardData sensorData, VehicleData vehicl
             break;
         }
 	case INIT_LEFT_SWITCH:{
-	    if(turnLeft(vehicleData, traveledPath, 0.15)){
+	    if(turnLeft(vehicleData, traveledPath, 0.25)){
 	        cout << "Transition to LEFT-SWITCH" << endl;
 		traveledPath = vehicleData.getAbsTraveledPath();
 		state = LEFT_SWITCH;
@@ -217,7 +217,7 @@ bool Overtaker::adjustLeftSwitch(VehicleData vehicleData, const double trvStart,
     if(traveled > maxTrv){
         cout << "ADJUST-LEFT: traveled " << traveled << " - Threshold: " << maxTrv << endl;
  	    ovtControl.setSteeringWheelAngle(0.0);
-        return true;
+        return true ;
     }
 
     //... else keep steering right
@@ -331,7 +331,8 @@ void Overtaker::keepParallelToObstacle(SensorBoardData sensorData, const double 
     // If none of the two IR sensors is detecting the obstacle...
     if(!ir_fr && !ir_rr){
         cout << "KEEP-PARALLEL: Lost sight of obstacle" << endl;
-        ovtControl.setSteeringWheelAngle(0.5235);
+        //ovtControl.setSteeringWheelAngle(0.5235);
+        if(state!= REACH_END) stopCar();
         return;
     }
 
