@@ -151,8 +151,9 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
         containerLaneRecommendationMSG = getKeyValueDataStore().get(autotux::LaneRecommendationMSG::ID());
         lrMSG = containerLaneRecommendationMSG.getData<LaneRecommendationMSG>();
 
-        //state = dmMSG.getState();
-
+      //  state = static_cast<DecisionMaker::STATE>(dmMSG.getState());
+	
+	//	cout << "THis is State:  " << state << endl;
         if(!ovt.isLeftLane()){
             ovtMSG.setLeftlane(NOTLEFTLANE);
         }
@@ -196,7 +197,6 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
             }
             // Lane follower + parking
             case PARKING:{
-
                 if(parker.getFoundSpot()){
                     if(parker.isReversing()){
                         lightSystem.setReverseLight(true);
@@ -207,6 +207,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                     if(!parker.getIsParked()) {
                         vehicleControl = parker.parallelPark(sbd, vd);
                     }
+		break;
                 }
                 else{
                     if(!isStopLine) {
