@@ -206,7 +206,7 @@ namespace lane {
 			// https://www  .youtube.com/watch?v=4Y7zG48uHRo
 			// Proportional gain. Values above 1 amplifies e and vice versa.
 			// 1 too low for right curve, 4 too twitchy. 2-3 seems very good
-            const double Kp = 2.6;
+            const double Kp = 1.3;
             // Cross track error rate gain. Affects the angle based on how fast we
 			// are moving towards the desired center of the lane. Counters the primary
 	        // proportional correction. Increase if car wobbles around centerline 
