@@ -1,3 +1,6 @@
+<u>AutoTux project folder</u>
+├── x64_86_build // will be .gitignored -> created on buildtime
+├── arm_build // same as above - for x-compiling
 ├── cmake<br />
 │   └── scripts_here<br />
 ├── include<br />
