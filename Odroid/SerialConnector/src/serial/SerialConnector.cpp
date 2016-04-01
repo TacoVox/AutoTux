@@ -6,7 +6,7 @@ using namespace std;
 
 /* constructor */
 SerialConnector::SerialConnector() {
-	cout << "Creating a serial object!" << endl;
+    cout << "Creating a serial object!" << endl;
 }
 
 /* copy constructor */
@@ -21,9 +21,9 @@ SerialConnector & SerialConnector::operator=(const SerialConnector &sc) {
 
 /* destructor */
 SerialConnector::~SerialConnector() {
-    //delete[] devs;
-    //delete[] usb_dev;
-    //delete[] ctx;
+    delete[] devs;
+    free(usb_dev);
+    free(ctx);
 }
 
 /* connect and open stream to usb */

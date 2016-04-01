@@ -8,6 +8,7 @@
 class SerialConnector
 {
 public:
+    // constructor
     SerialConnector();
     // copy constructor
     SerialConnector(const SerialConnector &sc);
@@ -20,9 +21,9 @@ public:
     void write(unsigned char c);
     void disconnect();
 private:
-    //libusb_device **devs;
-    //struct libusb_device_handle *usb_dev;
-    //struct libusb_context *ctx;
+    libusb_device **devs;
+    libusb_device_handle *usb_dev;
+    libusb_context *ctx;
 };
 
 
