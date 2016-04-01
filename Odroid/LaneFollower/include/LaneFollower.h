@@ -11,44 +11,47 @@
 #include <automotivedata/GeneratedHeaders_AutomotiveData.h>
 #include <opendavinci/GeneratedHeaders_OpenDaVINCI.h>
 
-namespace lanefollower {
-    using namespace std;
+namespace lane {
+    namespace follower {
+        using namespace std;
 
-    class LaneFollower: public odcore::base::module::TimeTriggeredConferenceClientModule {
-    private:
-        LaneFollower(const LaneFollower &/*obj*/);
+        class LaneFollower : public odcore::base::module::TimeTriggeredConferenceClientModule {
+        private:
+            LaneFollower(const LaneFollower &/*obj*/);
 
-        LaneFollower& operator=(const LaneFollower &/*obj*/);
+            LaneFollower &operator=(const LaneFollower &/*obj*/);
 
-    public:
-        LaneFollower(const int32_t &argc, char **argv);
+        public:
+            LaneFollower(const int32_t &argc, char **argv);
 
-        virtual ~LaneFollower();
+            virtual ~LaneFollower();
 
-        odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
+            odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
 
-    protected:
-        bool readSharedImage(odcore::data::Container &c);
+        protected:
+            bool readSharedImage(odcore::data::Container &c);
 
-    private:
-        bool m_hasAttachedToSharedImageMemory;
-        std::shared_ptr<odcore::wrapper::SharedMemory> m_sharedImageMemory;
-        IplImage *m_image;
+        private:
+            bool m_hasAttachedToSharedImageMemory;
+            std::shared_ptr<odcore::wrapper::SharedMemory> m_sharedImageMemory;
+            IplImage *m_image;
 
-        bool m_debug;
-        CvFont m_font;
+            bool m_debug;
+            CvFont m_font;
 
-        odcore::data::TimeStamp m_previousTime;
-        double m_eSum;
-        double m_eOld;
+            odcore::data::TimeStamp m_previousTime;
+            double m_eSum;
+            double m_eOld;
 
-        automotive::VehicleControl m_vehicleControl;
+            automotive::VehicleControl m_vehicleControl;
 
-        virtual void setUp();
-        virtual void tearDown();
+            virtual void setUp();
 
-        void processImage();
-    };
-} //lanefollower
+            virtual void tearDown();
+
+            void processImage();
+        };
+    } // follower
+} // lane
 
 #endif
