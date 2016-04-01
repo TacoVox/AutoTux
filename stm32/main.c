@@ -2,6 +2,15 @@
  * Main file for the stm32 part of AutoTux
  *
  * Initially based on the USB-CDC example from ChibiOS
+ * I imagine having if not classes and polymorphism,
+ * at least a similar naming across different sensor handling files
+ * for example ir_setup, us_setup etc.
+ * Also common functions for invoking the measurement process.
+ * To the SETUP methods you also provide a pointer to a container 
+		of the result (array if necessary).
+ * it will then be transparent to the using code (main loop)
+ * if a callback function is used or not.
+ *
  */
 
 #include <stdio.h>
