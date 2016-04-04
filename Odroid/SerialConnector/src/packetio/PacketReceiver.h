@@ -13,6 +13,7 @@ namespace packetio {
     public:
         void test(void);
         void receive(void);
+
     private:
         virtual void nextPacket(const odcore::io::Packet &packet);
     };

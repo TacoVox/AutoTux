@@ -6,6 +6,7 @@
 
 #include <thread>
 #include <iostream>
+#include <typeinfo>
 #include <opendavinci/odcore/base/Thread.h>
 #include <opendavinci/odcore/io/Packet.h>
 #include <opendavinci/odcore/io/udp/UDPReceiver.h>
@@ -59,6 +60,3 @@ void packetio::PacketReceiver::nextPacket(const odcore::io::Packet &packet) {
     //Simple output for now
     cout << packet.getData() << endl;
 }
-
-
-
