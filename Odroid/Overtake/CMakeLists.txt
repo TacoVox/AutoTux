@@ -1,29 +1,24 @@
-mum_required(VERSION 3.4)
-project(LaneFollower)
+cmake_minimum_required(VERSION 3.2)
+project(Overtaking)
 
 # Set module paths, system dependant.
 # TODO Make cmake search for it
-set(CMAKE_MODULE_PATH "/opt/od/share/cmake-3.5/Modules" ${CMAKE_MODULE_PATH})
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -lopencv_core -lopencv_highgui")
+set(CMAKE_MODULE_PATH "/usr/local/share/cmake-3.2/Modules" ${CMAKE_MODULE_PATH})
+
 
 # Require OpenDaVINCI
-set(OPENDAVINCI_DIR "/opt/od/")
+#set(OPENDAVINCI_DIR "/home/niklas/OpenDaVINCI/libopendavinci/#cmake.Modules")
 find_package(OpenDaVINCI REQUIRED)
 
 # Require Automotivedata
-set(AUTOMOTIVEDATA_DIR "/opt/od")
+#set(AUTOMOTIVEDATA_DIR "/home/niklas/OpenDaVINCI/libopendavinci")
 find_package(AutomotiveData REQUIRED)
-
-# Find OpenCV.
-set(OPENCV_ROOT_DIR "/usr")
-find_package(OpenCV REQUIRED)
 
 set(LIBRARIES ${OPENDAVINCI_LIBRARIES} ${AUTOMOTIVEDATA_LIBRARIES} ${OPENCV_LIBRARIES})
 
 # Include dirs
 include_directories(${OPENDAVINCI_INCLUDE_DIRS})
 include_directories(${AUTOMOTIVEDATA_INCLUDE_DIRS})
-include_directories(${OPENCV_INCLUDE_DIRS})
 include_directories(include)
 
 # Build things?
