@@ -22,76 +22,8 @@
 #include "chprintf.h"
 #include "usbcfg.h"
 
-typedef enum {SIDE_FRONT, SIDE_REAR, REAR} IR;
-
-int getIrDistance();
-void initializeIR();
-void adccb(ADCDriver *adcp, adcsample_t *buffer, size_t n);
-
-// Number of channels of ADC
-#define ADC_CHANNELS 3
-
-// Sampling amount
-#define ADC_SAMPLES 4
-
-static adcsample_t samples[ADC_SAMPLES * ADC_CHANNELS] = {0};
-static adcsample_t avg[ADC_CHANNELS];
-
-// 6 = side front, 15 = side rear, 14 = rear
-static const ADCConversionGroup adc_group = {
-  false,
-  ADC_CHANNELS,
-  adccb,
-  NULL,
-  0,
-  ADC_CR2_SWSTART,
-  ADC_SMPR2_SMP_AN8(ADC_SAMPLE_480) | ADC_SMPR1_SMP_AN14(ADC_SAMPLE_480) | ADC_SMPR1_SMP_AN15(ADC_SAMPLE_480),
-  0,
-  ADC_SQR1_NUM_CH(ADC_CHANNELS),
-  0,
-  ADC_SQR3_SQ1_N(ADC_CHANNEL_IN8) | ADC_SQR3_SQ2_N(ADC_CHANNEL_IN14) | ADC_SQR3_SQ3_N(ADC_CHANNEL_IN15)  
-};
-
-/* works with channel 6, pin A6 - side front
-static const ADCConversionGroup adc_group = {
-  FALSE,
-  ADC_CHANNELS,
-  adccb,
-  NULL,
-  0,
-  ADC_CR2_SWSTART,
-  ADC_SMPR2_SMP_AN6(ADC_SAMPLE_56),
-  0,
-  ADC_SQR1_NUM_CH(ADC_CHANNELS),
-  0,
-  ADC_SQR3_SQ1_N(ADC_CHANNEL_IN6) 
-};*/
-
-
-
-
-void adccb(ADCDriver *adcp, adcsample_t *buffer, size_t n) {
-
-  (void) buffer; (void) n;
-  /* Note, only in the ADC_COMPLETE state because the ADC driver fires an
-     intermediate callback when the buffer is half full.*/
-	
-  	if (adcp->state == ADC_COMPLETE) {
-    	/* Calculates the average values from the ADC samples.*/
-		avg[0] = (samples[0] + samples[3] + samples[6]) / 3;
-		avg[1] = (samples[1] + samples[4] + samples[7]) / 3;
-		avg[2] = (samples[2] + samples[5] + samples[8]) / 3;
-
-	}
-}
-
-
-
-
-
-
-
-
+#include "autotuxhardware.h"
+#include "hardwareIR.h"
 
 /*
  * Starting point  
@@ -141,36 +73,16 @@ int main(void) {
 			}
 			getIrDistance();
 			chThdSleepMilliseconds(300);
-			chprintf( (BaseSequentialStream *)&SDU1, "Avg[0]: %i ", avg[0]);
-			chprintf( (BaseSequentialStream *)&SDU1, "Avg[1]: %i ", avg[1]);
-			chprintf( (BaseSequentialStream *)&SDU1, "Avg[2]: %i    \r", avg[2]);
-	
+
+			//cm[2] = (int)(2914.0f / (avg[0] / 4.0f + 5.0f))- 1;
+			chprintf( (BaseSequentialStream *)&SDU1, "cm[0]: %i ", cm[0]);
+			chprintf( (BaseSequentialStream *)&SDU1, "cm[1]: %i ", cm[1]);
+			chprintf( (BaseSequentialStream *)&SDU1, "cm[2]: %i \r ", cm[2]);
 		}
 
 		// Exited while loop - means connection broken. Turn off LED, sleep then try connect again
 		palClearPad(GPIOD, GPIOD_LED4);
 		chThdSleepMilliseconds(1000);
 	}
-	return 0;
-}
-
-
-
-
-
-
-void initializeIR() {
-	// Note: pins are hard coded here!
-	adcStart(&ADCD1, NULL);
-	palSetPadMode(GPIOB, 0, PAL_MODE_INPUT_ANALOG);
-	palSetPadMode(GPIOC, 4, PAL_MODE_INPUT_ANALOG);
-	palSetPadMode(GPIOC, 5, PAL_MODE_INPUT_ANALOG);
-	
-}
-
-
-
-int getIrDistance() {
-	adcStartConversion(&ADCD1, &adc_group, &samples[0], ADC_SAMPLES);
 	return 0;
 }
