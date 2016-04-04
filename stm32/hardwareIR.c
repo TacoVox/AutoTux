@@ -5,6 +5,8 @@
  *      Author: jerker
  */
 
+
+#include "hal.h"
 #include "hardwareIR.h"
 
 
@@ -63,14 +65,16 @@ void hardwareSetupIR() {
  * Call this each time an analog read should be performed.
  */
 void hardwareIterationIR() {
-	adcStartConversion(&ADCD1, &adc_group, &samples[0], ADC_SAMPLES);
+	adcStartConversion(&ADCD1, &adc_group, &irSamples[0], ADC_SAMPLES);
 }
 
 
 /*
  * Getter for the values. Specify an IR sensor.
  */
-
+int hardwareGetValuesIR(IR sensor) {
+	return irCm[sensor];
+}
 
 //-----------------------------------------------------------------------------
 // "Private" implementation
@@ -84,15 +88,17 @@ void adcCallback(ADCDriver *adcp, adcsample_t *buffer, size_t n) {
   (void) buffer; (void) n;
 
   if (adcp->state == ADC_COMPLETE) {
-    	/* Calculates the average values from the ADC samples.*/
-		avg[0] = (samples[0] + samples[3] + samples[6] + samples[9]) / 4;
-		avg[1] = (samples[1] + samples[4] + samples[7] + samples[10]) / 4;
-		avg[2] = (samples[2] + samples[5] + samples[8] + samples[11]) / 4;
-		avg[0] = avg[0] >> 3;
-		avg[1] = avg[1] >> 3;
-		avg[2] = avg[2] >> 3;
-		cm[0] = (int)(2914.0f / (avg[0] + 5.0f))- 1;
-		cm[1] = (int)(2914.0f / (avg[1] + 5.0f))- 1;
-		cm[2] = (int)(2914.0f / (avg[2] + 5.0f))- 1;
+    	/* Calculates the average values from the ADC irSamples.*/
+		irAvg[0] = (irSamples[0] + irSamples[3] + irSamples[6] + irSamples[9]) / 4;
+		irAvg[1] = (irSamples[1] + irSamples[4] + irSamples[7] + irSamples[10]) / 4;
+		irAvg[2] = (irSamples[2] + irSamples[5] + irSamples[8] + irSamples[11]) / 4;
+		// Conversion algorithm from arduino. Bit shift to compensate for the higher
+		// ADC resolution on STM
+		irAvg[0] = irAvg[0] >> 3;
+		irAvg[1] = irAvg[1] >> 3;
+		irAvg[2] = irAvg[2] >> 3;
+		irCm[0] = (int)(2914.0f / (irAvg[0] + 5.0f))- 1;
+		irCm[1] = (int)(2914.0f / (irAvg[1] + 5.0f))- 1;
+		irCm[2] = (int)(2914.0f / (irAvg[2] + 5.0f))- 1;
 	}
 }

@@ -5,7 +5,8 @@
 
 #ifndef AUTOTUXHARDWARE_H_
 #define AUTOTUXHARDWARE_H_
-#include <pal.h>
+
+#include "hal.h"
 
 //-----------------------------------------------------------------------------
 // IR config
@@ -15,8 +16,8 @@
 typedef enum {SIDE_FRONT, SIDE_REAR, REAR} IR;
 
 // Pin config. Group/port + pin number. Now B0, C4, C5.
-const ioportid_t ADC_PIN_GROUPS[] = {GPIOB, GPIOC, GPIOC};
-const ioportmask_t ADC_PIN_NUMBERS[] = {0, 4, 5};
+static const ioportid_t ADC_PIN_GROUPS[] = {GPIOB, GPIOC, GPIOC};
+static const ioportmask_t ADC_PIN_NUMBERS[] = {0, 4, 5};
 
 // Number of channels of ADC
 #define ADC_CHANNELS 3

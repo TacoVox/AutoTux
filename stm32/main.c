@@ -22,7 +22,6 @@
 #include "chprintf.h"
 #include "usbcfg.h"
 
-#include "autotuxhardware.h"
 #include "hardwareIR.h"
 
 /*
@@ -34,7 +33,7 @@ int main(void) {
 	chSysInit();
 
 	// Initialize IR
-	initializeIR();
+	hardwareSetupIR();
 
  	// Initialize serial over USB
 	sduObjectInit(&SDU1);
@@ -49,40 +48,41 @@ int main(void) {
   	usbConnectBus(serusbcfg.usbp);
 
 	// Main loop
+  	int iterationsSinceActive = 0;
 	while(true) {
 		msg_t charbuf;
-		int exit = 0; // This can later be switched on timeout!
+		int active = 1; // This can later be switched on timeout!
 
-		while (!exit) {
-			// LED on
-			palSetPad(GPIOD, GPIOD_LED4);
-	
+		while (active) {
+			if (iterationsSinceActive < 3) {
+				// Active. LED on.
+				palSetPad(GPIOD, GPIOD_LED4);
+				iterationsSinceActive++;
+			} else {
+				palClearPad(GPIOD, GPIOD_LED4);
+			}
+
 			charbuf = chnGetTimeout(&SDU1, 1000);
 			if (charbuf != Q_TIMEOUT) {
+				/*
 				if ((char)charbuf == '\r') {
 					chprintf( (BaseSequentialStream *)&SDU1, "\r\n", (char)charbuf);	
 				} else {
 					chprintf( (BaseSequentialStream *)&SDU1, "%c", (char)charbuf);
-				}
-				if ((char)charbuf == 'e') {
-					// Exit on e
-					exit = 1;
-				}	
+				}*/
+				// Received a character!
+				iterationsSinceActive = 0;
 			} else {
+				// Timeout. Provide a \0 to keep connection alive.
 				chprintf( (BaseSequentialStream *)&SDU1, "\0");
 			}
-			getIrDistance();
+			hardwareIterationIR();
 			chThdSleepMilliseconds(300);
 
-			//cm[2] = (int)(2914.0f / (avg[0] / 4.0f + 5.0f))- 1;
-			chprintf( (BaseSequentialStream *)&SDU1, "cm[0]: %i ", cm[0]);
-			chprintf( (BaseSequentialStream *)&SDU1, "cm[1]: %i ", cm[1]);
-			chprintf( (BaseSequentialStream *)&SDU1, "cm[2]: %i \r ", cm[2]);
+			chprintf( (BaseSequentialStream *)&SDU1, "SIDE_FRONT: %i ", hardwareGetValuesIR(SIDE_FRONT));
+			chprintf( (BaseSequentialStream *)&SDU1, "SIDE_REAR: %i ",  hardwareGetValuesIR(SIDE_REAR));
+			chprintf( (BaseSequentialStream *)&SDU1, "REAR: %i \r", hardwareGetValuesIR(REAR));
 		}
-
-		// Exited while loop - means connection broken. Turn off LED, sleep then try connect again
-		palClearPad(GPIOD, GPIOD_LED4);
-		chThdSleepMilliseconds(1000);
 	}
 	return 0;
 }
