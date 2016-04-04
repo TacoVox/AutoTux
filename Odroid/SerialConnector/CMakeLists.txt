@@ -14,7 +14,7 @@ INCLUDE_DIRECTORIES (${OPENDAVINCI_INCLUDE_DIRS})
 # Set include directory.
 INCLUDE_DIRECTORIES(include)
 # Build this project.
-SET(SOURCE_FILES src/SerialConnector.cpp src/packetio/PacketBroadcaster.cpp src/packetio/PacketBroadcaster.h src/packetio/PacketReceiver.cpp src/packetio/PacketReceiver.h src/serial/SerialConnector.cpp src/serial/SerialConnector.cpp)
+SET(SOURCE_FILES src/SerialConnector.cpp src/packetio/PacketBroadcaster.cpp src/packetio/PacketBroadcaster.h src/packetio/PacketReceiver.cpp src/packetio/PacketReceiver.h src/serial/USBConnector.cpp src/serial/USBConnector.h)
 ADD_EXECUTABLE (SerialConnector ${SOURCE_FILES})
 
 # Linking
