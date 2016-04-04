@@ -15,12 +15,14 @@ INCLUDE_DIRECTORIES (${OPENDAVINCI_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(include)
 
 # Set all the source files // Ordered by namespace
+# file containing main
+SET(SOURCE_FILES src/AutoTuxProxy.cpp)
 # serial
-SET(SOURCE_FILES src/serial/USBConnector.cpp src/serial/USBConnector.h)
+SET(SOURCE_FILES ${SOURCE_FILES} src/serial/USBConnector.cpp src/serial/USBConnector.h)
 # packetio
 SET(SOURCE_FILES ${SOURCE_FILES} src/packetio/PacketBroadcaster.cpp include/packetio/PacketBroadcaster.h src/packetio/PacketReceiver.cpp include/packetio/PacketReceiver.h)
 # containerfactory
-SET(SOURCE_FILES ${SOURCE_FILES} src/containerfactory/SBDContainer.cpp include/containerfactory/SBDContainer.h)
+#SET(SOURCE_FILES ${SOURCE_FILES} src/containerfactory/SBDContainer.cpp include/containerfactory/SBDContainer.h)
 
 # Set executable
 ADD_EXECUTABLE (AutoTuxProxy ${SOURCE_FILES})
