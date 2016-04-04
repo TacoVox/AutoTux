@@ -2,7 +2,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 # Project name
-PROJECT(SerialConnector)
+PROJECT(AutoTuxProxy)
 
 SET (CMAKE_MODULE_PATH "/opt/od/share/cmake-2.8/Modules" ${CMAKE_MODULE_PATH})
 SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${CXX_OPTIONS} -pipe -std=c++11")
@@ -22,7 +22,7 @@ SET(SOURCE_FILES ${SOURCE_FILES} src/packetio/PacketBroadcaster.cpp include/pack
 # containerfactory
 SET(SOURCE_FILES ${SOURCE_FILES} src/containerfactory/SBDContainer.cpp include/containerfactory/SBDContainer.h)
 
-ADD_EXECUTABLE (SerialConnector ${SOURCE_FILES})
+ADD_EXECUTABLE (AutoTuxProxy ${SOURCE_FILES})
 
 # Linking
-TARGET_LINK_LIBRARIES (SerialConnector ${OPENDAVINCI_LIBRARIES} ${LIBUSB_LIBRARIES})
+TARGET_LINK_LIBRARIES (AutoTuxProxy ${OPENDAVINCI_LIBRARIES} ${LIBUSB_LIBRARIES})
