@@ -72,7 +72,7 @@ void hardwareIterationIR() {
 /*
  * Getter for the values. Specify an IR sensor.
  */
-int hardwareGetValuesIR(IR sensor) {
+int hardwareGetValuesIR(IR_SENSOR sensor) {
 	return irCm[sensor];
 }
 
@@ -83,6 +83,7 @@ int hardwareGetValuesIR(IR sensor) {
 
 /*
  * Callback function, runs when ADC is completed.
+ * (Could be generalized with a loop)
  */
 void adcCallback(ADCDriver *adcp, adcsample_t *buffer, size_t n) {
   (void) buffer; (void) n;

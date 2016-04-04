@@ -23,6 +23,6 @@ void hardwareIterationIR(void);
 /*
  * Getter for the values. Specify an IR sensor.
  */
-int hardwareGetValuesIR(IR);
+int hardwareGetValuesIR(IR_SENSOR);
 
 #endif /* HARDWAREIR_H_ */

@@ -16,13 +16,14 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "ch.h"
+#include <ch.h>
 #include "hal.h"
 #include "test.h"
 #include "chprintf.h"
 #include "usbcfg.h"
 
 #include "hardwareIR.h"
+#include "hardwareUS.h"
 
 /*
  * Starting point  
@@ -34,6 +35,7 @@ int main(void) {
 
 	// Initialize IR
 	hardwareSetupIR();
+	hardwareSetupUS();
 
  	// Initialize serial over USB
 	sduObjectInit(&SDU1);
@@ -62,7 +64,7 @@ int main(void) {
 				palClearPad(GPIOD, GPIOD_LED4);
 			}
 
-			charbuf = chnGetTimeout(&SDU1, 1000);
+			charbuf = chnGetTimeout(&SDU1, 100);
 			if (charbuf != Q_TIMEOUT) {
 				/*
 				if ((char)charbuf == '\r') {
@@ -77,8 +79,11 @@ int main(void) {
 				chprintf( (BaseSequentialStream *)&SDU1, "\0");
 			}
 			hardwareIterationIR();
+			hardwareIterationUS();
 			chThdSleepMilliseconds(300);
 
+			chprintf( (BaseSequentialStream *)&SDU1, "US FRONT: %i ", hardwareGetValuesUS(FRONT));
+			chprintf( (BaseSequentialStream *)&SDU1, "US SIDE: %i ", hardwareGetValuesUS(SIDE));
 			chprintf( (BaseSequentialStream *)&SDU1, "SIDE_FRONT: %i ", hardwareGetValuesIR(SIDE_FRONT));
 			chprintf( (BaseSequentialStream *)&SDU1, "SIDE_REAR: %i ",  hardwareGetValuesIR(SIDE_REAR));
 			chprintf( (BaseSequentialStream *)&SDU1, "REAR: %i \r", hardwareGetValuesIR(REAR));

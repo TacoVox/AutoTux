@@ -8,12 +8,13 @@
 
 #include "hal.h"
 
+
 //-----------------------------------------------------------------------------
 // IR config
 //-----------------------------------------------------------------------------
 
 // Used to identify each sensor
-typedef enum {SIDE_FRONT, SIDE_REAR, REAR} IR;
+typedef enum {SIDE_FRONT, SIDE_REAR, REAR} IR_SENSOR;
 
 // Pin config. Group/port + pin number. Now B0, C4, C5.
 static const ioportid_t ADC_PIN_GROUPS[] = {GPIOB, GPIOC, GPIOC};
@@ -30,6 +31,17 @@ static const ioportmask_t ADC_PIN_NUMBERS[] = {0, 4, 5};
 
 // Sequence for reading the ADC channels
 #define ADC_SEQUENCE ADC_SQR3_SQ1_N(ADC_CHANNEL_IN8) | ADC_SQR3_SQ2_N(ADC_CHANNEL_IN14) | ADC_SQR3_SQ3_N(ADC_CHANNEL_IN15)
+
+
+//-----------------------------------------------------------------------------
+// US config
+//-----------------------------------------------------------------------------
+
+typedef enum {FRONT, SIDE} US_SENSOR;
+
+#define US_SENSORS 2
+
+static const uint8_t US_ADDRESS[] = {0x79, 0x73};
 
 
 #endif /* AUTOTUXHARDWARE_H_ */
