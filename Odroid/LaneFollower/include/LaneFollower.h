@@ -28,9 +28,6 @@ namespace lane {
 
             odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
 
-        protected:
-            bool readSharedImage(odcore::data::Container &c);
-
         private:
             bool m_hasAttachedToSharedImageMemory;
             std::shared_ptr<odcore::wrapper::SharedMemory> m_sharedImageMemory;

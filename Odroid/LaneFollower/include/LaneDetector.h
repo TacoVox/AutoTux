@@ -51,6 +51,8 @@ namespace lane {
              * @return true if successfully processed.
              */
             bool readSharedImage(odcore::data::Container &c);
+            int m_distToLeftMarking;
+            int m_distToRightMarking;
 
         private:
             bool m_hasAttachedToSharedImageMemory;
