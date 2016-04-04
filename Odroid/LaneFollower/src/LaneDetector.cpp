@@ -7,6 +7,7 @@
 #include <opendavinci/odcore/base/KeyValueConfiguration.h>
 #include <opendavinci/odcore/base/Lock.h>
 #include <opendavinci/odcore/data/Container.h>
+#include <opendavinci/odcore/wrapper/SharedMemory.h>
 #include <opendavinci/odcore/wrapper/SharedMemoryFactory.h>
 
 #include <opendavinci/GeneratedHeaders_OpenDaVINCI.h>
@@ -23,6 +24,7 @@ namespace lane {
         using namespace odcore::base;
         using namespace odcore::data;
         using namespace odcore::data::image;
+        using namespace odcore::wrapper;
 
         using namespace lane::detector;
 
@@ -46,6 +48,13 @@ namespace lane {
             if(m_debug) {
                 cvNamedWindow("Debug Window", CV_WINDOW_AUTOSIZE);
                 cvMoveWindow("Debug Window", 300, 100);
+            }
+
+            // Set up shared memory for storing things
+            try {
+                shared_ptr<SharedMemory> sharedMemory(SharedMemoryFactory::createSharedMemory("TEST", 64));
+            } catch(string &ex) {
+                cerr << "Shared memory could not be created: " << ex << endl;
             }
         }
 
@@ -85,7 +94,7 @@ namespace lane {
                     }
 
                     // Mirror image?
-                    cvFlip(m_image, 0, -1);
+                    //cvFlip(m_image, 0, -1);
 
                     returnValue = true;
                 }
@@ -96,8 +105,9 @@ namespace lane {
         // Do magic to the image around here.
         void LaneDetector::processImage() {
 
-            const int32_t CONTROL_SCANLINE = 462;
-            const int32_t distance = 280;
+            double e = 0; //?
+            const int32_t CONTROL_SCANLINE = 462; //?
+            const int32_t distance = 280; //?
 
             TimeStamp beforeProcessing;
 
@@ -107,9 +117,9 @@ namespace lane {
 
                 left.y = y;
                 left.x = -1;
-                for(int x = m_image->width/2; x > 0; x--) {
+                for (int x = m_image->width / 2; x > 0; x--) {
                     pixelLeft = cvGet2D(m_image, y, x);
-                    if(pixelLeft.val[0] >= 200) {
+                    if (pixelLeft.val[0] >= 200) {
                         left.x = x;
                         break;
                     }
@@ -125,33 +135,48 @@ namespace lane {
                     }
                 }
 
+                // Attach and store in the shared memory.
+                if (y == CONTROL_SCANLINE) {
+                    shared_ptr<SharedMemory> sharedMemory(SharedMemoryFactory::attachToSharedMemory("TEST"));
+                    if (sharedMemory->isValid()) {
+                        Lock l(sharedMemory);
+
+                    }
+                    this->m_distToLeftMarking = m_image->width/2 - left.x;
+                    this->m_distToRightMarking = right.x - m_image->width/2;
+                }
+
+                /**
+                 * TODO
+                 * Decide on a proper scanline to use when calculating position.
+                 * Defined as CONTROL_SCANLINE further up.
+                 * Take into account the deviation error. Examples in the automotive/miniature.
+                 *
+                 * Research into the "Twiddle" algorithm.
+                 *
+                 * Later store/send position to the decision maker.
+                 */
+
                 if (m_debug) {
                     if (left.x > 0) {
                         cvLine(m_image, cvPoint(m_image->width / 2, y), left, CV_RGB(0, 255, 0), 1, 8);
                         stringstream sstr;
                         sstr << (m_image->width / 2 - left.x);
-                        cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width / 2 - 100, y - 2), &m_font, CV_RGB(0, 255, 0));
+                        cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width / 2 - 100, y - 2), &m_font,
+                                  CV_RGB(0, 255, 0));
                     }
                     if (right.x > 0) {
                         cvLine(m_image, cvPoint(m_image->width / 2, y), right, CV_RGB(255, 0, 0), 1, 8);
                         stringstream sstr;
                         sstr << (right.x - m_image->width / 2);
-                        cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width / 2 + 100, y - 2), &m_font, CV_RGB(255, 0, 0));
+                        cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width / 2 + 100, y - 2), &m_font,
+                                  CV_RGB(255, 0, 0));
                     }
                 }
             }
 
-            /**
-             * TODO
-             * Decide on a proper scanline to use when calculating position.
-             * Defined as CONTROL_SCANLINE further up.
-             * Take into account the deviation error. Examples in the automotive/miniature.
-             *
-             * Research into the "Twiddle" algorithm.
-             *
-             * Later store/send position to the decision maker.
-             */
-
+            TimeStamp afterImageProcessing;
+            clog << "Processing time: " << (afterImageProcessing.toMicroseconds() - beforeProcessing.toMicroseconds()) / 1000.0 << "ms." << endl;
 
             // Debugging; show image. Keep at end.
             if(m_debug) {

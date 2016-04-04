@@ -53,112 +53,6 @@ namespace lane {
             }
         }
 
-        bool LaneFollower::readSharedImage(odcore::data::Container &c) {
-            bool retVal = false;
-
-            if (c.getDataType() == odcore::data::image::SharedImage::ID()) {
-                SharedImage si = c.getData<SharedImage>();
-
-                // Have we already attached to the shared memory?
-                if (!m_hasAttachedToSharedImageMemory) {
-                    m_sharedImageMemory = odcore::wrapper::SharedMemoryFactory::attachToSharedMemory(si.getName());
-                }
-
-                // Could we attach succressfully?
-                if (m_sharedImageMemory->isValid()) {
-                    Lock l(m_sharedImageMemory);
-                    const uint32_t numberOfChannels = 3;
-
-                    if (m_image == NULL) {
-                        m_image = cvCreateImage(cvSize(si.getWidth(), si.getHeight()), IPL_DEPTH_8U, numberOfChannels);
-                    }
-
-                    // Copy image. EXPENSIVE!
-                    // TODO Check for proper solution
-                    if (m_image != NULL) {
-                        memcpy(m_image->imageData, m_sharedImageMemory->getSharedMemory(),
-                               si.getWidth() * si.getHeight() * numberOfChannels);
-                    }
-
-                    // Mirror image? Reason?
-                    cvFlip(m_image, 0, -1);
-
-                    retVal = true;
-                }
-            }
-            return retVal;
-        }
-
-        void LaneFollower::processImage() {
-            static bool useRightLaneMarking = true;
-            double e = 0;
-
-            const int32_t CONTROL_SCANLINE = 462;
-            const int32_t distance = 280;
-
-            TimeStamp beforeProcessing; // Keep before processing loop
-
-            /*
-             * TODO What does this loop do?
-             *
-             * First argument: where the lines start, from bottom.
-             * Second argument: How large part of the image should we cover?
-             * Third argument: Spacing between lines
-             */
-            for (int32_t y = m_image->height - 8; y > m_image->height * .5; y -= 10) {
-                CvScalar pixelLeft, pixelRight;
-                CvPoint left, right;
-
-                left.y = y;
-                left.x = -1;
-                for (int x = m_image->width / 2; x > 0; x--) {
-                    pixelLeft = cvGet2D(m_image, y, x);
-                    if (pixelLeft.val[0] >= 200) {
-                        left.x = x;
-                        break;
-                    }
-                }
-
-                right.y = y;
-                right.x = -1;
-                for (int x = m_image->width / 2; x < m_image->width; x++) {
-                    pixelRight = cvGet2D(m_image, y, x);
-                    if (pixelRight.val[0] >= 200) {
-                        right.x = x;
-                        break;
-                    }
-                }
-
-                if (m_debug) {
-                    if (left.x > 0) {
-                        cvLine(m_image, cvPoint(m_image->width / 2, y), left, CV_RGB(0, 255, 0), 1, 8);
-                        stringstream sstr;
-                        sstr << (m_image->width / 2 - left.x);
-                        cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width / 2 - 100, y - 2), &m_font,
-                                  CV_RGB(0, 255, 0));
-                    }
-                    if (right.x > 0) {
-                        cvLine(m_image, cvPoint(m_image->width / 2, y), right, CV_RGB(255, 0, 0), 1, 8);
-                        stringstream sstr;
-                        sstr << (right.x - m_image->width / 2);
-                        cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width / 2 + 100, y - 2), &m_font,
-                                  CV_RGB(255, 0, 0));
-                    }
-                }
-            }
-
-            TimeStamp afterProcessing; // Keep after processing loop
-            cerr << "Processing time: " <<
-            (afterProcessing.toMicroseconds() - beforeProcessing.toMicroseconds()) / 1000.0 << "ms." << endl;
-
-            // Show image
-            if (m_debug) {
-                if (m_image != NULL) {
-                    cvShowImage("WindowShowImage", m_image);
-                    cvWaitKey(10);
-                }
-            }
-        }
 
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode LaneFollower::body() {
             // Get configuration
@@ -173,11 +67,11 @@ namespace lane {
                 Container c = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
 
                 if (c.getDataType() == odcore::data::image::SharedImage::ID()) {
-                    has_next_frame = readSharedImage(c);
+                    //has_next_frame = readSharedImage(c);
                 }
 
-                if (true == has_next_frame) {
-                    processImage();
+                if (has_next_frame) {
+                    //processImage();
                 }
             }
 
