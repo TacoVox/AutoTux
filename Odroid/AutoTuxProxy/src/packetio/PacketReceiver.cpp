@@ -2,7 +2,7 @@
 // Created by Jonas Kahler on 4/1/16.
 //
 
-#include "PacketReceiver.h"
+#include "../../include/packetio/PacketReceiver.h"
 
 #include <thread>
 #include <iostream>
