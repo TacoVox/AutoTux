@@ -3,21 +3,15 @@
 //
 #include <iostream>
 #include <thread>
-#include "packetio/PacketBroadcaster.h"
-#include "packetio/PacketReceiver.h"
+#include "../include/packetio/PacketBroadcaster.h"
 
 using namespace std;
 
-int main() {
-    cout << "Testing UDP Session!" << endl;
-    packetio::UDPBroadcaster udpb;
-    packetio::PacketReceiver packetReceiver;
+int main(int32_t argc, char **argv) {
+    cout << "Testing Packet Broadcaster!" << endl;
+    packetio::PacketBroadcaster packetBroadcaster(argc, argv);
+    packetBroadcaster;
+    return packetBroadcaster.runModule();
 
-    thread sendthread(&packetio::UDPBroadcaster::sendtest, udpb);
-    thread receivethread(&packetio::PacketReceiver::test, packetReceiver);
-
-    sendthread.join();
-    receivethread.join();
-
-    return 0;
+    //return 0;
 }
