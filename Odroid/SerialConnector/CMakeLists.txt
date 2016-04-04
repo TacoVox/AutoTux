@@ -1,7 +1,10 @@
+# Set the CMake version for Ivos standard
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+
+# Project name
 PROJECT(SerialConnector)
 
-SET (CMAKE_MODULE_PATH "/opt/od/share/cmake-3.5/Modules" ${CMAKE_MODULE_PATH})
+SET (CMAKE_MODULE_PATH "/opt/od/share/cmake-2.8/Modules" ${CMAKE_MODULE_PATH})
 SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${CXX_OPTIONS} -pipe -std=c++11")
 # Find OpenDaVINCI
 SET(OPENDAVINCI_DIR "/opt/od")
