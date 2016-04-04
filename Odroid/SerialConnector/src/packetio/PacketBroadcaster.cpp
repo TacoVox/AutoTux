@@ -3,39 +3,40 @@
 //
 
 #include "PacketBroadcaster.h"
-#include <stdint.h>
+
 #include <iostream>
-#include <memory>
-#include <opendavinci/odcore/io/udp/UDPSender.h>
-#include <opendavinci/odcore/io/udp/UDPFactory.h>
 
 using namespace std;
-using namespace odcore;
-using namespace odcore::io::udp;
+using namespace odcore::base::module;
+using namespace odcore::data;
 
-void packetio::UDPBroadcaster::sendtest(void) {
-    //Send 100 times some shit
-    int i;
-    for(i = 0; i < 100; i++) {
-        send();
-    }
+packetio::PacketBroadcaster::PacketBroadcaster(const int32_t &argc, char **argv) :
+        TimeTriggeredConferenceClientModule(argc, argv, "TimeTriggeredSender"),
+        sensorBoardDataContainer(NULL), interrupted(false) {}
+
+packetio::PacketBroadcaster::~PacketBroadcaster() {}
+
+void packetio::PacketBroadcaster::setUp() {
+    cout << "Started the broadcasting component..." << endl;
 }
 
-void packetio::UDPBroadcaster::send(void) {
-    const string RECEIVER = "127.0.0.1";
-    const uint32_t PORT = 1111;
-
-    // We are using OpenDaVINCI's std::shared_ptr to automatically
-    // release any acquired resources.
-    try {
-        std::shared_ptr<UDPSender> udpsender(UDPFactory::createUDPSender(RECEIVER, PORT));
-        cout << "Sending data...\n";
-        udpsender->send("Hello World\r\n");
-    }
-    catch(string &exception) {
-        cerr << "Data could not be sent: " << exception << endl;
-    }
+void packetio::PacketBroadcaster::tearDown() {
+    cout << "Stopped the broadcasting component..." << endl;
 }
 
+odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode packetio::PacketBroadcaster::body() {
+    while (getModuleStateAndWaitForRemainingTimeInTimeslice() ==
+           odcore::data::dmcp::ModuleStateMessage::RUNNING && !interrupted) {
+        if(sensorBoardDataContainer != NULL) {
+            cout << "Broadcasting values..." << endl;
+            getConference().send(*sensorBoardDataContainer);
+        }
+    }
+    return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
+}
 
+void packetio::PacketBroadcaster::setSensorBoardDataContainer(
+        odcore::data::Container &sensorBoardDataContainer) {
+    this->sensorBoardDataContainer = &sensorBoardDataContainer;
+}
 
