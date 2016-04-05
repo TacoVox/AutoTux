@@ -37,14 +37,7 @@ namespace proxy {
 
             KeyValueConfiguration kv = getKeyValueConfiguration();
 
-            for(int i=0; i<kv.getListOfKeys().size(); i++) {
-                std:cout << kv.getListOfKeys()[i] << endl;
-            }
-
-            int32_t m_debug = kv.getValue<int32_t>("lanedetector.debug") == 1;
-
-
-
+            //TODO Fix configuration file.
             const bool useRecorder = kv.getValue<uint32_t>("proxy.useRecorder") == 1;
             if(useRecorder) {
                 stringstream recordingURL;
