@@ -182,7 +182,7 @@ Makefile*
 
 *.autosave
 
-# Manually added 
+# Manually added
 *.config
 *.creator
 *.files
