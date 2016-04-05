@@ -6,17 +6,22 @@ PROJECT(AutoTuxProxy)
 
 SET (CMAKE_MODULE_PATH "/opt/od/share/cmake-2.8/Modules" ${CMAKE_MODULE_PATH})
 SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${CXX_OPTIONS} -pipe -std=c++11 -lusb-1.0")
+
 # Find OpenDaVINCI
 SET(OPENDAVINCI_DIR "/opt/od")
 FIND_PACKAGE (OpenDaVINCI REQUIRED)
+
 # Find Automotivedata
 SET(AUTOMOTIVEDATA_DIR "/opt/od")
 FIND_PACKAGE(AutomotiveData REQUIRED)
+
 # Set header files from OpenDaVINCI.
 INCLUDE_DIRECTORIES(${OPENDAVINCI_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${LIBUSB_INCLUDE_DIR})
 # Set include directory.
 INCLUDE_DIRECTORIES(include)
+
+SET(LIBRARIES ${OPENDAVINCI_LIBRARIES} ${AUTOMOTIVE_LIBRARIES} ${OPENCV_LIBRARIES} ${LIBUSB_LIBRARIES})
 
 # Set all the source files // Ordered by namespace
 # file containing main
@@ -26,7 +31,7 @@ SET(SOURCE_FILES ${SOURCE_FILES} src/serial/USBConnector.cpp src/serial/USBConne
 # packetio
 SET(SOURCE_FILES ${SOURCE_FILES} src/packetio/PacketBroadcaster.cpp include/packetio/PacketBroadcaster.h src/packetio/PacketReceiver.cpp include/packetio/PacketReceiver.h)
 # containerfactory
-#SET(SOURCE_FILES ${SOURCE_FILES} src/containerfactory/SBDContainer.cpp include/containerfactory/SBDContainer.h)
+SET(SOURCE_FILES ${SOURCE_FILES} src/containerfactory/SBDContainer.cpp include/containerfactory/SBDContainer.h)
 # camera
 FILE(GLOB_RECURSE camera-sources "${CMAKE_CURRENT_SOURCE_DIR}/src/camera/*.cpp")
 FILE(GLOB_RECURSE camera-headers "${CMAKE_CURRENT_SOURCE_DIR}/include/camera/*.h")
@@ -36,4 +41,4 @@ SET(SOURCE_FILES ${SOURCE_FILES} ${camera-sources} ${camera-headers})
 ADD_EXECUTABLE (AutoTuxProxy ${SOURCE_FILES})
 
 # Link the libraries to the exec.
-TARGET_LINK_LIBRARIES (AutoTuxProxy ${OPENDAVINCI_LIBRARIES} ${LIBUSB_LIBRARIES})
+TARGET_LINK_LIBRARIES (${PROJECT_NAME} ${LIBRARIES})
