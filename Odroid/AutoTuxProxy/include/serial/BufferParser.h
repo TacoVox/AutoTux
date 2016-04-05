@@ -1,0 +1,4 @@
+#ifndef BUFFERPARSER_H
+#define BUFFERPARSER_H
+
+#endif // BUFFERPARSER_H
