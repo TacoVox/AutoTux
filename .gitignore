@@ -187,6 +187,8 @@ Makefile*
 *.creator
 *.files
 *.includes
+*.creator.user*
+*.creator.user.*
 
 # QtCtreator Qml
 *.qmlproject.user
