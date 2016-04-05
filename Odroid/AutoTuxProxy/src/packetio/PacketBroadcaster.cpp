@@ -27,6 +27,7 @@ void packetio::PacketBroadcaster::tearDown() {
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode packetio::PacketBroadcaster::body() {
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() ==
            odcore::data::dmcp::ModuleStateMessage::RUNNING && !interrupted) {
+        cout << "Checking for vals" << endl;
         if(sensorBoardDataContainer != NULL) {
             cout << "Broadcasting values..." << endl;
             getConference().send(*sensorBoardDataContainer);
@@ -36,7 +37,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode packetio::PacketBroadc
 }
 
 void packetio::PacketBroadcaster::setSensorBoardDataContainer(
-        odcore::data::Container *sensorBoardDataContainer) {
+        std::shared_ptr<odcore::data::Container> sensorBoardDataContainer) {
     this->sensorBoardDataContainer = sensorBoardDataContainer;
 }
 
