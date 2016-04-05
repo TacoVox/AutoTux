@@ -3,27 +3,34 @@
 
 #include <opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h>
 
-class Overtaking : public odcore::base::module::TimeTriggeredConferenceClientModule {
-private:
-        Overtaking(const Overtaking &/*obj*/);
-        Overtaking& operator=(const Overtaking &/*obj*/);
+namespace over{
+	namespace taking{
 
-    public:
-        /**
-         * Constructor.
-         *
-         * @param argc Number of command line arguments.
-         * @param argv Command line arguments.
-         */
-        Overtaking(const int32_t &argc, char **argv);
 
-        virtual ~Overtaking();
+		class Overtaking : public odcore::base::module::TimeTriggeredConferenceClientModule {
+			private:
+        		Overtaking(const Overtaking &/*obj*/);
+        		Overtaking& operator=(const Overtaking &/*obj*/);
 
-        odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
+			public:
+        		/**
+        		 * Constructor.
+        		 *
+        		 * @param argc Number of command line arguments.
+        		 * @param argv Command line arguments.
+        		 */
+        		Overtaking(const int32_t &argc, char **argv);
 
-    private:
-        virtual void setUp();
+        		virtual ~Overtaking();
 
-        virtual void tearDown();
+        		odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
+
+			private:
+        		virtual void setUp();
+
+        		virtual void tearDown();
         
-};
+			};
+	}
+}
+#endif /*OVERTAKING_H_*/

@@ -7,11 +7,11 @@ set(CMAKE_MODULE_PATH "/usr/local/share/cmake-3.2/Modules" ${CMAKE_MODULE_PATH})
 
 
 # Require OpenDaVINCI
-#set(OPENDAVINCI_DIR "/home/niklas/OpenDaVINCI/libopendavinci/#cmake.Modules")
+set(OPENDAVINCI_DIR "/usr/local/include")
 find_package(OpenDaVINCI REQUIRED)
 
 # Require Automotivedata
-#set(AUTOMOTIVEDATA_DIR "/home/niklas/OpenDaVINCI/libopendavinci")
+set(AUTOMOTIVEDATA_DIR "/usr/local/include")
 find_package(AutomotiveData REQUIRED)
 
 set(LIBRARIES ${OPENDAVINCI_LIBRARIES} ${AUTOMOTIVEDATA_LIBRARIES} ${OPENCV_LIBRARIES})
