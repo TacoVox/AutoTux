@@ -1,7 +1,8 @@
 
 #include <iostream>
 #include "USBConnector.h"
-#include <libusb-1.0/libusb.h>
+#include <thread>
+#include <chrono>
 
 using namespace std;
 void cb_in(struct libusb_transfer *transfer);
@@ -112,15 +113,19 @@ void USBConnector::connect() {
 void USBConnector::read() {
     cout << "Reading from usb stream..." << endl;
     
-    transfer_in  = libusb_alloc_transfer(0);
-    libusb_fill_bulk_transfer( transfer_in, usb_dev, USB_ENDPOINT_IN,
-        in_buffer,  LEN_IN_BUFFER, cb_in, NULL, 0);
-    libusb_submit_transfer(transfer_in);
-    
-    while(1) {
-        if(libusb_handle_events(NULL) != LIBUSB_SUCCESS) break;
+    while (1) {
+        cout << "loop iterating in read" << endl;
+        transfer_in  = libusb_alloc_transfer(0);
+        libusb_fill_bulk_transfer( transfer_in, usb_dev, USB_ENDPOINT_IN,
+            in_buffer,  LEN_IN_BUFFER, cb_in, NULL, 0);
+        libusb_submit_transfer(transfer_in);
+        libusb_handle_events(ctx);
+        libusb_free_transfer(transfer_in);
+        //if (libusb_handle_events(ctx) != LIBUSB_SUCCESS) {
+        //    break;
+        //}
+        std::this_thread::sleep_for (std::chrono::seconds(1));
     }
-    
 }
 
 /* write to the usb stream */
@@ -140,18 +145,17 @@ void USBConnector::disconnect() {
 }
 
 void cb_in(struct libusb_transfer *transfer) {
-    if ( NULL == transfer){
+    if (transfer == NULL){
         cout << "No libusb_transfer..." << endl;
     }
     else {
         cout << "libusb_transfer structure: " << endl;
-        cout << "flags = " << transfer->flags << endl;
-        cout << "endpoint = " << transfer->endpoint << endl;
-        cout << "type = " << transfer->type << endl;
-        cout << "timeout = " << transfer->timeout << endl;
-        cout << "length = " << transfer->length << endl;
         cout << "actual_length = " << transfer->actual_length << endl;
-        cout << "buffer = " << transfer->buffer << endl;
+        for (int i = 0; i < transfer->actual_length; i++) {
+            cout << transfer->buffer[i];
+        }
+        cout << endl;
+        //cout << "buffer = " << transfer->buffer << endl;
     }
     return;
 }

@@ -10,7 +10,7 @@
 /* endpoint addresses */
 #define USB_ENDPOINT_IN	    (LIBUSB_ENDPOINT_IN  | 1)   
 #define USB_ENDPOINT_OUT    (LIBUSB_ENDPOINT_OUT | 2)
-#define LEN_IN_BUFFER 1024*8
+#define LEN_IN_BUFFER       1024
 
 
 // define SerialConnector class
