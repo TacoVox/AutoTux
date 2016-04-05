@@ -12,7 +12,7 @@ namespace packetio {
     public:
         PacketBroadcaster(const int32_t &argc, char **argv);
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
-        void setSensorBoardDataContainer(odcore::data::Container &);
+        void setSensorBoardDataContainer(odcore::data::Container *);
         virtual ~PacketBroadcaster();
     private:
         virtual void setUp();

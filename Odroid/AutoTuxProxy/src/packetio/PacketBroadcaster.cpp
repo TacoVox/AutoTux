@@ -36,7 +36,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode packetio::PacketBroadc
 }
 
 void packetio::PacketBroadcaster::setSensorBoardDataContainer(
-        odcore::data::Container &sensorBoardDataContainer) {
-    this->sensorBoardDataContainer = &sensorBoardDataContainer;
+        odcore::data::Container *sensorBoardDataContainer) {
+    this->sensorBoardDataContainer = sensorBoardDataContainer;
 }
 
