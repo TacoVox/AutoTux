@@ -6,7 +6,7 @@
 
 #include <opendavinci/odcore/data/Container.h>
 
-#include "../include/packetio/PacketBroadcaster.h"
+#include "packetio/PacketBroadcaster.h"
 #include "serial/USBConnector.h"
 
 using namespace std;
