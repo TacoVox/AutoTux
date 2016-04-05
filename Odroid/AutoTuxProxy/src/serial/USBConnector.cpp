@@ -1,6 +1,6 @@
 
 #include <iostream>
-#include "USBConnector.h"
+#include "serial/USBConnector.h"
 #include <thread>
 #include <chrono>
 
