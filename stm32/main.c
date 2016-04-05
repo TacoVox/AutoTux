@@ -1,90 +1,93 @@
 /*
-    ChibiOS - Copyright (C) 2006..2015 Giovanni Di Sirio
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
+ * Main file for the stm32 part of AutoTux
+ *
+ * Initially based on the USB-CDC example from ChibiOS
+ * I imagine having if not classes and polymorphism,
+ * at least a similar naming across different sensor handling files
+ * for example ir_setup, us_setup etc.
+ * Also common functions for invoking the measurement process.
+ * To the SETUP methods you also provide a pointer to a container 
+		of the result (array if necessary).
+ * it will then be transparent to the using code (main loop)
+ * if a callback function is used or not.
+ *
+ */
 
 #include <stdio.h>
 #include <string.h>
 
-#include "ch.h"
+#include <ch.h>
 #include "hal.h"
 #include "test.h"
-
 #include "chprintf.h"
-
 #include "usbcfg.h"
 
-/*===========================================================================*/
-/* Command line related.                                                     */
-/*===========================================================================*/
-
-#define SHELL_WA_SIZE   THD_WORKING_AREA_SIZE(2048)
-#define TEST_WA_SIZE    THD_WORKING_AREA_SIZE(256)
-
-
+#include "hardwareIR.h"
+#include "hardwareUS.h"
 
 /*
- * Application entry point.
+ * Starting point  
  */
 int main(void) {
-  /*
-   * System initializations.
-   * - HAL initialization, this also initializes the configured device drivers
-   *   and performs the board-specific initializations.
-   * - Kernel initialization, the main() function becomes a thread and the
-   *   RTOS is active.
-   */
-  halInit();
-  chSysInit();
+	// Initialize drivers etc
+	halInit();
+	chSysInit();
 
-  /*
-   * Initializes a serial-over-USB CDC driver.
-   */
-  sduObjectInit(&SDU1);
-  sduStart(&SDU1, &serusbcfg);
+	// Initialize IR
+	hardwareSetupIR();
+	hardwareSetupUS();
 
-  /*
-   * Activates the USB driver and then the USB bus pull-up on D+.
-   * Note, a delay is inserted in order to not have to disconnect the cable
-   * after a reset.
-   */
-  /*
-   * Shell manager initialization.
-   */
-  //shellInit();
+ 	// Initialize serial over USB
+	sduObjectInit(&SDU1);
+ 	sduStart(&SDU1, &serusbcfg);
 
-
-
-	// Loop this - check in the inner loop if USB driver says still connected,
-	// otherwise go back here to reconnect
+  	// Activate USB driver, USB pull-up on D+
+	// Delay means that if device is reset, it will be unavailable to the
+	// host for a while, and then reattached
 	usbDisconnectBus(serusbcfg.usbp);
-  	chThdSleepMilliseconds(1500);
-  	usbStart(serusbcfg.usbp, &usbcfg);
+	chThdSleepMilliseconds(1500);
+	usbStart(serusbcfg.usbp, &usbcfg);
   	usbConnectBus(serusbcfg.usbp);
 
-	msg_t charbuf;
+	// Main loop
+  	int iterationsSinceActive = 0;
 	while(true) {
-		charbuf = chnGetTimeout(&SDU1, 1000);
-		if (charbuf != Q_TIMEOUT) {
-			if ((char)charbuf == '\r') {
-				chprintf( (BaseSequentialStream *)&SDU1, "%c", (char)charbuf);				} else {
-				chprintf( (BaseSequentialStream *)&SDU1, "%c", (char)charbuf);
+		msg_t charbuf;
+		int active = 1; // This can later be switched on timeout!
+
+		while (active) {
+			if (iterationsSinceActive < 3) {
+				// Active. LED on.
+				palSetPad(GPIOD, GPIOD_LED4);
+				iterationsSinceActive++;
+			} else {
+				palClearPad(GPIOD, GPIOD_LED4);
 			}
-			chprintf( (BaseSequentialStream *)&SDU1, "%c", (char)charbuf);
-		} else {
-			chprintf( (BaseSequentialStream *)&SDU1, "\0");
+
+			charbuf = chnGetTimeout(&SDU1, 100);
+			if (charbuf != Q_TIMEOUT) {
+				/*
+				if ((char)charbuf == '\r') {
+					chprintf( (BaseSequentialStream *)&SDU1, "\r\n", (char)charbuf);	
+				} else {
+					chprintf( (BaseSequentialStream *)&SDU1, "%c", (char)charbuf);
+				}*/
+				// Received a character!
+				iterationsSinceActive = 0;
+			} else {
+				// Timeout. Provide a \0 to keep connection alive.
+				chprintf( (BaseSequentialStream *)&SDU1, "\0");
+			}
+			hardwareIterationIR();
+			hardwareIterationUS();
+			chThdSleepMilliseconds(300);
+
+			chprintf( (BaseSequentialStream *)&SDU1, "US FRONT: %i ", hardwareGetValuesUS(FRONT));
+			chprintf( (BaseSequentialStream *)&SDU1, "US SIDE: %i ", hardwareGetValuesUS(SIDE));
+			chprintf( (BaseSequentialStream *)&SDU1, "SIDE_FRONT: %i ", hardwareGetValuesIR(SIDE_FRONT));
+			chprintf( (BaseSequentialStream *)&SDU1, "SIDE_REAR: %i ",  hardwareGetValuesIR(SIDE_REAR));
+			chprintf( (BaseSequentialStream *)&SDU1, "REAR: %i \r", hardwareGetValuesIR(REAR));
 		}
-		chThdSleepMilliseconds(20);
 	}
+	return 0;
 }
