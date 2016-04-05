@@ -29,4 +29,4 @@ SET(SOURCE_FILES ${SOURCE_FILES} src/packetio/PacketBroadcaster.cpp include/pack
 ADD_EXECUTABLE (AutoTuxProxy ${SOURCE_FILES})
 
 # Link the libraries to the exec.
-TARGET_LINK_LIBRARIES (AutoTuxProxy ${OPENDAVINCI_LIBRARIES} ${LIBUSB_LIBRARIES})
+TARGET_LINK_LIBRARIES (AutoTuxProxy ${OPENDAVINCI_LIBRARIES} ${LIBUSB_LIBRARIES} usb-1.0)
