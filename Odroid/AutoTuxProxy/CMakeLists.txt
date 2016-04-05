@@ -31,23 +31,3 @@ FILE(GLOB_RECURSE thisproject-sources "${CMAKE_CURRENT_SOURCE_DIR}/src/*/*.cpp")
 ADD_LIBRARY(${PROJECT_NAME}lib-static STATIC ${thisproject-sources})
 ADD_EXECUTABLE(${PROJECT_NAME} "${CMAKE_CURRENT_SOURCE_DIR}/apps/${PROJECT_NAME}.cpp")
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_NAME}lib-static ${LIBRARIES})
-
-## Set all the source files // Ordered by namespace
-## file containing main
-#SET(SOURCE_FILES src/AutoTuxProxy.cpp)
-## serial
-#SET(SOURCE_FILES ${SOURCE_FILES} src/serial/USBConnector.cpp src/serial/USBConnector.h)
-## packetio
-#SET(SOURCE_FILES ${SOURCE_FILES} src/packetio/PacketBroadcaster.cpp include/packetio/PacketBroadcaster.h src/packetio/PacketReceiver.cpp include/packetio/PacketReceiver.h)
-## containerfactory
-#SET(SOURCE_FILES ${SOURCE_FILES} src/containerfactory/SBDContainer.cpp include/containerfactory/SBDContainer.h)
-## camera
-#FILE(GLOB_RECURSE camera-sources "${CMAKE_CURRENT_SOURCE_DIR}/src/camera/*.cpp")
-#FILE(GLOB_RECURSE camera-headers "${CMAKE_CURRENT_SOURCE_DIR}/include/camera/*.h")
-#SET(SOURCE_FILES ${SOURCE_FILES} ${camera-sources} ${camera-headers})
-#
-## Set executable
-#ADD_EXECUTABLE (AutoTuxProxy ${SOURCE_FILES})
-#
-## Link the libraries to the exec.
-#TARGET_LINK_LIBRARIES (${PROJECT_NAME} ${LIBRARIES})
