@@ -7,6 +7,7 @@
 #include <opendavinci/odcore/data/Container.h>
 
 #include "packetio/PacketBroadcaster.h"
+#include "containerfactory/SBDContainer.h"
 #include "serial/USBConnector.h"
 
 using namespace std;
@@ -24,10 +25,13 @@ int main(int argc, char **argv) {
     serial_obj.read();
 
     //Here we have to start reading and then wrapping the shit
+    //Create factory
+    containerfactory::SBDContainer sbdContainer;
     //Create pointer
     Container *container;
+    *container = sbdContainer.genSBDContainer(95.2);
     //Set Broadcaster pointer
-    //packetBroadcaster.setSensorBoardDataContainer(container);
+    packetBroadcaster.setSensorBoardDataContainer(container);
 
     serial_obj.disconnect();
 
