@@ -44,4 +44,13 @@ typedef enum {FRONT, SIDE} US_SENSOR;
 static const uint8_t US_ADDRESS[] = {0x79, 0x73};
 
 
+//-----------------------------------------------------------------------------
+// RC config
+//-----------------------------------------------------------------------------
+
+typedef enum {THROTTLE, STEERING} RC_CHANNEL;
+
+#define RC_CHANNELS 2
+
+
 #endif /* AUTOTUXHARDWARE_H_ */

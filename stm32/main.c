@@ -24,6 +24,7 @@
 
 #include "hardwareIR.h"
 #include "hardwareUS.h"
+#include "hardwareRC.h"
 
 /*
  * Starting point  
@@ -36,6 +37,7 @@ int main(void) {
 	// Initialize IR
 	hardwareSetupIR();
 	hardwareSetupUS();
+	hardwareSetupRC();
 
  	// Initialize serial over USB
 	sduObjectInit(&SDU1);
@@ -80,10 +82,13 @@ int main(void) {
 			}
 			hardwareIterationIR();
 			hardwareIterationUS();
-			chThdSleepMilliseconds(300);
+			hardwareIterationRC();
+			chThdSleepMilliseconds(100);
 
+			chprintf( (BaseSequentialStream *)&SDU1, "\033[FTHROTTLE: %i ", hardwareGetValuesRC(THROTTLE));
+			chprintf( (BaseSequentialStream *)&SDU1, "STEERING: %i ", hardwareGetValuesRC(STEERING));
 			chprintf( (BaseSequentialStream *)&SDU1, "US FRONT: %i ", hardwareGetValuesUS(FRONT));
-			chprintf( (BaseSequentialStream *)&SDU1, "US SIDE: %i ", hardwareGetValuesUS(SIDE));
+			chprintf( (BaseSequentialStream *)&SDU1, "US SIDE: %i \r\n", hardwareGetValuesUS(SIDE));
 			chprintf( (BaseSequentialStream *)&SDU1, "SIDE_FRONT: %i ", hardwareGetValuesIR(SIDE_FRONT));
 			chprintf( (BaseSequentialStream *)&SDU1, "SIDE_REAR: %i ",  hardwareGetValuesIR(SIDE_REAR));
 			chprintf( (BaseSequentialStream *)&SDU1, "REAR: %i \r", hardwareGetValuesIR(REAR));

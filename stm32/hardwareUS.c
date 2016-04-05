@@ -1,5 +1,5 @@
 /*
- * hardwareIR.c
+ * hardwareUS.c
  *
  *  Created on: Apr 4, 2016
  *      Author: jerker
