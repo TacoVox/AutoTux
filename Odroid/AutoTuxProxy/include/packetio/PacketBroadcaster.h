@@ -12,13 +12,13 @@ namespace packetio {
     public:
         PacketBroadcaster(const int32_t &argc, char **argv);
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
-        void setSensorBoardDataContainer(odcore::data::Container *);
+        void setSensorBoardDataContainer(std::shared_ptr<odcore::data::Container>);
         virtual ~PacketBroadcaster();
     private:
         virtual void setUp();
         virtual void tearDown();
         bool interrupted;
-        odcore::data::Container *sensorBoardDataContainer;
+        std::shared_ptr<odcore::data::Container> sensorBoardDataContainer;
     };
 }
 
