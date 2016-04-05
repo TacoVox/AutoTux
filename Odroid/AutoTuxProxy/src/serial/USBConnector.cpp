@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <string>
 #include "serial/USBConnector.h"
 #include "serial/BufferParser.h"
 #include <thread>
@@ -160,6 +161,9 @@ void cb_in(struct libusb_transfer *transfer) {
         cout << endl;
         //cout << transfer->buffer << endl;
     }
+    BufferParser parser;
+    string str((char *)transfer->buffer);
+    parser.decode_packet(str);
     return;
 }
 
