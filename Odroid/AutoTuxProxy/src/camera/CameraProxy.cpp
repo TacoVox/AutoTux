@@ -37,8 +37,9 @@ namespace proxy {
 
             KeyValueConfiguration kv = getKeyValueConfiguration();
 
-            //TODO Fix configuration file.
-            const bool useRecorder = kv.getValue<uint32_t>("proxy.useRecorder") == 1;
+            //TODO Fix configuration file. Can only get values using the filename?
+
+            const bool useRecorder = kv.getValue<uint32_t>("cameraproxy.useRecorder") == 1;
             if(useRecorder) {
                 stringstream recordingURL;
                 recordingURL << "file://" << "proxy_camera_" << TimeStamp().getYYYYMMDD_HHMMSS() << ".rec";
@@ -52,13 +53,13 @@ namespace proxy {
             }
 
             // Create camrea grabber.
-            const string NAME = getKeyValueConfiguration().getValue<string>("proxy.camera.name");
-            string TYPE = kv.getValue<string>("proxy.camera.type");
+            const string NAME = getKeyValueConfiguration().getValue<string>("cameraproxy.name");
+            string TYPE = kv.getValue<string>("cameraproxy.type");
             transform(TYPE.begin(), TYPE.end(), TYPE.begin(), ::tolower);
-            const uint32_t ID = kv.getValue<uint32_t>("proxy.camera.id");
-            const uint32_t WIDTH = kv.getValue<uint32_t>("proxy.camera.width");
-            const uint32_t HEIGHT = kv.getValue<uint32_t>("proxy.camera.height");
-            const uint32_t BPP = kv.getValue<uint32_t>("proxy.camera.bpp");
+            const uint32_t ID = kv.getValue<uint32_t>("cameraproxy.id");
+            const uint32_t WIDTH = kv.getValue<uint32_t>("cameraproxy.width");
+            const uint32_t HEIGHT = kv.getValue<uint32_t>("cameraproxy.height");
+            const uint32_t BPP = kv.getValue<uint32_t>("cameraproxy.bpp");
 
             if(TYPE.compare("opencv") == 0) {
                 // TODO Error? No compiling errors.

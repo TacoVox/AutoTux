@@ -2,11 +2,15 @@
 
 #include <opencv2/imgproc/imgproc_c.h>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opendavinci/odcore/base/KeyValueConfiguration.h>
 
 #include "camera/OpenCVCamera.h"
 
 namespace proxy {
     namespace camera {
+        using namespace std;
+        using namespace odcore::base;
+
         OpenCVCamera::OpenCVCamera(const string &name, const uint32_t &id, const uint32_t &width, const uint32_t &height, const uint32_t &bpp) :
             Camera(name, id, width, height, bpp),
             m_capture(NULL),
@@ -35,6 +39,7 @@ namespace proxy {
             bool returnVal = false;
             if(m_capture != NULL) {
                 if(cvGrabFrame(m_capture)) {
+                    // TODO Unnesseccary code? Never using camera with BPP 1.
                     if(getBPP() == 1) {
                         IplImage *tmpFrame = cvRetrieveFrame(m_capture);
 
@@ -58,9 +63,10 @@ namespace proxy {
             if((dest != NULL) && (size > 0) && (m_image != NULL)) {
                 memcpy(dest, m_image->imageData, size);
 
+                // TODO Put in a debug if-statement.
                 cvShowImage("WindowShowImage", m_image);
                 cvWaitKey(10);
-
+                //
                 returnVal = true;
             }
             return returnVal;
