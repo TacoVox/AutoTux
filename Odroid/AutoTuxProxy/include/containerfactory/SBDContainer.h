@@ -11,7 +11,7 @@ namespace containerfactory {
     class SBDContainer {
     public:
         static SBDContainer* instance(void);
-        odcore::data::Container genSBDContainer(std::vector);
+        odcore::data::Container genSBDContainer(std::vector<auto>);
     private:
         SBDContainer();
         SBDContainer(const SBDContainer&);
