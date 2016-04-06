@@ -25,13 +25,13 @@ static ICUConfig icuChannel1 = {
   0
 };
 
-static ICUConfig icuChannel2 = {
+static ICUConfig icuChannel91 = {
   ICU_INPUT_ACTIVE_HIGH,
   1000000,
   icuCallback,
   NULL,
   NULL,
-  ICU_CHANNEL_2,
+  ICU_CHANNEL_1,
   0
 };
 
@@ -50,8 +50,20 @@ icucnt_t pw[RC_CHANNELS];
  */
 void hardwareSetupRC() {
 	// TODO: MOVE PINS TO CONFIG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// Throttle
 	palSetPadMode(GPIOA, 0, PAL_MODE_ALTERNATE(2));
-	palSetPadMode(GPIOA, 1, PAL_MODE_ALTERNATE(2));
+	icuStart(&ICUD5, &icuChannel1);
+	icuStartCapture(&ICUD5);
+	icuEnableNotifications(&ICUD5);
+
+
+	// Steering
+	palSetPadMode(GPIOB, 4, PAL_MODE_ALTERNATE(2));
+
+	icuStart(&ICUD3, &icuChannel91);
+	icuStartCapture(&ICUD3);
+	icuEnableNotifications(&ICUD3);
+	//chThdSleepMilliseconds(25);
 }
 
 /*
@@ -59,22 +71,18 @@ void hardwareSetupRC() {
  */
 void hardwareIterationRC() {
 
-	icuStart(&ICUD5, &icuChannel1);
 
-	icuStartCapture(&ICUD5);
-	icuEnableNotifications(&ICUD5);
-	chThdSleepMilliseconds(25);
-	icuStopCapture(&ICUD5);
-	icuStop(&ICUD5);
+	//icuStopCapture(&ICUD5);
+	//icuStop(&ICUD5);
 
-
+/*
 
 	icuStart(&ICUD5, &icuChannel2);
 	icuStartCapture(&ICUD5);
 	icuEnableNotifications(&ICUD5);
 	chThdSleepMilliseconds(25);
 	icuStopCapture(&ICUD5);
-	icuStop(&ICUD5);
+	icuStop(&ICUD5);*/
 }
 
 

@@ -80,10 +80,11 @@ int main(void) {
 				// Timeout. Provide a \0 to keep connection alive.
 				chprintf( (BaseSequentialStream *)&SDU1, "\0");
 			}
-			hardwareIterationIR();
-			hardwareIterationUS();
-			hardwareIterationRC();
+			hardwareIterationIR(); // TODO: check time
+			hardwareIterationUSStart();
 			chThdSleepMilliseconds(100);
+			hardwareIterationUSEnd();
+			//hardwareIterationRC();
 
 			chprintf( (BaseSequentialStream *)&SDU1, "\033[FTHROTTLE: %i ", hardwareGetValuesRC(THROTTLE));
 			chprintf( (BaseSequentialStream *)&SDU1, "STEERING: %i ", hardwareGetValuesRC(STEERING));

@@ -34,7 +34,7 @@ static const ioportmask_t ADC_PIN_NUMBERS[] = {0, 4, 5};
 
 
 //-----------------------------------------------------------------------------
-// US config
+// US config - NOTE ideally move config of pins and channels here as well
 //-----------------------------------------------------------------------------
 
 typedef enum {FRONT, SIDE} US_SENSOR;
