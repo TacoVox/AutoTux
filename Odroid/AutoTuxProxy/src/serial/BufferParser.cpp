@@ -1,19 +1,14 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 #include "serial/BufferParser.h"
 
 using namespace std;
 
-BufferParser::BufferParser() {
-    cout << "creating a buffer parser" << endl;
-}
 
-BufferParser::~BufferParser() {
-
-}
-
-double BufferParser::decode_packet(string p) {
+vector<double> buf_parser::decode_packet(string p, int len) {
+    /*
     cout << "decoding packet..." << endl;
     string::size_type del = p.find(':');
     del += 2;
@@ -25,8 +20,11 @@ double BufferParser::decode_packet(string p) {
     string sub2 = sub1.substr(0, del1);
     cout << "sub2-" << sub2 << endl;
     return stod(sub2);
+    */
+    vector<double> v;
+    return v;
 }
 
-int BufferParser::encode_packet() {
+int buf_parser::encode_packet() {
 
 }
