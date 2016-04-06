@@ -1,17 +1,19 @@
-cmake_minimum_required(VERSION 3.2)
-project(Overtaking)
+cmake_minimum_required(VERSION 3.0)
+project(Overtake)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 # Set module paths, system dependant.
 # TODO Make cmake search for it
-set(CMAKE_MODULE_PATH "/usr/local/share/cmake-3.2/Modules" ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "/usr/share/cmake-3.0/Modules" ${CMAKE_MODULE_PATH})
 
 
 # Require OpenDaVINCI
-set(OPENDAVINCI_DIR "/usr/local/include")
+#set(OPENDAVINCI_DIR "/usr/include")
 find_package(OpenDaVINCI REQUIRED)
 
 # Require Automotivedata
-set(AUTOMOTIVEDATA_DIR "/usr/local/include")
+set(AUTOMOTIVEDATA_DIR "/usr/share/cmake-3.0/Modules")
 find_package(AutomotiveData REQUIRED)
 
 set(LIBRARIES ${OPENDAVINCI_LIBRARIES} ${AUTOMOTIVEDATA_LIBRARIES} ${OPENCV_LIBRARIES})
