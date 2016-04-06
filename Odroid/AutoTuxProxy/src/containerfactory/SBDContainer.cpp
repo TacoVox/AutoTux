@@ -21,14 +21,14 @@ containerfactory::SBDContainer* containerfactory::SBDContainer::instance(void) {
     return _instance;
 }
 
-Container containerfactory::SBDContainer::genSBDContainer(vector<double> values) {
+Container containerfactory::SBDContainer::genSBDContainer(vector values) {
     //Create a map for all the sensor data
     map<uint32_t, double> sensordata;
 
     //Iterate over the vector and put the stuff in the map
     int i = 1;
-    for(vector<double>::iterator it = values.begin(); it != values.end(); ++it) {
-        sensordata[i] = *it;
+    for(vector::iterator it = values.begin(); it != values.end(); ++it) {
+        sensordata[i] = (double)*it;
         i++;
     }
 
