@@ -21,7 +21,7 @@ containerfactory::SBDContainer* containerfactory::SBDContainer::instance(void) {
     return _instance;
 }
 
-Container containerfactory::SBDContainer::genSBDContainer(vector<auto> values) {
+Container containerfactory::SBDContainer::genSBDContainer(vector<unsigned char> values) {
     //Create a map for all the sensor data
     map<uint32_t, double> sensordata;
 
