@@ -17,9 +17,7 @@ int main(int argc, char **argv) {
     shared_ptr<PacketBroadcaster> packetBroadcaster(new PacketBroadcaster(argc, argv));
     thread pbthread(&PacketBroadcaster::runModule, packetBroadcaster);
 
-    shared_ptr<Container> containerptr;
 
-    packetBroadcaster->setControlDataContainer(containerptr);
 
     VehicleControl vehicleControl;
     vehicleControl.setSpeed(10.0);
@@ -27,7 +25,9 @@ int main(int argc, char **argv) {
 
     Container container(vehicleControl);
 
-    *containerptr = container;
+    shared_ptr<Container> containerptr(new Container(vehicleControl));
+
+    packetBroadcaster->setControlDataContainer(containerptr);
 
     pbthread.join();
     return 0;
