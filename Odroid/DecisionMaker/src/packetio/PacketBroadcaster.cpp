@@ -36,8 +36,8 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode packetio::PacketBroadc
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
 }
 
-void packetio::PacketBroadcaster::setSensorBoardDataContainer(
-        std::shared_ptr<odcore::data::Container> sensorBoardDataContainer) {
-    this->controlDataContainer = sensorBoardDataContainer;
+void packetio::PacketBroadcaster::setControlDataContainer(
+        std::shared_ptr<odcore::data::Container> controlDataContainer) {
+    this->controlDataContainer = controlDataContainer;
 }
 
