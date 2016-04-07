@@ -49,6 +49,7 @@ int usb_connector::USBConnector::open_device(void)
     cout << "opening device..." << endl;
     libusb_device **devs;
     ssize_t dev_count = libusb_get_device_list(ctx, &devs);
+    cout << "num devices found: " << dev_count << endl;
     if (dev_count < 0) {
         cout << "device error" << endl;
         return dev_count;
@@ -61,14 +62,17 @@ int usb_connector::USBConnector::open_device(void)
             cout << "failed to get device descriptor" << endl;
             return r;
         }
+        cout << "device " << i << ": " << "vendor id - " << desc.idVendor;
+        cout << " | product id - " << desc.idProduct << endl;
         // if the device matches, open it
         if (desc.idVendor == USB_VENDOR_ID && desc.idProduct == USB_PRODUCT_ID) {
+            cout << "device match" << endl;
             open = libusb_open(devs[i], &usb_dev);
             break;
         }
     }
-    if (open) {
-        cout << "device not found" << endl;
+    if (open != 0) {
+        cout << "device not found, error code: " << open << endl;
         return open;
     }
     cout << "OK" << endl;
@@ -131,15 +135,25 @@ int usb_connector::USBConnector::connect(void)
 void usb_connector::USBConnector::read(void)
 {
     cout << "reading from usb stream..." << endl;
-    transfer_in  = libusb_alloc_transfer(0);
+
     while (1) {
         cout << "loop iterating in read" << endl;
+        // allocate transfer
+        transfer_in  = libusb_alloc_transfer(0);
         libusb_fill_bulk_transfer( transfer_in, usb_dev, USB_ENDPOINT_IN,
-            in_buffer,  LEN_IN_BUFFER, callback_in, NULL, 0);
+            in_buffer,  LEN_IN_BUFFER, callback_in, this, 0);
         libusb_submit_transfer(transfer_in);
-        libusb_handle_events(ctx);
-        //libusb_free_transfer(transfer_in);
-        std::this_thread::sleep_for (std::chrono::seconds(1));
+        while (1) {
+            cout << "in handle events" << endl;
+            // this is blocking
+            int cb = libusb_handle_events(ctx);
+            cout << "handle events code: " << cb << endl;
+            std::this_thread::sleep_for (std::chrono::seconds(1));
+            if (cb != LIBUSB_SUCCESS) break;
+        }
+        // free the transfer resources
+        libusb_free_transfer(transfer_in);
+        //std::this_thread::sleep_for (std::chrono::seconds(1));
     }
 }
 
@@ -162,19 +176,16 @@ void usb_connector::USBConnector::disconnect(void)
     cout << "OK" << endl;
 }
 
+void usb_connector::USBConnector::handle_callback(string transfer) {
+    cout << "transfer actual_length = " << transfer.length() << endl;
+    cout << "transfer data: " << transfer << endl;
+
+}
+
 void callback_in(struct libusb_transfer *transfer)
 {
-    if (transfer == NULL) {
-        cout << "No libusb_transfer..." << endl;
-    }
-    else {
-        cout << "libusb_transfer structure: " << endl;
-        cout << "actual_length = " << transfer->actual_length << endl;
-        for (int i = 0; i < transfer->actual_length; i++) {
-            cout << transfer->buffer[i];
-        }
-        cout << endl;
-    }
-
-    return;
+    cout << "call to callback_in" << endl;
+    usb_connector::USBConnector *connector = reinterpret_cast<usb_connector::USBConnector*>(transfer->user_data);
+    string tran((char *)transfer->buffer);
+    connector->handle_callback(tran);
 }
