@@ -16,7 +16,7 @@ using namespace automotive;
 //using namespace overtaker;
 //using namespace parker;
 
-void startDecisionMaker(int, char**);
+ void startDecisionMaker(int, char**);
 
 int main(int argc, char **argv) {
     cout << "Started the AutoTux DecisionMaker..." << endl;
@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
     vehicleControl.setSpeed(10.0);
     vehicleControl.setSteeringWheelAngle(90.0);
 
-    Container container(vehicleControl);
+//    Container container(vehicleControl);
 
     shared_ptr<Container> containerptr(new Container(vehicleControl));
 
@@ -45,7 +45,7 @@ void startDecisionMaker(int argc, char **argv) {
     //thread overtaker (initializeOvertaker, argc, argv);
     //thread parker (initializeParker, argc, argv);
 }
-
+/*
 void initializeOvertaker(int argc, char **argv){
     //overtaker::Overtaker ovt (argc, argv);
     //ovt.runModule();
@@ -55,4 +55,4 @@ void initializeParker(int argc, char **argv){
     //parker::Parker prk (argc, argv);
     //prk.runModule();
 }
-
+ */
