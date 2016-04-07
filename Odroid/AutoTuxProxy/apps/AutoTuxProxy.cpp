@@ -5,6 +5,7 @@
 #include <thread>
 #include <opendavinci/odcore/data/Container.h>
 #include "packetio/PacketBroadcaster.h"
+#include "packetio/PacketReceiver.h"
 #include "containerfactory/SBDContainer.h"
 #include "serial/USBConnector.h"
 
@@ -16,9 +17,14 @@ using namespace containerfactory;
 int main(int argc, char **argv) {
     cout << "Testing Packet Broadcaster!" << endl;
 
-    std::shared_ptr<PacketBroadcaster>
+    //Setup the broadcaster
+    shared_ptr<PacketBroadcaster>
             packetBroadcaster(new PacketBroadcaster(argc, argv));
-    std::thread pbthread(&PacketBroadcaster::runModule, packetBroadcaster);
+    thread pbthread(&PacketBroadcaster::runModule, packetBroadcaster);
+    //Setup the receiver
+    shared_ptr<PacketReceiver>
+            packetReceiver(new PacketReceiver(argc, argv));
+    thread prthread(&PacketReceiver::runModule, packetReceiver);
 
     cout << "Testing USBConnector!" << endl;
     //usb_connector::USBConnector serial_obj;
@@ -35,7 +41,9 @@ int main(int argc, char **argv) {
 
     //serial_obj.disconnect();
 
+    //Wait for the threads to terminate
     pbthread.join();
+    prthread.join();
 
     return 0;
 }
