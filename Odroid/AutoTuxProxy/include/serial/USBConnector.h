@@ -37,8 +37,9 @@ namespace usb_connector
         int init_libusb(void);
         int open_device(void);
         int interface_taken(void);
-        int claim_interface(void);      
-        unsigned char *in_buffer;
+        int claim_interface(void);
+        void release_interface(void);
+        unsigned char in_buffer[LEN_IN_BUFFER];
         std::unique_ptr<buf_parser::BufferParser> bp;
         struct libusb_device_handle *usb_dev;
         struct libusb_context *ctx;

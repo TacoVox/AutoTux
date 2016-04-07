@@ -13,7 +13,6 @@ void callback_in(struct libusb_transfer *transfer);
 usb_connector::USBConnector::USBConnector()
 {
     cout << "Creating a USB object!" << endl;
-    in_buffer[BUF_LEN_MAX];
     bp = (unique_ptr<buf_parser::BufferParser>) (new buf_parser::BufferParser());
 }
 
@@ -27,7 +26,7 @@ usb_connector::USBConnector::~USBConnector()
     libusb_release_interface(usb_dev, 1);
     libusb_close(usb_dev);
     libusb_exit(ctx);
-    delete [] in_buffer;
+    //delete in_buffer;
 }
 
 /* initialize libusb */
@@ -115,6 +114,14 @@ int usb_connector::USBConnector::claim_interface(void)
     return 0;
 }
 
+void usb_connector::USBConnector::release_interface()
+{
+    cout << "releasing interface..." << endl;
+    libusb_release_interface(usb_dev, 1);
+    libusb_attach_kernel_driver(usb_dev, 1);
+    cout << "OK" << endl;
+}
+
 /* connect and open stream to usb */
 int usb_connector::USBConnector::connect(void)
 {
@@ -135,26 +142,17 @@ int usb_connector::USBConnector::connect(void)
 void usb_connector::USBConnector::read(void)
 {
     cout << "reading from usb stream..." << endl;
-
+    transfer_in  = libusb_alloc_transfer(0);
     while (1) {
-        cout << "loop iterating in read" << endl;
-        // allocate transfer
-        transfer_in  = libusb_alloc_transfer(0);
         libusb_fill_bulk_transfer( transfer_in, usb_dev, USB_ENDPOINT_IN,
             in_buffer,  LEN_IN_BUFFER, callback_in, this, 0);
         libusb_submit_transfer(transfer_in);
-        while (1) {
-            cout << "in handle events" << endl;
-            // this is blocking
-            int cb = libusb_handle_events(ctx);
-            cout << "handle events code: " << cb << endl;
-            std::this_thread::sleep_for (std::chrono::seconds(1));
-            if (cb != LIBUSB_SUCCESS) break;
+        while (libusb_handle_events_completed(ctx, NULL) != LIBUSB_SUCCESS) {
+            cout << "waiting to complete" << endl;
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
-        // free the transfer resources
-        libusb_free_transfer(transfer_in);
-        //std::this_thread::sleep_for (std::chrono::seconds(1));
     }
+    libusb_free_transfer(transfer_in);
 }
 
 /* write to the usb stream */
@@ -185,7 +183,10 @@ void usb_connector::USBConnector::handle_callback(string transfer) {
 void callback_in(struct libusb_transfer *transfer)
 {
     cout << "call to callback_in" << endl;
-    usb_connector::USBConnector *connector = reinterpret_cast<usb_connector::USBConnector*>(transfer->user_data);
+    //cout << "buffer: " << endl;
+    //cout << transfer->buffer << endl;
+    usb_connector::USBConnector *connector =
+            reinterpret_cast<usb_connector::USBConnector*>(transfer->user_data);
     string tran((char *)transfer->buffer);
     connector->handle_callback(tran);
 }

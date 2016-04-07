@@ -27,9 +27,9 @@ int main(int argc, char **argv) {
     thread prthread(&PacketReceiver::runModule, packetReceiver);
 
     cout << "Testing USBConnector!" << endl;
-    //usb_connector::USBConnector serial_obj;
-    //serial_obj.connect();
-    //serial_obj.read();
+    usb_connector::USBConnector serial_obj;
+    serial_obj.connect();
+    serial_obj.read();
 
     //Just for testing
     vector<unsigned char> p {0, 3, 5, 7, 7};
@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
     packetBroadcaster->setSensorBoardDataContainer(
                 SBDContainer::instance()->genSBDContainer(p2));
 
-    //serial_obj.disconnect();
+    serial_obj.disconnect();
 
     //Wait for the threads to terminate
     pbthread.join();
