@@ -29,7 +29,8 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode packetio::PacketBroadc
            odcore::data::dmcp::ModuleStateMessage::RUNNING && !interrupted) {
         cout << "Checking for vals" << endl;
         if(sensorBoardDataContainer != NULL) {
-            cout << "Broadcasting values..." << endl;
+            cout << "Broadcasting values: ";
+            cout << sensorBoardDataContainer->toString() << endl;
             getConference().send(*sensorBoardDataContainer);
         }
     }

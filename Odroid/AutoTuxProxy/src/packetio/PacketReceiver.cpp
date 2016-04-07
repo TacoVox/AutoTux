@@ -2,61 +2,29 @@
 // Created by Jonas Kahler on 4/1/16.
 //
 
-#include "../../include/packetio/PacketReceiver.h"
-
-#include <thread>
+#include "packetio/PacketReceiver.h"
 #include <iostream>
-#include <typeinfo>
-#include <opendavinci/odcore/base/Thread.h>
-#include <opendavinci/odcore/io/Packet.h>
-#include <opendavinci/odcore/io/udp/UDPReceiver.h>
-#include <opendavinci/odcore/io/udp/UDPFactory.h>
+#include <automotivedata/generated/automotive/VehicleControl.h>
 
 using namespace std;
-using namespace odcore;
-using namespace odcore::io;
-using namespace odcore::io::udp;
+using namespace automotive;
+using namespace odcore::base::module;
+using namespace odcore::data;
 
+packetio::PacketReceiver::PacketReceiver(const int32_t &argc, char **argv) :
+    DataTriggeredConferenceClientModule(argc, argv, "DataTriggeredReceiver") {}
 
-void packetio::PacketReceiver::test(void) {
-    //Do the stuff 100 times
-    int i;
-    for(i = 0; i < 100; i++) {
-        receive();
+packetio::PacketReceiver::~PacketReceiver() {}
+
+void packetio::PacketReceiver::setUp() {}
+
+void packetio::PacketReceiver::tearDown() {}
+
+void packetio::PacketReceiver::nextContainer(Container &c) {
+    //Check if valid ControlData//Guard
+    if(c.getDataType() == VehicleControl::ID()) {
+        cout << "Received ControlData" << endl;
+    } else {
+        cout << "Received invalid data" << endl;
     }
-}
-
-void packetio::PacketReceiver::receive(void) {
-    const string RECEIVER = "127.0.0.1";
-    const uint32_t PORT = 1111;
-
-    // We are using OpenDaVINCI's std::shared_ptr to automatically
-    // release any acquired resources.
-    try {
-        std::shared_ptr<UDPReceiver>
-                udpreceiver(UDPFactory::createUDPReceiver(RECEIVER, PORT));
-
-        // This instance will handle any packets that are received
-        // by our UDP socket.
-        PacketReceiver handler;
-        udpreceiver->setPacketListener(&handler);
-
-        // Start receiving bytes.
-        udpreceiver->start();
-
-        const uint32_t ONE_SECOND = 1000 * 1000;
-        odcore::base::Thread::usleepFor(10 * ONE_SECOND);
-
-        // Stop receiving bytes and unregister our handler.
-        udpreceiver->stop();
-        udpreceiver->setPacketListener(NULL);
-    }
-    catch(string &exception) {
-        cerr << "Error while creating UDP receiver: " << exception << endl;
-    }
-}
-
-void packetio::PacketReceiver::nextPacket(const odcore::io::Packet &packet) {
-    //Simple output for now
-    cout << packet.getData() << endl;
 }
