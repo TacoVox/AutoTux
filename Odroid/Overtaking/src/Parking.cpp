@@ -1,4 +1,10 @@
 //
+// Created by marco on 2016-04-07.
+//
+
+#include "Parking.h"
+
+//
 // Created by niklas on 2016-04-05.
 //
 
@@ -9,7 +15,7 @@
 #include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
 #include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 
-#include "Overtake.h"
+#include "Parking.h"
 
 using namespace std;
 using namespace odcore::base;
@@ -20,19 +26,19 @@ using namespace automotive::miniature;
 
 using namespace over::take;
 
-Overtake::Overtake(const int32_t &argc, char **argv) :
-        TimeTriggeredConferenceClientModule(argc, argv, "Overtake") {}
+Parking::Parking(const int32_t &argc, char **argv) :
+        TimeTriggeredConferenceClientModule(argc, argv, "Parking") {}
 
-Overtake::~Overtake() {}
+Parking::~Parking() {}
 
-void Overtake::setUp(){
-    cout << "Overtake starts" << endl;
+void Parking::setUp(){
+    cout << "Parking starts" << endl;
 }
-void Overtake::tearDown(){
-    cout << "This is when Overtake stops" << endl;
+void Parking::tearDown(){
+    cout << "This is when Parking stops" << endl;
 }
 
-odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Overtake::body() {
+odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Parking::body() {
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
         // 1. Get most recent vehicle data:
@@ -46,7 +52,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Overtake::body() {
         // Create vehicle control data.
         VehicleControl vc;
 
-        cout << "Overtake: "  << vd.getSpeed() << endl;
+        cout << "Parking: "  << vd.getSpeed() << endl;
 
         cout << "This is the amount of sensors: " << sbd.getNumberOfSensors() << endl;
 
