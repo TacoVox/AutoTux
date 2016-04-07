@@ -7,16 +7,19 @@
 #include <chrono>
 
 using namespace std;
-void cb_in(struct libusb_transfer *transfer);
+void callback_in(struct libusb_transfer *transfer);
 
 /* constructor */
-USBConnector::USBConnector()
+usb_connector::USBConnector::USBConnector()
 {
     cout << "Creating a USB object!" << endl;
+    in_buffer[BUF_LEN_MAX];
+    bp = (unique_ptr<buf_parser::BufferParser>) (new buf_parser::BufferParser());
 }
 
+
 /* destructor */
-USBConnector::~USBConnector()
+usb_connector::USBConnector::~USBConnector()
 {
     // free resources here
     libusb_free_transfer(transfer_in);
@@ -24,10 +27,11 @@ USBConnector::~USBConnector()
     libusb_release_interface(usb_dev, 1);
     libusb_close(usb_dev);
     libusb_exit(ctx);
+    delete [] in_buffer;
 }
 
 /* initialize libusb */
-int USBConnector::init_libusb(void)
+int usb_connector::USBConnector::init_libusb(void)
 {
     cout << "initializing libusb..." << endl;
     int res = libusb_init(&ctx);
@@ -40,7 +44,7 @@ int USBConnector::init_libusb(void)
 }
 
 /* get a list of the devices and open the one we need */
-int USBConnector::open_device(void)
+int usb_connector::USBConnector::open_device(void)
 {
     cout << "opening device..." << endl;
     libusb_device **devs;
@@ -74,7 +78,7 @@ int USBConnector::open_device(void)
 }
 
 /* check if the interface of the USB is taken and free if so */
-int USBConnector::interface_taken(void)
+int usb_connector::USBConnector::interface_taken(void)
 {
     int d = libusb_kernel_driver_active(usb_dev, 1);
     if (d == 1) {
@@ -92,7 +96,7 @@ int USBConnector::interface_taken(void)
 }
 
 /* claim the interface of the USB for I/O operations */
-int USBConnector::claim_interface(void)
+int usb_connector::USBConnector::claim_interface(void)
 {
     cout << "claiming interface..." << endl;
     int r = libusb_claim_interface(usb_dev, 1);
@@ -108,7 +112,7 @@ int USBConnector::claim_interface(void)
 }
 
 /* connect and open stream to usb */
-int USBConnector::connect(void)
+int usb_connector::USBConnector::connect(void)
 {
     cout << "usb connecting..." << endl;
     if (init_libusb() == 0) {
@@ -124,14 +128,14 @@ int USBConnector::connect(void)
 }
 
 /* read from the usb stream */
-void USBConnector::read(void)
+void usb_connector::USBConnector::read(void)
 {
     cout << "reading from usb stream..." << endl;
     transfer_in  = libusb_alloc_transfer(0);
     while (1) {
         cout << "loop iterating in read" << endl;
         libusb_fill_bulk_transfer( transfer_in, usb_dev, USB_ENDPOINT_IN,
-            in_buffer,  LEN_IN_BUFFER, cb_in, NULL, 0);
+            in_buffer,  LEN_IN_BUFFER, callback_in, NULL, 0);
         libusb_submit_transfer(transfer_in);
         libusb_handle_events(ctx);
         //libusb_free_transfer(transfer_in);
@@ -140,13 +144,13 @@ void USBConnector::read(void)
 }
 
 /* write to the usb stream */
-void USBConnector::write(unsigned char *c)
+void usb_connector::USBConnector::write(unsigned char *c)
 {
     cout << "Writing to usb stream..." << endl;
 }
 
 /* disconnect and close the usb stream*/
-void USBConnector::disconnect(void)
+void usb_connector::USBConnector::disconnect(void)
 {
     cout << "disconnecting from usb stream..." << endl;
     // free resources here
@@ -158,7 +162,7 @@ void USBConnector::disconnect(void)
     cout << "OK" << endl;
 }
 
-void cb_in(struct libusb_transfer *transfer)
+void callback_in(struct libusb_transfer *transfer)
 {
     if (transfer == NULL) {
         cout << "No libusb_transfer..." << endl;
@@ -170,10 +174,7 @@ void cb_in(struct libusb_transfer *transfer)
             cout << transfer->buffer[i];
         }
         cout << endl;
-        //cout << transfer->buffer << endl;
     }
 
-    string str((char *)transfer->buffer);
-    buf_parser::decode_packet(str, transfer->actual_length);
     return;
 }

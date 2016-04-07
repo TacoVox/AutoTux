@@ -13,10 +13,10 @@ namespace containerfactory {
         static SBDContainer* instance(void);
         odcore::data::Container genSBDContainer(std::vector<unsigned char>);
     private:
+        static SBDContainer* _instance;
         SBDContainer();
         SBDContainer(const SBDContainer&);
-        ~SBDContainer();
-        static SBDContainer* _instance;
+        ~SBDContainer();      
     };
 }
 
