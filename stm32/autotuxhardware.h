@@ -41,16 +41,32 @@ typedef enum {FRONT, SIDE} US_SENSOR;
 
 #define US_SENSORS 2
 
-static const uint8_t US_ADDRESS[] = {0x79, 0x73};
+static const uint8_t US_ADDRESS[] = {0xE0 >> 1, 0x73};
+
+// Pins C9, A8
+static const ioportid_t US_PIN_GROUPS[] = {GPIOC, GPIOA};
+static const ioportmask_t US_PIN_NUMBERS[] = {9, 8};
+
+#define US_I2C_DRIVER &I2CD3
 
 
 //-----------------------------------------------------------------------------
 // RC config
 //-----------------------------------------------------------------------------
 
+
 typedef enum {THROTTLE, STEERING} RC_CHANNEL;
 
+#define RC_TIMER_THROTTLE &ICUD5
+#define RC_TIMER_CHANNEL_THROTTLE ICU_CHANNEL_1
+#define RC_TIMER_STEERING &ICUD3
+#define RC_TIMER_CHANNEL_STEERING ICU_CHANNEL_1
+
 #define RC_CHANNELS 2
+
+// A0, B4
+static const ioportid_t RC_PIN_GROUPS[] = {GPIOA, GPIOB};
+static const ioportmask_t RC_PIN_NUMBERS[] = {0, 4};
 
 
 #endif /* AUTOTUXHARDWARE_H_ */

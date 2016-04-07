@@ -44,9 +44,10 @@ int usCm[US_SENSORS];
  * Sets up the US sensor pins etc.
  */
 void hardwareSetupUS() {
-    // Side - C9 SDA - Channel 3 i2c
-    palSetPadMode(GPIOC, 9, PAL_MODE_ALTERNATE(4) | PAL_STM32_OTYPE_OPENDRAIN);
-    palSetPadMode(GPIOA, 8, PAL_MODE_ALTERNATE(4) | PAL_STM32_OTYPE_OPENDRAIN);
+    palSetPadMode(US_PIN_GROUPS[0], US_PIN_NUMBERS[0],
+    		PAL_MODE_ALTERNATE(4) | PAL_STM32_OTYPE_OPENDRAIN);
+    palSetPadMode(US_PIN_GROUPS[1], US_PIN_NUMBERS[1],
+    		PAL_MODE_ALTERNATE(4) | PAL_STM32_OTYPE_OPENDRAIN);
 }
 
 
@@ -64,12 +65,13 @@ void hardwareIterationUSStart() {
 		transferBuffer[1] = START_RANGING;
 
 		// Transmit CMD and START RANGING
-		i2cStart(&I2CD3, &i2cConfig);
-		i2cAcquireBus(&I2CD3);
-		i2cMasterTransmitTimeout(&I2CD3, US_ADDRESS[i], transferBuffer, 2, receiveBuffer, 0, timeout);
-		i2cReleaseBus(&I2CD3);
+		i2cStart(US_I2C_DRIVER, &i2cConfig);
+		i2cAcquireBus(US_I2C_DRIVER);
+		i2cMasterTransmitTimeout(US_I2C_DRIVER, US_ADDRESS[i],
+				transferBuffer, 2, receiveBuffer, 0, timeout);
+		i2cReleaseBus(US_I2C_DRIVER);
 
-		i2cStop(&I2CD3);
+		i2cStop(US_I2C_DRIVER);
 	}
 }
 
@@ -79,22 +81,22 @@ void hardwareIterationUSEnd() {
 		msg_t status = MSG_OK;
 		systime_t timeout = MS2ST(10);
 
-		i2cStart(&I2CD3, &i2cConfig);
+		i2cStart(US_I2C_DRIVER, &i2cConfig);
 
 		// Transmit RANGE REG and get reply
-		i2cAcquireBus(&I2CD3);
+		i2cAcquireBus(US_I2C_DRIVER);
 		transferBuffer[0] = RANGE_REG;
-		status = i2cMasterTransmitTimeout(&I2CD3, US_ADDRESS[i], transferBuffer, 1, receiveBuffer, 2, timeout);
-		i2cReleaseBus(&I2CD3);
+		status = i2cMasterTransmitTimeout(US_I2C_DRIVER, US_ADDRESS[i], transferBuffer, 1, receiveBuffer, 2, timeout);
+		i2cReleaseBus(US_I2C_DRIVER);
 
-		i2cStop(&I2CD3);
+		i2cStop(US_I2C_DRIVER);
 
 		// Store the value
 		if (status == MSG_OK) {
 			usCm[i] = (receiveBuffer[0] << 8) + receiveBuffer[1];
 		} else {
 			// Error message.
-			usCm[i] = (int)i2cGetErrors(&I2CD3);
+			usCm[i] = (int)i2cGetErrors(US_I2C_DRIVER);
 		}
 	}
 }

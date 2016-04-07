@@ -78,21 +78,23 @@ int main(void) {
 				iterationsSinceActive = 0;
 			} else {
 				// Timeout. Provide a \0 to keep connection alive.
-				chprintf( (BaseSequentialStream *)&SDU1, "\0");
+				//chprintf( (BaseSequentialStream *)&SDU1, "\0");
 			}
 			hardwareIterationIR(); // TODO: check time
 			hardwareIterationUSStart();
-			chThdSleepMilliseconds(100);
+			chThdSleepMilliseconds(500);
 			hardwareIterationUSEnd();
 			//hardwareIterationRC();
 
-			chprintf( (BaseSequentialStream *)&SDU1, "\033[FTHROTTLE: %i ", hardwareGetValuesRC(THROTTLE));
-			chprintf( (BaseSequentialStream *)&SDU1, "STEERING: %i ", hardwareGetValuesRC(STEERING));
-			chprintf( (BaseSequentialStream *)&SDU1, "US FRONT: %i ", hardwareGetValuesUS(FRONT));
-			chprintf( (BaseSequentialStream *)&SDU1, "US SIDE: %i \r\n", hardwareGetValuesUS(SIDE));
-			chprintf( (BaseSequentialStream *)&SDU1, "SIDE_FRONT: %i ", hardwareGetValuesIR(SIDE_FRONT));
-			chprintf( (BaseSequentialStream *)&SDU1, "SIDE_REAR: %i ",  hardwareGetValuesIR(SIDE_REAR));
-			chprintf( (BaseSequentialStream *)&SDU1, "REAR: %i \r", hardwareGetValuesIR(REAR));
+			// "\033[F" for going back to previous line
+
+			chprintf( (BaseSequentialStream *)&SDU1, "THROTTLE: %4i ", hardwareGetValuesRC(THROTTLE));
+			chprintf( (BaseSequentialStream *)&SDU1, "STEERING: %4i ", hardwareGetValuesRC(STEERING));
+			chprintf( (BaseSequentialStream *)&SDU1, "US FRONT: %2i \r\n", hardwareGetValuesUS(FRONT));
+			//chprintf( (BaseSequentialStream *)&SDU1, "US SIDE: %i \r\n", hardwareGetValuesUS(SIDE));
+			//chprintf( (BaseSequentialStream *)&SDU1, "SIDE_FRONT: %i ", hardwareGetValuesIR(SIDE_FRONT));
+			//chprintf( (BaseSequentialStream *)&SDU1, "SIDE_REAR: %i ",  hardwareGetValuesIR(SIDE_REAR));
+			//chprintf( (BaseSequentialStream *)&SDU1, "REAR: %2i \r", hardwareGetValuesIR(REAR));
 		}
 	}
 	return 0;

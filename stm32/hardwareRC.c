@@ -13,25 +13,28 @@
 // Definitions
 //-----------------------------------------------------------------------------
 
-static void icuCallback(ICUDriver *icup);
 
-static ICUConfig icuChannel1 = {
+static void icuCallbackThrottle(ICUDriver *icup);
+static void icuCallbackSteering(ICUDriver *icup);
+
+
+static ICUConfig icuConfigThrottle = {
   ICU_INPUT_ACTIVE_HIGH,
   1000000,
-  icuCallback,
+  icuCallbackThrottle,
   NULL,
   NULL,
-  ICU_CHANNEL_1,
+  RC_TIMER_CHANNEL_THROTTLE,
   0
 };
 
-static ICUConfig icuChannel91 = {
+static ICUConfig icuConfigSteering = {
   ICU_INPUT_ACTIVE_HIGH,
   1000000,
-  icuCallback,
+  icuCallbackSteering,
   NULL,
   NULL,
-  ICU_CHANNEL_1,
+  RC_TIMER_CHANNEL_STEERING,
   0
 };
 
@@ -49,40 +52,24 @@ icucnt_t pw[RC_CHANNELS];
  * Sets up the US sensor pins etc.
  */
 void hardwareSetupRC() {
-	// TODO: MOVE PINS TO CONFIG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// Throttle
-	palSetPadMode(GPIOA, 0, PAL_MODE_ALTERNATE(2));
-	icuStart(&ICUD5, &icuChannel1);
-	icuStartCapture(&ICUD5);
-	icuEnableNotifications(&ICUD5);
-
+	palSetPadMode(RC_PIN_GROUPS[0], RC_PIN_NUMBERS[0], PAL_MODE_ALTERNATE(2));
+	icuStart(RC_TIMER_THROTTLE, &icuConfigThrottle);
+	icuStartCapture(RC_TIMER_THROTTLE);
+	icuEnableNotifications(RC_TIMER_THROTTLE);
 
 	// Steering
-	palSetPadMode(GPIOB, 4, PAL_MODE_ALTERNATE(2));
-
-	icuStart(&ICUD3, &icuChannel91);
-	icuStartCapture(&ICUD3);
-	icuEnableNotifications(&ICUD3);
-	//chThdSleepMilliseconds(25);
+	palSetPadMode(RC_PIN_GROUPS[1], RC_PIN_NUMBERS[1], PAL_MODE_ALTERNATE(2));
+	icuStart(RC_TIMER_STEERING, &icuConfigSteering);
+	icuStartCapture(RC_TIMER_STEERING);
+	icuEnableNotifications(RC_TIMER_STEERING);
 }
 
 /*
- * Call this each time an US read should be performed.
+ * TODO: possibly remove this
  */
 void hardwareIterationRC() {
 
-
-	//icuStopCapture(&ICUD5);
-	//icuStop(&ICUD5);
-
-/*
-
-	icuStart(&ICUD5, &icuChannel2);
-	icuStartCapture(&ICUD5);
-	icuEnableNotifications(&ICUD5);
-	chThdSleepMilliseconds(25);
-	icuStopCapture(&ICUD5);
-	icuStop(&ICUD5);*/
 }
 
 
@@ -98,10 +85,10 @@ icucnt_t hardwareGetValuesRC(RC_CHANNEL channel) {
 //-----------------------------------------------------------------------------
 
 
-static void icuCallback(ICUDriver *icup) {
-	if (icup->config == &icuChannel1) {
-		pw[0] = icuGetWidthX(icup);
-	} else {
-		pw[1] = icuGetWidthX(icup);
-	}
+static void icuCallbackThrottle(ICUDriver *icup) {
+	pw[THROTTLE] = icuGetWidthX(icup);
+}
+
+static void icuCallbackSteering(ICUDriver *icup) {
+	pw[STEERING] = icuGetWidthX(icup);
 }
