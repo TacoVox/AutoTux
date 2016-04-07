@@ -9,6 +9,8 @@ using namespace std;
 using namespace odcore::data;
 using namespace automotive::miniature;
 
+containerfactory::SBDContainer* containerfactory::SBDContainer::_instance = 0;
+
 //Private Constructors & Destructor so that just one element can exist
 containerfactory::SBDContainer::SBDContainer() {}
 containerfactory::SBDContainer::SBDContainer(const SBDContainer &) {}

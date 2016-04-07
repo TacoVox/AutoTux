@@ -15,7 +15,7 @@ namespace containerfactory {
     private:
         SBDContainer();
         SBDContainer(const SBDContainer&);
-        ~SBDContainer();
+        ~SBDContainer();      
         static SBDContainer* _instance;
     };
 }
