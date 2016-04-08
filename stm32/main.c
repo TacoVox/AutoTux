@@ -23,10 +23,15 @@
 #include "usbcfg.h"
 #define CHPRINTF_USE_FLOAT   TRUE
 
+// Input
 #include "hardwareIR.h"
 #include "hardwareUS.h"
 #include "hardwareRC.h"
 #include "hardwareWE.h"
+
+// Output
+#include "hardwarePWM.h"
+
 
 #define DEBUG_OUTPUT 0
 
@@ -90,6 +95,7 @@ int main(void) {
 			chThdSleepMilliseconds(500);
 			hardwareIterationUSEnd();
 			hardwareIterationWE();
+			//hardwareSetupPWM();
 
 			// TODO The sensor c file should package the values in a data array.
 			// TODO The packet c file should pack it into the right packet format
@@ -100,20 +106,20 @@ int main(void) {
 				chprintf( (BaseSequentialStream *)&SDU1, "\033[FTHROTTLE: %4i ", hardwareGetValuesRC(THROTTLE));
 				chprintf( (BaseSequentialStream *)&SDU1, "STEERING: %4i ", hardwareGetValuesRC(STEERING));
 				chprintf( (BaseSequentialStream *)&SDU1, "WHEEL: %f ", hardwareGetValuesWE());
-				chprintf( (BaseSequentialStream *)&SDU1, "US FRONT: %2i \r\n", hardwareGetValuesUS(FRONT));
-				chprintf( (BaseSequentialStream *)&SDU1, "US SIDE: %i ", hardwareGetValuesUS(SIDE));
-				chprintf( (BaseSequentialStream *)&SDU1, "SIDE_FRONT: %i ", hardwareGetValuesIR(SIDE_FRONT));
-				chprintf( (BaseSequentialStream *)&SDU1, "SIDE_REAR: %i ",  hardwareGetValuesIR(SIDE_REAR));
-				chprintf( (BaseSequentialStream *)&SDU1, "REAR: %2i ", hardwareGetValuesIR(REAR));
+				chprintf( (BaseSequentialStream *)&SDU1, "US FRONT: %2i \r\n", hardwareGetValuesUS(US_FRONT));
+				chprintf( (BaseSequentialStream *)&SDU1, "US SIDE: %i ", hardwareGetValuesUS(US_SIDE));
+				chprintf( (BaseSequentialStream *)&SDU1, "SIDE_FRONT: %i ", hardwareGetValuesIR(IR_SIDE_FRONT));
+				chprintf( (BaseSequentialStream *)&SDU1, "SIDE_REAR: %i ",  hardwareGetValuesIR(IR_SIDE_REAR));
+				chprintf( (BaseSequentialStream *)&SDU1, "REAR: %2i ", hardwareGetValuesIR(IR_REAR));
 			} else {
 				// Normal packet output
 				int size = 6;
 				char data[size];
-				data[0] = (char)hardwareGetValuesUS(FRONT);
-				data[1] = (char)hardwareGetValuesUS(SIDE);
-				data[2] = (char)hardwareGetValuesIR(SIDE_FRONT);
-				data[3] = (char)hardwareGetValuesIR(SIDE_REAR);
-				data[4] = (char)hardwareGetValuesIR(REAR);
+				data[0] = (char)hardwareGetValuesUS(US_FRONT);
+				data[1] = (char)hardwareGetValuesUS(US_SIDE);
+				data[2] = (char)hardwareGetValuesIR(IR_SIDE_FRONT);
+				data[3] = (char)hardwareGetValuesIR(IR_SIDE_REAR);
+				data[4] = (char)hardwareGetValuesIR(IR_REAR);
 				data[5] = 0x00; // No checksum for now!
 
 				// Packet structure: size, colon, (bytes), comma

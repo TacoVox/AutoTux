@@ -49,7 +49,7 @@ icucnt_t pw[RC_CHANNELS];
 
 
 /*
- * Sets up the US sensor pins etc.
+ * Sets up the pins etc.
  */
 void hardwareSetupRC() {
 	// Throttle
@@ -65,12 +65,6 @@ void hardwareSetupRC() {
 	icuEnableNotifications(RC_TIMER_STEERING);
 }
 
-/*
- * TODO: possibly remove this
- */
-void hardwareIterationRC() {
-
-}
 
 
 /*

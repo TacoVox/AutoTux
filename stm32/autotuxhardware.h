@@ -14,7 +14,7 @@
 //-----------------------------------------------------------------------------
 
 // Used to identify each sensor
-typedef enum {SIDE_FRONT, SIDE_REAR, REAR} IR_SENSOR;
+typedef enum {IR_SIDE_FRONT, IR_SIDE_REAR, IR_REAR} IR_SENSOR;
 
 // Pin config. Group/port + pin number. Now B0, C4, C5.
 static const ioportid_t ADC_PIN_GROUPS[] = {GPIOB, GPIOC, GPIOC};
@@ -37,7 +37,7 @@ static const ioportmask_t ADC_PIN_NUMBERS[] = {0, 4, 5};
 // US config - NOTE ideally move config of pins and channels here as well
 //-----------------------------------------------------------------------------
 
-typedef enum {FRONT, SIDE} US_SENSOR;
+typedef enum {US_FRONT, US_SIDE} US_SENSOR;
 
 #define US_SENSORS 2
 
@@ -80,6 +80,20 @@ static const ioportmask_t RC_PIN_NUMBERS[] = {4, 6};
 // A0
 static const ioportid_t WE_PIN_GROUP = GPIOA;
 static const ioportmask_t WE_PIN_NUMBER  = 0;
+
+
+//-----------------------------------------------------------------------------
+// PWM config
+//-----------------------------------------------------------------------------
+
+
+typedef enum {PWM_OUTPUT_ESC, PWM_OUTPUT_SERVO} PWM_OUTPUT_ID;
+
+
+
+//
+//static const ioportid_t PWM_PIN_GROUPS[] = {GPIOB, GPIOB};
+//static const ioportmask_t PWM_PIN_NUMBERS[] = {4, 6};
 
 
 #endif /* AUTOTUXHARDWARE_H_ */

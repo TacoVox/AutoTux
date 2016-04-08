@@ -1,5 +1,5 @@
 /*
- * hardwareUS.h
+ * hardwareRC.h
  *
  *  Created on: Apr 4, 2016
  *      Author: jerker
@@ -11,17 +11,13 @@
 #include "autotuxhardware.h"
 
 /*
- * Sets up the US sensor pins etc.
+ * Sets up the RC sensor pins etc.
  */
 void hardwareSetupRC(void);
 
-/*
- * Call this each time an US read should be performed.
- */
-void hardwareIterationRC(void);
 
 /*
- * Getter for the values. Specify a US sensor.
+ * Getter for the values. Specify an RC channel.
  */
 icucnt_t hardwareGetValuesRC(RC_CHANNEL);
 
