@@ -57,16 +57,29 @@ static const ioportmask_t US_PIN_NUMBERS[] = {9, 8};
 
 typedef enum {THROTTLE, STEERING} RC_CHANNEL;
 
-#define RC_TIMER_THROTTLE &ICUD5
+#define RC_TIMER_THROTTLE &ICUD3
 #define RC_TIMER_CHANNEL_THROTTLE ICU_CHANNEL_1
-#define RC_TIMER_STEERING &ICUD3
+#define RC_TIMER_STEERING &ICUD4
 #define RC_TIMER_CHANNEL_STEERING ICU_CHANNEL_1
 
 #define RC_CHANNELS 2
 
-// A0, B4
-static const ioportid_t RC_PIN_GROUPS[] = {GPIOA, GPIOB};
-static const ioportmask_t RC_PIN_NUMBERS[] = {0, 4};
+// B4, B6
+static const ioportid_t RC_PIN_GROUPS[] = {GPIOB, GPIOB};
+static const ioportmask_t RC_PIN_NUMBERS[] = {4, 6};
+
+
+//-----------------------------------------------------------------------------
+// WE config
+//-----------------------------------------------------------------------------
+
+
+#define WE_TIMER &ICUD5
+#define WE_TIMER_CHANNEL ICU_CHANNEL_1
+
+// A0
+static const ioportid_t WE_PIN_GROUP = GPIOA;
+static const ioportmask_t WE_PIN_NUMBER  = 0;
 
 
 #endif /* AUTOTUXHARDWARE_H_ */

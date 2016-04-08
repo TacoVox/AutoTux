@@ -25,6 +25,9 @@
 #include "hardwareIR.h"
 #include "hardwareUS.h"
 #include "hardwareRC.h"
+#include "hardwareWE.h"
+
+#define DEBUG_OUTPUT 0
 
 /*
  * Starting point  
@@ -38,6 +41,7 @@ int main(void) {
 	hardwareSetupIR();
 	hardwareSetupUS();
 	hardwareSetupRC();
+	hardwareSetupWE();
 
  	// Initialize serial over USB
 	sduObjectInit(&SDU1);
@@ -86,15 +90,38 @@ int main(void) {
 			hardwareIterationUSEnd();
 			//hardwareIterationRC();
 
-			// "\033[F" for going back to previous line
+			// TODO The sensor c file should package the values in a data array.
+			// TODO The packet c file should pack it into the right packet format
+			// TODO The packet c file should READ and unpack values into the right format
+			// TODO These can then be passed to the CONTROL c file that outputs them
+			if (DEBUG_OUTPUT) {
+				// "\033[F" for going back to previous line
+				chprintf( (BaseSequentialStream *)&SDU1, "\033[FTHROTTLE: %4i ", hardwareGetValuesRC(THROTTLE));
+				chprintf( (BaseSequentialStream *)&SDU1, "STEERING: %4i ", hardwareGetValuesRC(STEERING));
+				chprintf( (BaseSequentialStream *)&SDU1, "WHEEL: %2i ", hardwareGetValuesWE());
+				chprintf( (BaseSequentialStream *)&SDU1, "US FRONT: %2i \r\n", hardwareGetValuesUS(FRONT));
+				chprintf( (BaseSequentialStream *)&SDU1, "US SIDE: %i ", hardwareGetValuesUS(SIDE));
+				chprintf( (BaseSequentialStream *)&SDU1, "SIDE_FRONT: %i ", hardwareGetValuesIR(SIDE_FRONT));
+				chprintf( (BaseSequentialStream *)&SDU1, "SIDE_REAR: %i ",  hardwareGetValuesIR(SIDE_REAR));
+				chprintf( (BaseSequentialStream *)&SDU1, "REAR: %2i ", hardwareGetValuesIR(REAR));
+			} else {
+				// Normal packet output
+				int size = 6;
+				char data[size];
+				data[0] = (char)hardwareGetValuesUS(FRONT);
+				data[1] = (char)hardwareGetValuesUS(SIDE);
+				data[2] = (char)hardwareGetValuesIR(SIDE_FRONT);
+				data[3] = (char)hardwareGetValuesIR(SIDE_REAR);
+				data[4] = (char)hardwareGetValuesIR(REAR);
+				data[5] = 0x00; // No checksum for now!
 
-			chprintf( (BaseSequentialStream *)&SDU1, "THROTTLE: %4i ", hardwareGetValuesRC(THROTTLE));
-			chprintf( (BaseSequentialStream *)&SDU1, "STEERING: %4i ", hardwareGetValuesRC(STEERING));
-			chprintf( (BaseSequentialStream *)&SDU1, "US FRONT: %2i \r\n", hardwareGetValuesUS(FRONT));
-			//chprintf( (BaseSequentialStream *)&SDU1, "US SIDE: %i \r\n", hardwareGetValuesUS(SIDE));
-			//chprintf( (BaseSequentialStream *)&SDU1, "SIDE_FRONT: %i ", hardwareGetValuesIR(SIDE_FRONT));
-			//chprintf( (BaseSequentialStream *)&SDU1, "SIDE_REAR: %i ",  hardwareGetValuesIR(SIDE_REAR));
-			//chprintf( (BaseSequentialStream *)&SDU1, "REAR: %2i \r", hardwareGetValuesIR(REAR));
+				// Packet structure: size, colon, (bytes), comma
+				chprintf((BaseSequentialStream *)&SDU1, "%i:", size);
+				for (int c = 0; c < size; c++) {
+					chprintf((BaseSequentialStream *)&SDU1, "%c", data[c]);
+				}
+				chprintf((BaseSequentialStream *)&SDU1, ",");
+			}
 		}
 	}
 	return 0;
