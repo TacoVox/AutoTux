@@ -14,7 +14,6 @@ void callback_out(struct libusb_transfer *);
 usb_connector::USBConnector::USBConnector()
 {
     cout << "creating a usb connector object... ";
-    bp = (unique_ptr<buf_parser::BufferParser>) (new buf_parser::BufferParser());
     cout << "[OK]" << endl;
 }
 
@@ -180,7 +179,7 @@ void usb_connector::USBConnector::disconnect(void)
 /* handles the callback when reading from the usb stream */
 void usb_connector::USBConnector::handle_cb_in(string transfer)
 {
-    cout << "transfer actual_length = " << transfer.length() << endl;
+    cout << "transfer actual_length: " << transfer.length() << endl;
     cout << "transfer data: " << transfer << endl;
 }
 
