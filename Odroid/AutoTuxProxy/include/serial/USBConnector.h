@@ -5,7 +5,6 @@
 #include <memory>
 #include <string>
 #include <libusb-1.0/libusb.h>
-#include "serial/BufferParser.h"
 
 // define
 // ==================================================
