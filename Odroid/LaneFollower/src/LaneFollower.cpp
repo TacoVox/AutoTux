@@ -7,6 +7,7 @@
 #include <opendavinci/odcore/base/KeyValueConfiguration.h>
 #include <opendavinci/odcore/base/Lock.h>
 #include <opendavinci/odcore/data/Container.h>
+#include "opendavinci/odcore/io/conference/ContainerConference.h"
 #include <opendavinci/odcore/wrapper/SharedMemory.h>
 #include <opendavinci/odcore/wrapper/SharedMemoryFactory.h>
 
@@ -38,7 +39,8 @@ namespace lane {
             m_image(NULL),
             m_previousTime(),
             m_font(),
-            m_debug(false) {}
+            m_debug(false),
+            m_vehicleControl() {}
 
         LaneFollower::~LaneFollower() {}
 
@@ -94,7 +96,8 @@ namespace lane {
                     }
 
                     // Mirror image?
-                    //cvFlip(m_image, 0, -1);
+                    // NOTE: Only for simulator
+                    cvFlip(m_image, 0, -1);
 
                     returnValue = true;
                 }
@@ -175,9 +178,6 @@ namespace lane {
                 }
             }
 
-            TimeStamp afterImageProcessing;
-            clog << "Processing time: " << (afterImageProcessing.toMicroseconds() - beforeProcessing.toMicroseconds()) / 1000.0 << "ms." << endl;
-
             // Debugging; show image. Keep at end.
             if(m_debug) {
                 if(m_image != NULL) {
@@ -185,6 +185,35 @@ namespace lane {
                     cvWaitKey(10);
                 }
             }
+
+            double desiredSteering = m_vehicleControl.getSteeringWheelAngle();
+
+            //cerr << "Dist to left marking: " << m_distToLeftMarking << " : ";
+            //cerr << "Dist to right marking: " << m_distToRightMarking << endl;
+
+            if((m_distToLeftMarking > 270 && m_distToLeftMarking < 290) &&
+                    (m_distToRightMarking > 270 && m_distToRightMarking < 290)) {
+                desiredSteering = 0;
+            }
+            else if(m_distToRightMarking > 290 && m_distToLeftMarking < 270 && m_distToLeftMarking > 100) {
+                desiredSteering += 0.1;
+                cerr << "Turning right! Left: " << m_distToLeftMarking << " & Right: " << m_distToRightMarking << endl;
+            }
+            else if(m_distToLeftMarking > 290 && m_distToRightMarking < 270 && m_distToRightMarking > 100) {
+                desiredSteering -= 0.1;
+                cerr << "Turning left! Left: " << m_distToLeftMarking << " & Right: " << m_distToRightMarking << endl;
+            }
+            else {
+                desiredSteering = 0;
+            }
+
+            TimeStamp afterImageProcessing;
+            //clog << "Processing time: " << (afterImageProcessing.toMicroseconds() - beforeProcessing.toMicroseconds()) / 1000.0 << "ms." << endl;
+
+            //cerr << "Angle: " << desiredSteering << endl;
+
+            m_vehicleControl.setSpeed(5);
+            m_vehicleControl.setSteeringWheelAngle(desiredSteering);
         }
 
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode LaneFollower::body() {
@@ -212,6 +241,10 @@ namespace lane {
                 if (has_next_frame) {
                     processImage();
                 }
+
+                Container c2(m_vehicleControl);
+
+                getConference().send(c2);
             }
 
             return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;

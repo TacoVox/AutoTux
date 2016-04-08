@@ -8,6 +8,9 @@
 #include <opendavinci/odcore/data/TimeStamp.h>
 #include <opendavinci/odcore/wrapper/SharedMemory.h>
 
+#include "automotivedata/GeneratedHeaders_AutomotiveData.h"
+#include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
+
 namespace lane {
     namespace follower {
         using namespace std;
@@ -63,6 +66,7 @@ namespace lane {
             odcore::data::TimeStamp m_previousTime;
             IplImage *m_image;
 
+            automotive::VehicleControl m_vehicleControl;
 
             virtual void setUp();
             virtual void tearDown();
