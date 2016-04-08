@@ -1,5 +1,5 @@
 //
-// Created by marco on 2016-04-07.
+// Created by niklas on 2016-04-07.
 //
 
 #ifndef DECISIONMAKER_PARKER_H
@@ -16,11 +16,14 @@ namespace parker{
         Parker &operator=(const Parker &/*obj*/);
 
     public:
+        std::shared_ptr<bool> parking;
         Parker(const int32_t &argc, char **argv);
 
         virtual ~Parker();
 
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
+
+        void setParking(std::shared_ptr<bool>);
 
     private:
         virtual void setUp();

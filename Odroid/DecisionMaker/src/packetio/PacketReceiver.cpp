@@ -24,7 +24,7 @@ void packetio::PacketReceiver::nextContainer(Container &c) {
     //Check if valid ControlData//Guard
     if(c.getDataType() == VehicleControl::ID()) {
         cout << "Received ControlData" << endl;
-    } else if (CHECKFORFLAG) {
+    } else {
         cout << "Received invalid data" << endl;
     }
 }

@@ -1,5 +1,5 @@
 //
-// Created by marco on 2016-04-07.
+// Created by niklas on 2016-04-07.
 //
 #include <iostream>
 
@@ -25,10 +25,10 @@ Parker::Parker(const int32_t &argc, char **argv) :
 Parker::~Parker() {}
 
 void Parker::setUp(){
-    cout << "Overtake starts" << endl;
+    cout << "Parker starts" << endl;
 }
 void Parker::tearDown(){
-    cout << "This is when Overtake stops" << endl;
+    cout << "This is when Parker stops" << endl;
 }
 
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Parker::body() {
@@ -45,6 +45,18 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Parker::body() {
         // Create vehicle control data.
         VehicleControl vc;
 
+        if(parking){
+            cout << "Now Parking" << endl;
+            break;
+        }
+        cout << "Stopped parking" << endl;
+
     }
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
+}
+/**
+ * This method sets the bool parking passed from DecisionMaker
+ */
+void Parker::setParking(std::shared_ptr<bool> parking){
+    this->parking = parking;
 }
