@@ -12,7 +12,9 @@ using namespace odcore::base::module;
 using namespace odcore::data;
 
 packetio::PacketReceiver::PacketReceiver(const int32_t &argc, char **argv) :
-    DataTriggeredConferenceClientModule(argc, argv, "DataTriggeredReceiver") {}
+    DataTriggeredConferenceClientModule(argc, argv, "DataTriggeredReceiver") {
+    cout << "Create PacketReceiver Object..." << endl;
+}
 
 packetio::PacketReceiver::~PacketReceiver() {}
 
