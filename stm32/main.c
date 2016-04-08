@@ -21,6 +21,7 @@
 #include "test.h"
 #include "chprintf.h"
 #include "usbcfg.h"
+#define CHPRINTF_USE_FLOAT   TRUE
 
 #include "hardwareIR.h"
 #include "hardwareUS.h"
@@ -88,7 +89,7 @@ int main(void) {
 			hardwareIterationUSStart();
 			chThdSleepMilliseconds(500);
 			hardwareIterationUSEnd();
-			//hardwareIterationRC();
+			hardwareIterationWE();
 
 			// TODO The sensor c file should package the values in a data array.
 			// TODO The packet c file should pack it into the right packet format
@@ -98,7 +99,7 @@ int main(void) {
 				// "\033[F" for going back to previous line
 				chprintf( (BaseSequentialStream *)&SDU1, "\033[FTHROTTLE: %4i ", hardwareGetValuesRC(THROTTLE));
 				chprintf( (BaseSequentialStream *)&SDU1, "STEERING: %4i ", hardwareGetValuesRC(STEERING));
-				chprintf( (BaseSequentialStream *)&SDU1, "WHEEL: %2i ", hardwareGetValuesWE());
+				chprintf( (BaseSequentialStream *)&SDU1, "WHEEL: %f ", hardwareGetValuesWE());
 				chprintf( (BaseSequentialStream *)&SDU1, "US FRONT: %2i \r\n", hardwareGetValuesUS(FRONT));
 				chprintf( (BaseSequentialStream *)&SDU1, "US SIDE: %i ", hardwareGetValuesUS(SIDE));
 				chprintf( (BaseSequentialStream *)&SDU1, "SIDE_FRONT: %i ", hardwareGetValuesIR(SIDE_FRONT));
