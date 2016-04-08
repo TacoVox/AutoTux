@@ -11,11 +11,16 @@ using namespace std;
 
 serial::SerialHandler::SerialHandler(int32_t &argc, char **argv)
 {
-    //Setup the broadcaster
+    //Setup the packetIO stuff
     packetBroadcaster = (shared_ptr<PacketBroadcaster>)new PacketBroadcaster(argc, argv);
     packetReceiver = (shared_ptr<PacketReceiver>)new PacketReceiver(argc, argv);
+    //Setup the usbconnector
     usbConnector = (shared_ptr<USBConnector>)new USBConnector();
+    //Setup the wrapper class for the buffer
     bufferWrapper = (shared_ptr<BufferWrapper>)new BufferWrapper();
+
+    //Set the bufferWrapperPointer in the packetReceiver
+    packetReceiver->setBufferWrapper(bufferWrapper);
 }
 
 void serial::SerialHandler::run(void)
