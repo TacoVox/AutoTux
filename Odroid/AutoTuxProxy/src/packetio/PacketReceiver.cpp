@@ -24,7 +24,13 @@ void packetio::PacketReceiver::nextContainer(Container &c) {
     //Check if valid ControlData//Guard
     if(c.getDataType() == VehicleControl::ID()) {
         cout << "Received ControlData" << endl;
+        bufferWrapper->appendSendBuffer("5080");
     } else {
         cout << "Received invalid data" << endl;
     }
+}
+
+void packetio::PacketReceiver::setBufferWrapper(
+        std::shared_ptr<serial::BufferWrapper> bufferWrapper) {
+    this->bufferWrapper = bufferWrapper;
 }
