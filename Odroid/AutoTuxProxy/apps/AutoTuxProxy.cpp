@@ -3,47 +3,22 @@
 //
 #include <iostream>
 #include <thread>
-#include <opendavinci/odcore/data/Container.h>
-#include "packetio/PacketBroadcaster.h"
-#include "packetio/PacketReceiver.h"
-#include "containerfactory/SBDContainer.h"
-#include "serial/USBConnector.h"
+#include "serial/SerialHandler.h"
+
 
 using namespace std;
-using namespace odcore::data;
-using namespace packetio;
-using namespace containerfactory;
+using namespace serial;
+
 
 int main(int argc, char **argv) {
-    cout << "Testing Packet Broadcaster!" << endl;
+    cout << "Starting up AutoTuxProxy..." << endl;
 
-    //Setup the broadcaster
-    shared_ptr<PacketBroadcaster>
-            packetBroadcaster(new PacketBroadcaster(argc, argv));
-    thread pbthread(&PacketBroadcaster::runModule, packetBroadcaster);
-    //Setup the receiver
-    shared_ptr<PacketReceiver>
-            packetReceiver(new PacketReceiver(argc, argv));
-    thread prthread(&PacketReceiver::runModule, packetReceiver);
+    //Setup the serialhandler
+    shared_ptr<SerialHandler> serialHandler(new SerialHandler(argc, argv));
+    thread shthread(&SerialHandler::run, serialHandler);
 
-    cout << "Testing USBConnector!" << endl;
-    usb_connector::USBConnector serial_obj;
-    serial_obj.connect();
-    serial_obj.read();
-
-    //Just for testing
-    vector<unsigned char> p {0, 3, 5, 7, 7};
-    packetBroadcaster->setSensorBoardDataContainer(
-                SBDContainer::instance()->genSBDContainer(p));
-    vector<unsigned char> p2 {0, 3, 5, 4, 5};
-    packetBroadcaster->setSensorBoardDataContainer(
-                SBDContainer::instance()->genSBDContainer(p2));
-
-    serial_obj.disconnect();
-
-    //Wait for the threads to terminate
-    pbthread.join();
-    prthread.join();
+    //Waiting for the thread to terminate
+    shthread.join();
 
     return 0;
 }
