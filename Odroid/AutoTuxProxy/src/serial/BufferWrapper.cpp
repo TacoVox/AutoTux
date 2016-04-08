@@ -62,16 +62,18 @@ vector<unsigned char> serial::BufferWrapper::readReceiveBuffer(void)
     cout << "buffer size is: " << buffer_in.size() << endl;
     std::vector<unsigned char> vec;
     for (int i = 0; i < buffer_in.size(); i++) {
-        if (buffer_in.at(i) == '6' &&  buffer_in.at(i+1) == ':') {
-            unsigned char us1 = buffer_in.at(i+2);
-            unsigned char us2 = buffer_in.at(i+3);
-            unsigned char ir1 = buffer_in.at(i+4);
-            unsigned char ir2 = buffer_in.at(i+5);
-            unsigned char ir3 = buffer_in.at(i+6);
-            cout << "filling vector in buffer wrapper" << endl;
-            vec = {us1, us2, ir1, ir2, ir3};
-            cout << "ok" << endl;
-            break;
+        if (buffer_in.size() < 9) {
+            if (buffer_in.at(i) == '6' &&  buffer_in.at(i+1) == ':') {
+                unsigned char us1 = buffer_in.at(i+2);
+                unsigned char us2 = buffer_in.at(i+3);
+                unsigned char ir1 = buffer_in.at(i+4);
+                unsigned char ir2 = buffer_in.at(i+5);
+                unsigned char ir3 = buffer_in.at(i+6);
+                cout << "filling vector in buffer wrapper" << endl;
+                vec = {us1, us2, ir1, ir2, ir3};
+                cout << "ok" << endl;
+                break;
+            }
         }
     }
     cout << "clearing buffer in the wrapper class" << endl;
