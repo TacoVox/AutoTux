@@ -37,13 +37,18 @@ void serial::SerialHandler::run(void)
 
     cout << "Testing USBConnector!" << endl;
     usbConnector->connect();
-    usbConnector->read();
+    usbConnector->set_buffer_wrapper(bufferWrapper);
+
 
     // do the main loop for reading and writing here
     // while we are connected
-    // while (1) {
+    while (1) {
     //      ========= READ =================================
     //      call usb connector to read
+        usbConnector->read();
+        vector<unsigned char> v = bufferWrapper->readReceiveBuffer();
+        packetBroadcaster->setSensorBoardDataContainer(
+                SBDContainer::instance()->genSBDContainer(v));
     //      call buffer wrapper to get vector
     //      create a shared pointer to container
     //      set the pointer in the sending thing (see below)
@@ -51,7 +56,7 @@ void serial::SerialHandler::run(void)
     //      ========= WRITE ================================
     //      call buffer wrapper to get data to write
     //      call usb connector to write the data
-    // }
+    }
 
     //Just for testing
     vector<unsigned char> p {0, 3, 5, 7, 7};

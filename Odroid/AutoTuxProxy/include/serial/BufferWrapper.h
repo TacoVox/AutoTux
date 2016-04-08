@@ -22,13 +22,13 @@ namespace serial
         BufferWrapper();
         ~BufferWrapper();
         //Methods for manipulating the internal buffer representation
-        void appendReceiveBuffer(std::string);
-        std::string readReceiveBuffer(void);
+        void appendReceiveBuffer(unsigned char *, int);
+        std::vector<unsigned char> readReceiveBuffer(void);
         void appendSendBuffer(std::string);
         std::string readSendBuffer(void);
     private:
-        std::string receive_buffer;
-        std::string send_buffer;
+        std::vector<unsigned char> buffer_in;
+        std::vector<unsigned char> buffer_out;
         unsigned char checksum(std::vector<unsigned char>);
     };
 }

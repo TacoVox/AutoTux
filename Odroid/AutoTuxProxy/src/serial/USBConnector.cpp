@@ -9,7 +9,6 @@ using namespace std;
 void callback_in(struct libusb_transfer *);
 void callback_out(struct libusb_transfer *);
 
-
 /* constructor */
 usb_connector::USBConnector::USBConnector()
 {
@@ -43,6 +42,12 @@ int usb_connector::USBConnector::init_libusb(void)
 }
 
 
+void usb_connector::USBConnector::set_buffer_wrapper(std::shared_ptr<serial::BufferWrapper> p)
+{
+    bw = p;
+}
+
+
 /* gets a list of the devices and opens the one we need */
 int usb_connector::USBConnector::open_device(void)
 {
@@ -53,7 +58,7 @@ int usb_connector::USBConnector::open_device(void)
         cout << "[FAIL] error code: " << dev_count << endl;
         return dev_count;
     }
-    cout << "[OK] " << dev_count << endl;
+    cout << "[OK] " << endl;
     cout << "opening device... ";
     int open;
     for (ssize_t i = 0; i < dev_count; i++) {
@@ -126,7 +131,7 @@ void usb_connector::USBConnector::release_interface()
 /* connects and opens stream to usb */
 int usb_connector::USBConnector::connect(void)
 {
-    cout << "usb connecting... ";
+    cout << "usb connecting..." << endl;
     if (init_libusb() == 0) {
         if (open_device() == 0)
             if (interface_taken() == 0)
@@ -187,10 +192,9 @@ void usb_connector::USBConnector::disconnect(void)
 
 
 /* handles the callback when reading from the usb stream */
-void usb_connector::USBConnector::handle_cb_in(string transfer)
+void usb_connector::USBConnector::handle_cb_in(unsigned char *transfer, int len)
 {
-    cout << "transfer actual_length: " << transfer.length() << endl;
-    cout << "transfer data: " << transfer << endl;
+    bw->appendReceiveBuffer(transfer, len);
 }
 
 
@@ -216,6 +220,6 @@ void callback_in(struct libusb_transfer *transfer)
 {
     usb_connector::USBConnector *connector =
             reinterpret_cast<usb_connector::USBConnector*>(transfer->user_data);
-    string tran((char *)transfer->buffer);
-    connector->handle_cb_in(tran);
+    cout << "transfer actual length: " << transfer->actual_length << endl;
+    connector->handle_cb_in(transfer->buffer, transfer->actual_length);
 }
