@@ -39,6 +39,10 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode packetio::PacketBroadc
 
 void packetio::PacketBroadcaster::setSensorBoardDataContainer(
         std::shared_ptr<odcore::data::Container> sensorBoardDataContainer) {
+    //If there is data set - remove it from memory
+    if(this->sensorBoardDataContainer != NULL) {
+        this->sensorBoardDataContainer->~Container();
+    }
     this->sensorBoardDataContainer = sensorBoardDataContainer;
 }
 
