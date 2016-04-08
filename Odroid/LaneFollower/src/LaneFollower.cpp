@@ -191,30 +191,32 @@ namespace lane {
             //cerr << "Dist to left marking: " << m_distToLeftMarking << " : ";
             //cerr << "Dist to right marking: " << m_distToRightMarking << endl;
 
-            if(m_distToLeftMarking > 260 && m_distToLeftMarking < 300 &&
-                    m_distToRightMarking > 260 && m_distToRightMarking < 300) {
+            if(m_distToLeftMarking > 240 && m_distToLeftMarking < 320 &&
+                    m_distToRightMarking > 240 && m_distToRightMarking < 320) {
                 desiredSteering = 0;
                 cerr << "Going straight!" << endl;
             }
-            else if(m_distToRightMarking > 290 && m_distToLeftMarking < 270 && m_distToLeftMarking > 150) {
-                desiredSteering += 1;
+            else if((m_distToRightMarking > 320 || m_distToRightMarking < 0) &&
+                        m_distToLeftMarking < 270 && m_distToLeftMarking > 0) {
+                desiredSteering += 2;
                 cerr << "Turning right! Left: " << m_distToLeftMarking << " & Right: " << m_distToRightMarking << endl;
             }
-            else if(m_distToLeftMarking > 290 && m_distToRightMarking < 270 && m_distToRightMarking > 150) {
-                desiredSteering -= 1;
+            else if((m_distToLeftMarking > 320 || m_distToLeftMarking < 0) &&
+                        m_distToRightMarking < 230 && m_distToRightMarking > 0) {
+                desiredSteering -= 2;
                 cerr << "Turning left! Left: " << m_distToLeftMarking << " & Right: " << m_distToRightMarking << endl;
-            }   
+            }
 
             // Panic (turn right)
             else if(m_distToLeftMarking < 100) {
-                desiredSteering += 1;
+                desiredSteering += 2;
                 cerr << "Panic! (right)" << endl;
             }
 
             // Panic (turn left)
             else if(m_distToLeftMarking < 100)
             {
-                desiredSteering -= 1;
+                desiredSteering -= 2;
                 cerr << "Panic! (left)" << endl;
             }
             else {
