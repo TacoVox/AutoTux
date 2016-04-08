@@ -12,6 +12,7 @@ namespace serial {
     class SerialHandler {
     public:
         SerialHandler(int32_t &argc, char **argv);
+        ~SerialHandler();
         void run(void);
     private:
         std::shared_ptr<packetio::PacketBroadcaster> packetBroadcaster;

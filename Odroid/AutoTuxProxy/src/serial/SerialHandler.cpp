@@ -23,6 +23,13 @@ serial::SerialHandler::SerialHandler(int32_t &argc, char **argv)
     packetReceiver->setBufferWrapper(bufferWrapper);
 }
 
+serial::SerialHandler::~SerialHandler() {
+    packetBroadcaster->~PacketBroadcaster();
+    packetReceiver->~PacketReceiver();
+    usbConnector->~USBConnector();
+    bufferWrapper->~BufferWrapper();
+}
+
 void serial::SerialHandler::run(void)
 {
     thread pbthread(&PacketBroadcaster::runModule, packetBroadcaster);
