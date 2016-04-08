@@ -23,9 +23,9 @@ namespace serial
         ~BufferWrapper();
         //Methods for manipulating the internal buffer representation
         void appendReceiveBuffer(std::string);
-        void readReceiveBuffer(void);
+        std::string readReceiveBuffer(void);
         void appendSendBuffer(std::string);
-        void readSendBuffer(void);
+        std::string readSendBuffer(void);
     private:
         std::string receive_buffer;
         std::string send_buffer;

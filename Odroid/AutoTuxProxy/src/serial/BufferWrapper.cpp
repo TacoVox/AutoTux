@@ -4,22 +4,26 @@
 
 using namespace std;
 
+
 serial::BufferWrapper::BufferWrapper() : receive_buffer(""), send_buffer("")
 {
     cout << "creating buffer parser object" << endl;
 }
+
 
 serial::BufferWrapper::~BufferWrapper()
 {
     cout << "destroying buffer parser object" << endl;
 }
 
+
 void serial::BufferWrapper::appendReceiveBuffer(string str)
 {
     receive_buffer.insert(0, str);
 }
 
-void serial::BufferWrapper::readReceiveBuffer(void)
+
+string serial::BufferWrapper::readReceiveBuffer(void)
 {
     // put this in a loop as well
     if (isalpha(receive_buffer[0]) && (short)receive_buffer[0] == 6) {
@@ -40,13 +44,19 @@ void serial::BufferWrapper::readReceiveBuffer(void)
     }
 }
 
+
 void serial::BufferWrapper::appendSendBuffer(string str)
 {
     send_buffer.insert(0, str);
 }
 
+
 //Here we will need to return a packet to the calling function.
-void serial::BufferWrapper::readSendBuffer(void) { }
+string serial::BufferWrapper::readSendBuffer(void)
+{
+
+}
+
 
 unsigned char serial::BufferWrapper::checksum(std::vector<unsigned char> vec)
 {
