@@ -5,6 +5,7 @@
 #include <memory>
 #include "packetio/PacketBroadcaster.h"
 #include "packetio/PacketReceiver.h"
+#include "serial/USBConnector.h"
 
 namespace serial {
     class SerialHandler {
@@ -14,6 +15,7 @@ namespace serial {
     private:
         std::shared_ptr<packetio::PacketBroadcaster> packetBroadcaster;
         std::shared_ptr<packetio::PacketReceiver> packetReceiver;
+        std::shared_ptr<usb_connector::USBConnector> usbConnector;
     };
 }
 #endif // SERIALHANDLER_H

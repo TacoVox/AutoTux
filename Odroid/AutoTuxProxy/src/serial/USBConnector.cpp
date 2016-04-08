@@ -9,6 +9,7 @@ using namespace std;
 void callback_in(struct libusb_transfer *);
 void callback_out(struct libusb_transfer *);
 
+
 /* constructor */
 usb_connector::USBConnector::USBConnector()
 {
@@ -27,6 +28,7 @@ usb_connector::USBConnector::~USBConnector()
     libusb_exit(ctx);
 }
 
+
 /* initializes libusb */
 int usb_connector::USBConnector::init_libusb(void)
 {
@@ -39,6 +41,7 @@ int usb_connector::USBConnector::init_libusb(void)
     cout << "[OK]" << endl;
     return 0;
 }
+
 
 /* gets a list of the devices and opens the one we need */
 int usb_connector::USBConnector::open_device(void)
@@ -76,6 +79,7 @@ int usb_connector::USBConnector::open_device(void)
     return 0;
 }
 
+
 /* checks if the interface of the USB is taken and frees it if so */
 int usb_connector::USBConnector::interface_taken(void)
 {
@@ -92,6 +96,7 @@ int usb_connector::USBConnector::interface_taken(void)
     return 0;
 }
 
+
 /* claims the interface of the USB for I/O operations */
 int usb_connector::USBConnector::claim_interface(void)
 {
@@ -107,6 +112,7 @@ int usb_connector::USBConnector::claim_interface(void)
     return 0;
 }
 
+
 /* releases the taken usb interface and attaches the kernel driver */
 void usb_connector::USBConnector::release_interface()
 {
@@ -115,6 +121,7 @@ void usb_connector::USBConnector::release_interface()
     libusb_attach_kernel_driver(usb_dev, 1);
     cout << "[OK]" << endl;
 }
+
 
 /* connects and opens stream to usb */
 int usb_connector::USBConnector::connect(void)
@@ -134,6 +141,7 @@ int usb_connector::USBConnector::connect(void)
     return -1;
 }
 
+
 /* reads from the usb stream */
 void usb_connector::USBConnector::read(void)
 {
@@ -145,6 +153,7 @@ void usb_connector::USBConnector::read(void)
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 }
+
 
 /* writes to the usb stream */
 void usb_connector::USBConnector::write(string out)
@@ -163,6 +172,7 @@ void usb_connector::USBConnector::write(string out)
     delete [] pkt;
 }
 
+
 /* disconnects and closes the usb stream*/
 void usb_connector::USBConnector::disconnect(void)
 {
@@ -175,6 +185,7 @@ void usb_connector::USBConnector::disconnect(void)
     cout << "[OK]" << endl;
 }
 
+
 /* handles the callback when reading from the usb stream */
 void usb_connector::USBConnector::handle_cb_in(string transfer)
 {
@@ -182,11 +193,13 @@ void usb_connector::USBConnector::handle_cb_in(string transfer)
     cout << "transfer data: " << transfer << endl;
 }
 
+
 /* handles the callback when writing to the usb stream */
 void usb_connector::USBConnector::handle_cb_out(int status)
 {
     cout << "transfer out status: " << status << endl;
 }
+
 
 /* callback when writing to the usb stream */
 void callback_out(struct libusb_transfer *transfer)
@@ -196,6 +209,7 @@ void callback_out(struct libusb_transfer *transfer)
     int status = transfer->status;
     connector->handle_cb_out(status);
 }
+
 
 /* callback when reading from the usb stream */
 void callback_in(struct libusb_transfer *transfer)
