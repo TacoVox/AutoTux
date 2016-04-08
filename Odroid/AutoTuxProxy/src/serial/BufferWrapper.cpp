@@ -1,48 +1,54 @@
-
 #include <iostream>
-#include "serial/BufferParser.h"
+#include "serial/BufferWrapper.h"
 #include "containerfactory/SBDContainer.h"
 
 using namespace std;
 
-buf_parser::BufferParser::BufferParser()
+serial::BufferWrapper::BufferWrapper() : receive_buffer(""), send_buffer("")
 {
     cout << "creating buffer parser object" << endl;
-    buffer = "";
 }
 
-buf_parser::BufferParser::~BufferParser()
+serial::BufferWrapper::~BufferWrapper()
 {
     cout << "destroying buffer parser object" << endl;
 }
 
-void buf_parser::BufferParser::submit(string str)
+void serial::BufferWrapper::appendReceiveBuffer(string str)
 {
-    buffer.insert(0, str);
+    receive_buffer.insert(0, str);
 }
 
-void buf_parser::BufferParser::read_buffer(void)
+void serial::BufferWrapper::readReceiveBuffer(void)
 {
     // put this in a loop as well
-    if (isalpha(buffer[0]) && (short)buffer[0] == 6) {
-        unsigned char us1 = buffer[2];
-        unsigned char us2 = buffer[3];
-        unsigned char ir1 = buffer[4];
-        unsigned char ir2 = buffer[5];
-        unsigned char ir3 = buffer[6];
+    if (isalpha(receive_buffer[0]) && (short)receive_buffer[0] == 6) {
+        unsigned char us1 = receive_buffer[2];
+        unsigned char us2 = receive_buffer[3];
+        unsigned char ir1 = receive_buffer[4];
+        unsigned char ir2 = receive_buffer[5];
+        unsigned char ir3 = receive_buffer[6];
         std::vector<unsigned char> vec{us1, us2, ir1, ir2, ir3};
-        if (checksum(vec) == buffer[7]) {
+        if (checksum(vec) == receive_buffer[7]) {
             // correct checksum, send to broadcast
             containerfactory::SBDContainer::instance()->genSBDContainer(vec);
         }
         else {
             // checksum not correct, continue reading
-            buffer.clear();
+            receive_buffer.clear();
         }
     }
 }
 
-unsigned char buf_parser::BufferParser::checksum(std::vector<unsigned char> vec)
+void serial::BufferWrapper::appendSendBuffer(string str)
+{
+    send_buffer.insert(0, str);
+}
+
+//Here we will need to return a packet to the calling function.
+void serial::BufferWrapper::readSendBuffer(void) { }
+
+unsigned char serial::BufferWrapper::checksum(std::vector<unsigned char> vec)
 {
     unsigned char checksum = 0;
     for (auto it = vec.begin(); it != vec.end(); ++it) {
@@ -51,7 +57,7 @@ unsigned char buf_parser::BufferParser::checksum(std::vector<unsigned char> vec)
     return checksum;
 }
 
-vector<double> buf_parser::decode_packet(string p, int len)
+vector<double> serial::decode_packet(string p, int len)
 {
     /*
     cout << "decoding packet..." << endl;
@@ -70,7 +76,7 @@ vector<double> buf_parser::decode_packet(string p, int len)
     return v;
 }
 
-int buf_parser::encode_packet()
+int serial::encode_packet()
 {
 
 }

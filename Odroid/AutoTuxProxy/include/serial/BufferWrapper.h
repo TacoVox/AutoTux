@@ -1,5 +1,5 @@
-#ifndef BUFFERPARSER_H
-#define BUFFERPARSER_H
+#ifndef BUFFERWRAPPER_H
+#define BUFFERWRAPPER_H
 
 // include
 // ==================================================
@@ -11,20 +11,24 @@
 #define BUF_LEN_MAX 1024*4
 
 
-namespace buf_parser
+namespace serial
 {
     int encode_packet(void);
     std::vector<double> decode_packet(std::string, int);
 
-    class BufferParser
+    class BufferWrapper
     {
     public:
-        BufferParser();
-        ~BufferParser();
-        void submit(std::string);
-        void read_buffer(void);
+        BufferWrapper();
+        ~BufferWrapper();
+        //Methods for manipulating the internal buffer representation
+        void appendReceiveBuffer(std::string);
+        void readReceiveBuffer(void);
+        void appendSendBuffer(std::string);
+        void readSendBuffer(void);
     private:
-        std::string buffer;
+        std::string receive_buffer;
+        std::string send_buffer;
         unsigned char checksum(std::vector<unsigned char>);
     };
 }
