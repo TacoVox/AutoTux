@@ -191,16 +191,26 @@ namespace lane {
             //cerr << "Dist to left marking: " << m_distToLeftMarking << " : ";
             //cerr << "Dist to right marking: " << m_distToRightMarking << endl;
 
+            // If the car is close enough to the middle of the road, just
+            // keep going forward.
             if(m_distToLeftMarking > 240 && m_distToLeftMarking < 320 &&
                     m_distToRightMarking > 240 && m_distToRightMarking < 320) {
                 desiredSteering = 0;
                 cerr << "Going straight!" << endl;
             }
+
+            // Whenever the left line gets too close and the right
+            // line gets too far away, make a right turn.
+            // NOTE: To keep further away from the left lane, the distance
+            // it waits until it turns is less than a left turn.
             else if((m_distToRightMarking > 320 || m_distToRightMarking < 0) &&
                         m_distToLeftMarking < 270 && m_distToLeftMarking > 0) {
                 desiredSteering += 2;
                 cerr << "Turning right! Left: " << m_distToLeftMarking << " & Right: " << m_distToRightMarking << endl;
             }
+
+            // Whenever the right line gets to close and the
+            // left line gets too far away, make a left turn.
             else if((m_distToLeftMarking > 320 || m_distToLeftMarking < 0) &&
                         m_distToRightMarking < 230 && m_distToRightMarking > 0) {
                 desiredSteering -= 2;
@@ -219,6 +229,8 @@ namespace lane {
                 desiredSteering -= 2;
                 cerr << "Panic! (left)" << endl;
             }
+
+            // If all else fails, just keep going forward without turning
             else {
                 desiredSteering = 0;
                 cerr << "Nothing." << endl;
