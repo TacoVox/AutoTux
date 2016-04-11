@@ -35,7 +35,9 @@ void serial::SerialHandler::run(void)
     interrupted = false;
 
     thread pbthread(&PacketBroadcaster::runModule, packetBroadcaster);
+    pbthread.detach();
     thread prthread(&PacketReceiver::runModule, packetReceiver);
+    prthread.detach();
 
     cout << "Testing USBConnector!" << endl;
     usbConnector->connect();
@@ -45,19 +47,20 @@ void serial::SerialHandler::run(void)
     // do the main loop for reading and writing here
     // while we are connected
     while (!interrupted) {
-    //      ========= READ =================================
-    //      call usb connector to read
+        // ========= READ =================================
+        // call usb connector to read
         usbConnector->read();
+        // call buffer wrapper to get vector
         vector<unsigned char> v = bufferWrapper->readReceiveBuffer();
+        // create a shared pointer to container
+        // set the pointer in the sending thing
         packetBroadcaster->setSensorBoardDataContainer(
                 SBDContainer::instance()->genSBDContainer(v));
-    //      call buffer wrapper to get vector
-    //      create a shared pointer to container
-    //      set the pointer in the sending thing (see below)
-    //
-    //      ========= WRITE ================================
-    //      call buffer wrapper to get data to write
-    //      call usb connector to write the data
+        // ========= WRITE ================================
+        // call usb connector to write the data
+
+        // sleep for 1 sec, just for output
+        std::this_thread::sleep_for(chrono::milliseconds(1000));
     }
 
     usbConnector->disconnect();

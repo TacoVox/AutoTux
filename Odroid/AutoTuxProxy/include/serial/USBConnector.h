@@ -29,7 +29,7 @@ namespace usb_connector
         ~USBConnector();
         int connect(void);
         void read(void);
-        void write(std::string);
+        void write(void);
         void disconnect(void);
         void handle_cb_in(unsigned char *, int);
         void handle_cb_out(int);

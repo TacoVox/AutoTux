@@ -22,64 +22,42 @@ serial::BufferWrapper::~BufferWrapper()
 
 void serial::BufferWrapper::appendReceiveBuffer(unsigned char *cin, int len)
 {
-    //buffer_in.insert(buffer_in.begin(), *cin, len);
-    cout << "len is: " << len << endl;
-    /*for (int i = 0; i < len; i++) {
-        printf("%i: ", cin[i]);
-    }*/
-    //auto it = buffer_in.begin();
+    if (len < 9) return;
+
     vector<unsigned char> v;
     for (int i = 0; i < len; i++) {
-        v.push_back(cin[i]);
-        //*it = cin[i];
-        //it++;
-    }
-    //cout << endl;
+        // if true -> correct packet ?maybe
+        if (cin[i] == '6' && cin[i+1] == ':' && cin[i+7] == ',') {
+            unsigned char us1 = cin[i+2];
+            unsigned char us2 = cin[i+3];
+            unsigned char ir1 = cin[i+4];
+            unsigned char ir2 = cin[i+5];
+            unsigned char ir3 = cin[i+6];
+            // populate the vector with values
+            v = {us1, us2, ir1, ir2, ir3};
+
+            // check for the checksum here
+            //unsigned char check = cin[i+7];
+            //if (checksum(v) == check) {
+                // found correct packet
+            //    break;
+            //}
+        }
+        else {
+            cout << "received incorrect packet" << endl;
+        }
+    } // end for
+
+    // push in front of the deque holding data (aka 'the buffer')
     buffer_in.push_front(v);
-    cout << "buffer size before read: " << buffer_in.size() << endl;
 }
 
 
 vector<unsigned char> serial::BufferWrapper::readReceiveBuffer(void)
 {
-    // put this in a loop as well
-    /*if (isalpha(receive_buffer[0]) && (short)receive_buffer[0] == 6) {
-        unsigned char us1 = receive_buffer[2];
-        unsigned char us2 = receive_buffer[3];
-        unsigned char ir1 = receive_buffer[4];
-        unsigned char ir2 = receive_buffer[5];
-        unsigned char ir3 = receive_buffer[6];
-        std::vector<unsigned char> vec{us1, us2, ir1, ir2, ir3};
-        if (checksum(vec) == receive_buffer[7]) {
-            // correct checksum, send to broadcast
-            containerfactory::SBDContainer::instance()->genSBDContainer(vec);
-        }
-        else {
-            // checksum not correct, continue reading
-            receive_buffer.clear();
-        }
-    }*/
-
-    cout << "reading from buffer in the wrapper class" << endl;
-    cout << "buffer size is: " << buffer_in.size() << endl;
-
     std::vector<unsigned char> vec = buffer_in.at(0);
     buffer_in.clear();
-    for (int i = 0; i < vec.size(); i++) {
-        if (vec.at(i) == '6' &&  vec.at(i+1) == ':') {
-            unsigned char us1 = vec.at(i+2);
-            unsigned char us2 = vec.at(i+3);
-            unsigned char ir1 = vec.at(i+4);
-            unsigned char ir2 = vec.at(i+5);
-            unsigned char ir3 = vec.at(i+6);
-            cout << "filling vector in buffer wrapper" << endl;
-            vec = {us1, us2, ir1, ir2, ir3};
-            cout << "ok" << endl;
-            break;
-        }
-    }
-    cout << "clearing buffer in the wrapper class" << endl;
-    cout << "buffer cleared" << endl;
+    buffer_in.push_front(vec);
     return vec;
 }
 
@@ -91,9 +69,9 @@ void serial::BufferWrapper::appendSendBuffer(vector<unsigned char>)
 
 
 //Here we will need to return a packet to the calling function.
-string serial::BufferWrapper::readSendBuffer(void)
+vector<unsigned char> serial::BufferWrapper::readSendBuffer(void)
 {
-
+    return buffer_out.at(0);
 }
 
 
@@ -108,19 +86,6 @@ unsigned char serial::BufferWrapper::checksum(std::vector<unsigned char> vec)
 
 vector<double> serial::decode_packet(string p, int len)
 {
-    /*
-    cout << "decoding packet..." << endl;
-    string::size_type del = p.find(':');
-    del += 2;
-    cout << "first : found at " << del << endl;
-    string sub1 = p.substr(del, p.length());
-    cout << "sub1-" << sub1 << endl;
-    string::size_type del1 = sub1.find(' ');
-    cout << "white space found at " << del1 << endl;
-    string sub2 = sub1.substr(0, del1);
-    cout << "sub2-" << sub2 << endl;
-    return stod(sub2);
-    */
     vector<double> v;
     return v;
 }

@@ -26,7 +26,7 @@ namespace serial
         void appendReceiveBuffer(unsigned char *, int);
         std::vector<unsigned char> readReceiveBuffer(void);
         void appendSendBuffer(std::vector<unsigned char>);
-        std::string readSendBuffer(void);
+        std::vector<unsigned char> readSendBuffer(void);
     private:
         std::deque<std::vector<unsigned char>> buffer_in;
         std::deque<std::vector<unsigned char>> buffer_out;
