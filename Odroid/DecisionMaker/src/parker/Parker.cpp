@@ -39,49 +39,32 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Parker::body() {
     const double INFRARED_REAR_RIGHT = 2;
     const double INFRARED_REAR_BACK = 1;
 
-    double ufr;
-    double uff;
-    double irfr;
-    double irrr;
-    double irrb;
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
-        // 1. Get most recent vehicle data:
-        Container containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
-        VehicleData vd = containerVehicleData.getData<VehicleData> ();
+        
+        *parking = true;
 
-        // 2. Get most recent sensor board data describing virtual sensor data:
-        Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
-        SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData> ();
+        while(*parking){
+            // 1. Get most recent vehicle data:
+            Container containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
+            VehicleData vd = containerVehicleData.getData<VehicleData>();
 
-        //distance = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT);
-        ufr = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT);
-        uff = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD);
-        irfr = sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
-        irrr = sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT);
-        irrb = sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK);
-/*
-        cout << "Right UltraSonic: " << ufr << endl;
-        cout << "Front UltraSonic: " << uff << endl;
-        cout << "Front right IRSENSOR: " << irfr << endl;
-        cout << "Rear right IRSENSOR: " << irrr << endl;
-        cout << "Rear Back IRSENSOR: " << irrb << endl;
-*/
-        cout << "Abs traveled: " << vd.getAbsTraveledPath() << endl;
-        cout << "REL traveled path: " << vd.getRelTraveledPath() << endl;
-        cout << "Get heading: " << vd.getHeading() << endl;
+            // 2. Get most recent sensor board data describing virtual sensor data:
+            Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
+            SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData>();
 
-        // Create vehicle control data.
-        VehicleControl vc;
+            // Create vehicle control data.
+            VehicleControl vc;
 
-        if(parking){
-            cout << "Now Parking" << endl;
-            vc.setSpeed(2);
-            vc.setSteeringWheelAngle(25);
+            vc.setSpeed(1);
+            vc.setSteeringWheelAngle(0);
+
             *parkingControler = vc;
-        }
-        cout << "Stopped parking" << endl;
 
+            cout << "This is the FRONT right IR sensoR: " << sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) << endl;
+            cout << "This is the BACK right IR SENSOR: " << sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) << endl;
+
+        }
     }
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
 }
