@@ -57,17 +57,23 @@ void DecisionMaker::tearDown(){
 
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() {
     //The current state of the car.
-    STATE state = DRIVING;
+    STATE state = PARKING;
 
-    //shared pointer to the Parker for the state of the car
+    /**
+     * Parker shared pointers
+     */
     bool park;
     shared_ptr<bool> ptrParking(&park);
 
+    VehicleControl parkcontrol;
+    shared_ptr<Container> parkControlptr(new Container(parkcontrol));
+    shared_ptr<Parker> parkerPointer(new Parker(ptrargc, ptrargv));
+
     /**
-     * These creates shared pointers to be able to share data between them
+     * PackerBroadcaster pointer
      */
     shared_ptr<PacketBroadcaster> packetBroadcaster(new PacketBroadcaster(ptrargc, ptrargv));
-    shared_ptr<Parker> parkerPointer(new Parker(ptrargc, ptrargv));
+
 
     /**
      * Starts the modules with the shared pointers
@@ -76,6 +82,12 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
     thread parkerthread(&Parker::runModule, parkerPointer);
 
     packetBroadcaster->setControlDataContainer(containerptr);
+
+    /*
+     * Setters for the parker
+     */
+    parkerPointer->setParking(ptrParking);
+    parkerPointer->setParkingControler(parkControlptr);
 
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
@@ -89,7 +101,8 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
         }
         if(state == PARKING){
             *ptrParking = true;
-            parkerPointer->setParking(ptrParking);
+            *containerptr = *parkControlptr;
+
         }
 
     }
