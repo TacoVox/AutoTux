@@ -4,6 +4,7 @@
 
 #include "packetio/PacketReceiver.h"
 #include <iostream>
+#include <typeinfo>
 #include <automotivedata/generated/automotive/VehicleControl.h>
 
 using namespace std;
@@ -24,9 +25,13 @@ void packetio::PacketReceiver::tearDown() {}
 
 void packetio::PacketReceiver::nextContainer(Container &c) {
     //Check if valid ControlData//Guard
-    if(c.getDataType() == VehicleControl::ID()) {
+    if(c.getDataType() == 1) {
         cout << "Received ControlData" << endl;
-        bufferWrapper->appendSendBuffer("5080");
+        VehicleControl vehicleControl = c.getData<VehicleControl>();
+        std::vector<unsigned char> data;
+        data.push_back((unsigned char)vehicleControl.getSpeed());
+        data.push_back((unsigned char)vehicleControl.getSteeringWheelAngle());
+        bufferWrapper->appendSendBuffer(data);
     } else {
         cout << "Received invalid data" << endl;
     }

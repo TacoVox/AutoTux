@@ -5,6 +5,7 @@
 // ==================================================
 #include <string>
 #include <vector>
+#include <deque>
 
 // define
 // ==================================================
@@ -24,11 +25,11 @@ namespace serial
         //Methods for manipulating the internal buffer representation
         void appendReceiveBuffer(unsigned char *, int);
         std::vector<unsigned char> readReceiveBuffer(void);
-        void appendSendBuffer(std::string);
+        void appendSendBuffer(std::vector<unsigned char>);
         std::string readSendBuffer(void);
     private:
-        std::vector<unsigned char> buffer_in;
-        std::vector<unsigned char> buffer_out;
+        std::deque<std::vector<unsigned char>> buffer_in;
+        std::deque<std::vector<unsigned char>> buffer_out;
         unsigned char checksum(std::vector<unsigned char>);
     };
 }

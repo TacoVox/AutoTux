@@ -32,6 +32,8 @@ serial::SerialHandler::~SerialHandler() {
 
 void serial::SerialHandler::run(void)
 {
+    interrupted = false;
+
     thread pbthread(&PacketBroadcaster::runModule, packetBroadcaster);
     thread prthread(&PacketReceiver::runModule, packetReceiver);
 
@@ -42,7 +44,7 @@ void serial::SerialHandler::run(void)
 
     // do the main loop for reading and writing here
     // while we are connected
-    while (1) {
+    while (!interrupted) {
     //      ========= READ =================================
     //      call usb connector to read
         usbConnector->read();
@@ -58,13 +60,11 @@ void serial::SerialHandler::run(void)
     //      call usb connector to write the data
     }
 
-    //Just for testing
-    vector<unsigned char> p {0, 3, 5, 7, 7};
-    packetBroadcaster->setSensorBoardDataContainer(
-            SBDContainer::instance()->genSBDContainer(p));
-    vector<unsigned char> p2 {0, 3, 5, 4, 5};
-    packetBroadcaster->setSensorBoardDataContainer(
-            SBDContainer::instance()->genSBDContainer(p2));
-
     usbConnector->disconnect();
 }
+
+void serial::SerialHandler::interrupt(void) {
+    interrupted = true;
+}
+
+

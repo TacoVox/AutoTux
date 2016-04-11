@@ -14,7 +14,9 @@ namespace serial {
         SerialHandler(int32_t &argc, char **argv);
         ~SerialHandler();
         void run(void);
+        void interrupt(void);
     private:
+        bool interrupted;
         std::shared_ptr<packetio::PacketBroadcaster> packetBroadcaster;
         std::shared_ptr<packetio::PacketReceiver> packetReceiver;
         std::shared_ptr<usb_connector::USBConnector> usbConnector;

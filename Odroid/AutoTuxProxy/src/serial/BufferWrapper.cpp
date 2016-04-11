@@ -28,12 +28,14 @@ void serial::BufferWrapper::appendReceiveBuffer(unsigned char *cin, int len)
         printf("%i: ", cin[i]);
     }*/
     //auto it = buffer_in.begin();
+    vector<unsigned char> v;
     for (int i = 0; i < len; i++) {
-        buffer_in.push_back(cin[i]);
+        v.push_back(cin[i]);
         //*it = cin[i];
         //it++;
     }
     //cout << endl;
+    buffer_in.push_front(v);
     cout << "buffer size before read: " << buffer_in.size() << endl;
 }
 
@@ -60,14 +62,15 @@ vector<unsigned char> serial::BufferWrapper::readReceiveBuffer(void)
 
     cout << "reading from buffer in the wrapper class" << endl;
     cout << "buffer size is: " << buffer_in.size() << endl;
-    std::vector<unsigned char> vec;
-    for (int i = 0; i < buffer_in.size(); i++) {
-        if (buffer_in.at(i) == '6' &&  buffer_in.at(i+1) == ':') {
-            unsigned char us1 = buffer_in.at(i+2);
-            unsigned char us2 = buffer_in.at(i+3);
-            unsigned char ir1 = buffer_in.at(i+4);
-            unsigned char ir2 = buffer_in.at(i+5);
-            unsigned char ir3 = buffer_in.at(i+6);
+    std::vector<unsigned char> vec = buffer_in.at(0);
+    buffer_in.clear();
+    for (int i = 0; i < vec.size(); i++) {
+        if (vec.at(i) == '6' &&  vec.at(i+1) == ':') {
+            unsigned char us1 = vec.at(i+2);
+            unsigned char us2 = vec.at(i+3);
+            unsigned char ir1 = vec.at(i+4);
+            unsigned char ir2 = vec.at(i+5);
+            unsigned char ir3 = vec.at(i+6);
             cout << "filling vector in buffer wrapper" << endl;
             vec = {us1, us2, ir1, ir2, ir3};
             cout << "ok" << endl;
@@ -75,13 +78,12 @@ vector<unsigned char> serial::BufferWrapper::readReceiveBuffer(void)
         }
     }
     cout << "clearing buffer in the wrapper class" << endl;
-    buffer_in.clear();
     cout << "buffer cleared" << endl;
     return vec;
 }
 
 
-void serial::BufferWrapper::appendSendBuffer(string str)
+void serial::BufferWrapper::appendSendBuffer(vector<unsigned char>)
 {
     //send_buffer.insert(0, str);
 }
