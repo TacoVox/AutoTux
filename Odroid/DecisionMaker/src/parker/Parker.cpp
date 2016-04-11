@@ -20,7 +20,7 @@ using namespace automotive::miniature;
 using namespace parker;
 
 Parker::Parker(const int32_t &argc, char **argv) :
-        TimeTriggeredConferenceClientModule(argc, argv, "Overtake") {}
+        TimeTriggeredConferenceClientModule(argc, argv, "Parker") {}
 
 Parker::~Parker() {}
 
@@ -33,6 +33,18 @@ void Parker::tearDown(){
 
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Parker::body() {
 
+    const double ULTRASONIC_FRONT_RIGHT = 4;
+    const double ULTRASONIC_FRONT_FORWARD = 3;
+    const double INFRARED_FRONT_RIGHT = 0;
+    const double INFRARED_REAR_RIGHT = 2;
+    const double INFRARED_REAR_BACK = 1;
+
+    double ufr;
+    double uff;
+    double irfr;
+    double irrr;
+    double irrb;
+
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
         // 1. Get most recent vehicle data:
         Container containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
@@ -42,12 +54,31 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Parker::body() {
         Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
         SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData> ();
 
+        //distance = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT);
+        ufr = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT);
+        uff = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD);
+        irfr = sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
+        irrr = sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT);
+        irrb = sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK);
+/*
+        cout << "Right UltraSonic: " << ufr << endl;
+        cout << "Front UltraSonic: " << uff << endl;
+        cout << "Front right IRSENSOR: " << irfr << endl;
+        cout << "Rear right IRSENSOR: " << irrr << endl;
+        cout << "Rear Back IRSENSOR: " << irrb << endl;
+*/
+        cout << "Abs traveled: " << vd.getAbsTraveledPath() << endl;
+        cout << "REL traveled path: " << vd.getRelTraveledPath() << endl;
+        cout << "Get heading: " << vd.getHeading() << endl;
+
         // Create vehicle control data.
         VehicleControl vc;
 
         if(parking){
             cout << "Now Parking" << endl;
-            break;
+            vc.setSpeed(2);
+            vc.setSteeringWheelAngle(25);
+            *parkingControler = vc;
         }
         cout << "Stopped parking" << endl;
 
@@ -60,3 +91,8 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Parker::body() {
 void Parker::setParking(std::shared_ptr<bool> parking){
     this->parking = parking;
 }
+void Parker::setParkingControler(std::shared_ptr<Container> parkingControler){
+    this->parkingControler = parkingControler;
+}
+
+

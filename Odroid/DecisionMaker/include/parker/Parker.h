@@ -17,6 +17,7 @@ namespace parker{
 
     public:
         std::shared_ptr<bool> parking;
+        std::shared_ptr<odcore::data::Container> parkingControler;
         Parker(const int32_t &argc, char **argv);
 
         virtual ~Parker();
@@ -24,6 +25,7 @@ namespace parker{
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
 
         void setParking(std::shared_ptr<bool>);
+        void setParkingControler(std::shared_ptr<odcore::data::Container>);
 
     private:
         virtual void setUp();
