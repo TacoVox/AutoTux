@@ -62,6 +62,7 @@ vector<unsigned char> serial::BufferWrapper::readReceiveBuffer(void)
 
     cout << "reading from buffer in the wrapper class" << endl;
     cout << "buffer size is: " << buffer_in.size() << endl;
+
     std::vector<unsigned char> vec = buffer_in.at(0);
     buffer_in.clear();
     for (int i = 0; i < vec.size(); i++) {
