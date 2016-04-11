@@ -39,11 +39,21 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Parker::body() {
     const double INFRARED_REAR_RIGHT = 2;
     const double INFRARED_REAR_BACK = 1;
 
+    enum STATE {FINDGAPSTART, FINDGAPEND, PARK};
+
+    bool objectFound = false;
+    double gapStart = 0;
+    double gapEnd = 0;
+
+    STATE state;
+
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
-        
-        *parking = true;
 
+        VehicleControl vc;
+
+        vc.setSpeed(1);
+        *parkingControler = vc;
         while(*parking){
             // 1. Get most recent vehicle data:
             Container containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
@@ -54,15 +64,40 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Parker::body() {
             SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData>();
 
             // Create vehicle control data.
-            VehicleControl vc;
 
-            vc.setSpeed(1);
-            vc.setSteeringWheelAngle(0);
 
-            *parkingControler = vc;
-
-            cout << "This is the FRONT right IR sensoR: " << sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) << endl;
-            cout << "This is the BACK right IR SENSOR: " << sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) << endl;
+            if(objectFound){
+                if((state == FINDGAPSTART) && (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < 0)){
+                    gapStart = vd.getAbsTraveledPath();
+                    state = FINDGAPEND;
+                    cout << "Found gap START" << endl;
+                }
+                if((state == FINDGAPEND) && (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 0)){
+                    cout << "Found gap END" << endl;
+                    gapEnd = vd.getAbsTraveledPath();
+                    cout << "This is the gap size: " << (gapEnd - gapStart) << endl;
+                    if((gapEnd - gapStart) > 3){
+                        cout << "spot has been found----------------" << endl;
+                        vc.setSpeed(0);
+                        *parkingControler = vc;
+                        state = PARK;
+                    }
+                    else{
+                        cout << "IT WASN'T BIG ENOUGH" << endl;
+                        objectFound = false;
+                    }
+                }
+                if(state == PARK){
+                   /* vc.setSpeed(-1.6);
+                    vc.setSteeringWheelAngle(25);
+                    *parkingControler = vc;
+                    **/
+                }
+            }
+            if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 0){
+                objectFound = true;
+                state = FINDGAPSTART;
+            }
 
         }
     }
