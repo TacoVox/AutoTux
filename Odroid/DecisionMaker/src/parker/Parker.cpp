@@ -33,13 +33,9 @@ void Parker::tearDown(){
 
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Parker::body() {
 
-    const double ULTRASONIC_FRONT_RIGHT = 4;
-    const double ULTRASONIC_FRONT_FORWARD = 3;
-    const double INFRARED_FRONT_RIGHT = 0;
-    const double INFRARED_REAR_RIGHT = 2;
-    const double INFRARED_REAR_BACK = 1;
+    const double INFRARED_REAR_RIGHT = 2; //Sensor
 
-    enum STATE {FINDGAPSTART, FINDGAPEND, PARK};
+    enum STATE {FINDGAPSTART, FINDGAPEND, ADJUST, PARK};
 
     bool objectFound = false;
     double gapStart = 0;
@@ -50,10 +46,16 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Parker::body() {
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
 
+        double absTraveled = 0;
+        double parkPosition = 0;
+        int parkState = 0;
+        /**
+         * @TODO Need to take these way later because it shall take the speed of the decisionmaker
+         */
         VehicleControl vc;
-
         vc.setSpeed(1);
         *parkingControler = vc;
+
         while(*parking){
             // 1. Get most recent vehicle data:
             Container containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
@@ -67,6 +69,8 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Parker::body() {
 
 
             if(objectFound){
+                absTraveled = vd.getAbsTraveledPath();
+
                 if((state == FINDGAPSTART) && (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < 0)){
                     gapStart = vd.getAbsTraveledPath();
                     state = FINDGAPEND;
@@ -76,29 +80,120 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Parker::body() {
                     cout << "Found gap END" << endl;
                     gapEnd = vd.getAbsTraveledPath();
                     cout << "This is the gap size: " << (gapEnd - gapStart) << endl;
-                    if((gapEnd - gapStart) > 3){
+                    if((gapEnd - gapStart) > 7){
                         cout << "spot has been found----------------" << endl;
-                        vc.setSpeed(0);
-                        *parkingControler = vc;
-                        state = PARK;
+                        state = ADJUST;
                     }
                     else{
                         cout << "IT WASN'T BIG ENOUGH" << endl;
                         objectFound = false;
                     }
                 }
+                if(state == ADJUST){
+                    if(gapEnd + 2 > absTraveled){
+                        vc.setSpeed(.6);
+                        vc.setSteeringWheelAngle(0);
+                        *parkingControler = vc;
+                    }
+                    if(gapEnd + 2 < absTraveled){
+                        vc.setSpeed(0);
+                        *parkingControler = vc;
+                        state = PARK;
+                        parkPosition = absTraveled;
+                    }
+                }
+                /**
+                 * @TODO Fix so that there is a safty check so that the car dosn't drive in to the back car
+                 */
+
                 if(state == PARK){
-                   /* vc.setSpeed(-1.6);
-                    vc.setSteeringWheelAngle(25);
-                    *parkingControler = vc;
-                    **/
+
+                    switch (parkState){
+                        // Make the car go back and turn around the corner of the front car
+                        case 0:{
+                            cout << "Current speed: " << vd.getSpeed() << endl;
+                            if(parkPosition + 5 > absTraveled){
+                                vc.setSpeed(-0.6);
+                                vc.setSteeringWheelAngle(45);
+                                *parkingControler = vc;
+                                break;
+                            }
+                                // Prepare for next step with straight wheels and change case
+                            else if(parkPosition + 5 < absTraveled){
+                                vc.setSpeed(0);
+                                vc.setSteeringWheelAngle(0);
+                                *parkingControler = vc;
+                                parkState = 1;
+                                break;
+                            }
+                            break;
+                        }
+                        // Goes straight back and after the distance turn the wheels -45 to make the car straight
+                        case 1:{
+                            cout << "inside case 1: " << endl;
+
+                            if(parkPosition + 7 > absTraveled){
+                                vc.setSpeed(-0.5);
+                                *parkingControler = vc;
+                                break;
+                            }
+                            else if(parkPosition + 7 < absTraveled){
+                                vc.setSteeringWheelAngle(-45);
+                                *parkingControler = vc;
+                                parkState = 2;
+                                break;
+                            }
+                            break;
+                        }
+                        //Continues to go backwards until the given length
+                        case 2:{
+                            if(parkPosition + 9.5 < absTraveled){
+                                vc.setSpeed(0);
+                                *parkingControler = vc;
+                                parkState = 3;
+                                break;
+                            }
+                            else break;
+                        }
+                        //Adjusts the car to go forward to get straighter
+                        case 3:{
+                            if(parkPosition + 11 > absTraveled){
+                                vc.setSpeed(0.3);
+                                vc.setSteeringWheelAngle(30);
+                                *parkingControler = vc;
+                                break;
+                            }
+                            else if(parkPosition + 11 < absTraveled){
+                                vc.setSpeed(0);
+                                vc.setSteeringWheelAngle(30);
+                                *parkingControler = vc;
+                                parkState = 4;
+                                break;
+                            }
+                            break;
+                        }
+                        //Adjusts by going backwards
+                        case 4:{
+                            if(parkPosition + 11.5 > absTraveled){
+                                vc.setSpeed(-0.3);
+                                vc.setSteeringWheelAngle(-15);
+                                *parkingControler = vc;
+                            }
+                            else if(parkPosition + 11.5 < absTraveled){
+                                vc.setSpeed(0);
+                                *parkingControler = vc;
+                                objectFound = false;
+                            }
+                        }
+                    }
                 }
             }
-            if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 0){
+                //If no states are set yet for the Parking and it finds an object
+            else if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 0){
+                cout << "object found" << endl;
                 objectFound = true;
                 state = FINDGAPSTART;
             }
-
         }
     }
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
