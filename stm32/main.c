@@ -1,39 +1,27 @@
 /*
  * Main file for the stm32 part of AutoTux
- *
- * Initially based on the USB-CDC example from ChibiOS
- * I imagine having if not classes and polymorphism,
- * at least a similar naming across different sensor handling files
- * for example ir_setup, us_setup etc.
- * Also common functions for invoking the measurement process.
- * To the SETUP methods you also provide a pointer to a container 
-		of the result (array if necessary).
- * it will then be transparent to the using code (main loop)
- * if a callback function is used or not.
- *
  */
 
 #include <stdio.h>
 #include <string.h>
 
 #include <ch.h>
-#include "hal.h"
-#include "test.h"
 #include "chprintf.h"
+#include "hal.h"
+
 #include "usbcfg.h"
-#define CHPRINTF_USE_FLOAT   TRUE
+
 
 // Input
-#include "hardwareIR.h"
-#include "hardwareUS.h"
-#include "hardwareRC.h"
-//#include "hardwareWE.h"
+#include "sensorInput.h"
 
 // Output
 #include "hardwarePWM.h"
+// TODO: should also be in output module
+#include "hardwareRC.h"
 
 
-#define DEBUG_OUTPUT 0
+#define DEBUG_OUTPUT 1
 
 /*
  * Starting point  
@@ -46,18 +34,15 @@ int main(void) {
 	halInit();
 	chSysInit();
 
-	// Initialize IR
-	hardwareSetupIR();
-	hardwareSetupUS();
-	hardwareSetupRC();
-	//hardwareSetupWE();
+	// Initialize sensor settings
+	sensorSetup();
 	hardwareSetupPWM();
 
  	// Initialize serial over USB
 	sduObjectInit(&SDU1);
  	sduStart(&SDU1, &serusbcfg);
 
-  	// Activate USB driver, USB pull-up on D+
+  	// Activate USB driver
 	// Delay means that if device is reset, it will be unavailable to the
 	// host for a while, and then reattached
 	usbDisconnectBus(serusbcfg.usbp);
@@ -82,12 +67,17 @@ int main(void) {
 
 			charbuf = chnGetTimeout(&SDU1, 100);
 			if (charbuf != Q_TIMEOUT) {
+				// Receiving code: if buffer size under packet size,
+				// keep waiting. Also KEEP PROCESSING if accumulated buffer size
+				// can contain several packets.
+
 
 				if ((char)charbuf == '\r') {
 					chprintf( (BaseSequentialStream *)&SDU1, "\r\n", (char)charbuf);	
 				} else {
 					chprintf( (BaseSequentialStream *)&SDU1, "%c", (char)charbuf);
 				}
+
 				// Received a character!
 				if ((char)charbuf == 'f')
 					dir = 2;
@@ -105,13 +95,11 @@ int main(void) {
 				iterationsSinceActive = 0;
 			} else {
 				// Timeout. Provide a \0 to keep connection alive.
-				//chprintf( (BaseSequentialStream *)&SDU1, "\0");
+				chprintf( (BaseSequentialStream *)&SDU1, "\0");
 			}
-			hardwareIterationIR(); // TODO: check time
-			hardwareIterationUSStart();
-			chThdSleepMilliseconds(300);
-			hardwareIterationUSEnd();
-			//hardwareIterationWE();
+
+
+
 			hardwareSetValuesPWM(PWM_OUTPUT_SERVO, angle);
 			hardwareSetValuesPWM(PWM_OUTPUT_ESC, dir);
 
@@ -120,25 +108,12 @@ int main(void) {
 			// TODO The packet c file should READ and unpack values into the right format
 			// TODO These can then be passed to the CONTROL c file that outputs them
 			if (DEBUG_OUTPUT) {
-				// "\033[F" for going back to previous line
-				chprintf( (BaseSequentialStream *)&SDU1, "\033[FTHROTTLE: %4i ", hardwareGetValuesRC(THROTTLE));
-				chprintf( (BaseSequentialStream *)&SDU1, "STEERING: %4i ", hardwareGetValuesRC(STEERING));
-				//chprintf( (BaseSequentialStream *)&SDU1, "WHEEL: %f ", hardwareGetValuesWE());
-				chprintf( (BaseSequentialStream *)&SDU1, "US FRONT: %3i \r\n", hardwareGetValuesUS(US_FRONT));
-				chprintf( (BaseSequentialStream *)&SDU1, "US SIDE: %3i ", hardwareGetValuesUS(US_SIDE));
-				chprintf( (BaseSequentialStream *)&SDU1, "SIDE_FRONT: %3i ", hardwareGetValuesIR(IR_SIDE_FRONT));
-				chprintf( (BaseSequentialStream *)&SDU1, "SIDE_REAR: %3i ",  hardwareGetValuesIR(IR_SIDE_REAR));
-				chprintf( (BaseSequentialStream *)&SDU1, "REAR: %2i ", hardwareGetValuesIR(IR_REAR));
+				sensorDebugOutput((BaseSequentialStream*) &SDU1);
 			} else {
 				// Normal packet output
 				int size = 6;
 				char data[size];
-				data[0] = (char)hardwareGetValuesUS(US_FRONT);
-				data[1] = (char)hardwareGetValuesUS(US_SIDE);
-				data[2] = (char)hardwareGetValuesIR(IR_SIDE_FRONT);
-				data[3] = (char)hardwareGetValuesIR(IR_SIDE_REAR);
-				data[4] = (char)hardwareGetValuesIR(IR_REAR);
-				data[5] = 0x00; // No checksum for now!
+				getSensorData(data);
 
 				// Packet structure: size, colon, (bytes), comma
 				chprintf((BaseSequentialStream *)&SDU1, "%i:", size);
@@ -147,6 +122,8 @@ int main(void) {
 				}
 				chprintf((BaseSequentialStream *)&SDU1, ",");
 			}
+
+			chThdSleepMilliseconds(100);
 		}
 	}
 	return 0;

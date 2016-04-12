@@ -14,6 +14,8 @@
 // Definitions
 //-----------------------------------------------------------------------------
 
+systime_t callbackEndTime;
+
 
 // Prototype for the adc callback function.
 void adcCallback(ADCDriver *adcp, adcsample_t *buffer, size_t n);
@@ -76,6 +78,10 @@ int hardwareGetValuesIR(IR_SENSOR sensor) {
 	return irCm[sensor];
 }
 
+systime_t getCallbackEndTime(void) {
+	return callbackEndTime;
+}
+
 //-----------------------------------------------------------------------------
 // "Private" implementation
 //-----------------------------------------------------------------------------
@@ -98,8 +104,10 @@ void adcCallback(ADCDriver *adcp, adcsample_t *buffer, size_t n) {
 		irAvg[0] = irAvg[0] >> 3;
 		irAvg[1] = irAvg[1] >> 3;
 		irAvg[2] = irAvg[2] >> 3;
-		irCm[0] = (int)(2914.0f / (irAvg[0] + 5.0f))- 1;
-		irCm[1] = (int)(2914.0f / (irAvg[1] + 5.0f))- 1;
-		irCm[2] = (int)(2914.0f / (irAvg[2] + 5.0f))- 1;
-	}
+		// Formula: irCm[0] = (int)(2914.0f / (irAvg[0] + 5.0f))- 1;
+		// Here we also add the previous value and divide by 2 to average out
+		irCm[0] = (irCm[0] + (int)(2914.0f / (irAvg[0] + 5.0f))- 1) / 2;
+		irCm[1] = (irCm[0] + (int)(2914.0f / (irAvg[1] + 5.0f))- 1) / 2;
+		irCm[2] = (irCm[0] + (int)(2914.0f / (irAvg[2] + 5.0f))- 1) / 2;
+  }
 }
