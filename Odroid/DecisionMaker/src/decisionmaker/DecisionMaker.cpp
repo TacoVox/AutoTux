@@ -13,6 +13,7 @@
 #include "packetio/PacketBroadcaster.h"
 #include "decisionmaker/DecisionMaker.h"
 #include "parker/Parker.h"
+#include "overtaker/Overtaker.h"
 
 using namespace std;
 
@@ -26,14 +27,15 @@ using namespace automotive::miniature;
 using namespace packetio;
 using namespace decisionmaker;
 using namespace parker;
+using namespace overtaker;
 
-enum STATE {DRIVING, SEARCHSFORSPACE, PARKING};
+enum STATE {DRIVING, PARKING};
 
 // takes the values of the argument passed to the constructor
 int32_t ptrargc;
 char** ptrargv;
 
-// Shared pointer to the PcketBroadCaster
+// Shared pointer to Container
 VehicleControl vehicleControl;
 shared_ptr<Container> containerptr(new Container(vehicleControl));
 
@@ -56,12 +58,11 @@ void DecisionMaker::tearDown(){
 }
 
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() {
-    //The current state of the car.
+
+    // Set initial state of the car
     STATE state = PARKING;
 
-    /**
-     * Parker shared pointers
-     */
+    // Parker shared pointers
     bool park;
     shared_ptr<bool> ptrParking(&park);
 
@@ -69,42 +70,40 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
     shared_ptr<Container> parkControlptr(new Container(parkcontrol));
     shared_ptr<Parker> parkerPointer(new Parker(ptrargc, ptrargv));
 
-    /**
-     * PackerBroadcaster pointer
-     */
-    shared_ptr<PacketBroadcaster> packetBroadcaster(new PacketBroadcaster(ptrargc, ptrargv));
-
-
-    /**
-     * Starts the modules with the shared pointers
-     */
-    thread pbthread(&PacketBroadcaster::runModule, packetBroadcaster);
-    thread parkerthread(&Parker::runModule, parkerPointer);
-
-    packetBroadcaster->setControlDataContainer(containerptr);
-
-    /*
-     * Setters for the parker
-     */
+    //Set values in parker
     parkerPointer->setParking(ptrParking);
     parkerPointer->setParkingControler(parkControlptr);
 
+    // To-Do...
+    // Overtaker shared pointers
+    VehicleControl ovtControl;
+    shared_ptr<Container> ovtControlPtr (new Container(ovtControl));
+    shared_ptr<Overtaker> ovtPtr (new Overtaker (ptrargc, ptrargv));
+
+    // Set container value in overtaker
+    ovtPtr->setOvtControlDataContainer(ovtControlPtr);
+
+    // PacketBroadcaster pointer
+    shared_ptr<PacketBroadcaster> packetBroadcaster(new PacketBroadcaster(ptrargc, ptrargv));
+
+    //Starts the modules with the shared pointers
+    thread pbthread(&PacketBroadcaster::runModule, packetBroadcaster);
+    thread parkerthread(&Parker::runModule, parkerPointer);
+    thread ovtThread(&Overtaker::runModule, ovtPtr);
+
+    packetBroadcaster->setControlDataContainer(containerptr);
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
         packetBroadcaster->setControlDataContainer(containerptr);
 
         if(state == DRIVING){
-            cout << "Is now Driving" << endl;
+            //cout << "Is now Driving" << endl;
+            *containerptr = *ovtControlPtr;
         }
-        if(state == SEARCHSFORSPACE){
-            cout << "is now searching for spot" << endl;
-        }
-        if(state == PARKING){
+        else if(state == PARKING){
             *ptrParking = true;
             *containerptr = *parkControlptr;
-
         }
-
     }
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
 }
