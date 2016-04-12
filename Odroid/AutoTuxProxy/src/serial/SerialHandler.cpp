@@ -60,7 +60,7 @@ void serial::SerialHandler::run(void)
         // call usb connector to write the data
 
         // sleep for 1 sec, just for output
-        std::this_thread::sleep_for(chrono::milliseconds(1000));
+        std::this_thread::sleep_for(chrono::milliseconds(10));
     }
 
     usbConnector->disconnect();
