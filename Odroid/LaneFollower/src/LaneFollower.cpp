@@ -108,11 +108,11 @@ namespace lane {
         // Do magic to the image around here.
         void LaneFollower::processImage() {
 
-            double e = 0; //?
+            // double e = 0; //?
             const int32_t CONTROL_SCANLINE = 462; //?
-            const int32_t distance = 280; //?
+            // const int32_t distance = 280; //?
 
-            TimeStamp beforeProcessing;
+            // TimeStamp beforeProcessing;
 
             for(int32_t y = m_image->height - 8; y > m_image->height * .5; y -= 10) {
                 CvScalar pixelLeft, pixelRight;
@@ -144,6 +144,7 @@ namespace lane {
                     if (sharedMemory->isValid()) {
                         Lock l(sharedMemory);
 
+                        // cvLine(m_image, cvPoint(m_image->width, y), left, CV_RGB(0, 255, 0), 1, 8);
                     }
                     this->m_distToLeftMarking = m_image->width/2 - left.x;
                     this->m_distToRightMarking = right.x - m_image->width/2;
@@ -188,8 +189,8 @@ namespace lane {
 
             double desiredSteering = m_vehicleControl.getSteeringWheelAngle();
 
-            //cerr << "Dist to left marking: " << m_distToLeftMarking << " : ";
-            //cerr << "Dist to right marking: " << m_distToRightMarking << endl;
+            // cerr << "Dist to left marking: " << m_distToLeftMarking << " : ";
+            // cerr << "Dist to right marking: " << m_distToRightMarking << endl;
 
             // If the car is close enough to the middle of the road, just
             // keep going forward.
@@ -217,29 +218,16 @@ namespace lane {
                 cerr << "Turning left! Left: " << m_distToLeftMarking << " & Right: " << m_distToRightMarking << endl;
             }
 
-            // Panic (turn right)
-            else if(m_distToLeftMarking < 100) {
-                desiredSteering += 2;
-                cerr << "Panic! (right)" << endl;
-            }
-
-            // Panic (turn left)
-            else if(m_distToLeftMarking < 100)
-            {
-                desiredSteering -= 2;
-                cerr << "Panic! (left)" << endl;
-            }
-
             // If all else fails, just keep going forward without turning
             else {
                 desiredSteering = 0;
                 cerr << "Nothing." << endl;
             }
 
-            TimeStamp afterImageProcessing;
-            //clog << "Processing time: " << (afterImageProcessing.toMicroseconds() - beforeProcessing.toMicroseconds()) / 1000.0 << "ms." << endl;
+            // TimeStamp afterImageProcessing;
+            // clog << "Processing time: " << (afterImageProcessing.toMicroseconds() - beforeProcessing.toMicroseconds()) / 1000.0 << "ms." << endl;
 
-            //cerr << "Angle: " << desiredSteering << endl;
+            // cerr << "Angle: " << desiredSteering << endl;
 
             m_vehicleControl.setSpeed(5);
             m_vehicleControl.setSteeringWheelAngle(desiredSteering);

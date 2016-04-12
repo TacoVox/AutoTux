@@ -58,13 +58,13 @@ namespace lane {
             int m_distToRightMarking;
 
         private:
-            bool m_hasAttachedToSharedImageMemory;
-            bool m_debug;
 
-            CvFont m_font;
+            bool m_hasAttachedToSharedImageMemory;
             std::shared_ptr<odcore::wrapper::SharedMemory> m_sharedImageMemory;
-            odcore::data::TimeStamp m_previousTime;
             IplImage *m_image;
+            odcore::data::TimeStamp m_previousTime;
+            CvFont m_font;
+            bool m_debug;
 
             automotive::VehicleControl m_vehicleControl;
 
