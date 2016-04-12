@@ -27,7 +27,7 @@ namespace usb_connector
     public:
         USBConnector();
         ~USBConnector();
-        int connect(void);
+        bool connect(void);
         void read(void);
         void write(void);
         void disconnect(void);
@@ -35,11 +35,10 @@ namespace usb_connector
         void handle_cb_out(int);
         void set_buffer_wrapper(std::shared_ptr<serial::BufferWrapper>);
     private:
-        int init_libusb(void);
-        int open_device(void);
-        int interface_taken(void);
-        int claim_interface(void);
-        void release_interface(void);
+        bool init_libusb(void);
+        bool open_device(void);
+        bool claim_interface(void);
+        bool release_interface(void);
     private:
         std::shared_ptr<serial::BufferWrapper> bw;
         unsigned char in_buffer[LEN_IN_BUFFER];
