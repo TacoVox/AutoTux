@@ -39,49 +39,67 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Parker::body() {
     const double INFRARED_REAR_RIGHT = 2;
     const double INFRARED_REAR_BACK = 1;
 
-    double ufr;
-    double uff;
-    double irfr;
-    double irrr;
-    double irrb;
+    enum STATE {FINDGAPSTART, FINDGAPEND, PARK};
+
+    bool objectFound = false;
+    double gapStart = 0;
+    double gapEnd = 0;
+
+    STATE state;
+
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
-        // 1. Get most recent vehicle data:
-        Container containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
-        VehicleData vd = containerVehicleData.getData<VehicleData> ();
 
-        // 2. Get most recent sensor board data describing virtual sensor data:
-        Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
-        SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData> ();
-
-        //distance = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT);
-        ufr = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT);
-        uff = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD);
-        irfr = sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT);
-        irrr = sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT);
-        irrb = sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK);
-/*
-        cout << "Right UltraSonic: " << ufr << endl;
-        cout << "Front UltraSonic: " << uff << endl;
-        cout << "Front right IRSENSOR: " << irfr << endl;
-        cout << "Rear right IRSENSOR: " << irrr << endl;
-        cout << "Rear Back IRSENSOR: " << irrb << endl;
-*/
-        cout << "Abs traveled: " << vd.getAbsTraveledPath() << endl;
-        cout << "REL traveled path: " << vd.getRelTraveledPath() << endl;
-        cout << "Get heading: " << vd.getHeading() << endl;
-
-        // Create vehicle control data.
         VehicleControl vc;
 
-        if(parking){
-            cout << "Now Parking" << endl;
-            vc.setSpeed(2);
-            vc.setSteeringWheelAngle(25);
-            *parkingControler = vc;
-        }
-        cout << "Stopped parking" << endl;
+        vc.setSpeed(1);
+        *parkingControler = vc;
+        while(*parking){
+            // 1. Get most recent vehicle data:
+            Container containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
+            VehicleData vd = containerVehicleData.getData<VehicleData>();
 
+            // 2. Get most recent sensor board data describing virtual sensor data:
+            Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
+            SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData>();
+
+            // Create vehicle control data.
+
+
+            if(objectFound){
+                if((state == FINDGAPSTART) && (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < 0)){
+                    gapStart = vd.getAbsTraveledPath();
+                    state = FINDGAPEND;
+                    cout << "Found gap START" << endl;
+                }
+                if((state == FINDGAPEND) && (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 0)){
+                    cout << "Found gap END" << endl;
+                    gapEnd = vd.getAbsTraveledPath();
+                    cout << "This is the gap size: " << (gapEnd - gapStart) << endl;
+                    if((gapEnd - gapStart) > 3){
+                        cout << "spot has been found----------------" << endl;
+                        vc.setSpeed(0);
+                        *parkingControler = vc;
+                        state = PARK;
+                    }
+                    else{
+                        cout << "IT WASN'T BIG ENOUGH" << endl;
+                        objectFound = false;
+                    }
+                }
+                if(state == PARK){
+                   /* vc.setSpeed(-1.6);
+                    vc.setSteeringWheelAngle(25);
+                    *parkingControler = vc;
+                    **/
+                }
+            }
+            if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 0){
+                objectFound = true;
+                state = FINDGAPSTART;
+            }
+
+        }
     }
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
 }
