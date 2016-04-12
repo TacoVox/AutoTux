@@ -26,16 +26,27 @@ void serial::BufferWrapper::appendReceiveBuffer(unsigned char *cin, int len)
 
     vector<unsigned char> v;
     for (int i = 0; i < len; i++) {
+        cout << cin[i] << endl;
         // if true -> correct packet ?maybe
-        if (cin[i] == '6' && cin[i+1] == ':' && cin[i+7] == ',') {
+        if (cin[i] == '6' && cin[i+1] == ':' && cin[i+8] == ',') {
+            cout << "correct packet maybe" << endl;
             unsigned char us1 = cin[i+2];
+            printf("%i ", us1);
             unsigned char us2 = cin[i+3];
+            printf("%i ", us2);
             unsigned char ir1 = cin[i+4];
+            printf("%i ", ir1);
             unsigned char ir2 = cin[i+5];
+            printf("%i ", ir2);
             unsigned char ir3 = cin[i+6];
-            // populate the vector with values
-            v = {us1, us2, ir1, ir2, ir3};
-
+            printf("%i ", ir3);
+            unsigned char check = cin[i+7];
+            printf("%i \n", check);
+            // for now
+            if (check == 0x00) {
+                v = {us1, us2, ir1, ir2, ir3};
+                break;
+            }
             // check for the checksum here
             //unsigned char check = cin[i+7];
             //if (checksum(v) == check) {
