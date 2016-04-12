@@ -161,7 +161,9 @@ namespace lane {
                  * Later store/send position to the decision maker.
                  */
 
-                if (m_debug) {
+                // TODO Remember, changed for the first presentation
+                //if (m_debug) {
+                if(y == CONTROL_SCANLINE) {
                     if (left.x > 0) {
                         cvLine(m_image, cvPoint(m_image->width / 2, y), left, CV_RGB(0, 255, 0), 1, 8);
                         stringstream sstr;
