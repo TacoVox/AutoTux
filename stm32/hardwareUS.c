@@ -96,7 +96,7 @@ void hardwareIterationUSEnd() {
 			usCm[i] = (receiveBuffer[0] << 8) + receiveBuffer[1];
 		} else {
 			// Error message.
-			usCm[i] = (int)i2cGetErrors(US_I2C_DRIVER);
+			//usCm[i] = (int)i2cGetErrors(US_I2C_DRIVER);
 		}
 	}
 }

@@ -27,7 +27,7 @@
 #include "hardwareIR.h"
 #include "hardwareUS.h"
 #include "hardwareRC.h"
-#include "hardwareWE.h"
+//#include "hardwareWE.h"
 
 // Output
 #include "hardwarePWM.h"
@@ -39,6 +39,9 @@
  * Starting point  
  */
 int main(void) {
+	int dir = 1; // 1 = neutral, 0 = back, 2 = forward. for testing
+	int angle = 1; // 1 = center, 0 = left, 2 right. for testing
+
 	// Initialize drivers etc
 	halInit();
 	chSysInit();
@@ -47,7 +50,8 @@ int main(void) {
 	hardwareSetupIR();
 	hardwareSetupUS();
 	hardwareSetupRC();
-	hardwareSetupWE();
+	//hardwareSetupWE();
+	hardwareSetupPWM();
 
  	// Initialize serial over USB
 	sduObjectInit(&SDU1);
@@ -78,13 +82,26 @@ int main(void) {
 
 			charbuf = chnGetTimeout(&SDU1, 100);
 			if (charbuf != Q_TIMEOUT) {
-				/*
+
 				if ((char)charbuf == '\r') {
 					chprintf( (BaseSequentialStream *)&SDU1, "\r\n", (char)charbuf);	
 				} else {
 					chprintf( (BaseSequentialStream *)&SDU1, "%c", (char)charbuf);
-				}*/
+				}
 				// Received a character!
+				if ((char)charbuf == 'f')
+					dir = 2;
+				if ((char)charbuf == 's')
+					dir = 1;
+				if ((char)charbuf == 'b')
+					dir = 0;
+				if ((char)charbuf == 'l')
+					angle = 0;
+				if ((char)charbuf == 'c')
+					angle = 1;
+				if ((char)charbuf == 'r')
+					angle = 2;
+
 				iterationsSinceActive = 0;
 			} else {
 				// Timeout. Provide a \0 to keep connection alive.
@@ -92,10 +109,11 @@ int main(void) {
 			}
 			hardwareIterationIR(); // TODO: check time
 			hardwareIterationUSStart();
-			chThdSleepMilliseconds(500);
+			chThdSleepMilliseconds(300);
 			hardwareIterationUSEnd();
-			hardwareIterationWE();
-			//hardwareSetupPWM();
+			//hardwareIterationWE();
+			hardwareSetValuesPWM(PWM_OUTPUT_SERVO, angle);
+			hardwareSetValuesPWM(PWM_OUTPUT_ESC, dir);
 
 			// TODO The sensor c file should package the values in a data array.
 			// TODO The packet c file should pack it into the right packet format
@@ -105,11 +123,11 @@ int main(void) {
 				// "\033[F" for going back to previous line
 				chprintf( (BaseSequentialStream *)&SDU1, "\033[FTHROTTLE: %4i ", hardwareGetValuesRC(THROTTLE));
 				chprintf( (BaseSequentialStream *)&SDU1, "STEERING: %4i ", hardwareGetValuesRC(STEERING));
-				chprintf( (BaseSequentialStream *)&SDU1, "WHEEL: %f ", hardwareGetValuesWE());
-				chprintf( (BaseSequentialStream *)&SDU1, "US FRONT: %2i \r\n", hardwareGetValuesUS(US_FRONT));
-				chprintf( (BaseSequentialStream *)&SDU1, "US SIDE: %i ", hardwareGetValuesUS(US_SIDE));
-				chprintf( (BaseSequentialStream *)&SDU1, "SIDE_FRONT: %i ", hardwareGetValuesIR(IR_SIDE_FRONT));
-				chprintf( (BaseSequentialStream *)&SDU1, "SIDE_REAR: %i ",  hardwareGetValuesIR(IR_SIDE_REAR));
+				//chprintf( (BaseSequentialStream *)&SDU1, "WHEEL: %f ", hardwareGetValuesWE());
+				chprintf( (BaseSequentialStream *)&SDU1, "US FRONT: %3i \r\n", hardwareGetValuesUS(US_FRONT));
+				chprintf( (BaseSequentialStream *)&SDU1, "US SIDE: %3i ", hardwareGetValuesUS(US_SIDE));
+				chprintf( (BaseSequentialStream *)&SDU1, "SIDE_FRONT: %3i ", hardwareGetValuesIR(IR_SIDE_FRONT));
+				chprintf( (BaseSequentialStream *)&SDU1, "SIDE_REAR: %3i ",  hardwareGetValuesIR(IR_SIDE_REAR));
 				chprintf( (BaseSequentialStream *)&SDU1, "REAR: %2i ", hardwareGetValuesIR(IR_REAR));
 			} else {
 				// Normal packet output

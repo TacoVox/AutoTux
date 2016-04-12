@@ -41,7 +41,7 @@ typedef enum {US_FRONT, US_SIDE} US_SENSOR;
 
 #define US_SENSORS 2
 
-static const uint8_t US_ADDRESS[] = {0xE0 >> 1, 0x73};
+static const uint8_t US_ADDRESS[] = {0x70, 0x73};
 
 // Pins C9, A8
 static const ioportid_t US_PIN_GROUPS[] = {GPIOC, GPIOA};
