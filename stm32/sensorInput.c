@@ -58,7 +58,6 @@ void getSensorData(char* buffer) {
 	buffer[2] = (char)hardwareGetValuesIR(IR_SIDE_FRONT);
 	buffer[3] = (char)hardwareGetValuesIR(IR_SIDE_REAR);
 	buffer[4] = (char)hardwareGetValuesIR(IR_REAR);
-	buffer[5] = 0x00; // No checksum for now!
 }
 
 
