@@ -172,15 +172,16 @@ void usb_connector::USBConnector::write(void)
     vector<unsigned char> vec = bw->readSendBuffer();
     int len = vec.size();
     if (len <= 0) return;
-    char *pkt = reinterpret_cast<char*>(vec.data());
+    unsigned char *data = new unsigned char[len];
+    copy(vec.begin(), vec.end(), data);
     cout << "writing to usb stream..." << endl;
-    libusb_fill_bulk_transfer( transfer_out, usb_dev, USB_ENDPOINT_OUT,
-        (unsigned char *)pkt,  len, callback_out, this, 0);
+    libusb_fill_bulk_transfer(transfer_out, usb_dev, USB_ENDPOINT_OUT,
+        data, len, callback_out, this, 0);
     libusb_submit_transfer(transfer_out);
     while (libusb_handle_events_completed(ctx, NULL) != LIBUSB_SUCCESS) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
-    delete [] pkt;
+    delete [] data;
 }
 
 
@@ -226,7 +227,5 @@ void callback_in(struct libusb_transfer *transfer)
 {
     usb_connector::USBConnector *connector =
             reinterpret_cast<usb_connector::USBConnector*>(transfer->user_data);
-    cout << "transfer actual length: " << transfer->actual_length << endl;
-    cout << "buffer: " << transfer->buffer << endl;
     connector->handle_cb_in(transfer->buffer, transfer->actual_length);
 }
