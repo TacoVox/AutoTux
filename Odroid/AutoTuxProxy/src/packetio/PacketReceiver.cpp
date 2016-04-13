@@ -31,9 +31,10 @@ void packetio::PacketReceiver::nextContainer(Container &c) {
     if(c.getDataType() == 1) {
         cout << "Received ControlData" << endl;
         VehicleControl vehicleControl = c.getData<VehicleControl>();
-        std::vector<unsigned char> data {'2', ':'};
+        std::vector<unsigned char> data {'3', ':'};
         data.push_back((unsigned char)vehicleControl.getSpeed());
         data.push_back((unsigned char)vehicleControl.getSteeringWheelAngle());
+        data.push_back(0);
         data.push_back(',');
         bufferWrapper->appendSendBuffer(data);
     } else {
@@ -45,6 +46,6 @@ void packetio::PacketReceiver::nextContainer(Container &c) {
 void packetio::PacketReceiver::setBufferWrapper(
         std::shared_ptr<serial::BufferWrapper> bufferWrapper) {
     this->bufferWrapper = bufferWrapper;
-    std::vector<unsigned char> data {'2', ':', 0, 90, ','};
+    std::vector<unsigned char> data {'3', ':', 0, 90, 0, ','};
     bufferWrapper->appendSendBuffer(data);
 }
