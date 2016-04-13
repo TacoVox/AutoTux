@@ -48,6 +48,6 @@ namespace proxy {
             IplImage *m_image;
         };
     }
-};
+}
 
 #endif
