@@ -86,8 +86,20 @@ static const ioportmask_t WE_PIN_NUMBER  = 0;
 // PWM config
 //-----------------------------------------------------------------------------
 
-
 typedef enum {PWM_OUTPUT_ESC, PWM_OUTPUT_SERVO} PWM_OUTPUT_ID;
+
+// Speeds and their corresponding pulsewidths.
+typedef enum {SPEED_REVERSE, SPEED_STOP, SPEED_FORWARD} SPEED;
+static const int SPEED_PULSEWIDTHS = {1140, 1350, 1420};
+static const int SPEED_STEPS = 3;
+
+#define WHEELS_MAXLEFT_PW 1220
+#define WHEELS_CENTERED_PW 1590
+#define WHEELS_MAXRIGHT_PW 1980
+
+#define WHEELS_MAXLEFT_ANGLE 60
+#define WHEELS_CENTERED_ANGLE 90
+#define WHEELS_MAXRIGHT_ANGLE 120
 
 
 

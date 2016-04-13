@@ -60,35 +60,15 @@ int main(void) {
 	static int lastBufferSize = 0;
 
 	// Main loop. Iteration counter for activity LED
-  	int iterationsSinceActive = 0;
-  	int iterationsSinceRedLED = 0;
+  	//int iterationsSinceActive = 0;
+  	//int iterationsSinceRedLED = 0;
 	while(true) {
 
 		//---------------------------------------------------------------------
-		// LED management
+		// Reset all LEDS
 		//---------------------------------------------------------------------
-		// TODO: have simple methods like hardwareRedLEDOn, hardwareGreenLEDOn
-		// and hardwareLEDIteration() that resets them after N iterations
-
-		// Handles green LED. On if recently recieved bytes.
-		if (iterationsSinceActive < ACTIVITY_LED_TIMEOUT_ITERATIONS) {
-			// Active. LED on.
-			palSetPad(GPIOD, GPIOD_LED4);
-			iterationsSinceActive++;
-		} else {
-			// Timeout. Clear LED and provide a \0 to keep connection alive.
-			chprintf( (BaseSequentialStream *)&SDU1, "\0");
-			palClearPad(GPIOD, GPIOD_LED4);
-		}
-
-		// Handles red LED. On if recently set to 0
-	  	if (iterationsSinceRedLED < ACTIVITY_LED_TIMEOUT_ITERATIONS) {
-	  		iterationsSinceRedLED++;
-			palSetPad(GPIOD, GPIOD_LED5);
-	  	} else {
-	  		// Off after the given number of iterations
-			palClearPad(GPIOD, GPIOD_LED5);
-	  	}
+		palClearPad(GPIOD, GPIOD_LED4);
+		palClearPad(GPIOD, GPIOD_LED5);
 
 		//---------------------------------------------------------------------
 		// Receiving part
@@ -99,7 +79,7 @@ int main(void) {
 		charbuf = chnGetTimeout(&SDU1, TIME_IMMEDIATE);
 		while (charbuf != Q_TIMEOUT) {
 			// Received a byte = activity
-			iterationsSinceActive = 0;
+			//iterationsSinceActive = 0;
 
 			// Add the byte to the packet buffer
 			appendToBuffer((char)charbuf);
@@ -116,9 +96,11 @@ int main(void) {
 				getPacketBufferSize() > lastBufferSize) {
 			// TODO: Light up red LED if failed to instantiate packet
 			if (readPacketFromBuffer(controlData) == PACKET_OK) {
-				// TODO
-				iterationsSinceRedLED = 0;
-
+				// Valid packet - green LED
+				palSetPad(GPIOD, GPIOD_LED4);
+			} else {
+				// Broken packet or garbage - red LED
+				palSetPad(GPIOD, GPIOD_LED5);
 			}
 		}
 		// Keep track of buffer size so we only execute the above if anything is new
@@ -129,14 +111,15 @@ int main(void) {
 		// Output to hardware
 		//---------------------------------------------------------------------
 
-		// Regardless of how it went, controlData contains the latest
-		// valid instructions. Output it to hardware
+		// Regardless of how it went, controlData at this point contains the latest
+		// valid instructions. Output it to hardware.
 		// TODO: hardwareOutput(controlData);
-		// hardwareSetValuesPWM(PWM_OUTPUT_SERVO, angle);
-		// hardwareSetValuesPWM(PWM_OUTPUT_ESC, dir);
 
-		//chprintf((BaseSequentialStream*) &SDU1, "CONTROL 1: %2x", controlData[0]);
-		//chprintf((BaseSequentialStream*) &SDU1, "CONTROL 2: %2x", controlData[1]);
+		// Speed controlled by int corresponding to SPEED enum in hardware config
+		hardwareSetValuesPWM(PWM_OUTPUT_ESC, controlData[0]);
+
+		// Wheel angle: 90 degress +- ~30 degrees.
+		hardwareSetValuesPWM(PWM_OUTPUT_SERVO, controlData[1]);
 
 
 		//---------------------------------------------------------------------

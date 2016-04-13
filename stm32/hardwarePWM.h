@@ -10,14 +10,17 @@
 
 #include "autotuxhardware.h"
 
+
 /*
  * Sets up the PWM pins etc
  */
 void hardwareSetupPWM(void);
 
+
 /*
  * Setter for the values. Specify an output channel ID
  */
-void hardwareSetValuesPWM(PWM_OUTPUT_ID, icucnt_t);
+void hardwareSetValuesPWM(PWM_OUTPUT_ID, int value);
+
 
 #endif /* HARDWAREPWM_H_ */
