@@ -70,6 +70,8 @@ namespace lane {
 
             autotux::LaneRecommendation laneRecommendation;
 
+            bool panicStop;
+
             virtual void setUp();
             virtual void tearDown();
 

@@ -187,7 +187,8 @@ namespace lane {
                 }
             }
 
-            double desiredSteering = m_vehicleControl.getSteeringWheelAngle();
+            laneRecommendation.setAngle(laneRecommendation.getAngle());
+            laneRecommendation.setQuality(true);
 
             // cerr << "Dist to left marking: " << m_distToLeftMarking << " : ";
             // cerr << "Dist to right marking: " << m_distToRightMarking << endl;
@@ -229,8 +230,15 @@ namespace lane {
 
             // cerr << "Angle: " << desiredSteering << endl;
 
-            m_vehicleControl.setSpeed(5);
-            m_vehicleControl.setSteeringWheelAngle(laneRecommendation.getAngle());
+            if(panicStop) {
+                laneRecommendation.setQuality(false);
+            }
+
+            else {
+                laneRecommendation.setQuality(true);
+                laneRecommendation.setDistance_to_line(0.0);
+                laneRecommendation.setLeft_lane(false);
+            }
         }
 
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode LaneFollower::body() {
@@ -259,9 +267,9 @@ namespace lane {
                     processImage();
                 }
 
-                Container c2();
+                Container laneRecContainer(laneRecommendation);
 
-                getConference().send(c2);
+                getConference().send(laneRecContainer);
             }
 
             return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;

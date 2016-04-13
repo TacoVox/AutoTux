@@ -41,7 +41,7 @@ char** ptrargv;
 VehicleControl vehicleControl;
 shared_ptr<Container> containerptr(new Container(vehicleControl));
 
-Container laneRecommendation(new Container(LaneRecommendation));
+Container laneRecommendation;
 
 /**
  * Constructor
@@ -97,6 +97,11 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
 
     packetBroadcaster->setControlDataContainer(containerptr);
 
+    LaneRecommendation lr;
+
+    vehicleControl.setSpeed(1);
+    *containerptr = vehicleControl;
+
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
         packetBroadcaster->setControlDataContainer(containerptr);
 
@@ -108,12 +113,20 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
             *containerptr = *ovtControlPtr;
         }
         else if(state == PARKING){
+
             *ptrParking = true;
 
             if(parkerPointer->getFoundSpot()){
                 *containerptr = *parkControlptr;
             }
-            *containerptr = laneRecommendation;
+
+
+
+            lr = laneRecommendation.getData<LaneRecommendation>();
+
+            cout << lr.getAngle() << endl;
+            vehicleControl.setSteeringWheelAngle(lr.getAngle());
+            *containerptr = vehicleControl;
         }
     }
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
@@ -126,6 +139,8 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
  */
 void decisionmaker::DecisionMaker::nextContainer(odcore::data::Container &c) {
     if(c.getDataType() == LaneRecommendation::ID()){
+        // c.getData<LaneRecommendation>();
+        cout << "This is laneRecommendation WOHO!!!!!!!!!!! " << endl;
         laneRecommendation = c; //Pointer to which the PacketBroadcaster sends for data.
     }
 }
