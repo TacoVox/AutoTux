@@ -11,7 +11,7 @@ using namespace odcore::base::module;
 using namespace odcore::data;
 
 packetio::PacketBroadcaster::PacketBroadcaster(const int32_t &argc, char **argv) :
-        TimeTriggeredConferenceClientModule(argc, argv, "TimeTriggeredSender"),
+        TimeTriggeredConferenceClientModule(argc, argv, "AutoTuxProxy - PacketSender"),
         sensorBoardDataContainer(NULL), interrupted(false) {
     cout << "Create PacketBroadcaster Object..." << endl;
 }
@@ -43,9 +43,8 @@ void packetio::PacketBroadcaster::setSensorBoardDataContainer(
         std::shared_ptr<odcore::data::Container> sensorBoardDataContainer) {
     cout << "Set SBDC..." << endl;
     //If there is data set - remove it from memory
-    //if(this->sensorBoardDataContainer != NULL) {
-    //    this->sensorBoardDataContainer->~Container();
-    //}
+    if(this->sensorBoardDataContainer != NULL) {
+        this->sensorBoardDataContainer->~Container();
+    }
     this->sensorBoardDataContainer = sensorBoardDataContainer;
 }
-

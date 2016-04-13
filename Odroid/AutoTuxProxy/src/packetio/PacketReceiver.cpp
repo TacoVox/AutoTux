@@ -13,14 +13,16 @@ using namespace odcore::base::module;
 using namespace odcore::data;
 
 packetio::PacketReceiver::PacketReceiver(const int32_t &argc, char **argv) :
-    DataTriggeredConferenceClientModule(argc, argv, "DataTriggeredReceiver"),
+    DataTriggeredConferenceClientModule(argc, argv, "AutoTuxProxy - PacketReceiver"),
     bufferWrapper(NULL) {
     cout << "Create PacketReceiver Object..." << endl;
 }
 
 packetio::PacketReceiver::~PacketReceiver() {}
 
-void packetio::PacketReceiver::setUp() {}
+void packetio::PacketReceiver::setUp() {
+    cout << "PacketReveicer initialized [OK]" << endl;
+}
 
 void packetio::PacketReceiver::tearDown() {}
 
@@ -29,11 +31,13 @@ void packetio::PacketReceiver::nextContainer(Container &c) {
     if(c.getDataType() == 1) {
         cout << "Received ControlData" << endl;
         VehicleControl vehicleControl = c.getData<VehicleControl>();
-        std::vector<unsigned char> data;
+        std::vector<unsigned char> data {'2', ':'};
         data.push_back((unsigned char)vehicleControl.getSpeed());
         data.push_back((unsigned char)vehicleControl.getSteeringWheelAngle());
+        data.push_back(',');
         bufferWrapper->appendSendBuffer(data);
     } else {
+        cout << "Received: " << c.getDataType() << endl;
         cout << "Received invalid data" << endl;
     }
 }
@@ -41,4 +45,6 @@ void packetio::PacketReceiver::nextContainer(Container &c) {
 void packetio::PacketReceiver::setBufferWrapper(
         std::shared_ptr<serial::BufferWrapper> bufferWrapper) {
     this->bufferWrapper = bufferWrapper;
+    std::vector<unsigned char> data {'2', ':', 0, 90, ','};
+    bufferWrapper->appendSendBuffer(data);
 }
