@@ -68,6 +68,8 @@ namespace lane {
 
             automotive::VehicleControl m_vehicleControl;
 
+            autotux::LaneRecommendation laneRecommendation;
+
             virtual void setUp();
             virtual void tearDown();
 
