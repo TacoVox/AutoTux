@@ -8,7 +8,8 @@
 using namespace std;
 
 
-serial::BufferWrapper::BufferWrapper()
+serial::BufferWrapper::BufferWrapper() :
+buffer_in({}), buffer_out({})
 {
     cout << "creating buffer parser object" << endl;
 }
@@ -82,7 +83,10 @@ void serial::BufferWrapper::appendSendBuffer(vector<unsigned char>)
 //Here we will need to return a packet to the calling function.
 vector<unsigned char> serial::BufferWrapper::readSendBuffer(void)
 {
-    return buffer_out.at(0);
+    if(buffer_out.size() != 0)
+        return buffer_out.at(0);
+    else
+        return vector<unsigned char> {0, 1};
 }
 
 
