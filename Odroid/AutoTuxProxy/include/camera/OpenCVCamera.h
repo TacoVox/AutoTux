@@ -2,11 +2,13 @@
 #define OPENCVCAMERA_H_
 
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/opencv.hpp>
 
 #include "Camera.h"
 
 namespace proxy {
     namespace camera {
+        using namespace cv;
         using namespace std;
 
         /**
@@ -44,10 +46,10 @@ namespace proxy {
             virtual bool captureFrame();
 
         private:
-            CvCapture *m_capture;
-            IplImage *m_image;
+            VideoCapture m_vc;
+            Mat m_mat;
         };
     }
-}
+};
 
 #endif
