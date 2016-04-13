@@ -8,7 +8,6 @@
 #include <opendavinci/odcore/base/Lock.h>
 #include <opendavinci/odcore/data/Container.h>
 #include "opendavinci/odcore/io/conference/ContainerConference.h"
-#include <opendavinci/odcore/wrapper/SharedMemory.h>
 #include <opendavinci/odcore/wrapper/SharedMemoryFactory.h>
 
 #include <opendavinci/GeneratedHeaders_OpenDaVINCI.h>
@@ -40,7 +39,8 @@ namespace lane {
             m_previousTime(),
             m_font(),
             m_debug(false),
-            m_vehicleControl() {}
+            m_vehicleControl(),
+            laneRecommendation() {}
 
         LaneFollower::~LaneFollower() {}
 
@@ -143,8 +143,6 @@ namespace lane {
                     shared_ptr<SharedMemory> sharedMemory(SharedMemoryFactory::attachToSharedMemory("TEST"));
                     if (sharedMemory->isValid()) {
                         Lock l(sharedMemory);
-
-                        // cvLine(m_image, cvPoint(m_image->width, y), left, CV_RGB(0, 255, 0), 1, 8);
                     }
                     this->m_distToLeftMarking = m_image->width/2 - left.x;
                     this->m_distToRightMarking = right.x - m_image->width/2;
@@ -198,7 +196,7 @@ namespace lane {
             // keep going forward.
             if(m_distToLeftMarking > 240 && m_distToLeftMarking < 320 &&
                     m_distToRightMarking > 240 && m_distToRightMarking < 320) {
-                desiredSteering = 0;
+                laneRecommendation.setAngle(0);
                 cerr << "Going straight!" << endl;
             }
 
@@ -208,7 +206,7 @@ namespace lane {
             // it waits until it turns is less than a left turn.
             else if((m_distToRightMarking > 320 || m_distToRightMarking < 0) &&
                         m_distToLeftMarking < 270 && m_distToLeftMarking > 0) {
-                desiredSteering += 2;
+                laneRecommendation.setAngle(2.0);
                 cerr << "Turning right! Left: " << m_distToLeftMarking << " & Right: " << m_distToRightMarking << endl;
             }
 
@@ -216,13 +214,13 @@ namespace lane {
             // left line gets too far away, make a left turn.
             else if((m_distToLeftMarking > 320 || m_distToLeftMarking < 0) &&
                         m_distToRightMarking < 230 && m_distToRightMarking > 0) {
-                desiredSteering -= 2;
+                laneRecommendation.setAngle(-2.0);
                 cerr << "Turning left! Left: " << m_distToLeftMarking << " & Right: " << m_distToRightMarking << endl;
             }
 
             // If all else fails, just keep going forward without turning
             else {
-                desiredSteering = 0;
+                laneRecommendation.setAngle(0);
                 cerr << "Nothing." << endl;
             }
 
@@ -232,7 +230,7 @@ namespace lane {
             // cerr << "Angle: " << desiredSteering << endl;
 
             m_vehicleControl.setSpeed(5);
-            m_vehicleControl.setSteeringWheelAngle(desiredSteering);
+            m_vehicleControl.setSteeringWheelAngle(laneRecommendation.getAngle());
         }
 
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode LaneFollower::body() {
@@ -261,7 +259,7 @@ namespace lane {
                     processImage();
                 }
 
-                Container c2(m_vehicleControl);
+                Container c2();
 
                 getConference().send(c2);
             }
