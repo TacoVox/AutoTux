@@ -6,6 +6,10 @@
 #define DECISIONMAKER_DecisionMaker_H
 
 #include <opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h>
+#include "opendavinci/odcore/data/Container.h"
+
+#include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
+#include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 
 namespace decisionmaker{
     using namespace std;
@@ -27,6 +31,13 @@ namespace decisionmaker{
     private:
         virtual void setUp();
         virtual void tearDown();
+
+        odcore::data::Container laneRecommendation;
+        double getAngle();
+        bool isInLeftLane();
+        bool isDataQuality();
+        double getDistanceToLine();
+        void laneFollowing();
     };
 
 } //DecisionMaker

@@ -11,7 +11,7 @@
 //using namespace odcore::base::module;
 using namespace odcore::data;               // Allows 'Container'
 using namespace automotive::miniature;      // Allows 'Sensor Board Data'
-using namespace automotive;                 // Allows 'Vehicle Data'
+//using namespace automotive;                 // Allows 'Vehicle Data'
 
 using namespace overtaker;
 
@@ -41,11 +41,19 @@ void Overtaker::setOvtControlDataContainer(std::shared_ptr<odcore::data::Contain
  * */
 bool Overtaker::isObstacleDetected(automotive::miniature::SensorBoardData sbd, const double sensor, const double maxDist) {
 
-    cout << "Front US sensor : " << sbd.getValueForKey_MapOfDistances(sensor) << endl;        // DEBUG** Remove this line
+    double sensorVal = sbd.getValueForKey_MapOfDistances(sensor);
 
-    if(sbd.getValueForKey_MapOfDistances(sensor) < maxDist) return true;
+    // DEBUG** Remove this line
+    cout << "Front US sensor : " << sensorVal << endl;
+
+    if(sensorVal < maxDist && sensorVal >= 1) return true;
 
     return false;
+}
+
+
+void Overtaker::switchToLeftLane() {
+    ovtVc.setSteeringWheelAngle(-45);
 }
 
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Overtaker::body(){
@@ -65,10 +73,9 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Overtaker::body(){
     VehicleData vd;
     Container containerSensorBoardData;
     SensorBoardData sbd;
+    VehicleControl vc;
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING){
-
-        //cout << "Overtaker loop" << endl;
 
         // 1. Get most recent vehicle data:
         containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
@@ -78,37 +85,37 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Overtaker::body(){
         containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
         sbd = containerSensorBoardData.getData<SensorBoardData>();
 
+        // Set initial speed in vehicle control
+        ovtVc.setSpeed(1);
+
         switch(state){
             case FREE_LANE:{
-
                 // Check front for obstacles
-                if(isObstacleDetected(sbd, ULTRASONIC_FRONT_FORWARD, 30.0)){
+                if(isObstacleDetected(sbd, ULTRASONIC_FRONT_FORWARD, 15.0)){
                     cout << "Overtaker: Obstacle detected" << endl;
-                    //state = APPROACHING;
+                    state = APPROACHING;
                 }
+                break;
             }
             case APPROACHING:{
-                // To-Do...
-                    // Measure distance from obstacle
+                // Check min distance
+                if(isObstacleDetected(sbd, ULTRASONIC_FRONT_FORWARD, 10.0)) {
+                    cout << "Overtaker: Initiating Left-Switch maneuver" << endl;
+                    state = LEFT_SWITCH;
+                }
+                break;
+            }
+            case LEFT_SWITCH:{
+                // Set vehicle control
+                cout << "Overtaker: Switching left maneuver" << endl;
+                switchToLeftLane();
+                break;
             }
         }
 
-        /*
-        if(state == FREE_LANE){
+        // Set control values in shared pointer
+        *ovtControlDataContainer = ovtVc;
 
-            cout << "Overtaker state: FREE_LANE" << endl;
-
-            // Check front for obstacles
-            if(isObstacleDetected(sbd, ULTRASONIC_FRONT_FORWARD, 30.0)){
-                cout << "Obstacle detected, switching to approaching obstacle" << endl;
-                //state = APPROACHING;
-            }
-        }else if(state == APPROACHING){
-            //To-Do...
-            // Measure Distance from obstacle and compare with threshold
-        }
-
-         */
     }
 
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
