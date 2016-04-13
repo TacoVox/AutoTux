@@ -1,9 +1,6 @@
 #include <iostream>
 #include <memory>
 
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
-
 #include <opendavinci/odcore/base/KeyValueConfiguration.h>
 #include <opendavinci/odcore/base/Lock.h>
 #include <opendavinci/odcore/data/Container.h>
@@ -21,6 +18,7 @@
 namespace lane {
     namespace follower {
         using namespace std;
+        using namespace cv;
         using namespace odcore::base;
         using namespace odcore::data;
         using namespace odcore::data::image;
@@ -32,41 +30,34 @@ namespace lane {
         using namespace odtools::player;
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) :
-            TimeTriggeredConferenceClientModule(argc, argv, "LaneDetector"),
-            m_hasAttachedToSharedImageMemory(false),
-            m_sharedImageMemory(),
-            m_image(NULL),
-            m_previousTime(),
-            m_font(),
-            m_debug(false),
-            m_vehicleControl(),
-            laneRecommendation() {}
+                TimeTriggeredConferenceClientModule(argc, argv, "LaneDetector"),
+                m_hasAttachedToSharedImageMemory(false),
+                m_sharedImageMemory(),
+                m_image(),
+                m_previousTime(),
+                m_debug(false),
+                m_vehicleControl(),
+                laneRecommendation() {}
 
-        LaneFollower::~LaneFollower() {}
+        LaneFollower::~LaneFollower() { }
 
         // This method will run before body()
         void LaneFollower::setUp() {
             // Set up debug window
-            if(m_debug) {
+            if (m_debug) {
                 cvNamedWindow("Debug Window", CV_WINDOW_AUTOSIZE);
                 cvMoveWindow("Debug Window", 300, 100);
-            }
-
-            // Set up shared memory for storing things
-            try {
-                shared_ptr<SharedMemory> sharedMemory(SharedMemoryFactory::createSharedMemory("TEST", 64));
-            } catch(string &ex) {
-                cerr << "Shared memory could not be created: " << ex << endl;
             }
         }
 
         // This method will run after return from body()
         void LaneFollower::tearDown() {
-            if(m_image != NULL) {
-                cvReleaseImage(&m_image);
+            if (!m_image.empty()) {
+                //cvReleaseImage(&m_image);
+                m_image.deallocate();
             }
 
-            if(m_debug) {
+            if (m_debug) {
                 cvvDestroyWindow("Debug Window");
             }
         }
@@ -74,31 +65,29 @@ namespace lane {
         bool LaneFollower::readSharedImage(odcore::data::Container &c) {
             bool returnValue = false;
 
-            if(c.getDataType() == odcore::data::image::SharedImage::ID()) {
+            if (c.getDataType() == odcore::data::image::SharedImage::ID()) {
                 SharedImage si = c.getData<SharedImage>();
 
                 // Have we already attached to the shared memory containing the image?
-                if(!m_hasAttachedToSharedImageMemory) {
+                if (!m_hasAttachedToSharedImageMemory) {
                     m_sharedImageMemory = odcore::wrapper::SharedMemoryFactory::attachToSharedMemory(si.getName());
                 }
 
                 // Did we successfully connect?
-                if(m_sharedImageMemory->isValid()) {
+                if (m_sharedImageMemory->isValid()) {
                     Lock l(m_sharedImageMemory);
-
-                    if(m_image == NULL) {
-                        m_image = cvCreateImage(cvSize(si.getWidth(), si.getHeight()), IPL_DEPTH_8U, si.getBytesPerPixel());
+                    // Create image(cv::Mat) if empty.
+                    if (m_image.empty()) {
+                        m_image.create(si.getHeight(), si.getWidth(), CV_8UC3);
+                    } else {
+                        // Copy image data form SharedImageMemory
+                        memcpy(m_image.data, m_sharedImageMemory->getSharedMemory(),
+                               si.getHeight() * si.getWidth() * si.getBytesPerPixel());
                     }
 
-                    // Copy the image to current process space
-                    if(m_image != NULL) {
-                        memcpy(m_image->imageData, m_sharedImageMemory->getSharedMemory(), si.getWidth() * si.getHeight() * si.getBytesPerPixel());
-                    }
-
-                    // Mirror image?
-                    // NOTE: Only for simulator
-                    cvFlip(m_image, 0, -1);
-
+                    // Mirror image
+                    // NOTE: For simulator.
+                    // flip(m_image, m_image, 0);
                     returnValue = true;
                 }
             }
@@ -108,21 +97,16 @@ namespace lane {
         // Do magic to the image around here.
         void LaneFollower::processImage() {
 
-            // double e = 0; //?
-            const int32_t CONTROL_SCANLINE = 462; //?
-            // const int32_t distance = 280; //?
+            const int32_t CONTROL_SCANLINE = 462;
+            Point left, right;
 
-            // TimeStamp beforeProcessing;
-
-            for(int32_t y = m_image->height - 8; y > m_image->height * .5; y -= 10) {
-                CvScalar pixelLeft, pixelRight;
-                CvPoint left, right;
+            for (int32_t y = m_image.rows - 8; y > m_image.rows * .5; y -= 10) {
 
                 left.y = y;
                 left.x = -1;
-                for (int x = m_image->width / 2; x > 0; x--) {
-                    pixelLeft = cvGet2D(m_image, y, x);
-                    if (pixelLeft.val[0] >= 200) {
+
+                for (int x = m_image.cols / 2; x > 0; x--) {
+                    if (m_image.at<Vec3b>(Point(x, y))[0] > 200) {
                         left.x = x;
                         break;
                     }
@@ -130,60 +114,40 @@ namespace lane {
 
                 right.y = y;
                 right.x = -1;
-                for (int x = m_image->width / 2; x < m_image->width; x++) {
-                    pixelRight = cvGet2D(m_image, y, x);
-                    if (pixelRight.val[0] >= 200) {
+                for (int x = m_image.cols / 2; x < m_image.cols; x++) {
+                    if (m_image.at<Vec3b>(Point(x, y))[0] > 200) {
                         right.x = x;
                         break;
                     }
                 }
 
-                // Attach and store in the shared memory.
                 if (y == CONTROL_SCANLINE) {
-                    shared_ptr<SharedMemory> sharedMemory(SharedMemoryFactory::attachToSharedMemory("TEST"));
-                    if (sharedMemory->isValid()) {
-                        Lock l(sharedMemory);
-                    }
-                    this->m_distToLeftMarking = m_image->width/2 - left.x;
-                    this->m_distToRightMarking = right.x - m_image->width/2;
+                    m_distToLeftMarking = m_image.cols / 2 - left.x;
+                    m_distToRightMarking = right.x - m_image.cols / 2;
                 }
 
-                /**
-                 * TODO
-                 * Decide on a proper scanline to use when calculating position.
-                 * Defined as CONTROL_SCANLINE further up.
-                 * Take into account the deviation error. Examples in the automotive/miniature.
-                 *
-                 * Research into the "Twiddle" algorithm.
-                 *
-                 * Later store/send position to the decision maker.
-                 */
-
-                // TODO Remember, changed for the first presentation
-                //if (m_debug) {
-                if(y == CONTROL_SCANLINE) {
+                if (m_debug) {
                     if (left.x > 0) {
-                        cvLine(m_image, cvPoint(m_image->width / 2, y), left, CV_RGB(0, 255, 0), 1, 8);
+                        line(m_image, Point(m_image.cols / 2, y), left, CV_RGB(0, 255, 0));
                         stringstream sstr;
-                        sstr << (m_image->width / 2 - left.x);
-                        cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width / 2 - 100, y - 2), &m_font,
-                                  CV_RGB(0, 255, 0));
+                        sstr << (m_image.cols / 2 - left.x);
+                        putText(m_image, sstr.str().c_str(), Point(m_image.cols / 2 - 100, y - 2), FONT_HERSHEY_PLAIN,
+                                0.5, CV_RGB(0, 255, 0));
                     }
                     if (right.x > 0) {
-                        cvLine(m_image, cvPoint(m_image->width / 2, y), right, CV_RGB(255, 0, 0), 1, 8);
+                        line(m_image, Point(m_image.cols / 2, y), right, CV_RGB(200, 0, 0));
                         stringstream sstr;
-                        sstr << (right.x - m_image->width / 2);
-                        cvPutText(m_image, sstr.str().c_str(), cvPoint(m_image->width / 2 + 100, y - 2), &m_font,
-                                  CV_RGB(255, 0, 0));
+                        sstr << (right.x - m_image.cols / 2);
+                        putText(m_image, sstr.str().c_str(), Point(m_image.cols / 2 + 100, y - 2), FONT_HERSHEY_PLAIN,
+                                0.5, CV_RGB(255, 0, 0));
                     }
                 }
             }
 
-            // Debugging; show image. Keep at end.
-            if(m_debug) {
-                if(m_image != NULL) {
-                    cvShowImage("Camera Image", m_image);
-                    cvWaitKey(10);
+            if (m_debug) {
+                if (m_image.data != NULL) {
+                    imshow("Camera Image", m_image);
+                    waitKey(10);
                 }
             }
 
@@ -195,31 +159,30 @@ namespace lane {
 
             // If the car is close enough to the middle of the road, just
             // keep going forward.
-            if(m_distToLeftMarking > 240 && m_distToLeftMarking < 320 &&
-                    m_distToRightMarking > 240 && m_distToRightMarking < 320) {
+            if (m_distToLeftMarking > 240 && m_distToLeftMarking < 320 &&
+                m_distToRightMarking > 240 && m_distToRightMarking < 320) {
                 laneRecommendation.setAngle(0);
                 cerr << "Going straight!" << endl;
             }
 
-            // Whenever the left line gets too close and the right
-            // line gets too far away, make a right turn.
-            // NOTE: To keep further away from the left lane, the distance
-            // it waits until it turns is less than a left turn.
-            else if((m_distToRightMarking > 320 || m_distToRightMarking < 0) &&
-                        m_distToLeftMarking < 270 && m_distToLeftMarking > 0) {
+                // Whenever the left line gets too close and the right
+                // line gets too far away, make a right turn.
+                // NOTE: To keep further away from the left lane, the distance
+                // it waits until it turns is less than a left turn.
+            else if ((m_distToRightMarking > 320 || m_distToRightMarking < 0) &&
+                     m_distToLeftMarking < 270 && m_distToLeftMarking > 0) {
                 laneRecommendation.setAngle(2.0);
                 cerr << "Turning right! Left: " << m_distToLeftMarking << " & Right: " << m_distToRightMarking << endl;
             }
 
-            // Whenever the right line gets to close and the
-            // left line gets too far away, make a left turn.
-            else if((m_distToLeftMarking > 320 || m_distToLeftMarking < 0) &&
-                        m_distToRightMarking < 230 && m_distToRightMarking > 0) {
+                // Whenever the right line gets to close and the
+                // left line gets too far away, make a left turn.
+            else if ((m_distToLeftMarking > 320 || m_distToLeftMarking < 0) &&
+                     m_distToRightMarking < 230 && m_distToRightMarking > 0) {
                 laneRecommendation.setAngle(-2.0);
                 cerr << "Turning left! Left: " << m_distToLeftMarking << " & Right: " << m_distToRightMarking << endl;
             }
-
-            // If all else fails, just keep going forward without turning
+                // If all else fails, just keep going forward without turning
             else {
                 laneRecommendation.setAngle(0);
                 cerr << "Nothing." << endl;
@@ -239,18 +202,14 @@ namespace lane {
                 laneRecommendation.setDistance_to_line(0.0);
                 laneRecommendation.setLeft_lane(false);
             }
+
+            m_vehicleControl.setSteeringWheelAngle(laneRecommendation.getAngle());
         }
 
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode LaneFollower::body() {
             // Get configuration
             KeyValueConfiguration kv = getKeyValueConfiguration();
             m_debug = kv.getValue<int32_t>("lanedetector.debug") == 1;
-
-            // Initialize OpenCV fonts
-            const double hscale = 0.4;
-            const double vscale = 0.3;
-
-            cvInitFont(&m_font, CV_FONT_NORMAL, hscale, vscale);
 
             // ?
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() ==
