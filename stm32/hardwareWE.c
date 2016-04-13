@@ -15,23 +15,21 @@
 //-----------------------------------------------------------------------------
 
 systime_t measurementStart;
-static void icuCallback(ICUDriver *icup);
+//static void icuCallback(ICUDriver *icup);
 
+//--
+//	Thread Definitions
+//--
 
-static ICUConfig icuConfig = {
-  ICU_INPUT_ACTIVE_HIGH,
-  //1000000,
-  10000,
-  icuCallback,
-  NULL,
-  NULL,
-  WE_TIMER_CHANNEL,
-  0
-};
+static THD_WORKING_AREA(wheelEncoderThreadWorkingArea, 150);
+static THD_FUNCTION(wheelEncoderThread, arg);
 
 // The resulting pulsewidth values
 uint8_t ticks;
+bool previousState;
 double metersPerSecond;
+systime_t startTime;
+unsigned int timeNow;
 
 
 //-----------------------------------------------------------------------------
@@ -43,44 +41,46 @@ double metersPerSecond;
  * Sets up the US sensor pins etc.
  */
 void hardwareSetupWE(void) {
-	palSetPadMode(WE_PIN_GROUP, WE_PIN_NUMBER, PAL_MODE_ALTERNATE(2));
-	icuStart(WE_TIMER, &icuConfig);
-	icuStartCapture(WE_TIMER);
-	icuEnableNotifications(WE_TIMER);
+	palSetPadMode(WE_PIN_GROUP, WE_PIN_NUMBER, PAL_MODE_INPUT_PULLUP);
+    //Set up the thread here
+    (void)chThdCreateStatic(wheelEncoderThreadWorkingArea, sizeof(wheelEncoderThreadWorkingArea),
+						  NORMALPRIO, wheelEncoderThread, NULL);
 }
-
 
 void hardwareIterationWE(void) {
 	// NOTE: For now, the calculation won't calculate/affect the speed around systime's reset
 	// (every time it's close to overflow)
 	// Try measuring every fifth iteration for now
-	const int n = 5;
-	const float ticksPerMeter = 47.7;
-	static int counter = 5;
-	if (counter < n - 1) {
-		counter++;
-	} else {
-		// Get current time
-		systime_t timeNow = chVTGetSystemTime();
 
-		// Calculate time passed since last reset
-		if (timeNow > measurementStart) {
-			systime_t timeDelta = timeNow - measurementStart;
-			int timeDeltaMS = (int)ST2MS(timeDelta);
-			double ticksPerS = (ticks * 1000 / (double)timeDeltaMS);
-			metersPerSecond = (ticksPerS / ticksPerMeter);
-		} else {
-			// TODO: could still calculate if we now the max value of systime_t
-		}
+	systime_t startTime = chVTGetSystemTime();
+    const float ticksPerMeter = 47.7;
 
-		// Reset timer and tick counter
-		ticks = 0;
-		measurementStart = chVTGetSystemTime();
-		counter = 0;
+	while(true){
+		if (previousState == FALSE && palReadPad(WE_PIN_GROUP, WE_PIN_NUMBER)) {
+	        previousState = TRUE;
+	        ticks++;
+	    } else if (previousState == TRUE && palReadPad(WE_PIN_GROUP, WE_PIN_NUMBER) == FALSE) {
+	        previousState = FALSE;
+	    }
+
+	    if (ST2MS(chVTGetSystemTime()) > ST2MS(startTime) + 1000) {
+	        // Do calculations here
+	        // numberOfTicksInMeters / timeElapsed
+	        systime_t timeDelta = timeNow - startTime;
+	        int timeDeltaMS = (int)ST2MS(timeDelta); // Why not just initialize this as double?
+			double seconds = (double)timeDeltaMS / 1000;
+	        double ticksPerS = ticks / seconds; // Why multiply by 1000?????
+	        metersPerSecond = (ticksPerS / ticksPerMeter);
+
+	        startTime = chVTGetSystemTime();
+	    }
 	}
 }
 
-
+static THD_FUNCTION(wheelEncoderThread, arg) {
+	(void) arg;
+	hardwareIterationWE();
+}
 
 /*
  * Getter for the values. Specify a US sensor.
@@ -94,7 +94,7 @@ double hardwareGetValuesWE(void) {
 //-----------------------------------------------------------------------------
 
 
-static void icuCallback(ICUDriver *icup) {
+/*static void icuCallback(ICUDriver *icup) {
 	(void)icup;
 	ticks++;
-}
+}*/
