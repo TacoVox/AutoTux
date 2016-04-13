@@ -22,7 +22,8 @@ usb_connector::USBConnector::USBConnector(const usb_connector::USBConnector &usb
 }
 
 
-usb_connector::USBConnector & usb_connector::USBConnector::operator=(const usb_connector::USBConnector &usb)
+usb_connector::USBConnector &
+usb_connector::USBConnector::operator=(const usb_connector::USBConnector &usb)
 {
     return *this;
 }
@@ -83,6 +84,7 @@ bool usb_connector::USBConnector::open_device(void)
                 cout << "[FAIL] error code: " << open << endl;
                 return false;
             }
+            break;
         }
     }
 
