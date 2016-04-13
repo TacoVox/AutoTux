@@ -19,11 +19,12 @@ namespace packetio {
         virtual void nextContainer(odcore::data::Container &c);
         void setBufferWrapper(std::shared_ptr<serial::BufferWrapper>);
     private:
+        std::shared_ptr<serial::BufferWrapper> bufferWrapper;
         PacketReceiver(const PacketReceiver &/*obj*/);
         PacketReceiver& operator=(const PacketReceiver &/*obj*/);
         virtual void setUp();
         virtual void tearDown();
-        std::shared_ptr<serial::BufferWrapper> bufferWrapper;
+        unsigned char checksum(std::vector<unsigned char>);
     };
 
 }

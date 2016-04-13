@@ -34,7 +34,7 @@ void packetio::PacketReceiver::nextContainer(Container &c) {
         std::vector<unsigned char> data {'3', ':'};
         data.push_back((unsigned char)vehicleControl.getSpeed());
         data.push_back((unsigned char)vehicleControl.getSteeringWheelAngle());
-        data.push_back(0);
+        data.push_back(checksum(data));
         data.push_back(',');
         bufferWrapper->appendSendBuffer(data);
     } else {
@@ -46,6 +46,14 @@ void packetio::PacketReceiver::nextContainer(Container &c) {
 void packetio::PacketReceiver::setBufferWrapper(
         std::shared_ptr<serial::BufferWrapper> bufferWrapper) {
     this->bufferWrapper = bufferWrapper;
-    std::vector<unsigned char> data {'3', ':', 0, 90, 0, ','};
+    std::vector<unsigned char> data {'3', ':', 0, 90, 95, ','};
     bufferWrapper->appendSendBuffer(data);
 }
+
+unsigned char packetio::PacketReceiver::checksum(std::vector<unsigned char> v) {
+    unsigned char cs = 0;
+    for(auto it = v.begin(); it < v.end(); it++)
+        cs ^= *it;
+    return cs;
+}
+
