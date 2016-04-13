@@ -4,7 +4,6 @@
 
 #include <ctype.h>
 #include <cstring>
-#include <cmath>
 #include <iostream>
 
 #include <opendavinci/odcore/base/KeyValueConfiguration.h>
