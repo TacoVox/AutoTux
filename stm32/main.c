@@ -36,8 +36,8 @@
 //-----------------------------------------------------------------------------
 
 
-#define DEBUG_OUTPUT 0
-#define ACTIVITY_LED_TIMEOUT_ITERATIONS 10
+#define DEBUG_OUTPUT 1
+
 
 // Buffer for received byte
 msg_t charbuf;
@@ -60,8 +60,6 @@ int main(void) {
 	static int lastBufferSize = 0;
 
 	// Main loop. Iteration counter for activity LED
-  	//int iterationsSinceActive = 0;
-  	//int iterationsSinceRedLED = 0;
 	while(true) {
 
 		//---------------------------------------------------------------------
@@ -116,10 +114,10 @@ int main(void) {
 		// TODO: hardwareOutput(controlData);
 
 		// Speed controlled by int corresponding to SPEED enum in hardware config
-		hardwareSetValuesPWM(PWM_OUTPUT_ESC, controlData[0]);
+		//hardwareSetValuesPWM(PWM_OUTPUT_ESC, controlData[0]);
 
 		// Wheel angle: 90 degress +- ~30 degrees.
-		hardwareSetValuesPWM(PWM_OUTPUT_SERVO, controlData[1]);
+		//hardwareSetValuesPWM(PWM_OUTPUT_SERVO, controlData[1]);
 
 
 		//---------------------------------------------------------------------

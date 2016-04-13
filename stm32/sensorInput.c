@@ -15,7 +15,7 @@
 #include "hardwareIR.h"
 #include "hardwareUS.h"
 #include "hardwareRC.h"
-//#include "hardwareWE.h"
+#include "hardwareWE.h"
 
 //-----------------------------------------------------------------------------
 // Definitions
@@ -42,7 +42,7 @@ void sensorSetup (void) {
 	// Initialize sensors
 	hardwareSetupIR();
 	hardwareSetupUS();
-
+	hardwareSetupWE();
 	(void)chThdCreateStatic(sensorThreadWorkingArea, sizeof(sensorThreadWorkingArea),
 						  NORMALPRIO, sensorThread, NULL);
 }
@@ -68,7 +68,7 @@ void sensorDebugOutput(BaseSequentialStream* SDU) {
 	// "\033[F" for going back to previous line
 	chprintf(SDU, "\033[FTHROTTLE: %4i ", hardwareGetValuesRC(THROTTLE));
 	chprintf(SDU, "STEERING: %4i ", hardwareGetValuesRC(STEERING));
-	//chprintf(SDU, "WHEEL: %f ", hardwareGetValuesWE());
+	chprintf(SDU, "WHEEL: %f ", hardwareGetValuesWE());
 	chprintf(SDU, "US FRONT: %3i \r\n", hardwareGetValuesUS(US_FRONT));
 	chprintf(SDU, "US SIDE: %3i ", hardwareGetValuesUS(US_SIDE));
 	chprintf(SDU, "SIDE_FRONT: %3i ", hardwareGetValuesIR(IR_SIDE_FRONT));

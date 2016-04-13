@@ -79,7 +79,7 @@ static const ioportmask_t RC_PIN_NUMBERS[] = {4, 6};
 
 // A0
 static const ioportid_t WE_PIN_GROUP = GPIOA;
-static const ioportmask_t WE_PIN_NUMBER  = 0;
+static const ioportmask_t WE_PIN_NUMBER  = 2;
 
 
 //-----------------------------------------------------------------------------
@@ -90,8 +90,8 @@ typedef enum {PWM_OUTPUT_ESC, PWM_OUTPUT_SERVO} PWM_OUTPUT_ID;
 
 // Speeds and their corresponding pulsewidths.
 typedef enum {SPEED_REVERSE, SPEED_STOP, SPEED_FORWARD} SPEED;
-static const int SPEED_PULSEWIDTHS = {1140, 1350, 1420};
-static const int SPEED_STEPS = 3;
+#define SPEED_STEPS 3
+static const int SPEED_PULSEWIDTHS[SPEED_STEPS] = {1140, 1350, 1420};
 
 #define WHEELS_MAXLEFT_PW 1220
 #define WHEELS_CENTERED_PW 1590
