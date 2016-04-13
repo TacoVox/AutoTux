@@ -15,10 +15,10 @@ namespace packetio {
         void setSensorBoardDataContainer(std::shared_ptr<odcore::data::Container>);
         virtual ~PacketBroadcaster();
     private:
+        std::shared_ptr<odcore::data::Container> sensorBoardDataContainer;
+        bool interrupted;
         virtual void setUp();
         virtual void tearDown();
-        bool interrupted;
-        std::shared_ptr<odcore::data::Container> sensorBoardDataContainer;
     };
 }
 

@@ -2,7 +2,7 @@
 // Created by Jonas Kahler on 4/1/16.
 //
 
-#include "../../include/packetio/PacketBroadcaster.h"
+#include "packetio/PacketBroadcaster.h"
 
 #include <iostream>
 
