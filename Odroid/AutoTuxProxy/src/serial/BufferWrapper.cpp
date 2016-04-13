@@ -74,17 +74,21 @@ vector<unsigned char> serial::BufferWrapper::readReceiveBuffer(void)
 }
 
 
-void serial::BufferWrapper::appendSendBuffer(vector<unsigned char>)
+void serial::BufferWrapper::appendSendBuffer(vector<unsigned char> vec)
 {
-    //send_buffer.insert(0, str);
+    buffer_out.push_front(vec);
 }
 
 
 //Here we will need to return a packet to the calling function.
 vector<unsigned char> serial::BufferWrapper::readSendBuffer(void)
 {
-    if(buffer_out.size() != 0)
-        return buffer_out.at(0);
+    if(buffer_out.size() != 0) {
+        vector<unsigned char> v = buffer_out.at(0);
+        buffer_out.clear();
+        buffer_out.push_front(v);
+        return v;
+    }
     else
         return vector<unsigned char> {0, 1};
 }
