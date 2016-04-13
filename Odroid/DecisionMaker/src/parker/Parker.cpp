@@ -56,8 +56,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Parker::body() {
          * @TODO Need to take these way later because it shall take the speed of the decisionmaker
          */
         VehicleControl vc;
-        vc.setSpeed(1);
-        *parkingControler = vc;
+
 
         while(*parking){
             // 1. Get most recent vehicle data:

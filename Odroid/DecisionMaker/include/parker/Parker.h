@@ -6,6 +6,7 @@
 #define DECISIONMAKER_PARKER_H
 
 #include <opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h>
+#include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 
 namespace parker{
     using namespace std;
@@ -16,6 +17,7 @@ namespace parker{
         Parker &operator=(const Parker &/*obj*/);
         std::shared_ptr<bool> parking;
         std::shared_ptr<odcore::data::Container> parkingControler;
+        double findGapStart(automotive::miniature::SensorBoardData, automotive::VehicleData);
 
     public:
         Parker(const int32_t &argc, char **argv);
@@ -23,10 +25,9 @@ namespace parker{
         virtual ~Parker();
 
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
-
+        bool getFoundSpot();
         void setParking(std::shared_ptr<bool>);
         void setParkingControler(std::shared_ptr<odcore::data::Container>);
-        bool getFoundSpot();
 
     private:
         virtual void setUp();
