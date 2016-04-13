@@ -24,7 +24,7 @@ using namespace odcore::data;
 using namespace automotive;
 using namespace automotive::miniature;
 
-using namespace autotux;
+//using namespace autotux;
 
 using namespace packetio;
 using namespace decisionmaker;
@@ -40,8 +40,6 @@ char** ptrargv;
 // Shared pointer to Container
 VehicleControl vehicleControl;
 shared_ptr<Container> containerptr(new Container(vehicleControl));
-
-Container laneRecommendation(new Container(LaneRecommendation));
 
 /**
  * Constructor
@@ -64,7 +62,7 @@ void DecisionMaker::tearDown(){
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() {
 
     // Set initial state of the car
-    STATE state = PARKING;
+    STATE state = DRIVING;
 
     // Parker shared pointers
     bool park;
@@ -100,11 +98,8 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
         packetBroadcaster->setControlDataContainer(containerptr);
 
-        vehicleControl.setSpeed(1);
-        *containerptr = vehicleControl;
-
         if(state == DRIVING){
-            //cout << "Is now Driving" << endl;
+            cout << "Is now Driving" << endl;
             *containerptr = *ovtControlPtr;
         }
         else if(state == PARKING){
@@ -113,7 +108,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
             if(parkerPointer->getFoundSpot()){
                 *containerptr = *parkControlptr;
             }
-            *containerptr = laneRecommendation;
+            //*containerptr = laneRecommendation;
         }
     }
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
@@ -123,10 +118,12 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
  * This method is a data listener that listens to the broadcast made by odsupercomponent
  *
  * @TODO Make it listen to the data sent from the camera instead of the VehicleControl container!
- */
+*/
 void decisionmaker::DecisionMaker::nextContainer(odcore::data::Container &c) {
+    /*
     if(c.getDataType() == LaneRecommendation::ID()){
         laneRecommendation = c; //Pointer to which the PacketBroadcaster sends for data.
     }
+    */
 }
 
