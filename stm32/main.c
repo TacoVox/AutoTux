@@ -57,6 +57,8 @@ void initialize(void);
 int main(void) {
 	initialize();
 
+	static int lastBufferSize = 0;
+
 	// Main loop. Iteration counter for activity LED
   	int iterationsSinceActive = 0;
   	int iterationsSinceRedLED = 0;
@@ -110,13 +112,18 @@ int main(void) {
 
 		// Received all bytes available from serial. Time to try to instantiate
 		// a packet, provided the buffer has some content now
-		if (getPacketBufferSize() >= CONTROL_DATA_PACKET_SIZE) {
+		if (getPacketBufferSize() >= CONTROL_DATA_PACKET_SIZE &&
+				getPacketBufferSize() > lastBufferSize) {
 			// TODO: Light up red LED if failed to instantiate packet
-			if (readPacketFromBuffer(controlData) != PACKET_OK) {
+			if (readPacketFromBuffer(controlData) == PACKET_OK) {
 				// TODO
 				iterationsSinceRedLED = 0;
+
 			}
 		}
+		// Keep track of buffer size so we only execute the above if anything is new
+		lastBufferSize = getPacketBufferSize();
+
 
 		//---------------------------------------------------------------------
 		// Output to hardware
@@ -127,6 +134,10 @@ int main(void) {
 		// TODO: hardwareOutput(controlData);
 		// hardwareSetValuesPWM(PWM_OUTPUT_SERVO, angle);
 		// hardwareSetValuesPWM(PWM_OUTPUT_ESC, dir);
+
+		//chprintf((BaseSequentialStream*) &SDU1, "CONTROL 1: %2x", controlData[0]);
+		//chprintf((BaseSequentialStream*) &SDU1, "CONTROL 2: %2x", controlData[1]);
+
 
 		//---------------------------------------------------------------------
 		// Sending part
