@@ -173,7 +173,7 @@ void usb_connector::USBConnector::write(void)
 {
     vector<unsigned char> vec = bw->readSendBuffer();
     int len = vec.size();
-    if (len <= 0) return;
+    if (len <= 1) return;
     unsigned char *data = new unsigned char[len];
     copy(vec.begin(), vec.end(), data);
     cout << "writing to usb stream..." << endl;

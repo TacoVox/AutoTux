@@ -24,12 +24,12 @@ serial::BufferWrapper::~BufferWrapper()
 void serial::BufferWrapper::appendReceiveBuffer(unsigned char *cin, int len)
 {
     if (len < 9) return;
-
+    //cout << "buffer read: " << len << endl;
     vector<unsigned char> v;
     for (int i = 0; i < len; i++) {
-        cout << cin[i] << endl;
+        printf("%i\n", cin[i]);
         // if true -> correct packet ?maybe
-        if (cin[i] == '6' && cin[i+1] == ':' && cin[i+8] == ',') {
+        if (cin[i] == '7' && cin[i+1] == ':' && cin[i+9] == ',') {
             cout << "correct packet maybe" << endl;
             unsigned char us1 = cin[i+2];
             printf("%i ", us1);
@@ -41,22 +41,19 @@ void serial::BufferWrapper::appendReceiveBuffer(unsigned char *cin, int len)
             printf("%i ", ir2);
             unsigned char ir3 = cin[i+6];
             printf("%i ", ir3);
-            unsigned char check = cin[i+7];
+            unsigned char wheel = cin[i+7];
+            printf("%i ", wheel);
+            unsigned char check = cin[i+8];
             printf("%i \n", check);
+            v = {us1, us2, ir1, ir2, ir3, wheel};
             // for now
-            if (check == 0x00) {
-                v = {us1, us2, ir1, ir2, ir3};
+            if (check == checksum(v)) {
+                cout << "checksum OK" << endl;
                 break;
             }
-            // check for the checksum here
-            //unsigned char check = cin[i+7];
-            //if (checksum(v) == check) {
-                // found correct packet
-            //    break;
-            //}
-        }
-        else {
-            cout << "received incorrect packet" << endl;
+            else {
+                cout << "checksum FAIL" << endl;
+            }
         }
     } // end for
 
@@ -90,7 +87,7 @@ vector<unsigned char> serial::BufferWrapper::readSendBuffer(void)
         return v;
     }
     else
-        return vector<unsigned char> {0, 1};
+        return vector<unsigned char> {0};
 }
 
 
@@ -111,5 +108,5 @@ vector<double> serial::decode_packet(string p, int len)
 
 int serial::encode_packet()
 {
-
+    return 0;
 }
