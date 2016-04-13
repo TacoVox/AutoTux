@@ -46,7 +46,10 @@ void packetio::PacketReceiver::nextContainer(Container &c) {
 void packetio::PacketReceiver::setBufferWrapper(
         std::shared_ptr<serial::BufferWrapper> bufferWrapper) {
     this->bufferWrapper = bufferWrapper;
-    std::vector<unsigned char> data {'3', ':', 0, 90, 83, ','};
+    std::vector<unsigned char> data {'3', ':', 0, 90};
+    data.push_back(checksum(data));
+    data.push_back(',');
+    cout << "appending";
     bufferWrapper->appendSendBuffer(data);
 }
 
