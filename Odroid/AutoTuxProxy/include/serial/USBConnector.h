@@ -27,6 +27,8 @@ namespace usb_connector
     public:
         USBConnector();
         ~USBConnector();
+        USBConnector(const USBConnector&);
+        USBConnector & operator=(const USBConnector&);
         bool connect(void);
         void read(void);
         void write(void);

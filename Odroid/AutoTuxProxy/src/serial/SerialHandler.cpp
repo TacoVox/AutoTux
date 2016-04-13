@@ -9,16 +9,12 @@ using namespace usb_connector;
 using namespace containerfactory;
 using namespace std;
 
-serial::SerialHandler::SerialHandler(int32_t &argc, char **argv)
+serial::SerialHandler::SerialHandler(int32_t &argc, char **argv) :
+    packetBroadcaster{(shared_ptr<PacketBroadcaster>)new PacketBroadcaster(argc, argv)},
+    packetReceiver{(shared_ptr<PacketReceiver>)new PacketReceiver(argc, argv)},
+    usbConnector{(shared_ptr<USBConnector>)new USBConnector()},
+    bufferWrapper{(shared_ptr<BufferWrapper>)new BufferWrapper()}
 {
-    //Setup the packetIO stuff
-    packetBroadcaster = (shared_ptr<PacketBroadcaster>)new PacketBroadcaster(argc, argv);
-    packetReceiver = (shared_ptr<PacketReceiver>)new PacketReceiver(argc, argv);
-    //Setup the usbconnector
-    usbConnector = (shared_ptr<USBConnector>)new USBConnector();
-    //Setup the wrapper class for the buffer
-    bufferWrapper = (shared_ptr<BufferWrapper>)new BufferWrapper();
-
     //Set the bufferWrapperPointer in the packetReceiver
     packetReceiver->setBufferWrapper(bufferWrapper);
 }
@@ -58,6 +54,7 @@ void serial::SerialHandler::run(void)
                 SBDContainer::instance()->genSBDContainer(v));
         // ========= WRITE ================================
         // call usb connector to write the data
+        usbConnector->write();
 
         // sleep for 1 sec, just for output
         std::this_thread::sleep_for(chrono::milliseconds(10));

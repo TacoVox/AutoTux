@@ -16,6 +16,18 @@ usb_connector::USBConnector::USBConnector()
 }
 
 
+usb_connector::USBConnector::USBConnector(const usb_connector::USBConnector &usb)
+{
+
+}
+
+
+usb_connector::USBConnector & usb_connector::USBConnector::operator=(const usb_connector::USBConnector &usb)
+{
+    return *this;
+}
+
+
 /* destructor */
 usb_connector::USBConnector::~USBConnector()
 {
@@ -57,7 +69,6 @@ bool usb_connector::USBConnector::open_device(void)
     }
     cout << "[OK] " << endl;
     cout << "opening device... ";
-    int open;
     for (ssize_t i = 0; i < dev_count; i++) {
         libusb_device_descriptor desc;
         int r = libusb_get_device_descriptor(devs[i], &desc);
@@ -67,14 +78,14 @@ bool usb_connector::USBConnector::open_device(void)
         }
         // if the device matches, open it
         if (desc.idVendor == USB_VENDOR_ID && desc.idProduct == USB_PRODUCT_ID) {
-            open = libusb_open(devs[i], &usb_dev);
-            break;
+            int open = libusb_open(devs[i], &usb_dev);
+            if (open != 0) {
+                cout << "[FAIL] error code: " << open << endl;
+                return false;
+            }
         }
     }
-    if (open != 0) {
-        cout << "[FAIL] error code: " << open << endl;
-        return false;
-    }
+
     cout << "[OK]" << endl;
     // free device list after we are done with it
     libusb_free_device_list(devs, 1);
@@ -165,7 +176,7 @@ void usb_connector::USBConnector::write(void)
     cout << "writing to usb stream..." << endl;
     libusb_fill_bulk_transfer( transfer_out, usb_dev, USB_ENDPOINT_OUT,
         (unsigned char *)pkt,  len, callback_out, this, 0);
-    libusb_submit_transfer(transfer_in);
+    libusb_submit_transfer(transfer_out);
     while (libusb_handle_events_completed(ctx, NULL) != LIBUSB_SUCCESS) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
