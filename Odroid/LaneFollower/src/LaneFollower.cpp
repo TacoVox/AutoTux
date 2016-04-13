@@ -87,7 +87,7 @@ namespace lane {
 
                     // Mirror image
                     // NOTE: For simulator.
-                    // flip(m_image, m_image, 0);
+                    flip(m_image, m_image, -1);
                     returnValue = true;
                 }
             }
