@@ -16,7 +16,7 @@ void sensorSetup(void);
 /**
  * Fills a char array with all sensor data
  */
-void getSensorData(char* buffer);
+void getSensorData(unsigned char* buffer);
 
 
 /**

@@ -21,6 +21,6 @@ void hardwareIterationWE(void);
 /*
  * Getter for the values. Specify a US sensor.
  */
-double hardwareGetValuesWE(void);
+int hardwareGetValuesWE(void);
 
 #endif /* HARDWAREWE_H_ */

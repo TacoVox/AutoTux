@@ -51,13 +51,14 @@ void sensorSetup (void) {
 /**
  * Fills a char array with all sensor data
  */
-void getSensorData(char* buffer) {
+void getSensorData(unsigned char* buffer) {
 	// Normal packet output
-	buffer[0] = (char)hardwareGetValuesUS(US_FRONT);
-	buffer[1] = (char)hardwareGetValuesUS(US_SIDE);
-	buffer[2] = (char)hardwareGetValuesIR(IR_SIDE_FRONT);
-	buffer[3] = (char)hardwareGetValuesIR(IR_SIDE_REAR);
-	buffer[4] = (char)hardwareGetValuesIR(IR_REAR);
+	buffer[0] = (unsigned char)hardwareGetValuesUS(US_FRONT);
+	buffer[1] = (unsigned char)hardwareGetValuesUS(US_SIDE);
+	buffer[2] = (unsigned char)hardwareGetValuesIR(IR_SIDE_FRONT);
+	buffer[3] = (unsigned char)hardwareGetValuesIR(IR_SIDE_REAR);
+	buffer[4] = (unsigned char)hardwareGetValuesIR(IR_REAR);
+	buffer[5] = (unsigned char)hardwareGetValuesWE();
 }
 
 

@@ -108,4 +108,5 @@ static const int SPEED_PULSEWIDTHS[SPEED_STEPS] = {1140, 1350, 1420};
 //static const ioportmask_t PWM_PIN_NUMBERS[] = {4, 6};
 
 
+
 #endif /* AUTOTUXHARDWARE_H_ */

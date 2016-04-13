@@ -40,6 +40,7 @@ static PWMConfig pwmcfg = {
  * Sets up the pins etc.
  */
 void hardwareSetupPWM(void) {
+	// TODO: Move pins and timer driver to config!
 	palSetPadMode(GPIOA, 0, PAL_MODE_ALTERNATE(2));
 	palSetPadMode(GPIOA, 1, PAL_MODE_ALTERNATE(2));
 	pwmStart(&PWMD5, &pwmcfg);

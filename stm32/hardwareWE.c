@@ -20,13 +20,13 @@ systime_t measurementStart;
 //	Thread Definitions
 //--
 
-static THD_WORKING_AREA(wheelEncoderThreadWorkingArea, 100);
+static THD_WORKING_AREA(wheelEncoderThreadWorkingArea, 60); // Stack size in bytes
 static THD_FUNCTION(wheelEncoderThread, arg);
 
 // The resulting pulsewidth values
 uint8_t ticks;
 bool previousState;
-double metersPerSecond;
+int cmPerSecond;
 systime_t startTime;
 systime_t timeNow;
 
@@ -67,8 +67,8 @@ void hardwareIterationWE(void) {
 	        // numberOfTicksInMeters / timeElapsed
 	        systime_t timeDelta = timeNow - startTime;
 			double seconds = ST2MS(timeDelta) / (double)1000;
-			double meters = ticks / ticksPerMeter;
-	        metersPerSecond = (meters / seconds);
+			double centimeters = (ticks / ticksPerMeter) * 100;
+	        cmPerSecond = (int)(centimeters / seconds);
 
 	        // Reset tick counter
 	        ticks = 0;
@@ -87,8 +87,8 @@ static THD_FUNCTION(wheelEncoderThread, arg) {
 /*
  * Getter for the values. Specify a US sensor.
  */
-double hardwareGetValuesWE(void) {
-	return metersPerSecond;
+int hardwareGetValuesWE(void) {
+	return cmPerSecond;
 }
 
 //-----------------------------------------------------------------------------

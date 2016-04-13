@@ -21,11 +21,11 @@
 
 #define BUFFER_SIZE 128
 
-char buffer[BUFFER_SIZE];
+unsigned char buffer[BUFFER_SIZE];
 int bufferCounter = 0;
 
-void strnshift(char* bufferString, int size, int n);
-char generateChecksum(char* data, int dataSize);
+void strnshift(unsigned char* bufferString, int size, int n);
+char generateChecksum(unsigned char* data, int dataSize);
 
 
 //-----------------------------------------------------------------------------
@@ -37,7 +37,7 @@ char generateChecksum(char* data, int dataSize);
  * Sends a packet based on the data array to the serial connection
  * NOTE: provide the size of the actual data array!
  */
-void sendPacket(char* data, int size, BaseSequentialStream* SDU) {
+void sendPacket(unsigned char* data, int size, BaseSequentialStream* SDU) {
 	// Packet structure: size, colon, (bytes), checksum byte, comma.
 	// Note: size + 1 because we also append a checksum XOR byte!
 	chprintf(SDU, "%i:", size + 1);
@@ -56,7 +56,7 @@ void sendPacket(char* data, int size, BaseSequentialStream* SDU) {
  * (the oldest part) if buffer size is reached. (The buffer is cleared
  * by the createPacketFromBuffer function on successful packet read).
  */
-void appendToBuffer(char latestByte) {
+void appendToBuffer(unsigned char latestByte) {
 	buffer[bufferCounter] = latestByte;
 	bufferCounter++;
 	if (bufferCounter > BUFFER_SIZE) {
@@ -74,22 +74,25 @@ void appendToBuffer(char latestByte) {
  * Initialize the char* with CONTROL_DATA_SIZE.
  * NOTE that implementation currently relies on the packet size being one digit.
  */
-PACKET_STATUS readPacketFromBuffer(char* data) {
+PACKET_STATUS readPacketFromBuffer(unsigned char* data) {
 	bool packetFound = FALSE;
 	// If packet seems to be found, values are put here temporarily before packet verified
-	char packetTest[CONTROL_DATA_SIZE];
+	unsigned char packetTest[CONTROL_DATA_SIZE];
+	int highestPossibleEndPos = bufferCounter - 1;
+	int lowestPossibleEndPos = CONTROL_DATA_PACKET_SIZE - 1;
 
-	for (int endCharPos = bufferCounter - 1; endCharPos > CONTROL_DATA_PACKET_SIZE &&
+	for (int endCharPos = highestPossibleEndPos; endCharPos >= lowestPossibleEndPos &&
 			!packetFound; endCharPos--) {
 		// See if char at endCharPos is ASCII comma
 		if (buffer[endCharPos] == ',') {
 			// If so, see if we can find a digit (packet size) and colon at the
 			// expected start of this possible packet
-			if (buffer[endCharPos - CONTROL_DATA_PACKET_SIZE] ==
-					'0' + CONTROL_DATA_SIZE + 1 && // ASCII for BYTE COUNT + CHECKSUM BYTE
-					buffer[endCharPos - CONTROL_DATA_PACKET_SIZE + 1] == ':') {
+			int packetStartPos = endCharPos - (CONTROL_DATA_PACKET_SIZE  - 1);
 
-				int dataStartPos = endCharPos - CONTROL_DATA_PACKET_SIZE + 2;
+			if (buffer[packetStartPos] == '0' + CONTROL_DATA_SIZE + 1 && // ASCII for BYTE COUNT + CHECKSUM BYTE
+					buffer[packetStartPos + 1] == ':') {
+
+				int dataStartPos = packetStartPos + 2;
 
 				// Read values
 				for (int i = 0; i < CONTROL_DATA_SIZE; i++)
@@ -135,16 +138,21 @@ int getPacketBufferSize(void) {
 /**
  * Shifts the string n positions to the left.
  */
-void strnshift(char* bufferString, int size, int n) {
+void strnshift(unsigned char* bufferString, int size, int n) {
 	for (int i = 0; i < n && i + n < size; i++) {
 		bufferString[i] = bufferString[i + n];
  	}
 }
 
 
-char generateChecksum(char* data, int dataSize) {
-	(void) data;
-	(void) dataSize;
-	return 0x00;
+/**
+ * Generates a checksum by XORing all data bytes.
+ */
+char generateChecksum(unsigned char* data, int dataSize) {
+	unsigned char checksum = 0;
+	for (int i = 0; i < dataSize; i++) {
+		checksum ^= data[i];
+	}
+	return checksum;
 }
 

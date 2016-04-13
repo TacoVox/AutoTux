@@ -36,14 +36,16 @@
 //-----------------------------------------------------------------------------
 
 
-#define DEBUG_OUTPUT 1
+#define DEBUG_OUTPUT 0
 
 
 // Buffer for received byte
 msg_t charbuf;
 
 // Last valid control data bytes
-char controlData[CONTROL_DATA_SIZE];
+// TODO: MOVE TO OUTPUT HARDWARE FILE
+unsigned char controlData[CONTROL_DATA_SIZE];
+
 
 // Initializes sensor thread, drivers etc.
 void initialize(void);
@@ -58,6 +60,12 @@ int main(void) {
 	initialize();
 
 	static int lastBufferSize = 0;
+
+
+	// TODO: MOVE TO OUTPUT HARDWARE FILE
+	controlData[CONTROL_BYTE_SPEED] = SPEED_PULSEWIDTHS[SPEED_STOP];
+	controlData[CONTROL_BYTE_ANGLE] = WHEELS_CENTERED_ANGLE;
+
 
 	// Main loop. Iteration counter for activity LED
 	while(true) {
@@ -80,7 +88,7 @@ int main(void) {
 			//iterationsSinceActive = 0;
 
 			// Add the byte to the packet buffer
-			appendToBuffer((char)charbuf);
+			appendToBuffer((unsigned char)charbuf);
 
 			// Read the next byte - but first wait a bit, the USB-serial driver
 			// tends to hang if we read to soon.
@@ -114,10 +122,10 @@ int main(void) {
 		// TODO: hardwareOutput(controlData);
 
 		// Speed controlled by int corresponding to SPEED enum in hardware config
-		//hardwareSetValuesPWM(PWM_OUTPUT_ESC, controlData[0]);
+		hardwareSetValuesPWM(PWM_OUTPUT_ESC, controlData[CONTROL_BYTE_SPEED]);
 
 		// Wheel angle: 90 degress +- ~30 degrees.
-		//hardwareSetValuesPWM(PWM_OUTPUT_SERVO, controlData[1]);
+		hardwareSetValuesPWM(PWM_OUTPUT_SERVO, controlData[CONTROL_BYTE_ANGLE]);
 
 
 		//---------------------------------------------------------------------
@@ -128,12 +136,12 @@ int main(void) {
 			sensorDebugOutput((BaseSequentialStream*) &SDU1);
 		} else {
 			// Send a sensor data packet. Fill a char[] with sensor values.
-			int size = 5;
-			char data[size];
+			int size = 6;
+			unsigned char data[size];
 			getSensorData(data);
 
 			// Send to SDU1
-			sendPacket(data, 5, (BaseSequentialStream*) &SDU1);
+			sendPacket(data, size, (BaseSequentialStream*) &SDU1);
 		}
 
 		chThdSleepMilliseconds(100);
