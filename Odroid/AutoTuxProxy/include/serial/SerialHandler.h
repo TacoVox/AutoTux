@@ -15,12 +15,12 @@ namespace serial {
         ~SerialHandler();
         void run(void);
         void interrupt(void);
-    private:
-        bool interrupted;
+    private:       
         std::shared_ptr<packetio::PacketBroadcaster> packetBroadcaster;
         std::shared_ptr<packetio::PacketReceiver> packetReceiver;
         std::shared_ptr<usb_connector::USBConnector> usbConnector;
         std::shared_ptr<serial::BufferWrapper> bufferWrapper;
+        bool interrupted;
     };
 }
 #endif // SERIALHANDLER_H

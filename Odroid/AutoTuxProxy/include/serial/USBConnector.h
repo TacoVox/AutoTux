@@ -13,8 +13,8 @@
 #define USB_VENDOR_ID	    0x0483
 #define USB_PRODUCT_ID	    0x5740
 // endpoints for reading and writing
-#define USB_ENDPOINT_IN	    (LIBUSB_ENDPOINT_IN  | 1)   
-#define USB_ENDPOINT_OUT    (LIBUSB_ENDPOINT_OUT | 2)
+#define USB_ENDPOINT_IN	    0x81
+#define USB_ENDPOINT_OUT    0x01
 // buffer size when reading from usb stream
 #define LEN_IN_BUFFER       128
 
