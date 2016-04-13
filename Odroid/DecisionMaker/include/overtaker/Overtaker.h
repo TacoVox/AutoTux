@@ -19,7 +19,7 @@ namespace  overtaker{
         virtual ~Overtaker();
         void setOvtControlDataContainer(std::shared_ptr<odcore::data::Container>);
     private:
-
+        bool isOverridingControls;
         VehicleControl ovtVc;
         virtual void setUp();
         virtual void tearDown();
