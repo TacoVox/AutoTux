@@ -19,6 +19,8 @@ using namespace automotive::miniature;
 
 using namespace parker;
 
+bool foundSpot;
+
 Parker::Parker(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "Parker") {}
 
@@ -26,6 +28,7 @@ Parker::~Parker() {}
 
 void Parker::setUp(){
     cout << "Parker starts" << endl;
+    foundSpot = false;
 }
 void Parker::tearDown(){
     cout << "This is when Parker stops" << endl;
@@ -83,6 +86,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Parker::body() {
                     if((gapEnd - gapStart) > 7){
                         cout << "spot has been found----------------" << endl;
                         state = ADJUST;
+                        foundSpot = true;
                     }
                     else{
                         cout << "IT WASN'T BIG ENOUGH" << endl;
@@ -206,6 +210,12 @@ void Parker::setParking(std::shared_ptr<bool> parking){
 }
 void Parker::setParkingControler(std::shared_ptr<Container> parkingControler){
     this->parkingControler = parkingControler;
+}
+bool Parker::getFoundSpot(){
+    if(foundSpot)
+        return true;
+    else
+        return false;
 }
 
 

@@ -14,10 +14,10 @@ namespace parker{
     private:
         Parker(const Parker &/*obj*/);
         Parker &operator=(const Parker &/*obj*/);
-
-    public:
         std::shared_ptr<bool> parking;
         std::shared_ptr<odcore::data::Container> parkingControler;
+
+    public:
         Parker(const int32_t &argc, char **argv);
 
         virtual ~Parker();
@@ -26,6 +26,7 @@ namespace parker{
 
         void setParking(std::shared_ptr<bool>);
         void setParkingControler(std::shared_ptr<odcore::data::Container>);
+        bool getFoundSpot();
 
     private:
         virtual void setUp();
