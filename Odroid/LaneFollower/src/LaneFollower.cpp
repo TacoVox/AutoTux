@@ -211,10 +211,6 @@ namespace lane {
             if(fabs(e) > 1e-2) {
                 // TODO WHY IS THIS HAPPENING?
                 desiredSteering = y;
-
-                desiredSteering = m_vehicleControl.getSteeringWheelAngle() + desiredSteering;
-
-                cout << desiredSteering << endl;
             }
 
             if (m_debug) {
