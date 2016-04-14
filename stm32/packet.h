@@ -5,10 +5,9 @@
 #ifndef PACKET_H_
 #define PACKET_H_
 
-#define CONTROL_DATA_SIZE 2
-#define CONTROL_DATA_PACKET_SIZE 6
-
-typedef enum {CONTROL_BYTE_SPEED, CONTROL_BYTE_ANGLE} CONTROL_BYTES;
+#define CONTROL_DATA_BYTES 2	// Actual data bytes
+#define CONTROL_DATA_PACKET_SIZE 6 // Size of whole packet
+#define SENSOR_DATA_BYTES 6 // Actual data bytes
 
 typedef enum {PACKET_OK, NO_PACKET} PACKET_STATUS;
 

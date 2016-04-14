@@ -18,40 +18,21 @@
 #include <ch.h>
 #include <chprintf.h>
 #include <hal.h>
+#include "usbcfg.h"
 
 // Local includes
-#include "usbcfg.h"
+#include "autotuxconfig.h"
 #include "sensorInput.h"
 #include "packet.h"
+#include "controlOutput.h"
 
-
-// TODO: Move to output
-#include "hardwarePWM.h"
-// TODO: should also be in output module
-#include "hardwareRC.h"
-
-// TODO:
-// TODO:
-// TODO:
-// TODO: if USB has been reset, does driver needs to be restarted somehow??
-// TODO:
-// TODO:
-// TODO:
 
 //-----------------------------------------------------------------------------
 // Definitions
 //-----------------------------------------------------------------------------
 
 
-#define DEBUG_OUTPUT 0
-
-
-// Buffer for received byte
-msg_t charbuf;
-
-// Last valid control data bytes
-// TODO: MOVE TO OUTPUT HARDWARE FILE
-unsigned char controlData[CONTROL_DATA_SIZE];
+#define DEBUG_OUTPUT 1
 
 
 // Initializes sensor thread, drivers etc.
@@ -66,12 +47,20 @@ void initialize(void);
 int main(void) {
 	initialize();
 
+	// Buffer for received byte
+	msg_t charbuf;
+
+	// Last valid control data bytes
+	// TODO: MOVE TO OUTPUT HARDWARE FILE
+	unsigned char controlData[CONTROL_DATA_BYTES];
 	int iterationsWithoutReceive = 0;
 	int bytesReceived = 0;
 
+	unsigned char sensorData[SENSOR_DATA_BYTES];
+
 	// TODO: MOVE TO OUTPUT HARDWARE FILE
-	controlData[CONTROL_BYTE_SPEED] = SPEED_STOP;
-	controlData[CONTROL_BYTE_ANGLE] = WHEELS_CENTERED_ANGLE;
+	// Car initial state: stopped, wheels centered
+	controlOutputStopCenter();
 
 
 	// Main loop. Iteration counter for activity LED
@@ -82,7 +71,6 @@ int main(void) {
 		//---------------------------------------------------------------------
 		palClearPad(GPIOD, GPIOD_LED4);
 		palClearPad(GPIOD, GPIOD_LED5);
-		palClearPad(GPIOD, GPIOD_LED6);
 
 		//---------------------------------------------------------------------
 		// Receiving part
@@ -134,25 +122,15 @@ int main(void) {
 		// Output to hardware
 		//---------------------------------------------------------------------
 
-		// Regardless of how it went, controlData at this point contains the latest
-		// valid instructions. Output it to hardware.
-		// TODO: controlOutput(controlData);
-
 		// Unless we received too much data at once or no data for a number of iterations,
 		// controlData contains the latest valid instructions. Output them to hardware.
 		if (bytesReceived <= MAX_RECEIVE_BYTES_IN_ITERATION &&
 				iterationsWithoutReceive < MAX_ITERATIONS_WITHOUT_RECEIVE) {
-			// Speed controlled by int corresponding to SPEED enum in hardware config
-			hardwareSetValuesPWM(PWM_OUTPUT_ESC, controlData[CONTROL_BYTE_SPEED]);
-
-			// Wheel angle: 90 degress +- ~30 degrees.
-			hardwareSetValuesPWM(PWM_OUTPUT_SERVO, controlData[CONTROL_BYTE_ANGLE]);
-
+			// Forward control data to hardware
+			controlOutput(controlData);
 		} else {
 			// Serial connection rules violated. Stop the car and center wheels!
-			// TODO: controlOutputStopCenter();
-			hardwareSetValuesPWM(PWM_OUTPUT_ESC, SPEED_STOP);
-			hardwareSetValuesPWM(PWM_OUTPUT_SERVO, WHEELS_CENTERED_ANGLE);
+			controlOutputStopCenter();
 		}
 
 		//---------------------------------------------------------------------
@@ -160,15 +138,14 @@ int main(void) {
 		//---------------------------------------------------------------------
 
 		if (DEBUG_OUTPUT) {
+			// Send debug output to serial instead of a normal packet.
 			sensorDebugOutput((BaseSequentialStream*) &SDU1);
 		} else {
-			// Send a sensor data packet. Fill a char[] with sensor values.
-			int size = 6;
-			unsigned char data[size];
-			getSensorData(data);
+			// Send a sensor data packet. Fill data array with sensor values.
+			getSensorData(sensorData);
 
 			// Send to SDU1
-			sendPacket(data, size, (BaseSequentialStream*) &SDU1);
+			sendPacket(sensorData, SENSOR_DATA_BYTES, (BaseSequentialStream*) &SDU1);
 		}
 
 		chThdSleepMilliseconds(100);
@@ -187,7 +164,7 @@ void initialize() {
 
 	// Initialize sensor settings
 	sensorSetup();
-	hardwareSetupPWM();
+	controlOutputSetup();
 
  	// Initialize serial over USB
 	sduObjectInit(&SDU1);

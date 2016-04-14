@@ -77,7 +77,7 @@ void appendToBuffer(unsigned char latestByte) {
 PACKET_STATUS readPacketFromBuffer(unsigned char* data) {
 	bool packetFound = FALSE;
 	// If packet seems to be found, values are put here temporarily before packet verified
-	unsigned char packetTest[CONTROL_DATA_SIZE];
+	unsigned char packetTest[CONTROL_DATA_BYTES];
 	int highestPossibleEndPos = bufferCounter - 1;
 	int lowestPossibleEndPos = CONTROL_DATA_PACKET_SIZE - 1;
 
@@ -89,24 +89,24 @@ PACKET_STATUS readPacketFromBuffer(unsigned char* data) {
 			// expected start of this possible packet
 			int packetStartPos = endCharPos - (CONTROL_DATA_PACKET_SIZE  - 1);
 
-			if (buffer[packetStartPos] == '0' + CONTROL_DATA_SIZE + 1 && // ASCII for BYTE COUNT + CHECKSUM BYTE
+			if (buffer[packetStartPos] == '0' + CONTROL_DATA_BYTES + 1 && // ASCII for BYTE COUNT + CHECKSUM BYTE
 					buffer[packetStartPos + 1] == ':') {
 
 				int dataStartPos = packetStartPos + 2;
 
 				// Read values
-				for (int i = 0; i < CONTROL_DATA_SIZE; i++)
+				for (int i = 0; i < CONTROL_DATA_BYTES; i++)
 					packetTest[i] = buffer[dataStartPos + i];
 
 				// Finally, see if the checksum is correct
-				if (buffer[endCharPos - 1] == generateChecksum(packetTest, CONTROL_DATA_SIZE)) {
+				if (buffer[endCharPos - 1] == generateChecksum(packetTest, CONTROL_DATA_BYTES)) {
 
 					// Shift the buffer, all content up to and including packet is discarded
 					strnshift(buffer, BUFFER_SIZE, endCharPos);
 					bufferCounter = endCharPos;
 
 					// Update the data array provided as an argument
-					for (int i = 0; i < CONTROL_DATA_SIZE; i++)
+					for (int i = 0; i < CONTROL_DATA_BYTES; i++)
 						data[i] = packetTest[i];
 
 					// Breaks loop and makes sure to return success

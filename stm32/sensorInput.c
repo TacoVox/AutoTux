@@ -14,7 +14,7 @@
 // Input
 #include "hardwareIR.h"
 #include "hardwareUS.h"
-#include "hardwareRC.h"
+#include "hardwareRC.h" // TODO: this should not be here
 #include "hardwareWE.h"
 
 //-----------------------------------------------------------------------------
@@ -43,6 +43,7 @@ void sensorSetup (void) {
 	hardwareSetupIR();
 	hardwareSetupUS();
 	hardwareSetupWE();
+	hardwareSetupRC();
 	(void)chThdCreateStatic(sensorThreadWorkingArea, sizeof(sensorThreadWorkingArea),
 						  NORMALPRIO, sensorThread, NULL);
 }

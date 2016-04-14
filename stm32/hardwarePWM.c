@@ -78,6 +78,14 @@ void hardwareSetValuesPWM(PWM_OUTPUT_ID pwm_id, int value) {
 }
 
 
+/*
+ * Setter for the values, pulsewidths directly from RC transmitter.
+ */
+void hardwareSetValuesPWM_RC(icucnt_t throttle, icucnt_t steering) {
+	pwmEnableChannel(&PWMD5, 0, throttle);
+	pwmEnableChannel(&PWMD5, 1, steering);
+}
+
 //-----------------------------------------------------------------------------
 // "Private" implementation
 //-----------------------------------------------------------------------------
