@@ -18,19 +18,7 @@
 // Definitions
 //-----------------------------------------------------------------------------
 
-// When RC is on, the throttle signal is above this treshold value
-#define RC_THROTTLE_ON_TRESHOLD 100
 
-// Anything below this will be BRAKE when in non-RC mode
-#define RC_THROTTLE_BRAKE_TRESHOLD 1000
-
-// Number of consecutive iterations to steer in the extreme directions to change mode
-#define ITERATIONS_TO_CHANGE_MODE 10
-
-// Steer max right to activate RC mode
-#define RC_STEERING_ACTIVATION_TRESHOLD 2060
-// Steer max left to deactivate RC mode
-#define RC_STEERING_DEACTIVATION_TRESHOLD 1140
 
 bool handleRCMode(void);
 bool rcModeCheck(void);
