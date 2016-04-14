@@ -57,3 +57,9 @@ unsigned char packetio::PacketReceiver::checksum(std::vector<unsigned char> v) {
         cs ^= *it;
     return cs;
 }
+
+odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode packetio::PacketReceiver::body() {
+    cout << "Entered the PacketReceiverCaster body" << endl;
+    cout << "Done with the PacketReceiverCaster body" << endl;
+    return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
+}
