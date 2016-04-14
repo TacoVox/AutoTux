@@ -8,7 +8,7 @@
 #ifndef HARDWAREWE_H_
 #define HARDWAREWE_H_
 
-#include "autotuxhardware.h"
+#include "autotuxconfig.h"
 
 /*
  * Sets up the US sensor pins etc.

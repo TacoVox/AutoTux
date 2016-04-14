@@ -3,10 +3,26 @@
  * For all hardware config needs.
  */
 
-#ifndef AUTOTUXHARDWARE_H_
-#define AUTOTUXHARDWARE_H_
+#ifndef AUTOTUXCONFIG_H_
+#define AUTOTUXCONFIG_H_
 
 #include "hal.h"
+
+
+//-----------------------------------------------------------------------------
+// Serial behaviour
+//-----------------------------------------------------------------------------
+
+
+// If more iterations than this occurs without receiving a valid packet,
+// the car is stopped and wheels are centered.
+#define MAX_ITERATIONS_WITHOUT_RECEIVE 5
+
+// If more bytes than this is received in the same iteration, we know we are
+// either getting lots of garbage data or we have a serious issue with keeping
+// a good communication rate with the odroid. The car will stop and the wheels
+// will be centered.
+#define MAX_RECEIVE_BYTES_IN_ITERATION 200
 
 
 //-----------------------------------------------------------------------------
@@ -86,6 +102,7 @@ static const ioportmask_t WE_PIN_NUMBER  = 2;
 // PWM config
 //-----------------------------------------------------------------------------
 
+
 typedef enum {PWM_OUTPUT_ESC, PWM_OUTPUT_SERVO} PWM_OUTPUT_ID;
 
 // Speeds and their corresponding pulsewidths.
@@ -109,4 +126,4 @@ static const int SPEED_PULSEWIDTHS[SPEED_STEPS] = {1140, 1350, 1420};
 
 
 
-#endif /* AUTOTUXHARDWARE_H_ */
+#endif /* AUTOTUXCONFIG_H_ */

@@ -8,7 +8,7 @@
 #ifndef HARDWAREIR_H_
 #define HARDWAREIR_H_
 
-#include "autotuxhardware.h"
+#include "autotuxconfig.h"
 
 /*
  * Sets up the IR sensor pins etc.
