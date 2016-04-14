@@ -57,4 +57,3 @@ unsigned char packetio::PacketReceiver::checksum(std::vector<unsigned char> v) {
         cs ^= *it;
     return cs;
 }
-
