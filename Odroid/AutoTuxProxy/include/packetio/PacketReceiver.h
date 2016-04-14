@@ -22,6 +22,7 @@ namespace packetio {
         std::shared_ptr<serial::BufferWrapper> bufferWrapper;
         PacketReceiver(const PacketReceiver &/*obj*/);
         PacketReceiver& operator=(const PacketReceiver &/*obj*/);
+        virtual odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
         virtual void setUp();
         virtual void tearDown();
         unsigned char checksum(std::vector<unsigned char>);
