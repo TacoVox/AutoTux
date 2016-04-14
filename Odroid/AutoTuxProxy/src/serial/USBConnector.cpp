@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <cstdio>
 #include "serial/USBConnector.h"
 #include <thread>
 #include <chrono>
@@ -176,6 +177,9 @@ void usb_connector::USBConnector::write(void)
     if (len <= 1) return;
     unsigned char *data = new unsigned char[len];
     copy(vec.begin(), vec.end(), data);
+    printf("%i ", data[2]);
+    printf("%i ", data[3]);
+    printf("%i\n", data[4]);
     cout << "writing to usb stream..." << endl;
     libusb_fill_bulk_transfer(transfer_out, usb_dev, USB_ENDPOINT_OUT,
         data, len, callback_out, this, 0);

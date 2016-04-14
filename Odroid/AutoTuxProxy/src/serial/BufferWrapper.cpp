@@ -99,14 +99,3 @@ unsigned char serial::BufferWrapper::checksum(std::vector<unsigned char> vec)
     }
     return checksum;
 }
-
-vector<double> serial::decode_packet(string p, int len)
-{
-    vector<double> v;
-    return v;
-}
-
-int serial::encode_packet()
-{
-    return 0;
-}
