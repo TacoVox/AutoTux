@@ -26,8 +26,30 @@ namespace parker{
         void findGapEnd(automotive::miniature::SensorBoardData, automotive::VehicleData);
         void findObject(automotive::miniature::SensorBoardData);
         void enoughSpace();
-        void adjustCar(double*, double*);
-        void parallelPark(int*, double*, double*);
+        void adjustCar(double);
+        void parallelPark();
+        void backAroundObj();
+        void backingStraight();
+        void backingLeft();
+        void adjustInSpotForward();
+        void adjustInSpotBack();
+        void goBackToLane();
+        bool isSafe(automotive::miniature::SensorBoardData);
+
+        const double INFRARED_REAR_RIGHT = 2;
+        const double INFRARED_REAR_BACK = 1;
+        enum STATE {FINDOBJECT, FINDGAPSTART, FINDGAPEND, ENOUGHSPACE, ADJUST, PARK, SAFETYSTOP};
+        enum PARKSTATE {PHASE1, PHASE2, PHASE3, PHASE4, PHASE5};
+        STATE state;
+        PARKSTATE parkstate;
+        bool foundSpot;
+
+        double gapStart;
+        double gapEnd;
+        double absTraveled;
+        double parkPosition;
+
+        automotive::VehicleControl vc;
 
 
 
