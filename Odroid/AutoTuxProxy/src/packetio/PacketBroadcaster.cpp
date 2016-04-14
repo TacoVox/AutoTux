@@ -37,6 +37,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode packetio::PacketBroadc
             getConference().send(*sensorBoardDataContainer);
         }
     }
+    cout << "Done with the body" << endl;
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
 }
 
