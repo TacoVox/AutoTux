@@ -28,7 +28,7 @@ void packetio::PacketReceiver::tearDown() {}
 
 void packetio::PacketReceiver::nextContainer(Container &c) {
     //Check if valid ControlData//Guard
-    if(c.getDataType() == 1) {
+    if(c.getDataType() == 41) {
         cout << "Received ControlData" << endl;
         VehicleControl vehicleControl = c.getData<VehicleControl>();
         std::vector<unsigned char> data {'3', ':'};
@@ -38,8 +38,7 @@ void packetio::PacketReceiver::nextContainer(Container &c) {
         data.push_back(',');
         bufferWrapper->appendSendBuffer(data);
     } else {
-        cout << "Received: " << c.getDataType() << endl;
-        cout << "Received invalid data" << endl;
+        cout << "Received invalid data. ID: " << c.getDataType() << endl;
     }
 }
 
