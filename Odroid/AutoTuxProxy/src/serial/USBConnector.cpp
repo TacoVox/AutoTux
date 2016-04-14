@@ -64,12 +64,6 @@ void usb_connector::USBConnector::set_buffer_wrapper(std::shared_ptr<serial::Buf
 }
 
 
-bool usb_connector::USBConnector::connected()
-{
-    return true;
-}
-
-
 /* gets a list of the devices and opens the one we need */
 bool usb_connector::USBConnector::open_device(void)
 {

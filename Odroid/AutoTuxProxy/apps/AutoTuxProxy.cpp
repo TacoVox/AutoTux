@@ -22,10 +22,12 @@ int main(int argc, char **argv) {
     //Setup the serialhandler
     serialHandler = (shared_ptr<SerialHandler>)new SerialHandler(argc, argv);
     thread shthread(&SerialHandler::run, serialHandler);
+    //shthread.detach();
 
     //Setup the cameraproxy
     cameraProxy= (shared_ptr<CameraProxy>)new CameraProxy(argc, argv);
     thread cpthread(&CameraProxy::runModule, cameraProxy);
+    //cpthread.detach();
 
     //Waiting for the thread to terminate
     shthread.join();
