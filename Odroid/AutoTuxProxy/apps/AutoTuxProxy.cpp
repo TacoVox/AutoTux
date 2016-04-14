@@ -14,8 +14,16 @@ using namespace proxy::camera;
 
 shared_ptr<SerialHandler> serialHandler;
 shared_ptr<CameraProxy> cameraProxy;
+void exit_handler(int);
 
 int main(int argc, char **argv) {
+
+    struct sigaction signal_handler;
+
+    signal_handler.sa_handler = exit_handler;
+    sigemptyset(&signal_handler.sa_mask);
+    signal_handler.sa_flags = 0;
+    sigaction(SIGINT, &signal_handler, NULL);
 
     cout << "Starting up AutoTuxProxy..." << endl;
 
@@ -31,8 +39,17 @@ int main(int argc, char **argv) {
 
     //Waiting for the thread to terminate
     shthread.join();
+    cout << "serial handler stopped" << endl;
     cpthread.join();
+    cout << "camera handler stopped" << endl;
 
     return 0;
+}
+
+
+void exit_handler(int num)
+{
+    cout << "caught signal: " << num << endl;
+    exit(1);
 }
 
