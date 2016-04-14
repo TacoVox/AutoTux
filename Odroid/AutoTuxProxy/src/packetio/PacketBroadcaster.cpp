@@ -27,6 +27,7 @@ void packetio::PacketBroadcaster::tearDown() {
 }
 
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode packetio::PacketBroadcaster::body() {
+    cout << "Entered the body" << endl;
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() ==
            odcore::data::dmcp::ModuleStateMessage::RUNNING && !interrupted) {
         cout << "Checking for vals" << endl;
