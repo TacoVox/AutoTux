@@ -40,7 +40,6 @@ usb_connector::USBConnector::~USBConnector()
     libusb_attach_kernel_driver(usb_dev, 1);
     libusb_close(usb_dev);
     libusb_exit(ctx);
-    cout << "[OK]" << endl;
 }
 
 

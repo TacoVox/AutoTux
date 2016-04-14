@@ -23,11 +23,10 @@ serial::BufferWrapper::~BufferWrapper()
 
 void serial::BufferWrapper::appendReceiveBuffer(unsigned char *cin, int len)
 {
-    if (len < 9) return;
-    //cout << "buffer read: " << len << endl;
+    if (len < 10) return;
+
     vector<unsigned char> v;
     for (int i = 0; i < len; i++) {
-        printf("%i\n", cin[i]);
         // if true -> correct packet ?maybe
         if (cin[i] == '7' && cin[i+1] == ':' && cin[i+9] == ',') {
             cout << "correct packet maybe" << endl;
