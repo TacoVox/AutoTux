@@ -34,7 +34,11 @@ usb_connector::USBConnector::operator=(const usb_connector::USBConnector &usb)
 usb_connector::USBConnector::~USBConnector()
 {
     cout << "destructing usb object..." << endl;
-    disconnect();
+    libusb_free_transfer(transfer_in);
+    libusb_free_transfer(transfer_out);
+    release_interface();
+    libusb_close(usb_dev);
+    libusb_exit(ctx);
     cout << "[OK]" << endl;
 }
 
