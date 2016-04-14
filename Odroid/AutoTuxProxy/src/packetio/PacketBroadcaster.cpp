@@ -45,4 +45,5 @@ void packetio::PacketBroadcaster::setSensorBoardDataContainer(
         std::shared_ptr<odcore::data::Container> sensorBoardDataContainer) {
     cout << "Set SBDC..." << endl;
     this->sensorBoardDataContainer = sensorBoardDataContainer;
+    cout << "Success in setting the SBDC" << endl;
 }
