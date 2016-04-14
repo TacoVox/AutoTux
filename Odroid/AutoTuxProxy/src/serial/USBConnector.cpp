@@ -180,10 +180,10 @@ void usb_connector::USBConnector::write(void)
     libusb_fill_bulk_transfer(transfer_out, usb_dev, USB_ENDPOINT_OUT,
         data, len, callback_out, this, 0);
     libusb_submit_transfer(transfer_out);
+    delete [] data;
     while (libusb_handle_events_completed(ctx, NULL) != LIBUSB_SUCCESS) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    }
-    delete [] data;
+    }  
 }
 
 
