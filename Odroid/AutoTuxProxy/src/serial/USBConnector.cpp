@@ -36,7 +36,8 @@ usb_connector::USBConnector::~USBConnector()
     cout << "destructing usb object..." << endl;
     libusb_free_transfer(transfer_in);
     libusb_free_transfer(transfer_out);
-    release_interface();
+    libusb_release_interface(usb_dev, 1);
+    libusb_attach_kernel_driver(usb_dev, 1);
     libusb_close(usb_dev);
     libusb_exit(ctx);
     cout << "[OK]" << endl;
