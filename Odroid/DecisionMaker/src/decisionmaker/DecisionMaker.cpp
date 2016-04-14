@@ -134,7 +134,18 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
         switch (state){
             case DRIVING:{
                 cout << "Is now Driving" << endl;
-                laneFollowing();
+
+                // Check if overtaker is overriding control values...
+                if(ovtPtr->getIsOverriding()){
+                    *containerptr = *ovtControlPtr;
+                }
+                // ...else execute lane following instructions
+                else{
+
+                    cout << "DENNIIISSSSSSSSSSSSSSSSSS" << endl;
+                    laneFollowing();
+                }
+
                 break;
             }
             case PARKING:{
@@ -143,7 +154,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                 if(parkerPointer->getFoundSpot()){
                     *containerptr = *parkControlptr;
                 }
-                laneFollowing();
+                else laneFollowing();
                 break;
             }
         }
