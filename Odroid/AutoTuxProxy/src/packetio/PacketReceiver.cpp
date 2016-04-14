@@ -58,3 +58,6 @@ unsigned char packetio::PacketReceiver::checksum(std::vector<unsigned char> v) {
     return cs;
 }
 
+void packetio::PacketReceiver::nextPacket(const odcore::io::Packet &p) {
+    cout << "DEBUG - WHAT THE FUCK IS GOING ON ----------- -----------" << endl;
+}

@@ -17,6 +17,7 @@ namespace packetio {
         PacketReceiver(const int32_t &argc, char **argv);
         virtual ~PacketReceiver();
         virtual void nextContainer(odcore::data::Container &c);
+        virtual void nextPacket(const odcore::io::Packet &p);
         void setBufferWrapper(std::shared_ptr<serial::BufferWrapper>);
     private:
         std::shared_ptr<serial::BufferWrapper> bufferWrapper;
