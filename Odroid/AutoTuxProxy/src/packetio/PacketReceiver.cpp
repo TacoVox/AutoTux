@@ -28,13 +28,14 @@ void packetio::PacketReceiver::tearDown() {}
 
 void packetio::PacketReceiver::nextContainer(Container &c) {
     //Check if valid ControlData//Guard
-    if(c.getDataType() == 41) {
+    if(c.getDataType() == VehicleControl::ID()) {
         cout << "Received ControlData" << endl;
         VehicleControl vehicleControl = c.getData<VehicleControl>();
         std::vector<unsigned char> data {'3', ':'};
         data.push_back((unsigned char)vehicleControl.getSpeed());
         data.push_back((unsigned char)vehicleControl.getSteeringWheelAngle());
-        data.push_back(checksum(data));
+        data.push_back(checksum({(unsigned char)vehicleControl.getSpeed(),
+        (unsigned char)vehicleControl.getSteeringWheelAngle()}));
         data.push_back(',');
         bufferWrapper->appendSendBuffer(data);
     } else {
@@ -54,6 +55,8 @@ unsigned char packetio::PacketReceiver::checksum(std::vector<unsigned char> v) {
     unsigned char cs = 0;
     for(auto it = v.begin(); it < v.end(); it++)
         cs ^= *it;
+
+
     return cs;
 }
 
