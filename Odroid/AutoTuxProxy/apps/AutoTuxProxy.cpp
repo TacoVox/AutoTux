@@ -31,7 +31,9 @@ int main(int argc, char **argv) {
 
     //Waiting for the thread to terminate
     shthread.join();
+    cout << "serial handler stopped" << endl;
     cpthread.join();
+    cout << "camera handler stopped" << endl;
 
     return 0;
 }
