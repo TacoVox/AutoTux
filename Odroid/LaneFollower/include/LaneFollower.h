@@ -59,18 +59,20 @@ namespace lane {
             int m_distToRightMarking;
 
         private:
-
             bool m_hasAttachedToSharedImageMemory;
+            bool m_debug;
+            bool panicStop;
+            double m_eSum;
+            double m_eOld;
+
             std::shared_ptr<odcore::wrapper::SharedMemory> m_sharedImageMemory;
             cv::Mat m_image;
             odcore::data::TimeStamp m_previousTime;
-            bool m_debug;
 
             automotive::VehicleControl m_vehicleControl;
 
             autotux::LaneRecommendation laneRecommendation;
 
-            bool panicStop;
 
             virtual void setUp();
             virtual void tearDown();
