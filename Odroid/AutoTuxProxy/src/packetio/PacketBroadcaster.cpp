@@ -27,7 +27,7 @@ void packetio::PacketBroadcaster::tearDown() {
 }
 
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode packetio::PacketBroadcaster::body() {
-    cout << "Entered the body" << endl;
+    cout << "Entered the PacketBroadCaster body" << endl;
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() ==
            odcore::data::dmcp::ModuleStateMessage::RUNNING && !interrupted) {
         cout << "Checking for vals" << endl;
@@ -37,7 +37,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode packetio::PacketBroadc
             getConference().send(*sensorBoardDataContainer);
         }
     }
-    cout << "Done with the body" << endl;
+    cout << "Done with the PacketBroadCaster body" << endl;
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
 }
 
