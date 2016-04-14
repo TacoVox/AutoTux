@@ -36,6 +36,7 @@ namespace usb_connector
         void handle_cb_in(unsigned char *, int);
         void handle_cb_out(int);
         void set_buffer_wrapper(std::shared_ptr<serial::BufferWrapper>);
+        bool connected();
     private:
         bool init_libusb(void);
         bool open_device(void);

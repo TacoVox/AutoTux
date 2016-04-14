@@ -64,6 +64,12 @@ void usb_connector::USBConnector::set_buffer_wrapper(std::shared_ptr<serial::Buf
 }
 
 
+bool usb_connector::USBConnector::connected()
+{
+    return true;
+}
+
+
 /* gets a list of the devices and opens the one we need */
 bool usb_connector::USBConnector::open_device(void)
 {
@@ -167,7 +173,8 @@ void usb_connector::USBConnector::read(void)
     cout << "reading from usb stream..." << endl; 
     libusb_fill_bulk_transfer( transfer_in, usb_dev, USB_ENDPOINT_IN,
         in_buffer,  LEN_IN_BUFFER, callback_in, this, 0);
-    libusb_submit_transfer(transfer_in);
+    int res = libusb_submit_transfer(transfer_in);
+    cout << "result code from write transfer: " << res << endl;
     while (libusb_handle_events_completed(ctx, NULL) != LIBUSB_SUCCESS) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
@@ -182,13 +189,11 @@ void usb_connector::USBConnector::write(void)
     if (len <= 1) return;
     unsigned char *data = new unsigned char[len];
     copy(vec.begin(), vec.end(), data);
-    printf("%i ", data[2]);
-    printf("%i ", data[3]);
-    printf("%i\n", data[4]);
     cout << "writing to usb stream..." << endl;
     libusb_fill_bulk_transfer(transfer_out, usb_dev, USB_ENDPOINT_OUT,
         data, len, callback_out, this, 0);
-    libusb_submit_transfer(transfer_out);
+    int res = libusb_submit_transfer(transfer_out);
+    cout << "result code from write transfer: " << res << endl;
     delete [] data;
     while (libusb_handle_events_completed(ctx, NULL) != LIBUSB_SUCCESS) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
