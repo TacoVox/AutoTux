@@ -1,5 +1,5 @@
 //
-// Created by jonas on 4/1/16.
+// Created by Jonas Kahler on 4/1/16.
 //
 #include <iostream>
 #include <thread>
@@ -27,21 +27,19 @@ int main(int argc, char **argv) {
 
     cout << "Starting up AutoTuxProxy..." << endl;
 
-    //Setup the serialhandler
+    //Setup the SerialHandler
     serialHandler = (shared_ptr<SerialHandler>)new SerialHandler(argc, argv);
-    thread shthread(&SerialHandler::run, serialHandler);
-    //shthread.detach();
+    thread shthread(&SerialHandler::runModule, serialHandler);
 
-    //Setup the cameraproxy
-    cameraProxy= (shared_ptr<CameraProxy>)new CameraProxy(argc, argv);
+    //Setup the CameraProxy
+    cameraProxy = (shared_ptr<CameraProxy>)new CameraProxy(argc, argv);
     thread cpthread(&CameraProxy::runModule, cameraProxy);
-    //cpthread.detach();
 
     //Waiting for the thread to terminate
     shthread.join();
-    cout << "serial handler stopped" << endl;
+    cout << "SerialHandler stopped" << endl;
     cpthread.join();
-    cout << "camera handler stopped" << endl;
+    cout << "CameraHandler stopped" << endl;
 
     return 0;
 }
@@ -52,4 +50,3 @@ void exit_handler(int num)
     cout << "caught signal: " << num << endl;
     exit(1);
 }
-
