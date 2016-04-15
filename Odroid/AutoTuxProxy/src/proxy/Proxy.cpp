@@ -22,10 +22,10 @@ namespace proxy {
     using namespace proxy::camera;
 
     Proxy::Proxy(int32_t &argc, char **argv) :
-            TimeTriggeredConferenceClientModule(argc, argv, "AutoTuxProxy") { }
+            TimeTriggeredConferenceClientModule(argc, argv, "Proxy") { }
 
     Proxy::Proxy(int32_t &argc, char **argv, shared_ptr<serial::BufferWrapper> bw) :
-            TimeTriggeredConferenceClientModule(argc, argv, "AutoTuxProxy"),
+            TimeTriggeredConferenceClientModule(argc, argv, "Proxy"),
             bufferWrapper{bw},
             interrupted{false},
             m_recorder{},
@@ -98,6 +98,7 @@ namespace proxy {
         while (getModuleStateAndWaitForRemainingTimeInTimeslice() == dmcp::ModuleStateMessage::RUNNING && !interrupted) {
             // ========= READ =================================
             // call buffer wrapper to get vector
+            cout << "reading from the read buffer" << endl;
             vector<unsigned char> v = bufferWrapper->readReceiveBuffer();
 
             //If there is something to send --> send it

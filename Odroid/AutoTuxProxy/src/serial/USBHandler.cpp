@@ -31,19 +31,19 @@ void usb_handler::USBHandler::run()
     while (1) {
         // read from usb
         int res1 = uc.read();
+        cout << "result from read: " << res1 << endl;
         if (res1 != 0) {
-            reconnect();
+            if (res1 != -7)
+                reconnect();
         }
         // write to usb
         int res2 = uc.write();
+        cout << "result from write: " << res2 << endl;
         if (res2 != 0) {
-            if (res2 == -13)
-                continue;
-            else
+            if (res2 != -13)
                 reconnect();
         }
-        // sleep a little
-        this_thread::sleep_for(chrono::milliseconds(10));
+        this_thread::sleep_for(chrono::milliseconds(50));
     }
 }
 
@@ -53,11 +53,12 @@ void usb_handler::USBHandler::set_buffer_wrapper(std::shared_ptr<serial::BufferW
     bw = p;
 }
 
+
 void usb_handler::USBHandler::reconnect()
 {
-    cout << "reconnecting..." << endl;
-    uc.disconnect();
+    cout << "reconnecting..." << endl; 
     while (1) {
+        uc.disconnect();
         if (uc.connect()) break;
         this_thread::sleep_for(chrono::milliseconds(50));
     }

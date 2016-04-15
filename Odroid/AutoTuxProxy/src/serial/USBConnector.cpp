@@ -80,6 +80,7 @@ bool usb_connector::USBConnector::open_device(void)
     cout << "[OK] " << endl;
     cout << "opening device... ";
     // go through the devices list searching for the one we need
+    int open;
     for (ssize_t i = 0; i < dev_count; i++) {
         libusb_device_descriptor desc;
         // for each device in the list, get its descriptor
@@ -90,15 +91,14 @@ bool usb_connector::USBConnector::open_device(void)
         }
         // if the device matches, open it
         if (desc.idVendor == USB_VENDOR_ID && desc.idProduct == USB_PRODUCT_ID) {
-            int open = libusb_open(devs[i], &usb_dev);
-            if (open != 0) {
-                cout << "[FAIL] error code: " << open << endl;
-                return false;
-            }
+            open = libusb_open(devs[i], &usb_dev);
             break;
         }
     }
-
+    if (open != 0) {
+        cout << "[FAIL] error code: " << open << endl;
+        return false;
+    }
     cout << "[OK]" << endl;
     // free devices list after we are done with it
     libusb_free_device_list(devs, 1);
