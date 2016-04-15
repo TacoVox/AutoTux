@@ -57,14 +57,23 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode
         // create a shared pointer to container
         // set the pointer in the sending thing
 
+        //If there is something to send --> send it
         if(v.size() != 0) {
             getConference().send(*SBDContainer::instance()->genSBDContainer(v));
         }
 
-        Container c = getKeyValueDataStore().get(VehicleControl::ID());
-        VehicleControl vehicleControl = c.getData<VehicleControl>();
-        cout << "Speed: " << vehicleControl.getSpeed() << endl;
-        cout << "Angle: " << vehicleControl.getSteeringWheelAngle() << endl;
+        //Get the LAST RECEIVED VehicleControlData
+        VehicleControl vehicleControl =
+                getKeyValueDataStore().get(VehicleControl::ID()).getData<VehicleControl>();
+        //Create checksum
+        unsigned char checks = checksum({vehicleControl.getSpeed(),
+                                         vehicleControl.getSteeringWheelAngle()});
+        //Append the stuff to the send buffer
+        bufferWrapper->appendSendBuffer({3, ':',
+                       (unsigned char)vehicleControl.getSpeed(),
+                       (unsigned char)vehicleControl.getSteeringWheelAngle(),
+                       checks, ','});
+        cout << "Appended received data to send buffer" << endl;
 
         // ========= WRITE ================================
         // call usb connector to write the data
@@ -73,4 +82,13 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode
 
     cout << "Done with the PacketBroadCaster body" << endl;
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
+}
+
+unsigned char serial::SerialHandler::checksum(std::vector<unsigned char> v) {
+    unsigned char cs = 0;
+
+    for(auto it = v.begin(); it < v.end(); it++)
+        cs ^= *it;
+
+   return cs;
 }

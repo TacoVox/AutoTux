@@ -22,6 +22,7 @@ namespace serial {
         std::shared_ptr<serial::BufferWrapper> bufferWrapper;
         virtual void setUp();
         virtual void tearDown();
+        unsigned char checksum(std::vector<unsigned char>);
     };
 }
 #endif // SERIALHANDLER_H
