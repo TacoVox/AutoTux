@@ -3,24 +3,25 @@
 
 #include <cstdint>
 #include <memory>
-#include "packetio/PacketBroadcaster.h"
-#include "packetio/PacketReceiver.h"
+#include <opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h>
+#include <opendavinci/odcore/data/Container.h>
 #include "serial/USBConnector.h"
 #include "serial/BufferWrapper.h"
 
 namespace serial {
-    class SerialHandler {
+    class SerialHandler :
+            public odcore::base::module::TimeTriggeredConferenceClientModule {
     public:
         SerialHandler(int32_t &argc, char **argv);
-        ~SerialHandler();
-        void run(void);
+        virtual ~SerialHandler();
+        odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
         void interrupt(void);
-    private:       
-        std::shared_ptr<packetio::PacketBroadcaster> packetBroadcaster;
-        std::shared_ptr<packetio::PacketReceiver> packetReceiver;
+    private:
+        bool interrupted;
         std::shared_ptr<usb_connector::USBConnector> usbConnector;
         std::shared_ptr<serial::BufferWrapper> bufferWrapper;
-        bool interrupted;
+        virtual void setUp();
+        virtual void tearDown();
     };
 }
 #endif // SERIALHANDLER_H
