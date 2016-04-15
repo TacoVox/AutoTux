@@ -1,71 +1,94 @@
 #include "serial/SerialHandler.h"
-#include "containerfactory/SBDContainer.h"
-#include <thread>
+#include <containerfactory/SBDContainer.h>
+#include <opendavinci/odcore/base/LIFOQueue.h>
+#include <automotivedata/generated/automotive/VehicleControl.h>
 #include <iostream>
 
 using namespace odcore::data;
-using namespace packetio;
 using namespace usb_connector;
 using namespace containerfactory;
+using namespace automotive;
 using namespace std;
 
-void termination_handler(int);
+//void termination_handler(int);
 
 serial::SerialHandler::SerialHandler(int32_t &argc, char **argv) :
-    packetBroadcaster{(shared_ptr<PacketBroadcaster>)new PacketBroadcaster(argc, argv)},
-    packetReceiver{(shared_ptr<PacketReceiver>)new PacketReceiver(argc, argv)},
+    TimeTriggeredConferenceClientModule(argc, argv, "AutoTuxProxy"),
     usbConnector{(shared_ptr<USBConnector>)new USBConnector()},
     bufferWrapper{(shared_ptr<BufferWrapper>)new BufferWrapper()},
-    interrupted{false}
-{
-    //Set the bufferWrapperPointer in the packetReceiver
-    packetReceiver->setBufferWrapper(bufferWrapper);
-}
+    interrupted{false} { }
 
 
-serial::SerialHandler::~SerialHandler()
-{
-    packetBroadcaster->~PacketBroadcaster();
-    packetReceiver->~PacketReceiver();
+serial::SerialHandler::~SerialHandler() {
     usbConnector->~USBConnector();
     bufferWrapper->~BufferWrapper();
 }
 
+void serial::SerialHandler::interrupt(void) {
+    interrupted = true;
+}
 
-void serial::SerialHandler::run(void)
-{
-    thread pbthread(&PacketBroadcaster::runModule, packetBroadcaster);
-    pbthread.detach();
-    thread prthread(&PacketReceiver::runModule, packetReceiver);
-    prthread.detach();
+void serial::SerialHandler::setUp() {
+    cout << "Started the AutoTuxProxy component..." << endl;
+}
+
+void serial::SerialHandler::tearDown() {
+    cout << "Stopped the AutoTuxProxy component..." << endl;
+}
+
+odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode
+        serial::SerialHandler::body() {
+
+    odcore::base::LIFOQueue lifoQueue;
+    addDataStoreFor(lifoQueue);
 
     cout << "Testing USBConnector!" << endl;
     usbConnector->connect();
     usbConnector->set_buffer_wrapper(bufferWrapper);
 
-    // do the main loop for reading and writing here
-    // while we are connected
-    while (!interrupted) {
+    while (getModuleStateAndWaitForRemainingTimeInTimeslice() ==
+           odcore::data::dmcp::ModuleStateMessage::RUNNING && !interrupted) {
+
         // ========= READ =================================
         // call usb connector to read
-        usbConnector->read();
+        //usbConnector->read();
         // call buffer wrapper to get vector
         vector<unsigned char> v = bufferWrapper->readReceiveBuffer();
         // create a shared pointer to container
         // set the pointer in the sending thing
-        packetBroadcaster->setSensorBoardDataContainer(
-                SBDContainer::instance()->genSBDContainer(v));
+
+        //If there is something to send --> send it
+        if(v.size() != 0) {
+            getConference().send(*SBDContainer::instance()->genSBDContainer(v));
+        }
+
+        //Get the LAST RECEIVED VehicleControlData
+        VehicleControl vehicleControl =
+                getKeyValueDataStore().get(VehicleControl::ID()).getData<VehicleControl>();
+        //Create checksum
+        unsigned char checks = checksum({vehicleControl.getSpeed(),
+                                         vehicleControl.getSteeringWheelAngle()});
+        //Append the stuff to the send buffer
+        bufferWrapper->appendSendBuffer({3, ':',
+                       (unsigned char)vehicleControl.getSpeed(),
+                       (unsigned char)vehicleControl.getSteeringWheelAngle(),
+                       checks, ','});
+        cout << "Appended received data to send buffer" << endl;
+
         // ========= WRITE ================================
         // call usb connector to write the data
         usbConnector->write();
-
-        // sleep for 1 sec, just for output
-        std::this_thread::sleep_for(chrono::milliseconds(100));
     }
+
+    cout << "Done with the PacketBroadCaster body" << endl;
+    return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
 }
 
+unsigned char serial::SerialHandler::checksum(std::vector<unsigned char> v) {
+    unsigned char cs = 0;
 
-void serial::SerialHandler::interrupt(void)
-{
-    interrupted = true;
+    for(auto it = v.begin(); it < v.end(); it++)
+        cs ^= *it;
+
+   return cs;
 }
