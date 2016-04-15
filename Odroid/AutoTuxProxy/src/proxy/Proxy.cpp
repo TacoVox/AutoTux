@@ -105,6 +105,7 @@ namespace proxy {
                 getConference().send(*SBDContainer::instance()->genSBDContainer(v));
             }
 
+            cout << "Will append to SendBuffer" << endl;
             bufferWrapper->appendSendBuffer(cdContToVec(getKeyValueDataStore().get(VehicleControl::ID())));
             cout << "Appended received data to send buffer" << endl;
 
