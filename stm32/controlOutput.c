@@ -13,6 +13,19 @@
 #include "hardwarePWM.h"
 #include "hardwareRC.h"
 
+// maybe in serial just call the controldata packet whenever a packet
+// is valid, and then in THIS NEW THREAD increase the counter whenever
+// controlData is touched - and if
+// If counter > lastCounter or (lastCounter == EDGE && counter > EDGE)
+// see values as relevant for up to X iterations, otherwise fallback
+// to STOP_CENTER.
+// This way the serial connection can run all the time, and even if that
+// thread blocks, this thread will always be executing it's iterations
+// which makes sure the main thread does not hang on SERIAL WRITE while the
+// car is moving!
+
+
+
 
 //-----------------------------------------------------------------------------
 // Definitions

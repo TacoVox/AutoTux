@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
 
 
-#define DEBUG_OUTPUT 1
+#define DEBUG_OUTPUT 0
 
 
 // Initializes sensor thread, drivers etc.
@@ -50,12 +50,14 @@ int main(void) {
 	// Buffer for received byte
 	msg_t charbuf;
 
-	// Last valid control data bytes
-	// TODO: MOVE TO OUTPUT HARDWARE FILE
+	// TODO: MOVE TO SERIAL FILE
 	unsigned char controlData[CONTROL_DATA_BYTES];
+	// Initialization needed for debug mode! Since any byte is seen as "valid packet"
+	controlData[0] = SPEED_STOP;
+	controlData[1] = WHEELS_CENTERED_ANGLE;
 	int iterationsWithoutReceive = 0;
 	int bytesReceived = 0;
-
+	bool connectionActive = false;
 	unsigned char sensorData[SENSOR_DATA_BYTES];
 
 	// TODO: MOVE TO OUTPUT HARDWARE FILE
@@ -69,8 +71,9 @@ int main(void) {
 		//---------------------------------------------------------------------
 		// Reset all LEDS
 		//---------------------------------------------------------------------
-		palClearPad(GPIOD, GPIOD_LED4);
-		palClearPad(GPIOD, GPIOD_LED5);
+		palClearPad(GPIOD, GPIOD_LED4); // Green
+		palClearPad(GPIOD, GPIOD_LED5); // Red
+		palClearPad(GPIOD, GPIOD_LED3); // Orange
 
 		//---------------------------------------------------------------------
 		// Receiving part
@@ -94,20 +97,32 @@ int main(void) {
 			charbuf = chnGetTimeout(&SDU1, TIME_IMMEDIATE);
 		}
 
+		if (charbuf == Q_RESET) {
+			palSetPad(GPIOD, GPIOD_LED5);
+			connectionActive = FALSE;
+		} else {
+			connectionActive = TRUE;
+		}
+
 		// Received all bytes available from serial. Time to try to instantiate
 		// a packet, provided we did receive something this iteration
 		bool receivedValidPacket = FALSE;
 		if (getPacketBufferSize() >= CONTROL_DATA_PACKET_SIZE &&
 				bytesReceived > 0) {
-			// TODO: Light up red LED if failed to instantiate packet
 			if (readPacketFromBuffer(controlData) == PACKET_OK) {
 				// Valid packet - green LED
 				palSetPad(GPIOD, GPIOD_LED4);
 				receivedValidPacket = TRUE;
 				iterationsWithoutReceive = 0;
 			} else {
-				// Broken packet or garbage - red LED
-				palSetPad(GPIOD, GPIOD_LED5);
+				if (!DEBUG_OUTPUT) {
+					// Broken packet or garbage - orange LED
+					palSetPad(GPIOD, GPIOD_LED3);
+				} else {
+					// DEBUG MODE - any received bytes will be seen as active connection
+					receivedValidPacket = TRUE;
+					iterationsWithoutReceive = 0;
+				}
 			}
 		}
 
@@ -117,15 +132,22 @@ int main(void) {
 			iterationsWithoutReceive++;
 		}
 
+		// We've got to try not to fill the USB output buffer if we have no connection.
+		// Therefore, we check if the connection seems active before sending
+		/*if (iterationsWithoutReceive < MAX_ITERATIONS_WITHOUT_RECEIVE) {
+			connectionActive = TRUE;
+		} else {
+			connectionActive = FALSE;
+		}*/
+
 
 		//---------------------------------------------------------------------
 		// Output to hardware
 		//---------------------------------------------------------------------
 
-		// Unless we received too much data at once or no data for a number of iterations,
+		// Unless we received no data for a number of iterations or too much data at once,
 		// controlData contains the latest valid instructions. Output them to hardware.
-		if (bytesReceived <= MAX_RECEIVE_BYTES_IN_ITERATION &&
-				iterationsWithoutReceive < MAX_ITERATIONS_WITHOUT_RECEIVE) {
+		if (connectionActive && bytesReceived <= MAX_RECEIVE_BYTES_IN_ITERATION) {
 			// Forward control data to hardware
 			controlOutput(controlData);
 		} else {
@@ -136,16 +158,17 @@ int main(void) {
 		//---------------------------------------------------------------------
 		// Sending part
 		//---------------------------------------------------------------------
-
-		if (DEBUG_OUTPUT) {
-			// Send debug output to serial instead of a normal packet.
-			sensorDebugOutput((BaseSequentialStream*) &SDU1);
-		} else {
-			// Send a sensor data packet. Fill data array with sensor values.
-			getSensorData(sensorData);
-
-			// Send to SDU1
-			sendPacket(sensorData, SENSOR_DATA_BYTES, (BaseSequentialStream*) &SDU1);
+		if (connectionActive) {
+			if (!DEBUG_OUTPUT) {
+				// Normal output
+				// Send a sensor data packet. Fill data array with sensor values.
+				getSensorData(sensorData);
+				// Send to SDU1
+				sendPacket(sensorData, SENSOR_DATA_BYTES, (BaseSequentialStream*) &SDU1);
+			} else {
+				// Sends debug output to serial instead of a normal packet.
+				sensorDebugOutput((BaseSequentialStream*) &SDU1);
+			}
 		}
 
 		chThdSleepMilliseconds(100);

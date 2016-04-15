@@ -89,7 +89,8 @@ PACKET_STATUS readPacketFromBuffer(unsigned char* data) {
 			// expected start of this possible packet
 			int packetStartPos = endCharPos - (CONTROL_DATA_PACKET_SIZE  - 1);
 
-			if (buffer[packetStartPos] == '0' + CONTROL_DATA_BYTES + 1 && // ASCII for BYTE COUNT + CHECKSUM BYTE
+			// ASCII for the digit representing BYTE COUNT + CHECKSUM BYTE
+			if (buffer[packetStartPos] == '0' + CONTROL_DATA_BYTES + 1 &&
 					buffer[packetStartPos + 1] == ':') {
 
 				int dataStartPos = packetStartPos + 2;
