@@ -7,22 +7,18 @@
 
 using namespace std;
 
-
 serial::BufferWrapper::BufferWrapper() :
-buffer_in({}), buffer_out({})
-{
+buffer_in({}), buffer_out({}) {
     cout << "creating buffer parser object" << endl;
 }
 
 
-serial::BufferWrapper::~BufferWrapper()
-{
+serial::BufferWrapper::~BufferWrapper() {
     cout << "destroying buffer parser object" << endl;
 }
 
 
-void serial::BufferWrapper::appendReceiveBuffer(unsigned char *cin, int len)
-{
+void serial::BufferWrapper::appendReceiveBuffer(unsigned char *cin, int len) {
     if (len < 10) return;
 
     vector<unsigned char> v;
@@ -61,24 +57,25 @@ void serial::BufferWrapper::appendReceiveBuffer(unsigned char *cin, int len)
 }
 
 
-vector<unsigned char> serial::BufferWrapper::readReceiveBuffer(void)
-{
-    std::vector<unsigned char> vec = buffer_in.at(0);
-    buffer_in.clear();
-    buffer_in.push_front(vec);
-    return vec;
+vector<unsigned char> serial::BufferWrapper::readReceiveBuffer(void) {
+    if(buffer_in.size() != 0) {
+        std::vector<unsigned char> vec = buffer_in.at(0);
+        buffer_in.clear();
+        buffer_in.push_front(vec);
+        return vec;
+    } else {
+        return {};
+    }
 }
 
 
-void serial::BufferWrapper::appendSendBuffer(vector<unsigned char> vec)
-{
+void serial::BufferWrapper::appendSendBuffer(vector<unsigned char> vec) {
     buffer_out.push_front(vec);
 }
 
 
 //Here we will need to return a packet to the calling function.
-vector<unsigned char> serial::BufferWrapper::readSendBuffer(void)
-{
+vector<unsigned char> serial::BufferWrapper::readSendBuffer(void) {
     if(buffer_out.size() != 0) {
         vector<unsigned char> v = buffer_out.at(0);
         buffer_out.clear();
@@ -90,8 +87,7 @@ vector<unsigned char> serial::BufferWrapper::readSendBuffer(void)
 }
 
 
-unsigned char serial::BufferWrapper::checksum(std::vector<unsigned char> vec)
-{
+unsigned char serial::BufferWrapper::checksum(std::vector<unsigned char> vec) {
     unsigned char checksum = 0;
     for (auto it = vec.begin(); it != vec.end(); ++it) {
         checksum ^= *it;
