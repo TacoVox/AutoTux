@@ -17,12 +17,12 @@ usb_connector::USBConnector::USBConnector()
 }
 
 
+/* copy constructor */
 usb_connector::USBConnector::USBConnector(const usb_connector::USBConnector &usb)
-{
-
-}
+{}
 
 
+/* copy constructor */
 usb_connector::USBConnector &
 usb_connector::USBConnector::operator=(const usb_connector::USBConnector &usb)
 {
@@ -59,6 +59,7 @@ bool usb_connector::USBConnector::init_libusb(void)
 }
 
 
+/* sets the buffer wrapper for this usb connector */
 void usb_connector::USBConnector::set_buffer_wrapper(std::shared_ptr<serial::BufferWrapper> p)
 {
     bw = p;
