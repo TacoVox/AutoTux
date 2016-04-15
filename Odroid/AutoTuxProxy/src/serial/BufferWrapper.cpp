@@ -80,7 +80,7 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec)
 /* returns the most recent valid packet from the read buffer */
 vector<unsigned char> serial::BufferWrapper::readReceiveBuffer(void)
 {
-    rrm.lock()
+    rrm.lock();
     // check for size, i.e. not empty
     if(buffer_in.size() != 0)
     {
