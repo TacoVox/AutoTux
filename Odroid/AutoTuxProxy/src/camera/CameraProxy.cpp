@@ -46,7 +46,7 @@ namespace proxy {
                 const uint32_t MEMORY_SEGMENT_SIZE = kv.getValue<uint32_t>("global.buffer.memorySegmentSize");
                 const uint32_t NUMBER_OF_SEGMENTS = kv.getValue<uint32_t>("global.buffer.numberOfMemorySegments");
                 const bool THREADING = true;
-                const bool DUMP_SHARED_DATA = kv.getValue<uint32_t>("proxy.camera.dumpshareddata") == 1;
+                const bool DUMP_SHARED_DATA = kv.getValue<uint32_t>("cameraproxy.dumpshareddata") == 1;
 
                 m_recorder = unique_ptr<Recorder>(new Recorder(recordingURL.str(), MEMORY_SEGMENT_SIZE, NUMBER_OF_SEGMENTS, THREADING, DUMP_SHARED_DATA));
             }
