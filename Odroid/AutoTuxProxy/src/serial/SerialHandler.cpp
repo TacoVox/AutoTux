@@ -14,7 +14,7 @@ using namespace std;
 
 serial::SerialHandler::SerialHandler(int32_t &argc, char **argv) :
     TimeTriggeredConferenceClientModule(argc, argv, "AutoTuxProxy"),
-    //usbConnector{(shared_ptr<USBConnector>)new USBConnector()},
+    usbConnector{(shared_ptr<USBConnector>)new USBConnector()},
     bufferWrapper{(shared_ptr<BufferWrapper>)new BufferWrapper()},
     interrupted{false} { }
 
@@ -43,8 +43,8 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode
     addDataStoreFor(lifoQueue);
 
     cout << "Testing USBConnector!" << endl;
-    //usbConnector->connect();
-    //usbConnector->set_buffer_wrapper(bufferWrapper);
+    usbConnector->connect();
+    usbConnector->set_buffer_wrapper(bufferWrapper);
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() ==
            odcore::data::dmcp::ModuleStateMessage::RUNNING && !interrupted) {
@@ -77,7 +77,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode
 
         // ========= WRITE ================================
         // call usb connector to write the data
-        //usbConnector->write();
+        usbConnector->write();
     }
 
     cout << "Done with the PacketBroadCaster body" << endl;
