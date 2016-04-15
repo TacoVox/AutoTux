@@ -18,12 +18,7 @@ void exit_handler(int);
 
 int main(int argc, char **argv) {
 
-    struct sigaction signal_handler;
-
-    signal_handler.sa_handler = exit_handler;
-    sigemptyset(&signal_handler.sa_mask);
-    signal_handler.sa_flags = 0;
-    sigaction(SIGINT, &signal_handler, NULL);
+    signal(SIGINT, exit_handler);
 
     cout << "Starting up AutoTuxProxy..." << endl;
 
