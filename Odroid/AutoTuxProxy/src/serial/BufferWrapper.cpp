@@ -7,25 +7,34 @@
 
 using namespace std;
 
-serial::BufferWrapper::BufferWrapper() :
-buffer_in({}), buffer_out({}) {
+
+/* constructor */
+serial::BufferWrapper::BufferWrapper() : buffer_in({}), buffer_out({})
+{
     cout << "creating buffer parser object... ";
     cout << "[OK]" << endl;
 }
 
 
-serial::BufferWrapper::~BufferWrapper() {
+/* destructor */
+serial::BufferWrapper::~BufferWrapper()
+{
     cout << "destroying buffer wrapper object... ";
     cout << "[OK]" << endl;
 }
 
 
-void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec) {
+/* appends a correct packet to the receive buffer */
+void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec)
+{
+    // return if the length of the vedcor is too short
     if (vec.size() < 10) return;
-
+    // the vector to hold the correct packet
     vector<unsigned char> v;
+    // loop through the received data from the read and look
+    // for a correct packet
     for (unsigned int i = 0; i < vec.size(); i++) {
-        // if true -> correct packet ?maybe
+        // if true -> correct packet maybe
         if (vec.at(i) == '7' && vec.at(i+1) == ':' && vec.at(i+9) == ',') {
             cout << "correct packet maybe" << endl;
             unsigned char us1 = vec.at(i+2);
@@ -42,14 +51,16 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec) {
             printf("%i ", wheel);
             unsigned char check = vec.at(i+8);
             printf("%i \n", check);
+            // fill the vector
             v = {us1, us2, ir1, ir2, ir3, wheel};
-            // for now
+            // check if correct checksum
             if (check == checksum(v)) {
                 cout << "checksum OK" << endl;
                 break;
             }
             else {
                 cout << "checksum FAIL" << endl;
+                // clear the vector
                 v.clear();
             }
         }
@@ -62,28 +73,43 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec) {
 }
 
 
-vector<unsigned char> serial::BufferWrapper::readReceiveBuffer(void) {
+/* returns the most recent valid packet from the read buffer */
+vector<unsigned char> serial::BufferWrapper::readReceiveBuffer(void)
+{
+    // check for size, i.e. not empty
     if(buffer_in.size() != 0) {
+        // get the most recent packet, always in first position
         std::vector<unsigned char> vec = buffer_in.at(0);
+        // clear the buffer
         buffer_in.clear();
+        // put the packet again so we always have a valid packet
+        // with the most recent data to read
         buffer_in.push_front(vec);
         return vec;
-    } else {
-        return {};
     }
+    else
+        return {};
 }
 
 
-void serial::BufferWrapper::appendSendBuffer(vector<unsigned char> vec) {
+/* appends a correct packet to the send buffer */
+void serial::BufferWrapper::appendSendBuffer(vector<unsigned char> vec)
+{
     buffer_out.push_front(vec);
 }
 
 
-//Here we will need to return a packet to the calling function.
-vector<unsigned char> serial::BufferWrapper::readSendBuffer(void) {
+/* returns the most recent valid packet from the send buffer */
+vector<unsigned char> serial::BufferWrapper::readSendBuffer(void)
+{
+    // check for size, i.e. not empty
     if(buffer_out.size() != 0) {
+        // get the most recent packet, always in first position
         vector<unsigned char> v = buffer_out.at(0);
+        // clear the buffer
         buffer_out.clear();
+        // put the packet again so we always have a valid packet
+        // with the most recent data to send
         buffer_out.push_front(v);
         return v;
     }
@@ -92,9 +118,12 @@ vector<unsigned char> serial::BufferWrapper::readSendBuffer(void) {
 }
 
 
+/* calculates and returns the checksum for a valid packet */
 unsigned char serial::BufferWrapper::checksum(std::vector<unsigned char> vec) {
     unsigned char checksum = 0;
+    if (vec.size() == 0) return checksum;
     for (auto it = vec.begin(); it != vec.end(); ++it) {
+        // the checksum is calculated by XOR all elements
         checksum ^= *it;
     }
     return checksum;
