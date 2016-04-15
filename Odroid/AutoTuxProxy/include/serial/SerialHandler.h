@@ -16,10 +16,10 @@ namespace serial {
         virtual ~SerialHandler();
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
         void interrupt(void);
-    private:
-        bool interrupted;
+    private:        
         std::shared_ptr<usb_connector::USBConnector> usbConnector;
         std::shared_ptr<serial::BufferWrapper> bufferWrapper;
+        bool interrupted;
         virtual void setUp();
         virtual void tearDown();
         unsigned char checksum(std::vector<unsigned char>);

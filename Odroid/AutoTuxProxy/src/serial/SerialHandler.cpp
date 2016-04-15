@@ -20,8 +20,8 @@ serial::SerialHandler::SerialHandler(int32_t &argc, char **argv) :
 
 
 serial::SerialHandler::~SerialHandler() {
-    usbConnector->~USBConnector();
-    bufferWrapper->~BufferWrapper();
+    cout << "destroying serial handler object... ";
+    cout << "[OK]" << endl;
 }
 
 void serial::SerialHandler::interrupt(void) {
@@ -51,7 +51,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode
 
         // ========= READ =================================
         // call usb connector to read
-        //usbConnector->read();
+        usbConnector->read();
         // call buffer wrapper to get vector
         vector<unsigned char> v = bufferWrapper->readReceiveBuffer();
         // create a shared pointer to container

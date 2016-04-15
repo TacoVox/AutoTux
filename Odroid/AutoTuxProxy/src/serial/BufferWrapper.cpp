@@ -14,31 +14,32 @@ buffer_in({}), buffer_out({}) {
 
 
 serial::BufferWrapper::~BufferWrapper() {
-    cout << "destroying buffer parser object" << endl;
+    cout << "destroying buffer wrapper object... ";
+    cout << "[OK]" << endl;
 }
 
 
-void serial::BufferWrapper::appendReceiveBuffer(unsigned char *cin, int len) {
-    if (len < 10) return;
+void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec) {
+    if (vec.size() < 10) return;
 
     vector<unsigned char> v;
-    for (int i = 0; i < len; i++) {
+    for (unsigned int i = 0; i < vec.size(); i++) {
         // if true -> correct packet ?maybe
-        if (cin[i] == '7' && cin[i+1] == ':' && cin[i+9] == ',') {
+        if (vec.at(i) == '7' && vec.at(i+1) == ':' && vec.at(i+9) == ',') {
             cout << "correct packet maybe" << endl;
-            unsigned char us1 = cin[i+2];
+            unsigned char us1 = vec.at(i+2);
             printf("%i ", us1);
-            unsigned char us2 = cin[i+3];
+            unsigned char us2 = vec.at(i+3);
             printf("%i ", us2);
-            unsigned char ir1 = cin[i+4];
+            unsigned char ir1 = vec.at(i+4);
             printf("%i ", ir1);
-            unsigned char ir2 = cin[i+5];
+            unsigned char ir2 = vec.at(i+5);
             printf("%i ", ir2);
-            unsigned char ir3 = cin[i+6];
+            unsigned char ir3 = vec.at(i+6);
             printf("%i ", ir3);
-            unsigned char wheel = cin[i+7];
+            unsigned char wheel = vec.at(i+7);
             printf("%i ", wheel);
-            unsigned char check = cin[i+8];
+            unsigned char check = vec.at(i+8);
             printf("%i \n", check);
             v = {us1, us2, ir1, ir2, ir3, wheel};
             // for now
@@ -48,12 +49,15 @@ void serial::BufferWrapper::appendReceiveBuffer(unsigned char *cin, int len) {
             }
             else {
                 cout << "checksum FAIL" << endl;
+                v.clear();
             }
         }
     } // end for
-
-    // push in front of the deque holding data (aka 'the buffer')
-    buffer_in.push_front(v);
+    // push in front of the buffer if valid data
+    if (v.size() != 0) {
+        cout << "pushing to buffer in" << endl;
+        buffer_in.push_front(v);
+    }
 }
 
 
@@ -83,7 +87,7 @@ vector<unsigned char> serial::BufferWrapper::readSendBuffer(void) {
         return v;
     }
     else
-        return vector<unsigned char> {0};
+        return {};
 }
 
 

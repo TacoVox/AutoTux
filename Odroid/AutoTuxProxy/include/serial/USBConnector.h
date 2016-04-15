@@ -33,17 +33,16 @@ namespace usb_connector
         void read(void);
         void write(void);
         void disconnect(void);
-        void handle_cb_in(unsigned char *, int);
+        void handle_cb_in(std::vector<unsigned char>);
         void handle_cb_out(int);
         void set_buffer_wrapper(std::shared_ptr<serial::BufferWrapper>);
     private:
         bool init_libusb(void);
         bool open_device(void);
         bool claim_interface(void);
-        bool release_interface(void);
     private:
         std::shared_ptr<serial::BufferWrapper> bw;
-        unsigned char in_buffer[LEN_IN_BUFFER];
+        //unsigned char in_buffer[LEN_IN_BUFFER];
         struct libusb_device_handle *usb_dev;
         struct libusb_context *ctx;
         struct libusb_transfer *transfer_in;

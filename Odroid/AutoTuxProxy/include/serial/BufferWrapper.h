@@ -16,7 +16,7 @@ namespace serial
         BufferWrapper();
         ~BufferWrapper();
         //Methods for manipulating the internal buffer representation
-        void appendReceiveBuffer(unsigned char *, int);
+        void appendReceiveBuffer(std::vector<unsigned char>);
         std::vector<unsigned char> readReceiveBuffer(void);
         void appendSendBuffer(std::vector<unsigned char>);
         std::vector<unsigned char> readSendBuffer(void);
