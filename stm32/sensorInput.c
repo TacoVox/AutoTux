@@ -38,7 +38,7 @@ void sensorInputIteration(void);
  * Initialize pins and settings for sensors.
  * Also start the sensor thread.
  */
-void sensorSetup (void) {
+void sensorInputSetup (void) {
 	// Initialize sensors
 	hardwareSetupIR();
 	hardwareSetupUS();
@@ -52,7 +52,7 @@ void sensorSetup (void) {
 /**
  * Fills a char array with all sensor data
  */
-void getSensorData(unsigned char* buffer) {
+void sensorInputGetData(unsigned char* buffer) {
 	// Normal packet output
 	buffer[0] = (unsigned char)hardwareGetValuesUS(US_FRONT);
 	buffer[1] = (unsigned char)hardwareGetValuesUS(US_SIDE);
@@ -66,7 +66,7 @@ void getSensorData(unsigned char* buffer) {
 /**
  * Print sensor values to serial
  */
-void sensorDebugOutput(BaseSequentialStream* SDU) {
+void sensorInputDebugOutput(BaseSequentialStream* SDU) {
 	// "\033[F" for going back to previous line
 	chprintf(SDU, "\033[FTHROTTLE: %4i ", hardwareGetValuesRC(THROTTLE));
 	chprintf(SDU, "STEERING: %4i ", hardwareGetValuesRC(STEERING));

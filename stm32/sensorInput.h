@@ -10,19 +10,19 @@
  * Initialize pins and settings for sensors.
  * Also start the sensor thread.
  */
-void sensorSetup(void);
+void sensorInputSetup(void);
 
 
 /**
  * Fills a char array with all sensor data
  */
-void getSensorData(unsigned char* buffer);
+void sensorInputGetData(unsigned char* buffer);
 
 
 /**
  * Print sensor values to serial
  */
-void sensorDebugOutput(BaseSequentialStream* SDU);
+void sensorInputDebugOutput(BaseSequentialStream* SDU);
 
 
 #endif /* SENSORINPUT_H_ */

@@ -9,10 +9,15 @@
 #include "hal.h"
 
 
+
+
 //-----------------------------------------------------------------------------
 // Serial behaviour
 //-----------------------------------------------------------------------------
 
+
+// Debug output. Set to 0 for normal packet output.
+#define DEBUG_OUTPUT 0
 
 // If more iterations than this occurs without receiving a valid packet,
 // the car is stopped and wheels are centered.
@@ -139,8 +144,7 @@ static const int SPEED_PULSEWIDTHS[SPEED_STEPS] = {1140, 1350, 1420};
 #define WHEELS_MAXRIGHT_ANGLE 120
 
 
-
-//
+// TODO: REPLACE HARD-CODED VALUES IN HARDWAREPWM.C WITH CONFIG CONSTANTS!
 //static const ioportid_t PWM_PIN_GROUPS[] = {GPIOB, GPIOB};
 //static const ioportmask_t PWM_PIN_NUMBERS[] = {4, 6};
 

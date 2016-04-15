@@ -10,8 +10,7 @@
 #include <hal.h>
 #include <string.h>
 
-#include "packet.h"
-
+#include "packetHandler.h"
 
 
 //-----------------------------------------------------------------------------
@@ -37,7 +36,7 @@ char generateChecksum(unsigned char* data, int dataSize);
  * Sends a packet based on the data array to the serial connection
  * NOTE: provide the size of the actual data array!
  */
-void sendPacket(unsigned char* data, int size, BaseSequentialStream* SDU) {
+void packetHandlerSend(unsigned char* data, int size, BaseSequentialStream* SDU) {
 	// Packet structure: size, colon, (bytes), checksum byte, comma.
 	// Note: size + 1 because we also append a checksum XOR byte!
 	chprintf(SDU, "%i:", size + 1);
@@ -56,7 +55,7 @@ void sendPacket(unsigned char* data, int size, BaseSequentialStream* SDU) {
  * (the oldest part) if buffer size is reached. (The buffer is cleared
  * by the createPacketFromBuffer function on successful packet read).
  */
-void appendToBuffer(unsigned char latestByte) {
+void packetHandlerAddToRcvBuffer(unsigned char latestByte) {
 	buffer[bufferCounter] = latestByte;
 	bufferCounter++;
 	if (bufferCounter > BUFFER_SIZE) {
@@ -74,7 +73,7 @@ void appendToBuffer(unsigned char latestByte) {
  * Initialize the char* with CONTROL_DATA_SIZE.
  * NOTE that implementation currently relies on the packet size being one digit.
  */
-PACKET_STATUS readPacketFromBuffer(unsigned char* data) {
+PACKET_STATUS packetHandlerReadPacketFromBuffer(unsigned char* data) {
 	bool packetFound = FALSE;
 	// If packet seems to be found, values are put here temporarily before packet verified
 	unsigned char packetTest[CONTROL_DATA_BYTES];
@@ -126,7 +125,7 @@ PACKET_STATUS readPacketFromBuffer(unsigned char* data) {
 }
 
 
-int getPacketBufferSize(void) {
+int packetHandlerGetBufferSize(void) {
 	return bufferCounter;
 }
 

@@ -45,8 +45,7 @@ bool rcModeCheck(void);
  * Initializes everything related to control output
  */
 void controlOutputSetup(void) {
-	// TODO: also initialize RC here later
-
+	// TODO: also initialize RC here later?
 	hardwareSetupPWM();
 }
 
