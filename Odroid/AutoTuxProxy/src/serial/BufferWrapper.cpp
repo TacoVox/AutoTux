@@ -9,7 +9,8 @@ using namespace std;
 
 serial::BufferWrapper::BufferWrapper() :
 buffer_in({}), buffer_out({}) {
-    cout << "creating buffer parser object" << endl;
+    cout << "creating buffer parser object... ";
+    cout << "[OK]" << endl;
 }
 
 
