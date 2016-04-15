@@ -5,19 +5,19 @@
 #include <memory>
 #include <opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h>
 #include <opendavinci/odcore/data/Container.h>
-#include "serial/USBConnector.h"
 #include "serial/BufferWrapper.h"
 
-namespace serial {
-    class SerialHandler :
+namespace proxy {
+    class Proxy :
             public odcore::base::module::TimeTriggeredConferenceClientModule {
     public:
-        SerialHandler(int32_t &argc, char **argv);
-        virtual ~SerialHandler();
+        Proxy(int32_t &argc, char **argv);
+        Proxy(int32_t &argc, char **argv, std::shared_ptr<serial::BufferWrapper>);
+        virtual ~Proxy();
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
         void interrupt(void);
-    private:        
-        std::shared_ptr<usb_connector::USBConnector> usbConnector;
+        void setBufferWrapper(std::shared_ptr<serial::BufferWrapper>);
+    private:
         std::shared_ptr<serial::BufferWrapper> bufferWrapper;
         bool interrupted;
         virtual void setUp();

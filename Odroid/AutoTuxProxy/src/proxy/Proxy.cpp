@@ -1,4 +1,4 @@
-#include "serial/SerialHandler.h"
+#include "proxy/Proxy.h"
 #include <containerfactory/SBDContainer.h>
 #include <opendavinci/odcore/base/LIFOQueue.h>
 #include <automotivedata/generated/automotive/VehicleControl.h>
@@ -6,57 +6,46 @@
 #include <cmath>
 
 using namespace odcore::data;
-using namespace usb_connector;
 using namespace containerfactory;
 using namespace automotive;
 using namespace std;
 
-//void termination_handler(int);
 
-serial::SerialHandler::SerialHandler(int32_t &argc, char **argv) :
-    TimeTriggeredConferenceClientModule(argc, argv, "AutoTuxProxy"),
-    usbConnector{(shared_ptr<USBConnector>)new USBConnector()},
-    bufferWrapper{(shared_ptr<BufferWrapper>)new BufferWrapper()},
-    interrupted{false} { }
+proxy::Proxy::Proxy(int32_t &argc, char **argv) :
+    TimeTriggeredConferenceClientModule(argc, argv, "AutoTuxProxy") { }
+
+proxy::Proxy::Proxy(int32_t &argc, char **argv,
+                    std::shared_ptr<serial::BufferWrapper> bw) :
+        TimeTriggeredConferenceClientModule(argc, argv, "AutoTuxProxy"),
+    bufferWrapper{bw},
+    interrupted{false} {}
 
 
-serial::SerialHandler::~SerialHandler() {
+proxy::Proxy::~Proxy() {
     cout << "destroying serial handler object... ";
     cout << "[OK]" << endl;
 }
 
-void serial::SerialHandler::interrupt(void) {
-    interrupted = true;
-}
-
-void serial::SerialHandler::setUp() {
+void proxy::Proxy::setUp() {
     cout << "Started the AutoTuxProxy component..." << endl;
 }
 
-void serial::SerialHandler::tearDown() {
+void proxy::Proxy::tearDown() {
     cout << "Stopped the AutoTuxProxy component..." << endl;
 }
 
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode
-        serial::SerialHandler::body() {
+    proxy::Proxy::body() {
 
     odcore::base::LIFOQueue lifoQueue;
     addDataStoreFor(lifoQueue);
-
-    cout << "Testing USBConnector!" << endl;
-    usbConnector->connect();
-    usbConnector->set_buffer_wrapper(bufferWrapper);
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() ==
            odcore::data::dmcp::ModuleStateMessage::RUNNING && !interrupted) {
 
         // ========= READ =================================
-        // call usb connector to read
-        usbConnector->read();
         // call buffer wrapper to get vector
         vector<unsigned char> v = bufferWrapper->readReceiveBuffer();
-        // create a shared pointer to container
-        // set the pointer in the sending thing
 
         //If there is something to send --> send it
         if(v.size() != 0) {
@@ -65,17 +54,13 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode
 
         bufferWrapper->appendSendBuffer(cdContToVec(getKeyValueDataStore().get(VehicleControl::ID())));
         cout << "Appended received data to send buffer" << endl;
-
-        // ========= WRITE ================================
-        // call usb connector to write the data
-        usbConnector->write();
     }
 
     cout << "Done with the PacketBroadCaster body" << endl;
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
 }
 
-std::vector<unsigned char> serial::SerialHandler::cdContToVec(
+std::vector<unsigned char> proxy::Proxy::cdContToVec(
         odcore::data::Container container) {
 
     VehicleControl vehicleControl = container.getData<VehicleControl>();
@@ -97,11 +82,19 @@ std::vector<unsigned char> serial::SerialHandler::cdContToVec(
     return {'3', ':', speed, angle, chsum, ','};
 }
 
-unsigned char serial::SerialHandler::checksum(std::vector<unsigned char> v) {
+unsigned char proxy::Proxy::checksum(std::vector<unsigned char> v) {
     unsigned char cs = 0;
 
     for(auto it = v.begin(); it < v.end(); it++)
         cs ^= *it;
 
    return cs;
+}
+
+void proxy::Proxy::interrupt(void) {
+    interrupted = true;
+}
+
+void proxy::Proxy::setBufferWrapper(std::shared_ptr<serial::BufferWrapper> bw) {
+    this->bufferWrapper = bw;
 }
