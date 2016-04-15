@@ -16,7 +16,7 @@
 #define USB_ENDPOINT_IN	    0x81
 #define USB_ENDPOINT_OUT    0x01
 // buffer size when reading from usb stream
-#define LEN_IN_BUFFER       128
+#define LEN_IN_BUFFER       512
 
 // USBConnector class
 // ============================
@@ -30,8 +30,8 @@ namespace usb_connector
         USBConnector(const USBConnector&);
         USBConnector & operator=(const USBConnector&);
         bool connect(void);
-        void read(void);
-        void write(void);
+        int read(void);
+        int write(void);
         void disconnect(void);
         void handle_cb_in(std::vector<unsigned char>);
         void handle_cb_out(int);

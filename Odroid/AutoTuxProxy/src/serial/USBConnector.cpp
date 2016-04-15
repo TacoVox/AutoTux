@@ -163,7 +163,7 @@ bool usb_connector::USBConnector::connect(void)
 
 
 /* reads from the usb stream */
-void usb_connector::USBConnector::read(void)
+int usb_connector::USBConnector::read(void)
 {
     cout << "reading from usb stream..." << endl; 
     // allocate memory for use when reading from the usb
@@ -188,17 +188,18 @@ void usb_connector::USBConnector::read(void)
     }
     // delete the allocated memory
     delete [] data;
+    return res;
 }
 
 
 /* writes to the usb stream */
-void usb_connector::USBConnector::write(void)
+int usb_connector::USBConnector::write(void)
 {
     // get data to send from the send buffer
     vector<unsigned char> vec = bw->readSendBuffer();
     int len = vec.size();
     // check for length, if 0 return
-    if (len == 0) return;
+    if (len == 0) return -13;
     // allocate memory for the data to write, we get a vector
     // from the buffer but need to send char array
     unsigned char *data = new unsigned char[len];
@@ -223,6 +224,7 @@ void usb_connector::USBConnector::write(void)
     }
     // delete allocated memory
     delete [] data;
+    return res;
 }
 
 

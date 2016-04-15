@@ -24,6 +24,7 @@ namespace serial {
         virtual void tearDown();
         std::vector<unsigned char> cdContToVec(odcore::data::Container);
         unsigned char checksum(std::vector<unsigned char>);
+        void reconnect();
     };
 }
 #endif // SERIALHANDLER_H
