@@ -8,16 +8,15 @@
 #include "serial/USBConnector.h"
 #include "serial/BufferWrapper.h"
 
-namespace serial {
-    class SerialHandler :
+namespace proxy {
+    class ProxyMaster :
             public odcore::base::module::TimeTriggeredConferenceClientModule {
     public:
-        SerialHandler(int32_t &argc, char **argv);
-        virtual ~SerialHandler();
+        ProxyMaster(int32_t &argc, char **argv);
+        virtual ~ProxyMaster();
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
         void interrupt(void);
-    private:        
-        std::shared_ptr<usb_connector::USBConnector> usbConnector;
+    private:
         std::shared_ptr<serial::BufferWrapper> bufferWrapper;
         bool interrupted;
         virtual void setUp();

@@ -13,38 +13,36 @@ using namespace std;
 
 //void termination_handler(int);
 
-serial::SerialHandler::SerialHandler(int32_t &argc, char **argv) :
+proxy::ProxyMaster::ProxyMaster(int32_t &argc, char **argv) :
     TimeTriggeredConferenceClientModule(argc, argv, "AutoTuxProxy"),
     usbConnector{(shared_ptr<USBConnector>)new USBConnector()},
     bufferWrapper{(shared_ptr<BufferWrapper>)new BufferWrapper()},
     interrupted{false} { }
 
 
-serial::SerialHandler::~SerialHandler() {
+proxy::ProxyMaster::~ProxyMaster() {
     cout << "destroying serial handler object... ";
     cout << "[OK]" << endl;
 }
 
-void serial::SerialHandler::interrupt(void) {
+void proxy::ProxyMaster::interrupt(void) {
     interrupted = true;
 }
 
-void serial::SerialHandler::setUp() {
+void proxy::ProxyMaster::setUp() {
     cout << "Started the AutoTuxProxy component..." << endl;
 }
 
-void serial::SerialHandler::tearDown() {
+void proxy::ProxyMaster::tearDown() {
     cout << "Stopped the AutoTuxProxy component..." << endl;
 }
 
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode
-        serial::SerialHandler::body() {
+    proxy::ProxyMaster::body() {
 
     odcore::base::LIFOQueue lifoQueue;
     addDataStoreFor(lifoQueue);
 
-    cout << "Testing USBConnector!" << endl;
-    usbConnector->connect();
     usbConnector->set_buffer_wrapper(bufferWrapper);
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() ==
@@ -75,7 +73,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
 }
 
-std::vector<unsigned char> serial::SerialHandler::cdContToVec(
+std::vector<unsigned char> proxy::ProxyMaster::cdContToVec(
         odcore::data::Container container) {
 
     VehicleControl vehicleControl = container.getData<VehicleControl>();
@@ -97,7 +95,7 @@ std::vector<unsigned char> serial::SerialHandler::cdContToVec(
     return {'3', ':', speed, angle, chsum, ','};
 }
 
-unsigned char serial::SerialHandler::checksum(std::vector<unsigned char> v) {
+unsigned char proxy::ProxyMaster::checksum(std::vector<unsigned char> v) {
     unsigned char cs = 0;
 
     for(auto it = v.begin(); it < v.end(); it++)
