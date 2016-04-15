@@ -2,6 +2,7 @@
 #include "serial/USBHandler.h"
 #include <thread>
 #include <chrono>
+#include <iostream>
 
 using namespace std;
 
@@ -54,6 +55,7 @@ void usb_handler::USBHandler::set_buffer_wrapper(std::shared_ptr<serial::BufferW
 
 void usb_handler::USBHandler::reconnect()
 {
+    cout << "reconnecting..." << endl;
     uc.disconnect();
     while (1) {
         if (uc.connect()) break;
