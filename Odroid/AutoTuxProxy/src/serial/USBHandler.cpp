@@ -16,7 +16,7 @@ usb_handler::USBHandler::USBHandler(std::shared_ptr<serial::BufferWrapper> p) :
 
 usb_handler::USBHandler::~USBHandler()
 {
-
+    uc.~USBConnector();
 }
 
 
