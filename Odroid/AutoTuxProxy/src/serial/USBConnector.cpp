@@ -168,16 +168,24 @@ void usb_connector::USBConnector::read(void)
     cout << "reading from usb stream..." << endl; 
     // allocate memory for use when reading from the usb
     unsigned char *data = new unsigned char[LEN_IN_BUFFER];
-    // prepare a transfer for reading
+    /*// prepare a transfer for reading
     libusb_fill_bulk_transfer( transfer_in, usb_dev, USB_ENDPOINT_IN,
-        data,  LEN_IN_BUFFER, callback_in, this, 0);
+        data,  LEN_IN_BUFFER, callback_in, this, 50);
     // submit the transfer, this will fire a request to read from the usb
     int res = libusb_submit_transfer(transfer_in);
     cout << "result code from read transfer: " << res << endl;
     // wait until the transfer is completed
     while (libusb_handle_events_completed(ctx, NULL) != LIBUSB_SUCCESS) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    } 
+    }*/
+    int tran;
+    int res = libusb_bulk_transfer(usb_dev, USB_ENDPOINT_IN, data, LEN_IN_BUFFER, &tran, 50);
+    if (res == 0) {
+        cout << "transfer in completed " << endl;
+        cout << "bytes received: " << tran << endl;
+        vector<unsigned char> vec(data, data + tran);
+        bw->appendReceiveBuffer(vec);
+    }
     // delete the allocated memory
     delete [] data;
 }
@@ -197,16 +205,22 @@ void usb_connector::USBConnector::write(void)
     // copy data from vector to array
     copy(vec.begin(), vec.end(), data);
     cout << "writing to usb stream..." << endl;
-    // prepare transfer fro writing
+    /*// prepare transfer fro writing
     libusb_fill_bulk_transfer(transfer_out, usb_dev, USB_ENDPOINT_OUT,
-        data, len, callback_out, this, 0);
+        data, len, callback_out, this, 50);
     // submit the transfer
     int res = libusb_submit_transfer(transfer_out);
     cout << "result code from write transfer: " << res << endl;
     // wait for completion
     while (libusb_handle_events_completed(ctx, NULL) != LIBUSB_SUCCESS) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    }  
+    }*/
+    int tran;
+    int res = libusb_bulk_transfer(usb_dev, USB_ENDPOINT_OUT, data, len, &tran, 50);
+    if (res == 0) {
+        cout << "transfer out completed" << endl;
+        cout << "bytes sent: " << tran << endl;
+    }
     // delete allocated memory
     delete [] data;
 }
@@ -230,7 +244,7 @@ void usb_connector::USBConnector::disconnect(void)
 /* handles the callback when reading from the usb stream */
 void usb_connector::USBConnector::handle_cb_in(vector<unsigned char> vec)
 {
-    // call the buffer wrapper and append to is the received data
+    // call the buffer wrapper and append to it the received data
     bw->appendReceiveBuffer(vec);
 }
 
@@ -245,6 +259,7 @@ void usb_connector::USBConnector::handle_cb_out(int status)
 /* callback when writing to the usb stream */
 void callback_out(struct libusb_transfer *transfer)
 {
+    cout << "called callback_out" << endl;
     usb_connector::USBConnector *connector =
             reinterpret_cast<usb_connector::USBConnector*>(transfer->user_data);
     int status = transfer->status;
@@ -255,6 +270,7 @@ void callback_out(struct libusb_transfer *transfer)
 /* callback when reading from the usb stream */
 void callback_in(struct libusb_transfer *transfer)
 {
+    cout << "called callback_in" << endl;
     usb_connector::USBConnector *connector =
             reinterpret_cast<usb_connector::USBConnector*>(transfer->user_data);
     vector<unsigned char> vec(transfer->buffer, transfer->buffer + transfer->actual_length);
