@@ -5,26 +5,45 @@
 #include <memory>
 #include <opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h>
 #include <opendavinci/odcore/data/Container.h>
+#include <opendavinci/odtools/recorder/Recorder.h>
+
+#include "camera/Camera.h"
 #include "serial/BufferWrapper.h"
 
 namespace proxy {
-    class Proxy :
-            public odcore::base::module::TimeTriggeredConferenceClientModule {
-    public:
-        Proxy(int32_t &argc, char **argv);
-        Proxy(int32_t &argc, char **argv, std::shared_ptr<serial::BufferWrapper>);
-        virtual ~Proxy();
-        odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
-        void interrupt(void);
-        void setBufferWrapper(std::shared_ptr<serial::BufferWrapper>);
+    using namespace std;
+
+    class Proxy : public odcore::base::module::TimeTriggeredConferenceClientModule {
     private:
-        std::shared_ptr<serial::BufferWrapper> bufferWrapper;
-        bool interrupted;
+        Proxy(int32_t &argc, char **argv);
+        Proxy(const Proxy &/*obj*/);
+        Proxy& operator=(const Proxy &/*obj*/);
+
+    public:
+        Proxy(int32_t &argc, char **argv, shared_ptr<serial::BufferWrapper>);
+
+        virtual ~Proxy();
+
+        odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
+
+        void interrupt(void);
+        void setBufferWrapper(shared_ptr<serial::BufferWrapper>);
+
+    private:
         virtual void setUp();
         virtual void tearDown();
-        std::vector<unsigned char> cdContToVec(odcore::data::Container);
-        unsigned char checksum(std::vector<unsigned char>);
+
         void reconnect();
+        void distribute(odcore::data::Container c);
+
+    private:
+        unique_ptr<odtools::recorder::Recorder> m_recorder;
+        unique_ptr<proxy::camera::Camera> m_camera;
+        shared_ptr<serial::BufferWrapper> bufferWrapper;
+        vector<unsigned char> cdContToVec(odcore::data::Container);
+
+        bool interrupted;
+        unsigned char checksum(std::vector<unsigned char>);
     };
 }
 #endif // SERIALHANDLER_H
