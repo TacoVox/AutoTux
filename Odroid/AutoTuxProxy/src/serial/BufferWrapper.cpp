@@ -2,11 +2,15 @@
 #include <stdio.h>
 #include <iostream>
 #include <iomanip>
+#include <mutex>
 #include "serial/BufferWrapper.h"
 #include "containerfactory/SBDContainer.h"
 
 using namespace std;
 
+//Mutexes for making the reading functions threadsafe
+std::mutex rsm;
+std::mutex rrm;
 
 /* constructor */
 serial::BufferWrapper::BufferWrapper() : buffer_in({}), buffer_out({})
@@ -76,8 +80,10 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec)
 /* returns the most recent valid packet from the read buffer */
 vector<unsigned char> serial::BufferWrapper::readReceiveBuffer(void)
 {
+    rrm.lock()
     // check for size, i.e. not empty
-    if(buffer_in.size() != 0) {
+    if(buffer_in.size() != 0)
+    {
         // get the most recent packet, always in first position
         std::vector<unsigned char> vec = buffer_in.at(0);
         // clear the buffer
@@ -85,10 +91,14 @@ vector<unsigned char> serial::BufferWrapper::readReceiveBuffer(void)
         // put the packet again so we always have a valid packet
         // with the most recent data to read
         buffer_in.push_front(vec);
+        rrm.unlock();
         return vec;
     }
     else
+    {
+        rrm.unlock();
         return {};
+    }
 }
 
 
@@ -102,8 +112,10 @@ void serial::BufferWrapper::appendSendBuffer(vector<unsigned char> vec)
 /* returns the most recent valid packet from the send buffer */
 vector<unsigned char> serial::BufferWrapper::readSendBuffer(void)
 {
+    rsm.lock();
     // check for size, i.e. not empty
-    if(buffer_out.size() != 0) {
+    if(buffer_out.size() != 0)
+    {
         // get the most recent packet, always in first position
         vector<unsigned char> v = buffer_out.at(0);
         // clear the buffer
@@ -111,10 +123,14 @@ vector<unsigned char> serial::BufferWrapper::readSendBuffer(void)
         // put the packet again so we always have a valid packet
         // with the most recent data to send
         buffer_out.push_front(v);
+        rsm.unlock();
         return v;
     }
     else
+    {
+        rsm.unlock();
         return {};
+    }
 }
 
 
