@@ -83,12 +83,15 @@ std::vector<unsigned char> serial::SerialHandler::cdContToVec(
     unsigned char speed = (unsigned char)round(vehicleControl.getSpeed());
     unsigned char angle = (unsigned char)round(vehicleControl.getSteeringWheelAngle());
 
-    //Check if angle not from empty packet
+    //Check if angle not from empty packet (normally this should only occur
+    //before the decision maker sent out any values
     if(angle == 0)
         angle = 90;
 
+    //Generate the checksum for the control values
     unsigned char chsum = checksum({speed, angle});
 
+    //Some fancy debug output
     cout << "Speed: " << speed << " Angle: " << angle << endl;
 
     return {'3', ':', speed, angle, chsum, ','};
