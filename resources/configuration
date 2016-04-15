@@ -242,16 +242,16 @@ egocontroller.LinearBicycleModelNew.maxSpeed=2.0                   # maxium spee
 #
 # CONFIGURATION FOR PROXY
 #
-cameraproxy.debug = 0
-cameraproxy.useRecorder = 1 # 1 = record all captured data directly, 0 otherwise.
-cameraproxy.recorder.output = file://recs/
-cameraproxy.name = WebCam
-cameraproxy.type = OpenCV # OpenCV or UEYE
-cameraproxy.id = 1 # Select here the proper ID for OpenCV
-cameraproxy.width = 640 #752-UEYE, 640-OpenCV
-cameraproxy.height = 480
-cameraproxy.bpp = 3 #3- openCV, 1-UEYE
-cameraproxy.dumpshareddata = 1
+proxy.camera.debug = 0
+proxy.camera.useRecorder = 0 # 1 = record all captured data directly, 0 otherwise.
+proxy.camera.recorder.output = file://recs/
+proxy.camera.name = WebCam
+proxy.camera.type = OpenCV # OpenCV or UEYE
+proxy.camera.id = 0 # Select here the proper ID for OpenCV
+proxy.camera.width = 640 #752-UEYE, 640-OpenCV
+proxy.camera.height = 480
+proxy.camera.bpp = 3 #3- openCV, 1-UEYE
+proxy.camera.dumpSharedData = 1
 
 proxy.Actuator.UseRealSpeed=0
 proxy.Actuator.SerialPort=/dev/ttyACM0
