@@ -11,6 +11,9 @@
 #include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
 #include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 
+using namespace automotive;                 // Allows 'Vehicle Data'
+using namespace automotive::miniature;      // Allows 'Sensor Board Data'
+
 namespace decisionmaker{
     using namespace std;
 
@@ -29,6 +32,8 @@ namespace decisionmaker{
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
 
     private:
+        VehicleData vd;
+        SensorBoardData sbd;
         virtual void setUp();
         virtual void tearDown();
 

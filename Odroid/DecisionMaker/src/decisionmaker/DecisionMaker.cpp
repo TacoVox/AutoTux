@@ -26,7 +26,7 @@ using namespace decisionmaker;
 using namespace parker;
 using namespace overtaker;
 
-enum STATE {DRIVING, PARKING};
+enum STATE {DRIVING, PARKING, TEST};
 
 // takes the values of the argument passed to the constructor
 int32_t ptrargc;
@@ -106,11 +106,10 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
     parkerPointer->setParking(ptrParking);
     parkerPointer->setParkingControler(parkControlptr);
 
-    // To-Do...
     // Overtaker shared pointers
     VehicleControl ovtControl;
     shared_ptr<Container> ovtControlPtr (new Container(ovtControl));
-    shared_ptr<Overtaker> ovtPtr (new Overtaker (ptrargc, ptrargv));
+    shared_ptr<Overtaker> ovtPtr (new Overtaker ());
 
     // Set container value in overtaker
     ovtPtr->setOvtControlDataContainer(ovtControlPtr);
@@ -118,31 +117,49 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
     // PacketBroadcaster pointer
     shared_ptr<PacketBroadcaster> packetBroadcaster(new PacketBroadcaster(ptrargc, ptrargv));
 
+
     //Starts the modules with the shared pointers
     thread pbthread(&PacketBroadcaster::runModule, packetBroadcaster);
-    thread parkerthread(&Parker::runModule, parkerPointer);
-    thread ovtThread(&Overtaker::runModule, ovtPtr);
+    //thread parkerthread(&Parker::runModule, parkerPointer);
+    //thread ovtThread(&Overtaker::runModule, ovtPtr);
 
     packetBroadcaster->setControlDataContainer(containerptr);
 
     vehicleControl.setSpeed(1);
     *containerptr = vehicleControl;
 
+    Container containerVehicleData;
+    Container containerSensorBoardData;
+
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
+
+        // Set Control Data Container into Packet Broadcaster
         packetBroadcaster->setControlDataContainer(containerptr);
+
+        // 1. Get most recent vehicle data
+        containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
+        vd = containerVehicleData.getData<VehicleData>();
+
+        // 2. Get most recent sensor board data
+        containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
+        sbd = containerSensorBoardData.getData<SensorBoardData>();
 
         switch (state){
             case DRIVING:{
-                cout << "Is now Driving" << endl;
 
-                // Check if overtaker is overriding control values...
+                // Run obstacle-detection in overtaker...
+                cout << "*******" << sbd.getValueForKey_MapOfDistances(3) << endl;
+                ovtPtr->obstacleDetection(sbd, vd);
+
+
                 if(ovtPtr->getIsOverriding()){
-                    *containerptr = *ovtControlPtr;
+                    cout << "DRIVING: Overtaker is driving " << endl;
+                    //*containerptr = *ovtControlPtr;
                 }
+
                 // ...else execute lane following instructions
                 else{
-
-                    cout << "DENNIIISSSSSSSSSSSSSSSSSS" << endl;
+                    cout << "DRIVING: Lane Follower is driving " << endl;
                     laneFollowing();
                 }
 
@@ -155,6 +172,12 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                     *containerptr = *parkControlptr;
                 }
                 else laneFollowing();
+                break;
+            }
+            case TEST:{
+
+                cout << "DM: Test-Mode" << endl;
+
                 break;
             }
         }
