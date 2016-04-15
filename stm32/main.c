@@ -57,7 +57,11 @@ int main(void) {
 	controlData[1] = WHEELS_CENTERED_ANGLE;
 	int iterationsWithoutReceive = 0;
 	int bytesReceived = 0;
-	bool connectionActive = false;
+	// Determines if USB connected - means we can send data to USB without fear of filling the output buffer
+	bool usbConnected = false;
+	// Whether we are receiving valid packets from Odroid regularly - means we should trust the packets
+	// to control the car
+	bool connectionLinkActive = false;
 	unsigned char sensorData[SENSOR_DATA_BYTES];
 
 	// TODO: MOVE TO OUTPUT HARDWARE FILE
@@ -98,10 +102,11 @@ int main(void) {
 		}
 
 		if (charbuf == Q_RESET) {
+			// Disconnected - light up red LED
 			palSetPad(GPIOD, GPIOD_LED5);
-			connectionActive = FALSE;
+			usbConnected = FALSE;
 		} else {
-			connectionActive = TRUE;
+			usbConnected = TRUE;
 		}
 
 		// Received all bytes available from serial. Time to try to instantiate
@@ -134,11 +139,11 @@ int main(void) {
 
 		// We've got to try not to fill the USB output buffer if we have no connection.
 		// Therefore, we check if the connection seems active before sending
-		/*if (iterationsWithoutReceive < MAX_ITERATIONS_WITHOUT_RECEIVE) {
-			connectionActive = TRUE;
+		if (iterationsWithoutReceive < MAX_ITERATIONS_WITHOUT_RECEIVE) {
+			connectionLinkActive = TRUE;
 		} else {
-			connectionActive = FALSE;
-		}*/
+			connectionLinkActive = FALSE;
+		}
 
 
 		//---------------------------------------------------------------------
@@ -147,18 +152,21 @@ int main(void) {
 
 		// Unless we received no data for a number of iterations or too much data at once,
 		// controlData contains the latest valid instructions. Output them to hardware.
-		if (connectionActive && bytesReceived <= MAX_RECEIVE_BYTES_IN_ITERATION) {
+		if (connectionLinkActive && bytesReceived <= MAX_RECEIVE_BYTES_IN_ITERATION) {
 			// Forward control data to hardware
 			controlOutput(controlData);
 		} else {
 			// Serial connection rules violated. Stop the car and center wheels!
+			// TODO: MAYBE it would be good style here to overwrite controlData to stop-center values?
+			// On the other hand, connectionLinkActive should only be TRUE again if a new valid
+			// packet is received.
 			controlOutputStopCenter();
 		}
 
 		//---------------------------------------------------------------------
 		// Sending part
 		//---------------------------------------------------------------------
-		if (connectionActive) {
+		if (usbConnected) {
 			if (!DEBUG_OUTPUT) {
 				// Normal output
 				// Send a sensor data packet. Fill data array with sensor values.
