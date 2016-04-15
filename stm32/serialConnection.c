@@ -163,7 +163,7 @@ int serialConnectionLoop(void) {
 		//---------------------------------------------------------------------
 		// Sending part
 		//---------------------------------------------------------------------
-		if (usbConnected) {
+		if (usbConnected && connectionLinkActive) {
 			if (!DEBUG_OUTPUT) {
 				// Normal output
 				// Send a sensor data packet. Fill data array with sensor values.
