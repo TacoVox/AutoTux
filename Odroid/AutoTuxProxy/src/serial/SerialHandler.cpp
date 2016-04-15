@@ -3,6 +3,7 @@
 #include <opendavinci/odcore/base/LIFOQueue.h>
 #include <automotivedata/generated/automotive/VehicleControl.h>
 #include <iostream>
+#include <cmath>
 
 using namespace odcore::data;
 using namespace usb_connector;
@@ -62,17 +63,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode
             getConference().send(*SBDContainer::instance()->genSBDContainer(v));
         }
 
-        //Get the LAST RECEIVED VehicleControlData
-        VehicleControl vehicleControl =
-                getKeyValueDataStore().get(VehicleControl::ID()).getData<VehicleControl>();
-        //Create checksum
-        unsigned char checks = checksum({vehicleControl.getSpeed(),
-                                         vehicleControl.getSteeringWheelAngle()});
-        //Append the stuff to the send buffer
-        bufferWrapper->appendSendBuffer({3, ':',
-                       (unsigned char)vehicleControl.getSpeed(),
-                       (unsigned char)vehicleControl.getSteeringWheelAngle(),
-                       checks, ','});
+        bufferWrapper->appendSendBuffer(cdContToVec(getKeyValueDataStore().get(VehicleControl::ID())));
         cout << "Appended received data to send buffer" << endl;
 
         // ========= WRITE ================================
@@ -82,6 +73,18 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode
 
     cout << "Done with the PacketBroadCaster body" << endl;
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
+}
+
+std::vector<unsigned char> serial::SerialHandler::cdContToVec(
+        odcore::data::Container container) {
+
+    VehicleControl vehicleControl = container.getData<VehicleControl>();
+
+    unsigned char speed = (unsigned char)round(vehicleControl.getSpeed());
+    unsigned char angle = (unsigned char)round(vehicleControl.getSteeringWheelAngle());
+    unsigned char chsum = checksum({speed, angle});
+
+    return {3, ':', speed, angle, chsum, ','};
 }
 
 unsigned char serial::SerialHandler::checksum(std::vector<unsigned char> v) {

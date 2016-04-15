@@ -22,6 +22,7 @@ namespace serial {
         bool interrupted;
         virtual void setUp();
         virtual void tearDown();
+        std::vector<unsigned char> cdContToVec(odcore::data::Container);
         unsigned char checksum(std::vector<unsigned char>);
     };
 }
