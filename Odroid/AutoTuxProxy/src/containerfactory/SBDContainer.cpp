@@ -23,7 +23,7 @@ containerfactory::SBDContainer* containerfactory::SBDContainer::instance(void) {
     return _instance;
 }
 
-Container containerfactory::SBDContainer::genSBDContainer(vector<unsigned char> values) {
+shared_ptr<Container> containerfactory::SBDContainer::genSBDContainer(vector<unsigned char> values) {
     //Create a map for all the sensor data
     map<uint32_t, double> sensordata;
 
@@ -40,6 +40,7 @@ Container containerfactory::SBDContainer::genSBDContainer(vector<unsigned char> 
     sensorBoardData.setMapOfDistances(sensordata);
 
     //Wrap the newly created SensorBoardData in a Container obj and return it
-    Container c(sensorBoardData);
-    return c;
+    //Container c(sensorBoardData);
+    //return c;
+    return (std::shared_ptr<Container>)(new Container(sensorBoardData));
 }

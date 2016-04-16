@@ -77,6 +77,8 @@ void hardwareIterationUSStart() {
 
 
 void hardwareIterationUSEnd() {
+	static int zero_occurences = 0;
+
 	for (int i = 0; i < US_SENSORS; i++) {
 		msg_t status = MSG_OK;
 		systime_t timeout = MS2ST(10);
@@ -93,10 +95,25 @@ void hardwareIterationUSEnd() {
 
 		// Store the value
 		if (status == MSG_OK) {
-			usCm[i] = (receiveBuffer[0] << 8) + receiveBuffer[1];
+			int value = (receiveBuffer[0] << 8) + receiveBuffer[1];
+
+			// To smooth out occasional ranging errors,
+			// Only update the value to 0 if it has been so for three consecutive times
+			if (value == 0 && zero_occurences <= 2) {
+				zero_occurences++;
+			} else {
+				// Assign value.
+				// Average the current value with the last
+				usCm[i] = (usCm[i] + value) / 2;
+
+			}
+			if (value > 0) {
+				zero_occurences = 0;
+			}
+
 		} else {
 			// Error message.
-			usCm[i] = (int)i2cGetErrors(US_I2C_DRIVER);
+			//usCm[i] = (int)i2cGetErrors(US_I2C_DRIVER);
 		}
 	}
 }

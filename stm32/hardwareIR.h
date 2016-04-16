@@ -8,7 +8,7 @@
 #ifndef HARDWAREIR_H_
 #define HARDWAREIR_H_
 
-#include "autotuxhardware.h"
+#include "autotuxconfig.h"
 
 /*
  * Sets up the IR sensor pins etc.
@@ -24,5 +24,9 @@ void hardwareIterationIR(void);
  * Getter for the values. Specify an IR sensor.
  */
 int hardwareGetValuesIR(IR_SENSOR);
+
+
+systime_t getCallbackEndTime(void);
+
 
 #endif /* HARDWAREIR_H_ */
