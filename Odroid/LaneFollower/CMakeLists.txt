@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.8)
 project(LaneFollower)
 
 # Set module paths, system dependant.
 # TODO Make cmake search for it
-set(CMAKE_MODULE_PATH "/usr/local/share/cmake-3.5/Modules" ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "/usr/local/share/cmake-2.8/Modules" ${CMAKE_MODULE_PATH})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -lopencv_core -lopencv_highgui -pedantic -Wall -Werror -Wextra -Wshadow -Wno-deprecated -Wfloat-equal -Wpointer-arith -Wwrite-strings -Wpacked")
 
 SET (CXX_EFFECTIVE_CXX "-Wno-error=effc++ -Weffc++ -Wmissing-format-attribute
