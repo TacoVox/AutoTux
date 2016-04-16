@@ -11,31 +11,30 @@
 #include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
 #include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 
-using namespace automotive;                 // Allows 'Vehicle Data'
-using namespace automotive::miniature;      // Allows 'Sensor Board Data'
-
 namespace decisionmaker{
-    using namespace std;
-
     class DecisionMaker : public odcore::base::module::TimeTriggeredConferenceClientModule{
-    private:
-        DecisionMaker(const DecisionMaker &/*obj*/);
-        DecisionMaker &operator=(const DecisionMaker &/*obj*/);
-
     public:
         DecisionMaker(const int32_t &argc, char **argv);
-
-        virtual ~DecisionMaker();
-
-        virtual void nextContainer(odcore::data::Container &c);
-
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
+        virtual void nextContainer(odcore::data::Container &c);
+        virtual ~DecisionMaker();
+    private:
+
+
 
     private:
-        VehicleData vd;
-        SensorBoardData sbd;
+        //DecisionMaker(const DecisionMaker &/*obj*/);
+        //DecisionMaker &operator=(const DecisionMaker &/*obj*/);
         virtual void setUp();
         virtual void tearDown();
+
+        const double ULTRASONIC_FRONT_RIGHT = 4;
+        const double ULTRASONIC_FRONT_FORWARD = 3;
+        const double INFRARED_FRONT_RIGHT = 0;
+        const double INFRARED_REAR_RIGHT = 2;
+
+        //automotive::VehicleData vd;
+        //automotive::miniature::SensorBoardData sbd;
 
         odcore::data::Container laneRecommendation;
         double getAngle();
