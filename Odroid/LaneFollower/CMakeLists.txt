@@ -3,7 +3,7 @@ project(LaneFollower)
 
 # Set module paths, system dependant.
 # TODO Make cmake search for it
-set(CMAKE_MODULE_PATH "/usr/local/share/cmake-2.8/Modules" ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "/opt/od/share/cmake-3.0/Modules" ${CMAKE_MODULE_PATH})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -lopencv_core -lopencv_highgui -pedantic -Wall -Werror -Wextra -Wshadow -Wno-deprecated -Wfloat-equal -Wpointer-arith -Wwrite-strings -Wpacked")
 
 SET (CXX_EFFECTIVE_CXX "-Wno-error=effc++ -Weffc++ -Wmissing-format-attribute
@@ -24,15 +24,19 @@ Warray-bounds -Wtrampolines -Wlogical-op -Wnormalized=nfc -Wvarargs -Wvector-ope
 -Wvla -Wtype-limits -Wc++11-compat -Woverloaded-virtual")
 
 # Require OpenDaVINCI
-#set(OPENDAVINCI_DIR "/opt/od/")
+set(OPENDAVINCI_DIR "/opt/od")
 find_package(OpenDaVINCI REQUIRED)
 
+MESSAGE( STATUS "${OPENDAVINCI_DIR}" )
+
 # Require Automotivedata
-#set(AUTOMOTIVEDATA_DIR "/opt/od")
+set(AUTOMOTIVEDATA_DIR "/opt/od")
 find_package(AutomotiveData REQUIRED)
 
+MESSAGE( STATUS "${AUTOMOTIVEDATA_DIR}" )
+
 # Find OpenCV.
-set(OpenCV_ROOT_DIR "/usr/local")
+set(OpenCV_ROOT_DIR "/usr")
 find_package(OpenCV REQUIRED)
 
 set(LIBRARIES ${OPENDAVINCI_LIBRARIES} ${AUTOMOTIVEDATA_LIBRARIES} ${OpenCV_LIBRARIES})

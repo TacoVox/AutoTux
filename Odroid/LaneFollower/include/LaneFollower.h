@@ -3,7 +3,8 @@
 
 #include <memory>
 
-#include <opencv/cv.h>
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui.hpp>
 #include <opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h>
 #include <opendavinci/odcore/data/TimeStamp.h>
 #include <opendavinci/odcore/wrapper/SharedMemory.h>
@@ -61,12 +62,13 @@ namespace lane {
 
             bool m_hasAttachedToSharedImageMemory;
             std::shared_ptr<odcore::wrapper::SharedMemory> m_sharedImageMemory;
-            IplImage *m_image;
+            cv::Mat m_image;
             odcore::data::TimeStamp m_previousTime;
-            CvFont m_font;
             bool m_debug;
 
             automotive::VehicleControl m_vehicleControl;
+
+            autotux::LaneRecommendation laneRecommendation;
 
             virtual void setUp();
             virtual void tearDown();
