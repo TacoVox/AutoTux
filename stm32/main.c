@@ -1,90 +1,186 @@
-/*
-    ChibiOS - Copyright (C) 2006..2015 Giovanni Di Sirio
+/**
+ * Main file for the stm32 part of AutoTux.
+ * Some of the files such as usbcfg.*, chconf, mcuconf and halconf are from the ChibiOS
+ * examples for stm32. The config files are tailored for our particular needs.
+ * Also note this from the ChibiOS example readme:
+ *
+ * "Some files used by the demo are not part of ChibiOS/RT but are copyright of
+ * ST Microelectronics and are licensed under a different license.
+ * Also note that not all the files present in the ST library are distributed
+ * with ChibiOS/RT, you can find the whole library on the ST web site."
+ */
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
 
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
-
+// General includes
 #include <stdio.h>
 #include <string.h>
+// ChibiOS includes
+#include <ch.h>
+#include <chprintf.h>
+#include <hal.h>
 
-#include "ch.h"
-#include "hal.h"
-#include "test.h"
-
-#include "chprintf.h"
-
+// Local includes
 #include "usbcfg.h"
-
-/*===========================================================================*/
-/* Command line related.                                                     */
-/*===========================================================================*/
-
-#define SHELL_WA_SIZE   THD_WORKING_AREA_SIZE(2048)
-#define TEST_WA_SIZE    THD_WORKING_AREA_SIZE(256)
+#include "sensorInput.h"
+#include "packet.h"
 
 
+// TODO: Move to output
+#include "hardwarePWM.h"
+// TODO: should also be in output module
+#include "hardwareRC.h"
 
-/*
- * Application entry point.
- */
+
+//-----------------------------------------------------------------------------
+// Definitions
+//-----------------------------------------------------------------------------
+
+
+#define DEBUG_OUTPUT 0
+#define ACTIVITY_LED_TIMEOUT_ITERATIONS 10
+
+// Buffer for received byte
+msg_t charbuf;
+
+// Last valid control data bytes
+char controlData[CONTROL_DATA_SIZE];
+
+// Initializes sensor thread, drivers etc.
+void initialize(void);
+
+
+//-----------------------------------------------------------------------------
+// Implementation - main loop.
+//-----------------------------------------------------------------------------
+
+
 int main(void) {
-  /*
-   * System initializations.
-   * - HAL initialization, this also initializes the configured device drivers
-   *   and performs the board-specific initializations.
-   * - Kernel initialization, the main() function becomes a thread and the
-   *   RTOS is active.
-   */
-  halInit();
-  chSysInit();
+	initialize();
 
-  /*
-   * Initializes a serial-over-USB CDC driver.
-   */
-  sduObjectInit(&SDU1);
-  sduStart(&SDU1, &serusbcfg);
+	static int lastBufferSize = 0;
 
-  /*
-   * Activates the USB driver and then the USB bus pull-up on D+.
-   * Note, a delay is inserted in order to not have to disconnect the cable
-   * after a reset.
-   */
-  /*
-   * Shell manager initialization.
-   */
-  //shellInit();
-
-
-
-	// Loop this - check in the inner loop if USB driver says still connected,
-	// otherwise go back here to reconnect
-	usbDisconnectBus(serusbcfg.usbp);
-  	chThdSleepMilliseconds(1500);
-  	usbStart(serusbcfg.usbp, &usbcfg);
-  	usbConnectBus(serusbcfg.usbp);
-
-	msg_t charbuf;
+	// Main loop. Iteration counter for activity LED
+  	int iterationsSinceActive = 0;
+  	int iterationsSinceRedLED = 0;
 	while(true) {
-		charbuf = chnGetTimeout(&SDU1, 1000);
-		if (charbuf != Q_TIMEOUT) {
-			if ((char)charbuf == '\r') {
-				chprintf( (BaseSequentialStream *)&SDU1, "%c", (char)charbuf);				} else {
-				chprintf( (BaseSequentialStream *)&SDU1, "%c", (char)charbuf);
-			}
-			chprintf( (BaseSequentialStream *)&SDU1, "%c", (char)charbuf);
+
+		//---------------------------------------------------------------------
+		// LED management
+		//---------------------------------------------------------------------
+		// TODO: have simple methods like hardwareRedLEDOn, hardwareGreenLEDOn
+		// and hardwareLEDIteration() that resets them after N iterations
+
+		// Handles green LED. On if recently recieved bytes.
+		if (iterationsSinceActive < ACTIVITY_LED_TIMEOUT_ITERATIONS) {
+			// Active. LED on.
+			palSetPad(GPIOD, GPIOD_LED4);
+			iterationsSinceActive++;
 		} else {
+			// Timeout. Clear LED and provide a \0 to keep connection alive.
 			chprintf( (BaseSequentialStream *)&SDU1, "\0");
+			palClearPad(GPIOD, GPIOD_LED4);
 		}
-		chThdSleepMilliseconds(20);
+
+		// Handles red LED. On if recently set to 0
+	  	if (iterationsSinceRedLED < ACTIVITY_LED_TIMEOUT_ITERATIONS) {
+	  		iterationsSinceRedLED++;
+			palSetPad(GPIOD, GPIOD_LED5);
+	  	} else {
+	  		// Off after the given number of iterations
+			palClearPad(GPIOD, GPIOD_LED5);
+	  	}
+
+		//---------------------------------------------------------------------
+		// Receiving part
+		//---------------------------------------------------------------------
+
+		// Read bytes until we get a timeout, meaning we have caught up with
+		// whatever is sent from the high-level board.
+		charbuf = chnGetTimeout(&SDU1, TIME_IMMEDIATE);
+		while (charbuf != Q_TIMEOUT) {
+			// Received a byte = activity
+			iterationsSinceActive = 0;
+
+			// Add the byte to the packet buffer
+			appendToBuffer((char)charbuf);
+
+			// Read the next byte - but first wait a bit, the USB-serial driver
+			// tends to hang if we read to soon.
+			chThdSleepMicroseconds(50);
+			charbuf = chnGetTimeout(&SDU1, TIME_IMMEDIATE);
+		}
+
+		// Received all bytes available from serial. Time to try to instantiate
+		// a packet, provided the buffer has some content now
+		if (getPacketBufferSize() >= CONTROL_DATA_PACKET_SIZE &&
+				getPacketBufferSize() > lastBufferSize) {
+			// TODO: Light up red LED if failed to instantiate packet
+			if (readPacketFromBuffer(controlData) == PACKET_OK) {
+				// TODO
+				iterationsSinceRedLED = 0;
+
+			}
+		}
+		// Keep track of buffer size so we only execute the above if anything is new
+		lastBufferSize = getPacketBufferSize();
+
+
+		//---------------------------------------------------------------------
+		// Output to hardware
+		//---------------------------------------------------------------------
+
+		// Regardless of how it went, controlData contains the latest
+		// valid instructions. Output it to hardware
+		// TODO: hardwareOutput(controlData);
+		// hardwareSetValuesPWM(PWM_OUTPUT_SERVO, angle);
+		// hardwareSetValuesPWM(PWM_OUTPUT_ESC, dir);
+
+		//chprintf((BaseSequentialStream*) &SDU1, "CONTROL 1: %2x", controlData[0]);
+		//chprintf((BaseSequentialStream*) &SDU1, "CONTROL 2: %2x", controlData[1]);
+
+
+		//---------------------------------------------------------------------
+		// Sending part
+		//---------------------------------------------------------------------
+
+		if (DEBUG_OUTPUT) {
+			sensorDebugOutput((BaseSequentialStream*) &SDU1);
+		} else {
+			// Send a sensor data packet. Fill a char[] with sensor values.
+			int size = 5;
+			char data[size];
+			getSensorData(data);
+
+			// Send to SDU1
+			sendPacket(data, 5, (BaseSequentialStream*) &SDU1);
+		}
+
+		chThdSleepMilliseconds(100);
 	}
+	return 0;
+}
+
+
+/**
+ * Initializes sensor thread, drivers etc
+ */
+void initialize() {
+	// Initialize drivers etc
+	halInit();
+	chSysInit();
+
+	// Initialize sensor settings
+	sensorSetup();
+	hardwareSetupPWM();
+
+ 	// Initialize serial over USB
+	sduObjectInit(&SDU1);
+ 	sduStart(&SDU1, &serusbcfg);
+
+  	// Activate USB driver. The delay means that if the device is reset, it will
+ 	// be unavailable to the host for a while, and then reattached.
+	usbDisconnectBus(serusbcfg.usbp);
+	chThdSleepMilliseconds(1500);
+	usbStart(serusbcfg.usbp, &usbcfg);
+  	usbConnectBus(serusbcfg.usbp);
 }
