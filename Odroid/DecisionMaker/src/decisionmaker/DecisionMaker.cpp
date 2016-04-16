@@ -3,30 +3,26 @@
 //
 
 #include <iostream>
+#include <string>
 #include <thread>
 
 #include "packetio/PacketBroadcaster.h"
 #include "decisionmaker/DecisionMaker.h"
-#include "parker/Parker.h"
-#include "overtaker/Overtaker.h"
 
 using namespace std;
 
-
 using namespace odcore::base;
 using namespace odcore::base::module;
-using namespace odcore::data;
-using namespace automotive;
-using namespace automotive::miniature;
+using namespace odcore::data;               // Container
+using namespace automotive;                 // Vehicle Control & Vehicle Data
+using namespace automotive::miniature;      // Sensor Board Data
 
 using namespace autotux;
 
 using namespace packetio;
 using namespace decisionmaker;
-using namespace parker;
-using namespace overtaker;
 
-enum STATE {DRIVING, PARKING, TEST};
+enum STATE {DRIVING, PARKING};
 
 // takes the values of the argument passed to the constructor
 int32_t ptrargc;
@@ -41,7 +37,7 @@ shared_ptr<Container> containerptr(new Container(vehicleControl));
  */
 DecisionMaker::DecisionMaker(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "DecisionMaker"),
-    laneRecommendation() {
+        laneRecommendation() {
     ptrargc = argc;
     ptrargv = argv;
 }
@@ -56,11 +52,12 @@ void DecisionMaker::tearDown(){
 }
 /**
  * Sets wheelangledata to the LaneRecommandation
- */
+*/
 void DecisionMaker::laneFollowing() {
     vehicleControl.setSteeringWheelAngle(getAngle());
     *containerptr = vehicleControl;
 }
+
 /**
  * Get the angle given by LaneRecommandation
  */
@@ -73,12 +70,14 @@ double DecisionMaker::getAngle() {
  */
 bool DecisionMaker::isInLeftLane() {
     return laneRecommendation.getData<LaneRecommendation>().getLeft_lane();
+
 }
 /**
  * How good the Data sent by the LaneRecommendation are.
  */
 bool DecisionMaker::isDataQuality(){
     return laneRecommendation.getData<LaneRecommendation>().getQuality();
+
 }
 /**
  * Get's the distance from a stop Line
@@ -86,50 +85,32 @@ bool DecisionMaker::isDataQuality(){
  */
 double DecisionMaker::getDistanceToLine() {
     return laneRecommendation.getData<LaneRecommendation>().getDistance_to_line();
-}
 
+}
 
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() {
 
     // Set initial state of the car
     STATE state = DRIVING;
 
-    // Parker shared pointers
-    bool park;
-    shared_ptr<bool> ptrParking(&park);
-
-    VehicleControl parkcontrol;
-    shared_ptr<Container> parkControlptr(new Container(parkcontrol));
-    shared_ptr<Parker> parkerPointer(new Parker(ptrargc, ptrargv));
-
-    //Set values in parker
-    parkerPointer->setParking(ptrParking);
-    parkerPointer->setParkingControler(parkControlptr);
-
-    // Overtaker shared pointers
-    VehicleControl ovtControl;
-    shared_ptr<Container> ovtControlPtr (new Container(ovtControl));
-    shared_ptr<Overtaker> ovtPtr (new Overtaker ());
-
-    // Set container value in overtaker
-    ovtPtr->setOvtControlDataContainer(ovtControlPtr);
-
     // PacketBroadcaster pointer
     shared_ptr<PacketBroadcaster> packetBroadcaster(new PacketBroadcaster(ptrargc, ptrargv));
 
-
     //Starts the modules with the shared pointers
     thread pbthread(&PacketBroadcaster::runModule, packetBroadcaster);
-    //thread parkerthread(&Parker::runModule, parkerPointer);
-    //thread ovtThread(&Overtaker::runModule, ovtPtr);
 
+    // Set container pointer in packet broadcaster
     packetBroadcaster->setControlDataContainer(containerptr);
-
-    vehicleControl.setSpeed(1);
-    *containerptr = vehicleControl;
 
     Container containerVehicleData;
     Container containerSensorBoardData;
+
+    VehicleData vd;
+    SensorBoardData sbd;
+
+    // Set initial speed
+    vehicleControl.setSpeed(2);
+    *containerptr = vehicleControl;
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
 
@@ -147,41 +128,17 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
         switch (state){
             case DRIVING:{
 
+                // To-Do
                 // Run obstacle-detection in overtaker...
-                cout << "*******" << sbd.getValueForKey_MapOfDistances(3) << endl;
-                ovtPtr->obstacleDetection(sbd, vd);
 
-
-                if(ovtPtr->getIsOverriding()){
-                    cout << "DRIVING: Overtaker is driving " << endl;
-                    //*containerptr = *ovtControlPtr;
-                }
-
-                // ...else execute lane following instructions
-                else{
-                    cout << "DRIVING: Lane Follower is driving " << endl;
-                    laneFollowing();
-                }
-
-                break;
-            }
-            case PARKING:{
-                *ptrParking = true;
-
-                if(parkerPointer->getFoundSpot()){
-                    *containerptr = *parkControlptr;
-                }
-                else laneFollowing();
-                break;
-            }
-            case TEST:{
-
-                cout << "DM: Test-Mode" << endl;
+                laneFollowing();
+                //*containerptr = vehicleControl;
 
                 break;
             }
         }
     }
+
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
 }
 

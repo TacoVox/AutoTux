@@ -8,9 +8,9 @@
 #include <opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h>
 #include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 
-using namespace automotive;                     // Allows 'Vehicle Data' and 'Vehicle Control'
-
 namespace  overtaker{
+
+    using namespace automotive;                     // Allows 'Vehicle Data' and 'Vehicle Control'
 
     class Overtaker {
     public:
