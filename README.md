@@ -13,6 +13,10 @@
 &nbsp;&nbsp;
 [LaneFollowing](http://www.derkahler.de:8888/job/AutoTux%20-%20LaneFollowing/)
 <br />
+[![Build Status](http://www.derkahler.de:8888/job/Decision%20Maker/badge/icon)](http://www.derkahler.de:8888/job/Decision%20Maker/)
+&nbsp;&nbsp;
+[Decision Maker](http://www.derkahler.de:8888/job/Decision%20Maker/)
+<br />
 [![Build Status](http://www.derkahler.de:8888/job/Autotux%20Odroid%20Integration%20(dev%20branch)/badge/icon)](http://www.derkahler.de:8888/job/Autotux%20Odroid%20Integration%20(dev%20branch)/)
 &nbsp;&nbsp;
 [Integration](http://www.derkahler.de:8888/job/Autotux%20Odroid%20Integration%20(dev%20branch))
