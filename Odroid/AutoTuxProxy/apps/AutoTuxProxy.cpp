@@ -1,32 +1,46 @@
 //
-// Created by jonas on 4/1/16.
+// Created by Jonas Kahler on 4/1/16.
 //
 #include <iostream>
 #include <thread>
-
-#include <opendavinci/odcore/data/Container.h>
-
-#include "packetio/PacketBroadcaster.h"
-#include "containerfactory/SBDContainer.h"
-#include "serial/USBConnector.h"
+#include <signal.h>
+#include "serial/BufferWrapper.h"
+#include "proxy/Proxy.h"
+#include "serial/USBHandler.h"
 
 using namespace std;
-using namespace odcore::data;
+using namespace serial;
+using namespace usb_handler;
+using namespace proxy::camera;
 
-int main(int argc, char **argv) {
-    cout << "Testing Packet Broadcaster!" << endl;
+void exit_handler(int);
 
-    std::shared_ptr<packetio::PacketBroadcaster> packetBroadcaster(new packetio::PacketBroadcaster(argc, argv));
-    std::thread pbthread(&packetio::PacketBroadcaster::runModule, packetBroadcaster);
+int32_t main(int32_t argc, char **argv) {
 
-    cout << "Testing USBConnector!" << endl;
-    usb_connector::USBConnector serial_obj;
-    serial_obj.connect();
-    serial_obj.read();
+    signal(SIGINT, exit_handler);
 
-    serial_obj.disconnect();
+    cout << "Starting up AutoTuxProxy..." << endl;
 
-    pbthread.join();
+    shared_ptr<BufferWrapper> bw = (shared_ptr<BufferWrapper>)new BufferWrapper();
+
+    shared_ptr<proxy::Proxy> prx = (shared_ptr<proxy::Proxy>) new proxy::Proxy(argc, argv, bw);
+    thread prxthread(&proxy::Proxy::runModule, prx);
+
+    shared_ptr<USBHandler> uc = (shared_ptr<USBHandler>) new USBHandler(bw);
+    thread ucthread(&USBHandler::run, uc);
+
+    //Waiting for the thread to terminate
+    ucthread.join();
+    cout << "USBHandler stopped" << endl;
+    prxthread.join();
+    cout << "Proxy stopped" << endl;
 
     return 0;
+}
+
+
+void exit_handler(int num)
+{
+    cout << "caught signal: " << num << endl;
+    exit(1);
 }
