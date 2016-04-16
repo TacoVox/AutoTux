@@ -3,14 +3,55 @@
  * For all hardware config needs.
  */
 
-#ifndef AUTOTUXHARDWARE_H_
-#define AUTOTUXHARDWARE_H_
+#ifndef AUTOTUXCONFIG_H_
+#define AUTOTUXCONFIG_H_
 
 #include "hal.h"
 
 
+
+
 //-----------------------------------------------------------------------------
-// IR config
+// Serial behaviour
+//-----------------------------------------------------------------------------
+
+
+// Debug output. Set to 0 for normal packet output.
+#define DEBUG_OUTPUT 0
+
+// If more iterations than this occurs without receiving a valid packet,
+// the car is stopped and wheels are centered.
+#define MAX_ITERATIONS_WITHOUT_RECEIVE 5
+
+// If more bytes than this is received in the same iteration, we know we are
+// either getting lots of garbage data or we have a serious issue with keeping
+// a good communication rate with the Odroid. The car will stop and the wheels
+// will be centered.
+#define MAX_RECEIVE_BYTES_IN_ITERATION 200
+
+
+//-----------------------------------------------------------------------------
+// RC mode behavior. If recalibrating PWM values, also see PWM hardware config.
+//-----------------------------------------------------------------------------
+
+
+// When RC is on, the throttle signal is above this treshold value
+#define RC_THROTTLE_ON_TRESHOLD 100
+
+// Anything below this will be BRAKE when in non-RC mode
+#define RC_THROTTLE_BRAKE_TRESHOLD 1000
+
+// Number of consecutive iterations to steer in the extreme directions to change mode
+#define ITERATIONS_TO_CHANGE_MODE 10
+
+// Steer max right to activate RC mode
+#define RC_STEERING_ACTIVATION_TRESHOLD 2060
+// Steer max left to deactivate RC mode
+#define RC_STEERING_DEACTIVATION_TRESHOLD 1140
+
+
+//-----------------------------------------------------------------------------
+// IR hardware config
 //-----------------------------------------------------------------------------
 
 // Used to identify each sensor
@@ -34,7 +75,7 @@ static const ioportmask_t ADC_PIN_NUMBERS[] = {0, 4, 5};
 
 
 //-----------------------------------------------------------------------------
-// US config - NOTE ideally move config of pins and channels here as well
+// US hardware config
 //-----------------------------------------------------------------------------
 
 typedef enum {US_FRONT, US_SIDE} US_SENSOR;
@@ -51,7 +92,7 @@ static const ioportmask_t US_PIN_NUMBERS[] = {9, 8};
 
 
 //-----------------------------------------------------------------------------
-// RC config
+// RC hardware config
 //-----------------------------------------------------------------------------
 
 
@@ -70,7 +111,7 @@ static const ioportmask_t RC_PIN_NUMBERS[] = {4, 6};
 
 
 //-----------------------------------------------------------------------------
-// WE config
+// WE hardware config
 //-----------------------------------------------------------------------------
 
 
@@ -79,21 +120,34 @@ static const ioportmask_t RC_PIN_NUMBERS[] = {4, 6};
 
 // A0
 static const ioportid_t WE_PIN_GROUP = GPIOA;
-static const ioportmask_t WE_PIN_NUMBER  = 0;
+static const ioportmask_t WE_PIN_NUMBER  = 2;
 
 
 //-----------------------------------------------------------------------------
-// PWM config
+// PWM hardware config
 //-----------------------------------------------------------------------------
 
 
 typedef enum {PWM_OUTPUT_ESC, PWM_OUTPUT_SERVO} PWM_OUTPUT_ID;
 
+// Speeds and their corresponding pulsewidths.
+typedef enum {SPEED_REVERSE, SPEED_STOP, SPEED_FORWARD} SPEED;
+#define SPEED_STEPS 3
+static const int SPEED_PULSEWIDTHS[SPEED_STEPS] = {1140, 1350, 1420};
+
+#define WHEELS_MAXLEFT_PW 1220
+#define WHEELS_CENTERED_PW 1590
+#define WHEELS_MAXRIGHT_PW 1980
+
+#define WHEELS_MAXLEFT_ANGLE 60
+#define WHEELS_CENTERED_ANGLE 90
+#define WHEELS_MAXRIGHT_ANGLE 120
 
 
-//
+// TODO: REPLACE HARD-CODED VALUES IN HARDWAREPWM.C WITH CONFIG CONSTANTS!
 //static const ioportid_t PWM_PIN_GROUPS[] = {GPIOB, GPIOB};
 //static const ioportmask_t PWM_PIN_NUMBERS[] = {4, 6};
 
 
-#endif /* AUTOTUXHARDWARE_H_ */
+
+#endif /* AUTOTUXCONFIG_H_ */

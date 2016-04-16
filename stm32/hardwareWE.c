@@ -15,21 +15,20 @@
 //-----------------------------------------------------------------------------
 
 systime_t measurementStart;
-//static void icuCallback(ICUDriver *icup);
 
 //--
 //	Thread Definitions
 //--
 
-static THD_WORKING_AREA(wheelEncoderThreadWorkingArea, 150);
+static THD_WORKING_AREA(wheelEncoderThreadWorkingArea, 60); // Stack size in bytes
 static THD_FUNCTION(wheelEncoderThread, arg);
 
 // The resulting pulsewidth values
 uint8_t ticks;
 bool previousState;
-double metersPerSecond;
+int cmPerSecond;
 systime_t startTime;
-unsigned int timeNow;
+systime_t timeNow;
 
 
 //-----------------------------------------------------------------------------
@@ -38,7 +37,7 @@ unsigned int timeNow;
 
 
 /*
- * Sets up the US sensor pins etc.
+ * Sets up the pin and the thread
  */
 void hardwareSetupWE(void) {
 	palSetPadMode(WE_PIN_GROUP, WE_PIN_NUMBER, PAL_MODE_INPUT_PULLUP);
@@ -62,18 +61,21 @@ void hardwareIterationWE(void) {
 	    } else if (previousState == TRUE && palReadPad(WE_PIN_GROUP, WE_PIN_NUMBER) == FALSE) {
 	        previousState = FALSE;
 	    }
-
-	    if (ST2MS(chVTGetSystemTime()) > ST2MS(startTime) + 1000) {
+		timeNow = chVTGetSystemTime();
+	    if (ST2MS(timeNow) > ST2MS(startTime) + 1000) {
 	        // Do calculations here
 	        // numberOfTicksInMeters / timeElapsed
 	        systime_t timeDelta = timeNow - startTime;
-	        int timeDeltaMS = (int)ST2MS(timeDelta); // Why not just initialize this as double?
-			double seconds = (double)timeDeltaMS / 1000;
-	        double ticksPerS = ticks / seconds; // Why multiply by 1000?????
-	        metersPerSecond = (ticksPerS / ticksPerMeter);
+			double seconds = ST2MS(timeDelta) / (double)1000;
+			double centimeters = (ticks / ticksPerMeter) * 100;
+	        cmPerSecond = (int)(centimeters / seconds);
 
+	        // Reset tick counter
+	        ticks = 0;
 	        startTime = chVTGetSystemTime();
 	    }
+
+		chThdSleepMilliseconds(5);
 	}
 }
 
@@ -85,8 +87,8 @@ static THD_FUNCTION(wheelEncoderThread, arg) {
 /*
  * Getter for the values. Specify a US sensor.
  */
-double hardwareGetValuesWE(void) {
-	return metersPerSecond;
+int hardwareGetValuesWE(void) {
+	return cmPerSecond;
 }
 
 //-----------------------------------------------------------------------------
@@ -94,7 +96,3 @@ double hardwareGetValuesWE(void) {
 //-----------------------------------------------------------------------------
 
 
-/*static void icuCallback(ICUDriver *icup) {
-	(void)icup;
-	ticks++;
-}*/

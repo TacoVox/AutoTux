@@ -5,7 +5,8 @@
 
 # Compiler options here.
 ifeq ($(USE_OPT),)
-  USE_OPT = -std=c99 -O0 -ggdb -fomit-frame-pointer -falign-functions=16 -Wall -Wextra -Werror
+  USE_OPT = -std=c99 -O0 -ggdb -fomit-frame-pointer -falign-functions=16 -Wall -Wextra 
+#-Werror
 endif
 
 # C specific options here (added to USE_OPT).
@@ -117,7 +118,7 @@ CSRC = $(STARTUPSRC) \
        $(CHIBIOS)/os/various/shell.c \
        $(CHIBIOS)/os/hal/lib/streams/memstreams.c \
        $(CHIBIOS)/os/hal/lib/streams/chprintf.c \
-       usbcfg.c main.c sensorInput.c hardwareIR.c hardwareUS.c hardwareRC.c hardwarePWM.c packet.c hardwareWE.c
+       usbcfg.c main.c sensorInput.c hardwareIR.c hardwareUS.c hardwareRC.c hardwarePWM.c packetHandler.c hardwareWE.c controlOutput.c serialConnection.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.

@@ -8,7 +8,7 @@
 #ifndef HARDWARERC_H_
 #define HARDWARERC_H_
 
-#include "autotuxhardware.h"
+#include "autotuxconfig.h"
 
 /*
  * Sets up the RC sensor pins etc.
