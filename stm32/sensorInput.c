@@ -14,8 +14,8 @@
 // Input
 #include "hardwareIR.h"
 #include "hardwareUS.h"
-#include "hardwareRC.h"
-//#include "hardwareWE.h"
+#include "hardwareRC.h" // TODO: this should not be here
+#include "hardwareWE.h"
 
 //-----------------------------------------------------------------------------
 // Definitions
@@ -38,11 +38,12 @@ void sensorInputIteration(void);
  * Initialize pins and settings for sensors.
  * Also start the sensor thread.
  */
-void sensorSetup (void) {
+void sensorInputSetup (void) {
 	// Initialize sensors
 	hardwareSetupIR();
 	hardwareSetupUS();
-
+	hardwareSetupWE();
+	hardwareSetupRC();
 	(void)chThdCreateStatic(sensorThreadWorkingArea, sizeof(sensorThreadWorkingArea),
 						  NORMALPRIO, sensorThread, NULL);
 }
@@ -51,24 +52,25 @@ void sensorSetup (void) {
 /**
  * Fills a char array with all sensor data
  */
-void getSensorData(char* buffer) {
+void sensorInputGetData(unsigned char* buffer) {
 	// Normal packet output
-	buffer[0] = (char)hardwareGetValuesUS(US_FRONT);
-	buffer[1] = (char)hardwareGetValuesUS(US_SIDE);
-	buffer[2] = (char)hardwareGetValuesIR(IR_SIDE_FRONT);
-	buffer[3] = (char)hardwareGetValuesIR(IR_SIDE_REAR);
-	buffer[4] = (char)hardwareGetValuesIR(IR_REAR);
+	buffer[0] = (unsigned char)hardwareGetValuesUS(US_FRONT);
+	buffer[1] = (unsigned char)hardwareGetValuesUS(US_SIDE);
+	buffer[2] = (unsigned char)hardwareGetValuesIR(IR_SIDE_FRONT);
+	buffer[3] = (unsigned char)hardwareGetValuesIR(IR_SIDE_REAR);
+	buffer[4] = (unsigned char)hardwareGetValuesIR(IR_REAR);
+	buffer[5] = (unsigned char)hardwareGetValuesWE();
 }
 
 
 /**
  * Print sensor values to serial
  */
-void sensorDebugOutput(BaseSequentialStream* SDU) {
+void sensorInputDebugOutput(BaseSequentialStream* SDU) {
 	// "\033[F" for going back to previous line
 	chprintf(SDU, "\033[FTHROTTLE: %4i ", hardwareGetValuesRC(THROTTLE));
 	chprintf(SDU, "STEERING: %4i ", hardwareGetValuesRC(STEERING));
-	//chprintf(SDU, "WHEEL: %f ", hardwareGetValuesWE());
+	chprintf(SDU, "WHEEL: %f ", hardwareGetValuesWE());
 	chprintf(SDU, "US FRONT: %3i \r\n", hardwareGetValuesUS(US_FRONT));
 	chprintf(SDU, "US SIDE: %3i ", hardwareGetValuesUS(US_SIDE));
 	chprintf(SDU, "SIDE_FRONT: %3i ", hardwareGetValuesIR(IR_SIDE_FRONT));

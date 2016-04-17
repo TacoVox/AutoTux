@@ -1,0 +1,3 @@
+killall odsupercomponent
+killall odsimcamera
+killall odsimvehicle

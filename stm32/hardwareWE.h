@@ -8,7 +8,7 @@
 #ifndef HARDWAREWE_H_
 #define HARDWAREWE_H_
 
-#include "autotuxhardware.h"
+#include "autotuxconfig.h"
 
 /*
  * Sets up the US sensor pins etc.
@@ -21,6 +21,6 @@ void hardwareIterationWE(void);
 /*
  * Getter for the values. Specify a US sensor.
  */
-double hardwareGetValuesWE(void);
+int hardwareGetValuesWE(void);
 
 #endif /* HARDWAREWE_H_ */
