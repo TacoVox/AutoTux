@@ -3,10 +3,7 @@
 //
 
 #include <iostream>
-#include <string>
-#include <thread>
 
-#include "packetio/PacketBroadcaster.h"
 #include "decisionmaker/DecisionMaker.h"
 
 using namespace std;
@@ -19,7 +16,6 @@ using namespace automotive::miniature;      // Sensor Board Data
 
 using namespace autotux;
 
-using namespace packetio;
 using namespace decisionmaker;
 
 enum STATE {DRIVING, PARKING};
@@ -30,7 +26,6 @@ char** ptrargv;
 
 // Shared pointer to Container
 VehicleControl vehicleControl;
-shared_ptr<Container> containerptr(new Container(vehicleControl));
 
 /**
  * Constructor
@@ -55,17 +50,16 @@ void DecisionMaker::tearDown(){
 */
 void DecisionMaker::laneFollowing() {
     vehicleControl.setSteeringWheelAngle(getAngle());
-    *containerptr = vehicleControl;
 }
 
 /**
- * Get the angle given by LaneRecommandation
+ * Gets the angle given by LaneRecommandation
  */
 double DecisionMaker::getAngle() {
     return laneRecommendation.getData<LaneRecommendation>().getAngle();
 }
 /**
- * Get's a bool if the car is in leftlane
+ * Gets a bool if the car is in leftlane
  * @TODO This isn't working yet
  */
 bool DecisionMaker::isInLeftLane() {
@@ -73,7 +67,7 @@ bool DecisionMaker::isInLeftLane() {
 
 }
 /**
- * How good the Data sent by the LaneRecommendation are.
+ * True if Data sent by the LaneRecommendation are considered reliable.
  */
 bool DecisionMaker::isDataQuality(){
     return laneRecommendation.getData<LaneRecommendation>().getQuality();
@@ -93,36 +87,18 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
     // Set initial state of the car
     STATE state = DRIVING;
 
-    // PacketBroadcaster pointer
-    shared_ptr<PacketBroadcaster> packetBroadcaster(new PacketBroadcaster(ptrargc, ptrargv));
-
-    //Starts the modules with the shared pointers
-    thread pbthread(&PacketBroadcaster::runModule, packetBroadcaster);
-
-    // Set container pointer in packet broadcaster
-    packetBroadcaster->setControlDataContainer(containerptr);
-
-    Container containerVehicleData;
-    Container containerSensorBoardData;
-
     VehicleData vd;
     SensorBoardData sbd;
 
     // Set initial speed
     vehicleControl.setSpeed(2);
-    *containerptr = vehicleControl;
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
 
-        // Set Control Data Container into Packet Broadcaster
-        packetBroadcaster->setControlDataContainer(containerptr);
-
-        // 1. Get most recent vehicle data
-        containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
+        // 1. Update vehicle data values
         vd = containerVehicleData.getData<VehicleData>();
 
-        // 2. Get most recent sensor board data
-        containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
+        // 2. Update sensor board data values
         sbd = containerSensorBoardData.getData<SensorBoardData>();
 
         switch (state){
@@ -130,13 +106,14 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
 
                 // To-Do
                 // Run obstacle-detection in overtaker...
-
                 laneFollowing();
-                //*containerptr = vehicleControl;
-
                 break;
             }
         }
+
+        // Pack and send control values
+        Container control(vehicleControl);
+        getConference().send(control);
     }
 
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
@@ -149,6 +126,10 @@ void decisionmaker::DecisionMaker::nextContainer(odcore::data::Container &c) {
 
     if(c.getDataType() == LaneRecommendation::ID()){
         laneRecommendation = c; //Pointer to which the PacketBroadcaster sends for data.
+    }else if(c.getDataType() == SensorBoardData::ID()){
+        containerSensorBoardData = c;
+    }else if(c.getDataType() == VehicleData::ID()){
+        containerVehicleData = c;
     }
 
 }

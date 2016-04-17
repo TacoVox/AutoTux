@@ -16,14 +16,6 @@ Overtaker::Overtaker():
 
 Overtaker::~Overtaker(){}
 
-void Overtaker::setUp() {
-    cout << "Starting Overtaker component..." << endl;
-}
-
-void Overtaker::tearDown() {
-    cout << "Terminating Overtaker component..." << endl;
-}
-
 /* @doc Run obstacle detection according to overtaker sub-state
  * */
 void Overtaker::obstacleDetection(automotive::miniature::SensorBoardData sensorData, automotive::VehicleData vehicleData) {
@@ -164,17 +156,7 @@ void Overtaker::switchToRightLane(automotive::VehicleData vehicleData, double tr
  *      overtaking maneuver
  * */
 bool Overtaker::isRightLaneClear(){
-    /*double us_fr = sensorValueWithLimit(ULTRASONIC_FRONT_RIGHT, 7);
-    double ir_fr = sensorValueWithLimit(INFRARED_FRONT_RIGHT, 5);
-    double ir_rr = sensorValueWithLimit(INFRARED_REAR_RIGHT, 5);
+    // To-Do...
 
-    cout << "US_FR : " << us_fr << endl;
-    cout << "IR_FR : " << ir_fr << endl;
-    cout << "IR_RR : " << ir_rr << endl;
-
-    if(us_fr <= -1 && ir_fr <= -1 && ir_rr <= -1){
-        return true;
-    }
-    */
     return false;
 }
