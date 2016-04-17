@@ -13,28 +13,21 @@
 
 namespace decisionmaker{
     class DecisionMaker : public odcore::base::module::TimeTriggeredConferenceClientModule{
+    private:
+        // "Forbidden" copy constructor
+        DecisionMaker(const DecisionMaker &/*obj*/);
+        //"Forbidden" assignment operator
+        DecisionMaker &operator=(const DecisionMaker &/*obj*/);
+
     public:
         DecisionMaker(const int32_t &argc, char **argv);
+        virtual ~DecisionMaker();
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
         virtual void nextContainer(odcore::data::Container &c);
-        virtual ~DecisionMaker();
-    private:
-
-
 
     private:
-        //DecisionMaker(const DecisionMaker &/*obj*/);
-        //DecisionMaker &operator=(const DecisionMaker &/*obj*/);
         virtual void setUp();
         virtual void tearDown();
-
-        const double ULTRASONIC_FRONT_RIGHT = 4;
-        const double ULTRASONIC_FRONT_FORWARD = 3;
-        const double INFRARED_FRONT_RIGHT = 0;
-        const double INFRARED_REAR_RIGHT = 2;
-
-        //automotive::VehicleData vd;
-        //automotive::miniature::SensorBoardData sbd;
 
         odcore::data::Container laneRecommendation;
         double getAngle();

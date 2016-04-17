@@ -35,9 +35,6 @@ namespace  overtaker{
         double traveledPath;
         double getTraveledPath(automotive::VehicleData);
 
-        virtual void setUp();
-        virtual void tearDown();
-
         bool isObstacleDetected(automotive::miniature::SensorBoardData, const double);
         bool switchToLeftLane(automotive::VehicleData, double, double);
         void switchToRightLane(automotive::VehicleData, double, double);
