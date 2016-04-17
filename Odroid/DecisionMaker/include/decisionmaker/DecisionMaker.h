@@ -28,6 +28,8 @@ namespace decisionmaker{
     private:
         virtual void setUp();
         virtual void tearDown();
+        odcore::data::Container containerVehicleData;
+        odcore::data::Container containerSensorBoardData;
 
         odcore::data::Container laneRecommendation;
         double getAngle();
