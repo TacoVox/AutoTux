@@ -220,7 +220,21 @@ namespace lane {
                 }
             }
 
-            laneRecommendation.setAngle(desiredSteering);
+            double steeringOut;
+            if (abs(desiredSteering) > 1)
+                steeringOut = desiredSteering*0.03;
+            else if (abs(desiredSteering) > 0.30)
+                steeringOut = desiredSteering*0.10;
+            else if (abs(desiredSteering) > 0.20)
+                steeringOut = desiredSteering*0.15;
+            else if (abs(desiredSteering) > 0.15)
+                steeringOut = desiredSteering*0.50;
+            else // Very low values
+                steeringOut = desiredSteering;
+
+            laneRecommendation.setAngle(steeringOut);
+
+            cout << "STEERING: " << desiredSteering << " CORRECTED STEERING: " << steeringOut << endl;
 //
 //            laneRecommendation.setAngle(laneRecommendation.getAngle());
 //            laneRecommendation.setQuality(true);
