@@ -16,30 +16,29 @@ namespace  overtaker{
     public:
         Overtaker();
         virtual ~Overtaker();
-        void setOvtControlDataContainer(std::shared_ptr<odcore::data::Container>);
-        bool getIsOverriding();
         void obstacleDetection(automotive::miniature::SensorBoardData, automotive::VehicleData);
+
+        bool getIsOverriding();
+        VehicleControl getOvtControl();
+
     private:
+        VehicleControl ovtControl;
+        bool isOverridingControls;
+        double traveledPath;
+        enum STATE {FREE_LANE, APPROACHING, LEFT_SWITCH, PARALLEL, RIGHT_SWITCH};
+        enum STATE state;
+
         const double ULTRASONIC_FRONT_RIGHT = 4;
         const double ULTRASONIC_FRONT_FORWARD = 3;
         const double INFRARED_FRONT_RIGHT = 0;
         const double INFRARED_REAR_RIGHT = 2;
 
-        enum STATE {FREE_LANE, APPROACHING, LEFT_SWITCH, PARALLEL, RIGHT_SWITCH};
-        enum STATE state;
+        bool isObstacleOnLane(automotive::miniature::SensorBoardData, const double);
+        void switchToLeftLane(automotive::VehicleData, const double, const double);
+        bool isRightLaneClear(automotive::miniature::SensorBoardData);
+        void switchToRightLane(automotive::VehicleData, const double, const double);
+        bool isObstacleDetected(automotive::miniature::SensorBoardData, const double, const double);
 
-        bool isOverridingControls;
-        VehicleControl ovtVc;
-        std::shared_ptr<odcore::data::Container> ovtControlDataContainer;
-
-        double traveledPath;
-        double getTraveledPath(automotive::VehicleData);
-
-        bool isObstacleDetected(automotive::miniature::SensorBoardData, const double);
-        bool switchToLeftLane(automotive::VehicleData, double, double);
-        void switchToRightLane(automotive::VehicleData, double, double);
-        bool isRightLaneClear();
-        double sensorValueWithLimit(automotive::miniature::SensorBoardData, const double, const double);
     };
 }// overtaker
 

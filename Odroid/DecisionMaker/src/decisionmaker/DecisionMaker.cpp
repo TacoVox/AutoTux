@@ -4,7 +4,9 @@
 
 #include <iostream>
 
+
 #include "decisionmaker/DecisionMaker.h"
+#include "overtaker/Overtaker.h"
 
 using namespace std;
 
@@ -17,6 +19,7 @@ using namespace automotive::miniature;      // Sensor Board Data
 using namespace autotux;
 
 using namespace decisionmaker;
+using namespace overtaker;
 
 enum STATE {DRIVING, PARKING};
 
@@ -32,7 +35,7 @@ VehicleControl vehicleControl;
  */
 DecisionMaker::DecisionMaker(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "DecisionMaker"),
-        laneRecommendation() {
+        laneRecommendation() , ovt(){
     ptrargc = argc;
     ptrargv = argv;
 }
@@ -104,9 +107,20 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
         switch (state){
             case DRIVING:{
 
-                // To-Do
-                // Run obstacle-detection in overtaker...
-                laneFollowing();
+                // Update overtaker state info...
+                ovt.obstacleDetection(sbd, vd);
+
+                // If overtaker is overriding control values...
+                if(ovt.getIsOverriding()) {
+                    cout << "Overtaker is OVERRIDING" << endl;
+                    vehicleControl = ovt.getOvtControl();
+                }
+                //... else follow lane-follower instructions...
+                else{
+                    cout <<"Overtaker NOT overriding" << endl;
+                    laneFollowing();
+                }
+
                 break;
             }
         }
