@@ -7,6 +7,7 @@
 
 #include <opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h>
 #include <overtaker/Overtaker.h>
+#include <parker/Parker.h>
 #include "opendavinci/odcore/data/Container.h"
 
 #include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
@@ -28,6 +29,7 @@ namespace decisionmaker{
 
     private:
         overtaker::Overtaker ovt;
+        parker::Parker parker;
 
         virtual void setUp();
         virtual void tearDown();

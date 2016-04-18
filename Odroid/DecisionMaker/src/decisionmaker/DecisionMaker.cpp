@@ -35,7 +35,7 @@ VehicleControl vehicleControl;
  */
 DecisionMaker::DecisionMaker(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "DecisionMaker"),
-        laneRecommendation() , ovt(){
+        laneRecommendation() , ovt(), parker(){
     ptrargc = argc;
     ptrargv = argv;
 }
@@ -121,6 +121,24 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                     laneFollowing();
                 }
 
+                break;
+            }
+            case PARKING:{
+
+                if(parker.getFoundSpot()){
+                    if(!parker.getIsParked()) {
+                        vehicleControl = parker.parallelPark(sbd, vd);
+                    }
+                    else {
+                        cout << "NOW PARKED!!!" << endl;
+                        break;
+                    }
+                }
+                else{
+                    parker.findSpot(sbd, vd);
+                    vehicleControl.setSpeed(1);
+                    laneFollowing();
+                }
                 break;
             }
         }
