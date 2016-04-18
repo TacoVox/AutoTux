@@ -147,7 +147,7 @@ bool rcModeCheck(void) {
 	}
 	
 	// Blink LED if past step 1 and waiting for centering
-	if (max(itWindowToCenterToActivate, itWindowToCenterToDectivate) % 2) {
+	if ((max(itWindowToCenterToActivate, itWindowToCenterToDectivate) % 4) >= 2) {
 		palSetPad(GPIOD, GPIOD_LED6);
 	} else {
 		palClearPad(GPIOD, GPIOD_LED6);
