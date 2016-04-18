@@ -27,13 +27,14 @@ shared_ptr<Container> containerfactory::SBDContainer::genSBDContainer(vector<uns
     //Create a map for all the sensor data
     map<uint32_t, double> sensordata;
 
-    //Iterate over the vector and put the stuff in the map
-    int i = 1;
-    for(vector<unsigned char>::iterator it = values.begin(); it != values.end(); ++it) {
-        sensordata[i] = (double)*it;
-        i++;
-    }
-
+    //Receiving order: (US1 byte)(US2 byte)(IR1 byte)(IR2 byte)(IR3 byte)
+    //OD order: (IR1 byte)(IR3 byte)(IR2 byte)(US1 byte)(US2 byte)
+    sensordata[0] = values.at(2);
+    sensordata[1] = values.at(4);
+    sensordata[2] = values.at(3);
+    sensordata[3] = values.at(0);
+    sensordata[4] = values.at(1);
+    
     //Wrap the information in a SensorBoardData object
     SensorBoardData sensorBoardData;
     sensorBoardData.setNumberOfSensors(values.size());
