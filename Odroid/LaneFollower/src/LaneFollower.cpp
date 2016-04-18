@@ -197,7 +197,7 @@ namespace lane {
             }
 			
 			// For introduction to algorithm see
-			// https://www.youtube.com/watch?v=4Y7zG48uHRo
+			// https://www  .youtube.com/watch?v=4Y7zG48uHRo
 			// Proportional gain. Values above 1 amplifies e and vice versa.
 			// 1 too low for right curve, 4 too twitchy. 2-3 seems very good
             const double Kp = 2.60;
@@ -208,7 +208,7 @@ namespace lane {
 			const double Kd = 0;
 			// Integral gain. Adjusts based on accumulated e values, to correct for
 			// offset. 
-			const double Ki = 0.5; 
+			const double Ki = 0;
 
 
             const double p = Kp * e;
