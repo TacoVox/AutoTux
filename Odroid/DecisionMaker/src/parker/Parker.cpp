@@ -29,7 +29,6 @@ Parker::Parker(){
 }
 
 void Parker::findSpot(SensorBoardData sbd, VehicleData vd) {
-    cout << "This is the sensorvalue: " << sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) << endl;
     switch (state) {
         case FINDOBJECT: {
             isSpot = false;
@@ -56,12 +55,10 @@ void Parker::findSpot(SensorBoardData sbd, VehicleData vd) {
 }
 
 VehicleControl Parker::parallelPark(SensorBoardData sbd, VehicleData vd){
-
+    cout << "This is the sensorvalue: " << sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) << endl;
     if(isNotSafe((sbd))){
         parkstate = SAFETYSTOP;
     }
-    cout << "gapEnd " << gapEnd << endl;
-    cout << "This is the absPath " << vd.getAbsTraveledPath() << endl;
     switch(parkstate){
         case PHASE0:{
             vc = adjustBeforeParking(vd, 2);
@@ -91,7 +88,6 @@ VehicleControl Parker::parallelPark(SensorBoardData sbd, VehicleData vd){
             vc = goBackToLane(vd);
             break;
         }
-        break;
     }
     return vc;
 }
@@ -210,20 +206,21 @@ bool Parker::getIsParked() {
 
 bool Parker::isNotSafe(SensorBoardData sbd){
     return((sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > 0.5) &&
-           (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) < 1));
+           (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) < 0.8));
 }
 
 VehicleControl Parker::goBackToLane(VehicleData vd){
     if(carPosition + 4 > vd.getAbsTraveledPath()){
-        vc.setSpeed(0.6);
-        vc.setSteeringWheelAngle(-25);
+        controlTemp.setSpeed(0.6);
+        controlTemp.setSteeringWheelAngle(-25);
     }
     else if(carPosition + 7 > vd.getAbsTraveledPath()){
-        vc.setSteeringWheelAngle(30);
+        controlTemp.setSteeringWheelAngle(30);
     }
     else {
         state = FINDOBJECT;
         parkstate = PHASE0;
         isSpot = false;
     }
+    return controlTemp;
 }
