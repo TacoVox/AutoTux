@@ -89,7 +89,7 @@ namespace lane {
 
                     // Mirror image
                     // NOTE: For simulator.
-                    flip(m_image, m_image, -1);
+                    // flip(m_image, m_image, -1);
                     returnValue = true;
                 }
             }
@@ -106,7 +106,9 @@ namespace lane {
 
             Mat m_image_grey = m_image.clone();
             cvtColor(m_image, m_image_grey, COLOR_BGR2GRAY);
-            threshold(m_image_grey, m_image_grey, 128, 255, CV_THRESH_BINARY);
+            threshold(m_image_grey, m_image_grey, 180, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+
+            //adaptiveThreshold(m_image_grey, m_image_grey, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY_INV, 3, 5);
 
             vector<vector<Point>> contours;
             findContours(m_image_grey, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
@@ -215,7 +217,8 @@ namespace lane {
 
             if (m_debug) {
                 if (m_image.data != NULL) {
-                    imshow("Camera Image", m_image);
+                    imshow("Camera Original Image", m_image);
+                    imshow("Camera BW Image", m_image_grey);
                     waitKey(10);
                 }
             }
