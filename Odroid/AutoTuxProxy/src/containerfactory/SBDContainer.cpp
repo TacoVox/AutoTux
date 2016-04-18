@@ -34,7 +34,7 @@ shared_ptr<Container> containerfactory::SBDContainer::genSBDContainer(vector<uns
     sensordata[2] = values.at(3);
     sensordata[3] = values.at(0);
     sensordata[4] = values.at(1);
-    
+
     //Wrap the information in a SensorBoardData object
     SensorBoardData sensorBoardData;
     sensorBoardData.setNumberOfSensors(values.size());
