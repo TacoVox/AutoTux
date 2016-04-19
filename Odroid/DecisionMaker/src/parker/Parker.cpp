@@ -22,13 +22,16 @@ double gapStart = 0;
 double gapEnd = 0;
 bool isSpot = false;
 bool isParked = false;
+int isAccurate = 0;
 VehicleControl controlTemp;
 
-Parker::Parker(){
+Parker::Parker(){}
 
-}
-
+/**
+ * Finds a parking spot where the car fits
+ */
 void Parker::findSpot(SensorBoardData sbd, VehicleData vd) {
+    cout << "This is the accurate value: " << isAccurate << endl;
     switch (state) {
         case FINDOBJECT: {
             isSpot = false;
@@ -54,8 +57,10 @@ void Parker::findSpot(SensorBoardData sbd, VehicleData vd) {
     }
 }
 
+/**
+ * This executes a hardcoded procedure for parking the car
+ */
 VehicleControl Parker::parallelPark(SensorBoardData sbd, VehicleData vd){
-    cout << "This is the sensorvalue: " << sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) << endl;
     if(isNotSafe((sbd))){
         parkstate = SAFETYSTOP;
     }
@@ -92,9 +97,12 @@ VehicleControl Parker::parallelPark(SensorBoardData sbd, VehicleData vd){
     return vc;
 }
 
+/**
+ * Drives the car back for adjusting the hardcoded procedure
+ */
 VehicleControl Parker::adjustInSpotBack(VehicleData vd, int add) {
     if(carPosition + add > vd.getAbsTraveledPath()){
-        controlTemp.setSpeed(-0.3);
+        controlTemp.setSpeed(-1);
         controlTemp.setSteeringWheelAngle(-15);
     }
     else if(carPosition + add < vd.getAbsTraveledPath()){
@@ -104,9 +112,12 @@ VehicleControl Parker::adjustInSpotBack(VehicleData vd, int add) {
     return controlTemp;
 }
 
+/**
+ * Drives the car forward for adjusting the hardcoded procedure
+ */
 VehicleControl Parker::adjustInSpotForward(VehicleData vd, int add){
     if(carPosition + add > vd.getAbsTraveledPath()){
-        controlTemp.setSpeed(0.3);
+        controlTemp.setSpeed(1);
         controlTemp.setSteeringWheelAngle(30);
     }
     else if(carPosition + add < vd.getAbsTraveledPath()){
@@ -118,6 +129,9 @@ VehicleControl Parker::adjustInSpotForward(VehicleData vd, int add){
     return controlTemp;
 }
 
+/**
+ * Drives the car back into the spot for straighting it up in the hardcoded procedure
+ */
 VehicleControl Parker::backingLeft(VehicleData vd, int add){
     controlTemp.setSteeringWheelAngle(-45);
     if(carPosition + add < vd.getAbsTraveledPath()){
@@ -128,9 +142,12 @@ VehicleControl Parker::backingLeft(VehicleData vd, int add){
     return controlTemp;
 }
 
+/**
+ * Drives the car straight back into the spot in the hardcoded procedure
+ */
 VehicleControl Parker::backingStraight(VehicleData vd, int add) {
     if(carPosition + add > vd.getAbsTraveledPath())
-        controlTemp.setSpeed(-0.5);
+        controlTemp.setSpeed(-1);
     else {
         parkstate = PHASE3;
         carPosition = carPosition + add;
@@ -138,10 +155,13 @@ VehicleControl Parker::backingStraight(VehicleData vd, int add) {
     return controlTemp;
 }
 
+/**
+ * The car backs around the first corner of the object in the hardcoded procedure
+ */
 VehicleControl Parker::backAroundCorner(VehicleData vd, int add){
     if(carPosition + add > vd.getAbsTraveledPath()){
         cout << "Starts back around corner" << endl;
-        controlTemp.setSpeed(-0.6);
+        controlTemp.setSpeed(-1);
         controlTemp.setSteeringWheelAngle(45);
     }
     else if(carPosition + add < vd.getAbsTraveledPath()){
@@ -152,9 +172,12 @@ VehicleControl Parker::backAroundCorner(VehicleData vd, int add){
     }
     return controlTemp;
 }
+/**
+ * Adjust the car for the front object before starting the hardcoded procedure
+ */
 VehicleControl Parker::adjustBeforeParking(VehicleData vd, int add) {
     if(gapEnd + add > vd.getAbsTraveledPath()){
-        controlTemp.setSpeed(.6);
+        controlTemp.setSpeed(1);
         controlTemp.setSteeringWheelAngle(0);
     }
     else if(gapEnd + add < vd.getAbsTraveledPath()){
@@ -165,50 +188,93 @@ VehicleControl Parker::adjustBeforeParking(VehicleData vd, int add) {
     return controlTemp;
 }
 
+/**
+ * Checks if the gap is big enough to park in
+ */
 void Parker::enoughSpace(){
-    if((gapEnd - gapStart) > 7){
+    if((gapEnd - gapStart) > 6){
         isSpot = true;
     }
     else
         state = FINDOBJECT;
 }
 
+/**
+ * Finds end of the gap
+ */
 void Parker::findGapEnd(SensorBoardData sbd, VehicleData vd){
-    if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 1.2) {
-        cout << "Found gap END method---------------------------" << endl;
+    if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 0 &&
+            sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT < 30)) {
         gapEnd = vd.getAbsTraveledPath();
+        isAccurate++;
+    }
+    else
+        isAccurate = 0;
+    //To check if the readings are Accurate and have no noise
+    if(isAccurate == 3){
+        cout << "Found gap END method---------------------------" << endl;
+        isAccurate = 0;
         state = ENOUGHSPACE;
     }
 }
-
+/**
+ * Finds the start of the gap
+ */
 void Parker::findGapStart(SensorBoardData sbd, VehicleData vd) {
-    if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < 1.2){
+    if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < 0 ||
+            sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 30){
         gapStart = vd.getAbsTraveledPath();
-        state = FINDGAPEND;
+        isAccurate++;
+    }
+    else
+        isAccurate = 0;
+    //To check if the readings are Accurate and have no noise
+    if(isAccurate == 3){
         cout << "Found gap START method---------------------------" << endl;
+        isAccurate = 0;
+        state = FINDGAPEND;
     }
 }
-
+/**
+ * Finds the object
+ */
 void Parker::findObject(SensorBoardData sbd) {
-    if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 1.2){
+    if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 0 &&
+            sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < 30){
+        isAccurate++;
+    }
+    else
+        isAccurate = 0;
+    //To check if the readings are Accurate and have no noise
+    if(isAccurate == 3){
+        isAccurate = 0;
         cout << "object found method---------------------------" << endl;
         state = FINDGAPSTART;
     }
 }
-
+/**
+ * If a spot has been found or not
+ */
 bool Parker::getFoundSpot(){
     return isSpot;
 }
-
+/**
+ * Returns if the car has fintished parking
+ */
 bool Parker::getIsParked() {
     return isParked;
 }
 
+/**
+ * Method to check if the car is to close to the back object
+ */
 bool Parker::isNotSafe(SensorBoardData sbd){
     return((sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > 0.5) &&
            (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) < 0.8));
 }
-
+/**
+ * Method to bring the car back to the lane if the car is to close to the back object
+ */
 VehicleControl Parker::goBackToLane(VehicleData vd){
     if(carPosition + 4 > vd.getAbsTraveledPath()){
         controlTemp.setSpeed(0.6);
