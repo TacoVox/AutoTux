@@ -3,7 +3,7 @@
 //
 #include <iostream>
 #include <thread>
-#include <signal.h>
+#include <csignal>
 #include "serial/BufferWrapper.h"
 #include "proxy/Proxy.h"
 #include "serial/USBHandler.h"
@@ -14,17 +14,19 @@ using namespace usb_handler;
 using namespace usb_connector;
 using namespace proxy::camera;
 
-void exit_handler(int);
+shared_ptr<USBHandler> uh;
+
+static void handler(int);
 
 int32_t main(int32_t argc, char **argv) {
 
-    signal(SIGINT, exit_handler);
+    signal(SIGINT, handler);
 
     cout << "Starting up AutoTuxProxy..." << endl;
 
     shared_ptr<BufferWrapper> bw = (shared_ptr<BufferWrapper>) new BufferWrapper();
     shared_ptr<USBConnector> uc = (shared_ptr<USBConnector>) new USBConnector();
-    shared_ptr<USBHandler> uh = (shared_ptr<USBHandler>) new USBHandler(uc);
+    uh = (shared_ptr<USBHandler>) new USBHandler(uc);
 
     uc->set_buffer_wrapper(bw);
 
@@ -38,8 +40,11 @@ int32_t main(int32_t argc, char **argv) {
 }
 
 
-void exit_handler(int num)
+static void handler(int signum)
 {
-    cout << "caught signal: " << num << endl;
-    exit(0);
+    cout << "caught signal: " << signum << endl;
+    uh->stop();
+    uh->~USBHandler();
+    exit(signum);
 }
+

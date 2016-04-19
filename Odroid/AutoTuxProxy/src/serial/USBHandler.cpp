@@ -18,7 +18,9 @@ usb_handler::USBHandler::USBHandler(std::shared_ptr<usb_connector::USBConnector>
 
 usb_handler::USBHandler::~USBHandler()
 {
+    cout << "destroying usb handler... ";
     uc->~USBConnector();
+    cout << "[OK]" << endl;
 }
 
 
