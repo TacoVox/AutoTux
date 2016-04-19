@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include <iostream>
 #include <containerfactory/SBDContainer.h>
+#include <containerfactory/VDContainer.h>
 #include <opendavinci/odcore/base/LIFOQueue.h>
 #include <opendavinci/odcore/data/TimeStamp.h>
 #include <opendavinci/odcore/base/KeyValueConfiguration.h>
@@ -105,7 +106,14 @@ namespace proxy {
 
             //If there is something to send --> send it
             if (v.size() != 0) {
-                getConference().send(*SBDContainer::instance()->genSBDContainer(v));
+                vector<unsigned char>::const_iterator first = v.begin();
+                vector<unsigned char> sbdv(first, first + 4);
+                vector<unsigned char> vcv(first + 5, first + 6);
+
+                getConference().send(*SBDContainer::instance()->
+                        genSBDContainer(sbdv));
+                getConference().send(*VDContainer::instance()->
+                        genVDContainer(vcv));
             }
 
             cout << "Will append to SendBuffer" << endl;

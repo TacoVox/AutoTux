@@ -3,8 +3,10 @@
 //
 
 #include "containerfactory/VDContainer.h"
+#include <automotivedata/generated/automotive/VehicleData.h>
 
 using namespace odcore::data;
+using namespace automotive;
 
 containerfactory::VDContainer* containerfactory::VDContainer::_instance = 0;
 
@@ -22,6 +24,10 @@ containerfactory::VDContainer* containerfactory::VDContainer::instance(void) {
 
 std::shared_ptr<Container> containerfactory::VDContainer::genVDContainer(
         std::vector<unsigned char> v) {
-    //Do something
-    return std::shared_ptr<Container>();
+    VehicleData vehicleData;
+
+    vehicleData.setSpeed((double)v.at(0) * 100);
+    vehicleData.setAbsTraveledPath((double)v.at(0) * 100);
+
+    return (std::shared_ptr<Container>)(new Container(vehicleData));
 }
