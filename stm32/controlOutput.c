@@ -109,11 +109,28 @@ bool rcModeCheck(void) {
 	if (itWindowToCenterToActivate > 0 && steeringPW > WHEELS_CENTERED_PW - 50 && steeringPW < WHEELS_CENTERED_PW + 50) {
 		rcMode = true;
 		palSetPad(GPIOD, GPIOD_LED6);
+		itWindowToCenterToActivate = 0;
 	} else if (itWindowToCenterToDeactivate > 0 && steeringPW > WHEELS_CENTERED_PW - 50 && steeringPW < WHEELS_CENTERED_PW + 50) {
 		rcMode = false;
 		palClearPad(GPIOD, GPIOD_LED6);
+		itWindowToCenterToDectivate = 0;
+	}
+		
+	// If step 1 complete, keep diminishing window in which we wait for centered steering
+	if (itWindowToCenterToActivate > 0) {
+		itWindowToCenterToActivate--
+	} else if (itWindowToCenterToDectivate > 0) {
+		itWindowToCenterToDeactivate--;
 	}
 	
+	// Blink LED if past step 1 and waiting for centering
+	if ((max(itWindowToCenterToActivate, itWindowToCenterToDectivate) % 4) >= 2) {
+		palSetPad(GPIOD, GPIOD_LED6);
+	} else {
+		palClearPad(GPIOD, GPIOD_LED6);
+	}
+	
+	// Step 1
 	// Only check for activation of RC mode if not already active
 	if (!rcMode && steeringPW > RC_STEERING_ACTIVATION_TRESHOLD) {
 		// Increase counter if we're on the way towards activation
@@ -137,20 +154,6 @@ bool rcModeCheck(void) {
 			palClearPad(GPIOD, GPIOD_LED6);
 			//rcMode = false;
 		}
-	}
-	
-	// If step 1 complete, keep diminishing window in which we wait for centered steering
-	if (itWindowToCenterToActivate > 0) {
-		itWindowToCenterToActivate--
-	} else if (itWindowToCenterToDectivate > 0) {
-		itWindowToCenterToDeactivate--;
-	}
-	
-	// Blink LED if past step 1 and waiting for centering
-	if ((max(itWindowToCenterToActivate, itWindowToCenterToDectivate) % 4) >= 2) {
-		palSetPad(GPIOD, GPIOD_LED6);
-	} else {
-		palClearPad(GPIOD, GPIOD_LED6);
 	}
 	
 	// Reset counters if not in range
