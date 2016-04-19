@@ -89,7 +89,7 @@ namespace lane {
 
                     // Mirror image
                     // NOTE: For simulator.
-                    // flip(m_image, m_image, -1);
+                    flip(m_image, m_image, -1);
                     returnValue = true;
                 }
             }
@@ -170,6 +170,7 @@ namespace lane {
                 }
 
                 if (m_debug) {
+
                     //line(m_image, Point(m_image.cols / 2, 0), Point(m_image.cols / 2, m_image.rows), Scalar(0,255,255));
                     if (left.x > 0) {
                         line(m_image, Point(m_image.cols / 2, y), left, Scalar(0, 255, 0));
