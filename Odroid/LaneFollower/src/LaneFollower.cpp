@@ -46,8 +46,8 @@ namespace lane {
         // This method will run before body()
         void LaneFollower::setUp() {
             // Set up debug window
-	        cout << "Setup LaneFollower" << endl;
-	        cout << "LaneFollower Debug: " << m_debug << endl;
+            cout << "Setup LaneFollower" << endl;
+            cout << "LaneFollower Debug: " << m_debug << endl;
             if (m_debug) {
                 cvNamedWindow("Debug Window", CV_WINDOW_AUTOSIZE);
                 cvMoveWindow("Debug Window", 300, 100);
@@ -197,19 +197,19 @@ namespace lane {
                 m_eSum += e;
             }
 
-			// For introduction to algorithm see
-			// https://www  .youtube.com/watch?v=4Y7zG48uHRo
-			// Proportional gain. Values above 1 amplifies e and vice versa.
-			// 1 too low for right curve, 4 too twitchy. 2-3 seems very good
+            // For introduction to algorithm see
+            // https://www  .youtube.com/watch?v=4Y7zG48uHRo
+            // Proportional gain. Values above 1 amplifies e and vice versa.
+            // 1 too low for right curve, 4 too twitchy. 2-3 seems very good
             const double Kp = 1.3;
             // Cross track error rate gain. Affects the angle based on how fast we
-			// are moving towards the desired center of the lane. Counters the primary
-	        // proportional correction. Increase if car wobbles around centerline
-			// because of of overcorrection.
-			const double Kd = 0.0;
-			// Integral gain. Adjusts based on accumulated e values, to correct for
-			// offset.
-			const double Ki = 0;
+            // are moving towards the desired center of the lane. Counters the primary
+            // proportional correction. Increase if car wobbles around centerline
+            // because of of overcorrection.
+            const double Kd = 0.0;
+            // Integral gain. Adjusts based on accumulated e values, to correct for
+            // offset.
+            const double Ki = 0;
 
 
             const double p = Kp * e;
@@ -233,12 +233,12 @@ namespace lane {
                 }
             }
 
-		    // Limit max steering anlge based on car limits
-		    if (desiredSteering > 0.5) desiredSteering = 0.5;
-		    if (desiredSteering < -0.5) desiredSteering = -0.5;
+            // Limit max steering anlge based on car limits
+            if (desiredSteering > 0.5) desiredSteering = 0.5;
+            if (desiredSteering < -0.5) desiredSteering = -0.5;
 
-		    cout << "DS: " << desiredSteering;
-		    laneRecommendation.setAngle(desiredSteering);
+            cout << "DS: " << desiredSteering;
+            laneRecommendation.setAngle(desiredSteering);
         }
 
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode LaneFollower::body() {
@@ -247,7 +247,7 @@ namespace lane {
             m_debug = kv.getValue<int32_t>("lanedetector.debug") == 1;
 
             // ?
-		    cout << "Entering loop:" << endl;
+            cout << "Entering loop:" << endl;
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() ==
                    odcore::data::dmcp::ModuleStateMessage::RUNNING) {
                 bool has_next_frame = false;
@@ -255,7 +255,7 @@ namespace lane {
                 Container c = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
 
                 if (c.getDataType() == odcore::data::image::SharedImage::ID()) {
-			        cout << "Read shared image";
+                    cout << "Read shared image";
                     has_next_frame = readSharedImage(c);
                 }
 
