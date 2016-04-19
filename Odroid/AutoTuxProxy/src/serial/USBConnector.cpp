@@ -34,7 +34,7 @@ usb_connector::USBConnector::operator=(const usb_connector::USBConnector &usb)
 /* destructor */
 usb_connector::USBConnector::~USBConnector()
 {
-    cout << "destroying usb object... ";
+    cout << "destroying usb connector... ";
     // release all resources here
     bw->~BufferWrapper();
     libusb_release_interface(usb_dev, 1);
