@@ -30,6 +30,9 @@ namespace lane {
         // Debugging use only
         using namespace odtools::player;
 
+        // SET TO TRUE FOR CARMODE
+        const bool CARMODE = false;
+
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) :
                 TimeTriggeredConferenceClientModule(argc, argv, "LaneDetector"),
                 m_hasAttachedToSharedImageMemory(false),
@@ -118,7 +121,7 @@ namespace lane {
             double e = 0;
 
             const int32_t CONTROL_SCANLINE = 462;
-            const int32_t distance = 280;
+            const int32_t distance = SIMDISTANCE;
 
             Mat m_image_grey = m_image.clone();
             cvtColor(m_image, m_image_grey, COLOR_BGR2GRAY);
@@ -199,19 +202,19 @@ namespace lane {
             } else {
                 m_eSum += e;
             }
-			
+
 			// For introduction to algorithm see
 			// https://www  .youtube.com/watch?v=4Y7zG48uHRo
 			// Proportional gain. Values above 1 amplifies e and vice versa.
 			// 1 too low for right curve, 4 too twitchy. 2-3 seems very good
-            const double Kp = 2.60;
+            const double Kp = SIMGAIN;
             // Cross track error rate gain. Affects the angle based on how fast we
 			// are moving towards the desired center of the lane. Counters the primary
-	        // proportional correction. Increase if car wobbles around centerline 
+	        // proportional correction. Increase if car wobbles around centerline
 			// because of of overcorrection.
 			const double Kd = 0;
 			// Integral gain. Adjusts based on accumulated e values, to correct for
-			// offset. 
+			// offset.
 			const double Ki = 0;
 
 

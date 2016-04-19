@@ -1,6 +1,12 @@
 #ifndef LANEDETECTOR_H_
 #define LANEDETECTOR_H_
 
+#define SIMGAIN 2.6;
+#define SIMDISTANCE 280;
+
+#define CARGAIN 1.7;
+#define CARDISTANCE 220;
+
 #include <memory>
 
 #include <opencv2/opencv.hpp>
