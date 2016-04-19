@@ -26,8 +26,8 @@ std::shared_ptr<Container> containerfactory::VDContainer::genVDContainer(
         std::vector<unsigned char> v) {
     VehicleData vehicleData;
 
-    vehicleData.setSpeed((double)v.at(0) * 100);
-    vehicleData.setAbsTraveledPath((double)v.at(0) * 100);
+    vehicleData.setSpeed((double)v.at(5) * 100);
+    vehicleData.setAbsTraveledPath((double)v.at(6) * 100);
 
     return (std::shared_ptr<Container>)(new Container(vehicleData));
 }
