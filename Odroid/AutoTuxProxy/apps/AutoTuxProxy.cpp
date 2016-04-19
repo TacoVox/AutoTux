@@ -41,5 +41,5 @@ int32_t main(int32_t argc, char **argv) {
 void exit_handler(int num)
 {
     cout << "caught signal: " << num << endl;
-    exit(1);
+    exit(0);
 }
