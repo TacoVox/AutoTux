@@ -119,8 +119,8 @@ void sensorInputIteration(void) {
 		chThdSleepMilliseconds(70); // TODO: not 65 if less is needed
 		hardwareIterationUSEnd();
 
-		// Above meausred to 72 ms including ADC callback - sleep 28 to achieve 10 hertz
-		chThdSleepMilliseconds(28); // Comment this out to meausre time
+		// Above meausred to 72 ms including ADC callback - sleep 8 to achieve 12.5 hertz
+		chThdSleepMilliseconds(8); // Comment this out to meausre time
 	} // Comment this out to meausre time
 	//endTimeThread =	chVTGetSystemTime();
 

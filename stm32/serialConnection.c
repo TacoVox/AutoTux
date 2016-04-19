@@ -67,11 +67,11 @@ int serialConnectionLoop(void) {
 	controlOutputStopCenter();
 
 	// Time of the iteration. Used to adapt the sleeping
-	int itTime = 0;
+	unsigned int itTime = 0;
 
 	// Main serial connection loop.
 	while(true) {
-		itTime = ST2MS(chTimeNow());
+		itTime = ST2MS(chVTGetSystemTime());
 		
 		//---------------------------------------------------------------------
 		// Reset all LEDS
@@ -180,13 +180,13 @@ int serialConnectionLoop(void) {
 			}
 		}
 		
-		if (ST2MS(chTimeNow()) > itTime) {
+		if (ST2MS(chVTGetSystemTime()) > itTime) {
 			// itTime - ST2MS(chTimeNow()) is the time in MS of this iteration.
 			// Sleep 100 - this value to get 10Hz.
-			 chThdSleepMilliseconds(100 - (itTime - ST2MS(chTimeNow()));
+			 chThdSleepMilliseconds(67 - (itTime - ST2MS(chVTGetSystemTime())));
 		} else {
 			// System timer recently overflowed, rare but can happen. Sleep a fixed amount
-			chThdSleepMilliseconds(95);
+			chThdSleepMilliseconds(60);
 		}
 	}
 	return 0;
