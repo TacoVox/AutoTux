@@ -11,6 +11,7 @@
 using namespace std;
 using namespace serial;
 using namespace usb_handler;
+using namespace usb_connector;
 using namespace proxy::camera;
 
 void exit_handler(int);
@@ -21,13 +22,15 @@ int32_t main(int32_t argc, char **argv) {
 
     cout << "Starting up AutoTuxProxy..." << endl;
 
-    shared_ptr<BufferWrapper> bw = (shared_ptr<BufferWrapper>)new BufferWrapper();
+    shared_ptr<BufferWrapper> bw = (shared_ptr<BufferWrapper>) new BufferWrapper();
+    shared_ptr<USBConnector> uc = (shared_ptr<USBConnector>) new USBConnector();
+    shared_ptr<USBHandler> uh = (shared_ptr<USBHandler>) new USBHandler(uc);
 
-    shared_ptr<USBHandler> uc = (shared_ptr<USBHandler>) new USBHandler(bw);
-    thread ucthread(&USBHandler::run, uc);
+    uc->set_buffer_wrapper(bw);
+
+    thread ucthread(&USBHandler::run, uh);
     ucthread.detach();
-	
-	cout << "Detatched USB thread"  << endl; 
+
     proxy::Proxy proxy(argc, argv, bw);
     proxy.runModule();
 
