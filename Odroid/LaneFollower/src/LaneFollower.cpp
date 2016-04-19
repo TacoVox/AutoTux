@@ -147,8 +147,8 @@ namespace lane {
                     // Testing Twiddle algorithm stuff
                     if(right.x > 0) {
                         if(!useLeftMarking) {
-                            m_eSum = 0;
-                            m_eOld = 0;
+                            //m_eSum = 0;
+                            //m_eOld = 0;
                         }
 
                         e = ((right.x - m_image.cols/2.0) - distance) / distance;
@@ -156,16 +156,16 @@ namespace lane {
 
                     } else if(left.x > 0) {
                         if(useLeftMarking) {
-                            m_eSum = 0;
-                            m_eOld = 0;
+                            //m_eSum = 0;
+                            //m_eOld = 0;
                         }
 
                         e = (distance - (m_image.cols/2.0 - left.x)) / distance;
                         useLeftMarking = false;
 
                     } else {
-                        m_eSum = 0;
-                        m_eOld = 0;
+                        //m_eSum = 0;
+                        //m_eOld = 0;
                     }
                 }
 
@@ -197,10 +197,21 @@ namespace lane {
             } else {
                 m_eSum += e;
             }
+			
+			// For introduction to algorithm see
+			// https://www  .youtube.com/watch?v=4Y7zG48uHRo
+			// Proportional gain. Values above 1 amplifies e and vice versa.
+			// 1 too low for right curve, 4 too twitchy. 2-3 seems very good
+            const double Kp = 2.60;
+            // Cross track error rate gain. Affects the angle based on how fast we
+			// are moving towards the desired center of the lane. Counters the primary
+	        // proportional correction. Increase if car wobbles around centerline 
+			// because of of overcorrection.
+			const double Kd = 0;
+			// Integral gain. Adjusts based on accumulated e values, to correct for
+			// offset. 
+			const double Ki = 0;
 
-            const double Kp = 0.4482626884328734;
-            const double Ki = 3.103197570937628;
-            const double Kd = 0.030450210485408566;
 
             const double p = Kp * e;
             const double i = Ki * timeStep * m_eSum;
@@ -210,8 +221,7 @@ namespace lane {
             const double y = p + i + d;
 
             double desiredSteering = 0;
-            if(fabs(e) > 1e-2) {
-                // TODO WHY IS THIS HAPPENING?
+            if(fabs(e) > 1e-2) {	
                 desiredSteering = y;
             }
 
@@ -223,21 +233,12 @@ namespace lane {
                 }
             }
 
-            double steeringOut;
-            if (abs(desiredSteering) > 1)
-                steeringOut = desiredSteering*0.03;
-            else if (abs(desiredSteering) > 0.30)
-                steeringOut = desiredSteering*0.10;
-            else if (abs(desiredSteering) > 0.20)
-                steeringOut = desiredSteering*0.15;
-            else if (abs(desiredSteering) > 0.15)
-                steeringOut = desiredSteering*0.50;
-            else // Very low values
-                steeringOut = desiredSteering;
+		// Limit max steering anlge based on car limits
+		if (desiredSteering > 0.5) desiredSteering = 0.5;
+		if (desiredSteering < -0.5) desiredSteering = -0.5;
 
-            laneRecommendation.setAngle(steeringOut);
-
-            cout << "STEERING: " << desiredSteering << " CORRECTED STEERING: " << steeringOut << endl;
+		cout << "\rDS: " << desiredSteering;
+		laneRecommendation.setAngle(desiredSteering);
 //
 //            laneRecommendation.setAngle(laneRecommendation.getAngle());
 //            laneRecommendation.setQuality(true);

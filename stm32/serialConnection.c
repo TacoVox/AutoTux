@@ -176,7 +176,7 @@ int serialConnectionLoop(void) {
 			}
 		}
 
-		chThdSleepMilliseconds(100);
+		chThdSleepMilliseconds(90);
 	}
 	return 0;
 }

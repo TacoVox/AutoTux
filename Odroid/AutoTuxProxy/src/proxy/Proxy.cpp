@@ -11,6 +11,8 @@
 #include "camera/Camera.h"
 #include "camera/OpenCVCamera.h"
 
+#define MATH_PI  3.1415926535897
+
 namespace proxy {
     using namespace std;
     using namespace odcore::base;
@@ -126,13 +128,18 @@ namespace proxy {
 
         VehicleControl vehicleControl = container.getData<VehicleControl>();
 
-        unsigned char speed = (unsigned char) round(vehicleControl.getSpeed());
-        unsigned char angle = (unsigned char) round(vehicleControl.getSteeringWheelAngle());
+        //Angle conversion
+        int degrees = (int)(vehicleControl.getSteeringWheelAngle() * 180 / MATH_PI);
+        unsigned char angle = degrees + 90;
 
-        //Check if angle not from empty packet (normally this should only occur
-        //before the decision maker sent out any values
-        if (angle == 0)
-            angle = 90;
+        // Speed conversion
+        double delta = 0.0001;
+        unsigned char speed = 1; // Assume stopped
+        if (vehicleControl.getSpeed() > 0 + delta) {
+            speed = 2; // Forward
+        } else if (vehicleControl.getSpeed() < 0 - delta) {
+            speed = 0; // backward
+        }
 
         //Generate the checksum for the control values
         unsigned char chsum = checksum({speed, angle});
