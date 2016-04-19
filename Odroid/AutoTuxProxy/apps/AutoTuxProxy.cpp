@@ -28,15 +28,10 @@ int32_t main(int32_t argc, char **argv) {
 
     shared_ptr<USBHandler> uc = (shared_ptr<USBHandler>) new USBHandler(bw);
     thread ucthread(&USBHandler::run, uc);
-
+    ucthread.detach();
+ 
     proxy::Proxy proxy(argc, argv, bw);
     proxy.runModule();
-
-    //Waiting for the thread to terminate
-    ucthread.join();
-    cout << "USBHandler stopped" << endl;
-    //prxthread.join();
-    //cout << "Proxy stopped" << endl;
 
     return 0;
 }

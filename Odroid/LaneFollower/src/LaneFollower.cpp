@@ -297,6 +297,7 @@ namespace lane {
             m_debug = kv.getValue<int32_t>("lanedetector.debug") == 1;
 
             // ?
+		cout << "Entering loop:" << endl;
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() ==
                    odcore::data::dmcp::ModuleStateMessage::RUNNING) {
                 bool has_next_frame = false;
@@ -304,6 +305,7 @@ namespace lane {
                 Container c = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
 	
                 if (c.getDataType() == odcore::data::image::SharedImage::ID()) {
+			cout << "Read shared image";
                     has_next_frame = readSharedImage(c);
                 }
 
