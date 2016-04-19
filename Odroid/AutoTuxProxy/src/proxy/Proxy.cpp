@@ -108,12 +108,12 @@ namespace proxy {
             if (v.size() != 0) {
                 vector<unsigned char>::const_iterator first = v.begin();
                 vector<unsigned char> sbdv(first, first + 4);
-                vector<unsigned char> vcv(first + 5, first + 6);
+                vector<unsigned char> vdv(first + 5, first + 6);
 
                 getConference().send(*SBDContainer::instance()->
                         genSBDContainer(sbdv));
                 getConference().send(*VDContainer::instance()->
-                        genVDContainer(vcv));
+                        genVDContainer(vdv));
             }
 
             cout << "Will append to SendBuffer" << endl;
