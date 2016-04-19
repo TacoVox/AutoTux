@@ -23,6 +23,7 @@ namespace lane {
         using namespace odcore::data;
         using namespace odcore::data::image;
         using namespace odcore::wrapper;
+        using namespace autotux;
 
         using namespace lane::follower;
 
@@ -96,9 +97,24 @@ namespace lane {
             return returnValue;
         }
 
+        // TODO: New datatype
+        void LaneFollower::getLaneRecommendation(odcore::data::Container &c) {
+
+            // TODO: New datatype
+            if(c.getDataType() == LaneRecommendation::ID()) {
+
+                // TODO: New datatype
+                laneRecommendation = c.getData<LaneRecommendation>();
+            }
+        }
+
         // Do magic to the image around here.
         void LaneFollower::processImage() {
-            static bool useLeftMarking = true;
+
+            // TODO: New datatype
+            laneRecommendation.setLeft_lane(false);
+            bool inLeftLane = laneRecommendation.getLeft_lane();
+
             double e = 0;
 
             const int32_t CONTROL_SCANLINE = 462;
@@ -145,27 +161,12 @@ namespace lane {
 
                 if(y == CONTROL_SCANLINE) {
                     // Testing Twiddle algorithm stuff
-                    if(right.x > 0) {
-                        if(!useLeftMarking) {
-                            //m_eSum = 0;
-                            //m_eOld = 0;
-                        }
-
+                    if(!inLeftLane) {
                         e = ((right.x - m_image.cols/2.0) - distance) / distance;
-                        useLeftMarking = true;
+                    }
 
-                    } else if(left.x > 0) {
-                        if(useLeftMarking) {
-                            //m_eSum = 0;
-                            //m_eOld = 0;
-                        }
-
-                        e = (distance - (m_image.cols/2.0 - left.x)) / distance;
-                        useLeftMarking = false;
-
-                    } else {
-                        //m_eSum = 0;
-                        //m_eOld = 0;
+                    else {
+                        e = ((left.x - m_image.cols/2.0) - distance) / distance;
                     }
                 }
 
@@ -229,63 +230,16 @@ namespace lane {
             if (m_debug) {
                 if (m_image.data != NULL) {
                     imshow("Camera Original Image", m_image);
-                    imshow("Camera BW Image", m_image_grey);
                     waitKey(10);
                 }
             }
 
-		// Limit max steering anlge based on car limits
-		if (desiredSteering > 0.5) desiredSteering = 0.5;
-		if (desiredSteering < -0.5) desiredSteering = -0.5;
+            // Limit max steering anlge based on car limits
+            if (desiredSteering > 0.5) desiredSteering = 0.5;
+            if (desiredSteering < -0.5) desiredSteering = -0.5;
 
-		cout << "\rDS: " << desiredSteering;
-		laneRecommendation.setAngle(desiredSteering);
-//
-//            laneRecommendation.setAngle(laneRecommendation.getAngle());
-//            laneRecommendation.setQuality(true);
-//
-//            // If the car is close enough to the middle of the road, just
-//            // keep going forward.
-//            if (m_distToLeftMarking > 240 && m_distToLeftMarking < 320 &&
-//                m_distToRightMarking > 240 && m_distToRightMarking < 320) {
-//                laneRecommendation.setAngle(0);
-//                cerr << "Going straight!" << endl;
-//            }
-//
-//                // Whenever the left line gets too close and the right
-//                // line gets too far away, make a right turn.
-//                // NOTE: To keep further away from the left lane, the distance
-//                // it waits until it turns is less than a left turn.
-//            else if ((m_distToRightMarking > 320 || m_distToRightMarking < 0) &&
-//                     m_distToLeftMarking < 270 && m_distToLeftMarking > 0) {
-//                laneRecommendation.setAngle(2.0);
-//                cerr << "Turning right! Left: " << m_distToLeftMarking << " & Right: " << m_distToRightMarking << endl;
-//            }
-//
-//                // Whenever the right line gets to close and the
-//                // left line gets too far away, make a left turn.
-//            else if ((m_distToLeftMarking > 320 || m_distToLeftMarking < 0) &&
-//                     m_distToRightMarking < 230 && m_distToRightMarking > 0) {
-//                laneRecommendation.setAngle(-2.0);
-//                cerr << "Turning left! Left: " << m_distToLeftMarking << " & Right: " << m_distToRightMarking << endl;
-//            }
-//                // If all else fails, just keep going forward without turning
-//            else {
-//                laneRecommendation.setAngle(0);
-//                cerr << "Nothing." << endl;
-//            }
-//
-//            if(panicStop) {
-//                laneRecommendation.setQuality(false);
-//            }
-//
-//            else {
-//                laneRecommendation.setQuality(true);
-//                laneRecommendation.setDistance_to_line(0.0);
-//                laneRecommendation.setLeft_lane(false);
-//            }
-//
-//            m_vehicleControl.setSteeringWheelAngle(laneRecommendation.getAngle());
+            cout << "\rDS: " << desiredSteering;
+            laneRecommendation.setAngle(desiredSteering);
         }
 
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode LaneFollower::body() {
@@ -298,19 +252,28 @@ namespace lane {
                    odcore::data::dmcp::ModuleStateMessage::RUNNING) {
                 bool has_next_frame = false;
 
-                Container c = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
+                Container imageContainer = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
 
-                if (c.getDataType() == odcore::data::image::SharedImage::ID()) {
-                    has_next_frame = readSharedImage(c);
+                // TODO: New datatype
+                Container laneContainer = getKeyValueDataStore().get(LaneRecommendation::ID());
+
+                // TODO: New datatype
+                if(laneContainer.getDataType() == LaneRecommendation::ID()) {
+
+                    // TODO: New datatype
+                    getLaneRecommendation(laneContainer);
+                }
+
+                if (imageContainer.getDataType() == odcore::data::image::SharedImage::ID()) {
+                    has_next_frame = readSharedImage(imageContainer);
                 }
 
                 if (has_next_frame) {
                     processImage();
                 }
 
-                Container laneRecContainer(laneRecommendation);
-
-                getConference().send(laneRecContainer);
+                Container outContainer(laneRecommendation);
+                getConference().send(outContainer);
             }
 
             return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;

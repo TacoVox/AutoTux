@@ -73,11 +73,11 @@ namespace lane {
 
             autotux::LaneRecommendation laneRecommendation;
 
-
             virtual void setUp();
             virtual void tearDown();
 
             void processImage();
+            void getLaneRecommendation(odcore::data::Container &c);
         };
     } // follower
 } // lane
