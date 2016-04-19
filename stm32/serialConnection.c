@@ -66,9 +66,13 @@ int serialConnectionLoop(void) {
 	// Car initial state: stopped, wheels centered
 	controlOutputStopCenter();
 
+	// Time of the iteration. Used to adapt the sleeping
+	int itTime = 0;
+
 	// Main serial connection loop.
 	while(true) {
-
+		itTime = ST2MS(chTimeNow());
+		
 		//---------------------------------------------------------------------
 		// Reset all LEDS
 		//---------------------------------------------------------------------
@@ -175,8 +179,15 @@ int serialConnectionLoop(void) {
 				sensorInputDebugOutput((BaseSequentialStream*) &SDU1);
 			}
 		}
-
-		chThdSleepMilliseconds(90);
+		
+		if (ST2MS(chTimeNow()) > itTime) {
+			// itTime - ST2MS(chTimeNow()) is the time in MS of this iteration.
+			// Sleep 100 - this value to get 10Hz.
+			 chThdSleepMilliseconds(100 - (itTime - ST2MS(chTimeNow()));
+		} else {
+			// System timer recently overflowed, rare but can happen. Sleep a fixed amount
+			chThdSleepMilliseconds(95);
+		}
 	}
 	return 0;
 }

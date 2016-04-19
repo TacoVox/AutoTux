@@ -53,13 +53,20 @@ void sensorInputSetup (void) {
  * Fills a char array with all sensor data
  */
 void sensorInputGetData(unsigned char* buffer) {
-	// Normal packet output
-	buffer[0] = (unsigned char)hardwareGetValuesUS(US_FRONT);
-	buffer[1] = (unsigned char)hardwareGetValuesUS(US_SIDE);
-	buffer[2] = (unsigned char)hardwareGetValuesIR(IR_SIDE_FRONT);
-	buffer[3] = (unsigned char)hardwareGetValuesIR(IR_SIDE_REAR);
-	buffer[4] = (unsigned char)hardwareGetValuesIR(IR_REAR);
-	buffer[5] = (unsigned char)hardwareGetValuesWE();
+	// Normal packet output. Allow only values up to 255 to be sure not
+	// to get unexpectedly low values caused by conversion/overflow 
+	buffer[0] = hardwareGetValuesUS(US_FRONT) < 255 ? 
+		(unsigned char)hardwareGetValuesUS(US_FRONT) : 255;
+	buffer[1] = hardwareGetValuesUS(US_SIDE) < 255 ? 
+		(unsigned char)hardwareGetValuesUS(US_SIDE) : 255;
+	buffer[2] = hardwareGetValuesIR(IR_SIDE_FRONT) < 255 ? 
+		(unsigned char)hardwareGetValuesIR(IR_SIDE_FRONT) : 255;
+	buffer[3] = hardwareGetValuesIR(IR_SIDE_REAR) < 255 ?
+		(unsigned char)hardwareGetValuesIR(IR_SIDE_REAR) : 255;
+	buffer[4] = hardwareGetValuesIR(IR_REAR) ? 
+		(unsigned char)hardwareGetValuesIR(IR_REAR) : 255;
+	buffer[5] = hardwareGetValuesWE() < 255 ?
+		(unsigned char)hardwareGetValuesWE() : 255;
 }
 
 
