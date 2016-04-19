@@ -3,13 +3,19 @@
 #include <iostream>
 #include <iomanip>
 #include <mutex>
+#include <algorithm>
 #include "serial/BufferWrapper.h"
 #include "containerfactory/SBDContainer.h"
 
 using namespace std;
 
-//Mutexes for making the reading functions threadsafe
+// append receive buffer mutex
+std::mutex arb;
+// append send buffer mutex
+std::mutex asb;
+// read send buffer mutex
 std::mutex rsm;
+// read receive buffer mutex
 std::mutex rrm;
 
 /* constructor */
@@ -31,49 +37,64 @@ serial::BufferWrapper::~BufferWrapper()
 /* appends a correct packet to the receive buffer */
 void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec)
 {
+    // lock mutex
+    arb.lock();
     // return if the length of the vedcor is too short
-    if (vec.size() < 10) return;
+    if (vec.size() < SBDPKTSIZE) {
+        // unlock mutex
+        arb.unlock();
+        return;
+    }
     // the vector to hold the correct packet
-    vector<unsigned char> v;
+    vector<unsigned char> ret_vec;
     // loop through the received data from the read and look
     // for a correct packet
-    for (unsigned int i = 0; i < vec.size(); i++) {
-        // if true -> correct packet maybe
-        if (vec.at(i) == '7' && vec.at(i+1) == ':' && vec.at(i+9) == ',') {
+    for (auto it = vec.begin(); it != vec.end(); it++) {
+        if (it + SBDPKTSIZE > vec.end()) {
+            break;
+        }
+        if (*it == '7' && *(it+DEL_POS) == ':' && *(it+END_DEL) == ',') {
             cout << "correct packet maybe" << endl;
-            unsigned char us1 = vec.at(i+2);
+            unsigned char us1 = *(it+US1_POS);
             printf("%i ", us1);
-            unsigned char us2 = vec.at(i+3);
+            unsigned char us2 = *(it+US2_POS);
             printf("%i ", us2);
-            unsigned char ir1 = vec.at(i+4);
+            unsigned char ir1 = *(it+IR1_POS);
             printf("%i ", ir1);
-            unsigned char ir2 = vec.at(i+5);
+            unsigned char ir2 = *(it+IR2_POS);
             printf("%i ", ir2);
-            unsigned char ir3 = vec.at(i+6);
+            unsigned char ir3 = *(it+IR3_POS);
             printf("%i ", ir3);
-            unsigned char wheel = vec.at(i+7);
+            unsigned char wheel = *(it+WHL_POS);
             printf("%i ", wheel);
-            unsigned char check = vec.at(i+8);
+            unsigned char check = *(it+CHK_SUM);
             printf("%i \n", check);
             // fill the vector
-            v = {us1, us2, ir1, ir2, ir3, wheel};
+            ret_vec = {us1, us2, ir1, ir2, ir3, wheel};
             // check if correct checksum
-            if (check == checksum(v)) {
+            if (check == checksum(ret_vec)) {
                 cout << "checksum OK" << endl;
                 break;
             }
             else {
                 cout << "checksum FAIL" << endl;
-                // clear the vector
-                v.clear();
+                // clear the return vector
+                ret_vec.clear();
+                // find where next packet starts
+                it = find(it+1, vec.end(), '7');
+                // if not found, break
+                if (it == vec.end()) break;
             }
         }
-    } // end for
-    // push in front of the buffer if valid data
-    if (v.size() != 0) {
-        cout << "pushing to buffer in" << endl;
-        buffer_in.push_front(v);
     }
+    // push in front of the buffer if valid data
+    if (ret_vec.size() != 0) {
+        // for now
+        ret_vec.push_back(0);
+        buffer_in.push_front(ret_vec);
+    }
+    // unlock mutex
+    arb.unlock();
 }
 
 
@@ -105,7 +126,11 @@ vector<unsigned char> serial::BufferWrapper::readReceiveBuffer(void)
 /* appends a correct packet to the send buffer */
 void serial::BufferWrapper::appendSendBuffer(vector<unsigned char> vec)
 {
+    // lock mutex
+    asb.lock();
     buffer_out.push_front(vec);
+    // and unlock after append
+    asb.unlock();
 }
 
 
@@ -135,7 +160,8 @@ vector<unsigned char> serial::BufferWrapper::readSendBuffer(void)
 
 
 /* calculates and returns the checksum for a valid packet */
-unsigned char serial::BufferWrapper::checksum(std::vector<unsigned char> vec) {
+unsigned char serial::BufferWrapper::checksum(std::vector<unsigned char> vec)
+{
     unsigned char checksum = 0;
     if (vec.size() == 0) return checksum;
     for (auto it = vec.begin(); it != vec.end(); ++it) {
