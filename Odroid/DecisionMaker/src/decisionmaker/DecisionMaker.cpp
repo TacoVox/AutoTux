@@ -108,7 +108,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
             case DRIVING:{
 
                 // Update overtaker state info...
-                ovt.obstacleDetection(sbd, vd);
+                /*ovt.obstacleDetection(sbd, vd);
 
                 // If overtaker is overriding control values...
                 if(ovt.getIsOverriding()) {
@@ -117,9 +117,9 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                 }
                 //... else follow lane-follower instructions...
                 else{
-                    cout <<"Overtaker NOT overriding" << endl;
+                    cout <<"Overtaker NOT overriding" << endl;*/
                     laneFollowing();
-                }
+                //}
 
                 break;
             }
@@ -142,7 +142,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                 break;
             }
         }
-
+	cout << "Steering: " << vehicleControl.getSteeringWheelAngle() << endl;
         // Pack and send control values
         Container control(vehicleControl);
         getConference().send(control);

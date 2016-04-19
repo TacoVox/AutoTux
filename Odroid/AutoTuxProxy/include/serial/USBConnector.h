@@ -3,7 +3,6 @@
 // include
 // ==================================================
 #include <memory>
-#include <string>
 #include <libusb-1.0/libusb.h>
 #include "serial/BufferWrapper.h"
 
@@ -16,7 +15,9 @@
 #define USB_ENDPOINT_IN	    0x81
 #define USB_ENDPOINT_OUT    0x01
 // buffer size when reading from usb stream
-#define LEN_IN_BUFFER       512
+#define READ_LEN            128
+// error code on empty data to write
+#define EMPTY_DATA          -13
 
 // USBConnector class
 // ============================
@@ -33,8 +34,6 @@ namespace usb_connector
         int read(void);
         int write(void);
         void disconnect(void);
-        void handle_cb_in(std::vector<unsigned char>);
-        void handle_cb_out(int);
         void set_buffer_wrapper(std::shared_ptr<serial::BufferWrapper>);
     private:
         bool init_libusb(void);
@@ -42,11 +41,8 @@ namespace usb_connector
         bool claim_interface(void);
     private:
         std::shared_ptr<serial::BufferWrapper> bw;
-        //unsigned char in_buffer[LEN_IN_BUFFER];
-        struct libusb_device_handle *usb_dev;
         struct libusb_context *ctx;
-        struct libusb_transfer *transfer_in;
-        struct libusb_transfer *transfer_out;
+        struct libusb_device_handle *usb_dev;
     };
 } // namespace usb_connector
 

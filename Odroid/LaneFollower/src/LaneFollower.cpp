@@ -46,6 +46,8 @@ namespace lane {
         // This method will run before body()
         void LaneFollower::setUp() {
             // Set up debug window
+            cout << "Setup LaneFollower" << endl;
+            cout << "LaneFollower Debug: " << m_debug << endl;
             if (m_debug) {
                 cvNamedWindow("Debug Window", CV_WINDOW_AUTOSIZE);
                 cvMoveWindow("Debug Window", 300, 100);
@@ -102,13 +104,11 @@ namespace lane {
             double e = 0;
 
             const int32_t CONTROL_SCANLINE = 462;
-            const int32_t distance = 280;
+            const int32_t distance = 220;
 
             Mat m_image_grey = m_image.clone();
             cvtColor(m_image, m_image_grey, COLOR_BGR2GRAY);
             threshold(m_image_grey, m_image_grey, 180, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
-
-            //adaptiveThreshold(m_image_grey, m_image_grey, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY_INV, 3, 5);
 
             vector<vector<Point>> contours;
             findContours(m_image_grey, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
@@ -170,7 +170,6 @@ namespace lane {
                 }
 
                 if (m_debug) {
-                    //line(m_image, Point(m_image.cols / 2, 0), Point(m_image.cols / 2, m_image.rows), Scalar(0,255,255));
                     if (left.x > 0) {
                         line(m_image, Point(m_image.cols / 2, y), left, Scalar(0, 255, 0));
                         stringstream sstr;
@@ -197,20 +196,22 @@ namespace lane {
             } else {
                 m_eSum += e;
             }
-			
-			// For introduction to algorithm see
-			// https://www  .youtube.com/watch?v=4Y7zG48uHRo
-			// Proportional gain. Values above 1 amplifies e and vice versa.
-			// 1 too low for right curve, 4 too twitchy. 2-3 seems very good
-            const double Kp = 2.60;
+
+	
+            const double Kp = 1.7;
+
+            // For introduction to algorithm see
+            // https://www  .youtube.com/watch?v=4Y7zG48uHRo
+            // Proportional gain. Values above 1 amplifies e and vice versa.
+            // 1 too low for right curve, 4 too twitchy. 2-3 seems very good
             // Cross track error rate gain. Affects the angle based on how fast we
-			// are moving towards the desired center of the lane. Counters the primary
-	        // proportional correction. Increase if car wobbles around centerline 
-			// because of of overcorrection.
-			const double Kd = 0;
-			// Integral gain. Adjusts based on accumulated e values, to correct for
-			// offset. 
-			const double Ki = 0;
+            // are moving towards the desired center of the lane. Counters the primary
+            // proportional correction. Increase if car wobbles around centerline
+            // because of of overcorrection.
+            const double Kd = 0.0;
+            // Integral gain. Adjusts based on accumulated e values, to correct for
+            // offset.
+            const double Ki = 0;
 
 
             const double p = Kp * e;
@@ -221,11 +222,12 @@ namespace lane {
             const double y = p + i + d;
 
             double desiredSteering = 0;
-            if(fabs(e) > 1e-2) {	
+            if(fabs(e) > 1e-2) {
                 desiredSteering = y;
             }
 
-            if (m_debug) {
+            // Make this use debug flag when finished? Or remove?
+            if (false) {
                 if (m_image.data != NULL) {
                     imshow("Camera Original Image", m_image);
                     imshow("Camera BW Image", m_image_grey);
@@ -233,58 +235,12 @@ namespace lane {
                 }
             }
 
-		// Limit max steering anlge based on car limits
-		if (desiredSteering > 0.5) desiredSteering = 0.5;
-		if (desiredSteering < -0.5) desiredSteering = -0.5;
+            // Limit max steering anlge based on car limits
+            if (desiredSteering > 0.5) desiredSteering = 0.5;
+            if (desiredSteering < -0.5) desiredSteering = -0.5;
 
-		cout << "\rDS: " << desiredSteering;
-		laneRecommendation.setAngle(desiredSteering);
-//
-//            laneRecommendation.setAngle(laneRecommendation.getAngle());
-//            laneRecommendation.setQuality(true);
-//
-//            // If the car is close enough to the middle of the road, just
-//            // keep going forward.
-//            if (m_distToLeftMarking > 240 && m_distToLeftMarking < 320 &&
-//                m_distToRightMarking > 240 && m_distToRightMarking < 320) {
-//                laneRecommendation.setAngle(0);
-//                cerr << "Going straight!" << endl;
-//            }
-//
-//                // Whenever the left line gets too close and the right
-//                // line gets too far away, make a right turn.
-//                // NOTE: To keep further away from the left lane, the distance
-//                // it waits until it turns is less than a left turn.
-//            else if ((m_distToRightMarking > 320 || m_distToRightMarking < 0) &&
-//                     m_distToLeftMarking < 270 && m_distToLeftMarking > 0) {
-//                laneRecommendation.setAngle(2.0);
-//                cerr << "Turning right! Left: " << m_distToLeftMarking << " & Right: " << m_distToRightMarking << endl;
-//            }
-//
-//                // Whenever the right line gets to close and the
-//                // left line gets too far away, make a left turn.
-//            else if ((m_distToLeftMarking > 320 || m_distToLeftMarking < 0) &&
-//                     m_distToRightMarking < 230 && m_distToRightMarking > 0) {
-//                laneRecommendation.setAngle(-2.0);
-//                cerr << "Turning left! Left: " << m_distToLeftMarking << " & Right: " << m_distToRightMarking << endl;
-//            }
-//                // If all else fails, just keep going forward without turning
-//            else {
-//                laneRecommendation.setAngle(0);
-//                cerr << "Nothing." << endl;
-//            }
-//
-//            if(panicStop) {
-//                laneRecommendation.setQuality(false);
-//            }
-//
-//            else {
-//                laneRecommendation.setQuality(true);
-//                laneRecommendation.setDistance_to_line(0.0);
-//                laneRecommendation.setLeft_lane(false);
-//            }
-//
-//            m_vehicleControl.setSteeringWheelAngle(laneRecommendation.getAngle());
+            cout << "DS: " << desiredSteering;
+            laneRecommendation.setAngle(desiredSteering);
         }
 
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode LaneFollower::body() {
@@ -293,6 +249,7 @@ namespace lane {
             m_debug = kv.getValue<int32_t>("lanedetector.debug") == 1;
 
             // ?
+            cout << "Entering loop:" << endl;
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() ==
                    odcore::data::dmcp::ModuleStateMessage::RUNNING) {
                 bool has_next_frame = false;
@@ -300,6 +257,7 @@ namespace lane {
                 Container c = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
 
                 if (c.getDataType() == odcore::data::image::SharedImage::ID()) {
+                    cout << "Read shared image";
                     has_next_frame = readSharedImage(c);
                 }
 

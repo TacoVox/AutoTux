@@ -6,13 +6,17 @@ namespace usb_handler {
     class USBHandler
     {
     public:
-        USBHandler(std::shared_ptr<serial::BufferWrapper>);
+        USBHandler(std::shared_ptr<usb_connector::USBConnector>);
         ~USBHandler();
         void run();
-        void set_buffer_wrapper(std::shared_ptr<serial::BufferWrapper>);
+        void stop();
+        void set_usb_connector(std::shared_ptr<usb_connector::USBConnector>);
     private:
-        std::shared_ptr<serial::BufferWrapper> bw;
-        usb_connector::USBConnector uc;
         void reconnect();
+        bool is_reconnect(int);
+    private:
+        bool running;
+        std::shared_ptr<usb_connector::USBConnector> uc;
+
     };
 } // namespace usb_handler
