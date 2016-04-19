@@ -18,7 +18,9 @@ usb_handler::USBHandler::USBHandler(std::shared_ptr<usb_connector::USBConnector>
 
 usb_handler::USBHandler::~USBHandler()
 {
+    cout << "destroying usb handler... ";
     uc->~USBConnector();
+    cout << "[OK]" << endl;
 }
 
 
@@ -41,7 +43,7 @@ void usb_handler::USBHandler::run()
         if (res2 != 0) {
             if (is_reconnect(res2)) reconnect();
         }
-        this_thread::sleep_for(chrono::milliseconds(100));
+        this_thread::sleep_for(chrono::milliseconds(67));
     }
 }
 
@@ -64,7 +66,7 @@ void usb_handler::USBHandler::reconnect()
     uc->disconnect();
     while (1) {       
         if (uc->connect()) break;
-        this_thread::sleep_for(chrono::milliseconds(200));
+        this_thread::sleep_for(chrono::milliseconds(500));
     }
 }
 

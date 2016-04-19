@@ -170,7 +170,7 @@ int usb_connector::USBConnector::read(void)
     // read from the usb device
     int transferred;
     int res = libusb_bulk_transfer(usb_dev, USB_ENDPOINT_IN,
-                                   data, READ_LEN, &transferred, 50);
+                                   data, READ_LEN, &transferred, 20);
     if (res == 0) {
         cout << "READ successful" << endl;
         cout << "bytes received: " << transferred << endl;
@@ -202,7 +202,7 @@ int usb_connector::USBConnector::write(void)
     cout << "writing to usb stream..." << endl;
     int transferred;
     int res = libusb_bulk_transfer(usb_dev, USB_ENDPOINT_OUT,
-                                   data, len, &transferred, 50);
+                                   data, len, &transferred, 20);
     if (res == 0) {
         cout << "WRITE successful" << endl;
         cout << "bytes sent: " << transferred << endl;
