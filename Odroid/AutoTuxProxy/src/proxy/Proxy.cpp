@@ -141,7 +141,9 @@ namespace proxy {
         // Speed conversion
         double delta = 0.0001;
         unsigned char speed = 1; // Assume stopped
-        if (vehicleControl.getSpeed() > 0 + delta) {
+        if (vehicleControl.getSpeed() > 1 + delta) {
+            speed = 3;
+        } else if (vehicleControl.getSpeed() > 0 + delta) {
             speed = 2; // Forward
         } else if (vehicleControl.getSpeed() < 0 - delta) {
             speed = 0; // backward
