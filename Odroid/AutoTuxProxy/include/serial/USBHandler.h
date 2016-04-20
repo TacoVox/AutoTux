@@ -1,3 +1,5 @@
+#ifndef USBHANDLER_H
+#define USBHANDLER_H
 
 #include "serial/BufferWrapper.h"
 #include "serial/USBConnector.h"
@@ -20,3 +22,5 @@ namespace usb_handler {
 
     };
 } // namespace usb_handler
+
+#endif	// USBHANDLER_H

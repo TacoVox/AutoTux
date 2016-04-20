@@ -59,24 +59,34 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec)
         if (it + SBDPKTSIZE > vec.end()) {
             break;
         }
-        if (*it == STR_DEL && *(it+MID_DEL_POS) == MID_DEL && *(it+END_DEL_POS) == END_DEL) {
+        if (*it == STR_DEL && *(it+STR_DEL_POS) == STR_DEL &&
+                *(it+MID_DEL_POS) == MID_DEL && *(it+END_DEL_POS) == END_DEL) {
             cout << "correct packet maybe" << endl;
             unsigned char us1 = *(it+US1_POS);
-            printf("%i ", us1);
+            printf("us1:%i ", us1);
             unsigned char us2 = *(it+US2_POS);
-            printf("%i ", us2);
+            printf("us2:%i ", us2);
             unsigned char ir1 = *(it+IR1_POS);
-            printf("%i ", ir1);
+            printf("ir1:%i ", ir1);
             unsigned char ir2 = *(it+IR2_POS);
-            printf("%i ", ir2);
+            printf("ir2:%i ", ir2);
             unsigned char ir3 = *(it+IR3_POS);
-            printf("%i ", ir3);
+            printf("ir3:%i ", ir3);
             unsigned char wheel = *(it+WHL_POS);
-            printf("%i ", wheel);
+            printf("wheel:%i ", wheel);
+            unsigned char dis1 = *(it+DIS_POS_1);
+            printf("dis1:%i ", dis1);
+            unsigned char dis2 = *(it+DIS_POS_2);
+            printf("dis2:%i ", dis2);
+            unsigned char dis3 = *(it+DIS_POS_3);
+            printf("dis3:%i ", dis3);
+            unsigned char dis4 = *(it+DIS_POS_4);
+            printf("dis4:%i ", dis4);
             unsigned char check = *(it+CHK_SUM);
-            printf("%i \n", check);
+            printf("check:%i \n", check);
             // fill the vector
-            ret_vec = {us1, us2, ir1, ir2, ir3, wheel};
+            ret_vec = {us1, us2, ir1, ir2, ir3, wheel, dis1, dis2, dis3, dis4};
+            //ret_vec((it+US1_POS), (it+CHK_SUM));
             // check if correct checksum
             if (check == checksum(ret_vec)) {
                 cout << "checksum OK" << endl;
