@@ -23,10 +23,6 @@ using namespace overtaker;
 
 enum STATE {DRIVING, PARKING};
 
-// takes the values of the argument passed to the constructor
-int32_t ptrargc;
-char** ptrargv;
-
 // Shared pointer to Container
 VehicleControl vehicleControl;
 
@@ -36,8 +32,6 @@ VehicleControl vehicleControl;
 DecisionMaker::DecisionMaker(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "DecisionMaker"),
         laneRecommendation() , ovt(), parker(){
-    ptrargc = argc;
-    ptrargv = argv;
 }
 
 DecisionMaker::~DecisionMaker() {}
@@ -88,7 +82,7 @@ double DecisionMaker::getDistanceToLine() {
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() {
 
     // Set initial state of the car
-    STATE state = DRIVING;
+    STATE state = PARKING;
 
     VehicleData vd;
     SensorBoardData sbd;
