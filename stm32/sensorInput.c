@@ -54,19 +54,19 @@ void sensorInputSetup (void) {
  */
 void sensorInputGetData(unsigned char* buffer) {
 	// Normal packet output. Allow only values up to 255 to be sure not
-	// to get unexpectedly low values caused by conversion/overflow 
-	buffer[0] = hardwareGetValuesUS(US_FRONT) < 255 ? 
+	// to get unexpectedly low values caused by conversion/overflow
+	buffer[0] = hardwareGetValuesUS(US_FRONT) < 255 ?
 		(unsigned char)hardwareGetValuesUS(US_FRONT) : 255;
-	buffer[1] = hardwareGetValuesUS(US_SIDE) < 255 ? 
+	buffer[1] = hardwareGetValuesUS(US_SIDE) < 255 ?
 		(unsigned char)hardwareGetValuesUS(US_SIDE) : 255;
-	buffer[2] = hardwareGetValuesIR(IR_SIDE_FRONT) < 255 ? 
+	buffer[2] = hardwareGetValuesIR(IR_SIDE_FRONT) < 255 ?
 		(unsigned char)hardwareGetValuesIR(IR_SIDE_FRONT) : 255;
 	buffer[3] = hardwareGetValuesIR(IR_SIDE_REAR) < 255 ?
 		(unsigned char)hardwareGetValuesIR(IR_SIDE_REAR) : 255;
-	buffer[4] = hardwareGetValuesIR(IR_REAR) ? 
+	buffer[4] = hardwareGetValuesIR(IR_REAR) ?
 		(unsigned char)hardwareGetValuesIR(IR_REAR) : 255;
-	buffer[5] = hardwareGetValuesWE() < 255 ?
-		(unsigned char)hardwareGetValuesWE() : 255;
+	buffer[5] = hardwareGetValuesWESpeed() < 255 ?
+		(unsigned char)hardwareGetValuesWESpeed() : 255;
 }
 
 
@@ -77,12 +77,13 @@ void sensorInputDebugOutput(BaseSequentialStream* SDU) {
 	// "\033[F" for going back to previous line
 	chprintf(SDU, "\033[FTHROTTLE: %4i ", hardwareGetValuesRC(THROTTLE));
 	chprintf(SDU, "STEERING: %4i ", hardwareGetValuesRC(STEERING));
-	chprintf(SDU, "WHEEL: %f ", hardwareGetValuesWE());
+	chprintf(SDU, "WHEEL: %f ", hardwareGetValuesWESpeed());
 	chprintf(SDU, "US FRONT: %3i \r\n", hardwareGetValuesUS(US_FRONT));
 	chprintf(SDU, "US SIDE: %3i ", hardwareGetValuesUS(US_SIDE));
 	chprintf(SDU, "SIDE_FRONT: %3i ", hardwareGetValuesIR(IR_SIDE_FRONT));
 	chprintf(SDU, "SIDE_REAR: %3i ",  hardwareGetValuesIR(IR_SIDE_REAR));
 	chprintf(SDU, "REAR: %2i ", hardwareGetValuesIR(IR_REAR));
+	chprintf(SDU, "DIST: %2i ", hardwareGetValuesWEDistance());
 
 	// For time measurement
 	/*

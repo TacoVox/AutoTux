@@ -25,6 +25,8 @@ static THD_FUNCTION(wheelEncoderThread, arg);
 
 // The resulting pulsewidth values
 uint8_t ticks;
+unsigned int distanceTicks;
+unsigned int distanceTraveled;
 bool previousState;
 int cmPerSecond;
 systime_t startTime;
@@ -52,7 +54,6 @@ void hardwareIterationWE(void) {
 	// Try measuring every fifth iteration for now
 
 	systime_t startTime = chVTGetSystemTime();
-    const float ticksPerMeter = 47.7;
 
 	while(true){
 		if (previousState == FALSE && palReadPad(WE_PIN_GROUP, WE_PIN_NUMBER)) {
@@ -67,10 +68,11 @@ void hardwareIterationWE(void) {
 	        // numberOfTicksInMeters / timeElapsed
 	        systime_t timeDelta = timeNow - startTime;
 			double seconds = ST2MS(timeDelta) / (double)1000;
-			double centimeters = (ticks / ticksPerMeter) * 100;
+			double centimeters = (ticks / WE_TICKS_PER_METER) * 100;
 	        cmPerSecond = (int)(centimeters / seconds);
 
 	        // Reset tick counter
+			distanceTicks += ticks;
 	        ticks = 0;
 	        startTime = chVTGetSystemTime();
 	    }
@@ -87,12 +89,19 @@ static THD_FUNCTION(wheelEncoderThread, arg) {
 /*
  * Getter for the values. Specify a US sensor.
  */
-int hardwareGetValuesWE(void) {
+int hardwareGetValuesWESpeed(void) {
 	return cmPerSecond;
+}
+
+/*
+ * Returns distance traveled in centimeters
+ */
+
+int hardwareGetValuesWEDistance(void) {
+	distanceTraveled = ((int)(((float)distanceTicks / (float)WE_TICKS_PER_METER) * 100)+0.5);
+	return distanceTraveled;
 }
 
 //-----------------------------------------------------------------------------
 // "Private" implementation
 //-----------------------------------------------------------------------------
-
-
