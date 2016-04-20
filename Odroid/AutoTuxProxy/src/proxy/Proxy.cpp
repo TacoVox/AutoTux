@@ -111,7 +111,7 @@ namespace proxy {
                 getConference().send(*SBDContainer::instance()->
                         genSBDContainer(v));
             }
-            if (v.size() == 7) {
+            if (v.size() == 10) {
                 getConference().send(*VDContainer::instance()->
                         genVDContainer(v));
             }
