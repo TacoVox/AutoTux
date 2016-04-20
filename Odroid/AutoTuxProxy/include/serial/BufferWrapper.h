@@ -1,9 +1,15 @@
+/*!
+ * BufferWrapper header. Declares the functions and member variables.
+ *
+ * @author Ivo
+ */
+
+
 #ifndef BUFFERWRAPPER_H
 #define BUFFERWRAPPER_H
 
 // include
 // ==================================================
-#include <string>
 #include <vector>
 #include <deque>
 
@@ -29,16 +35,25 @@ namespace serial
     class BufferWrapper
     {
     public:
+        /*! constructor */
         BufferWrapper();
+        /*! destructor */
         ~BufferWrapper();
+        /*! appends data read from the serial to the receive buffer */
         void appendReceiveBuffer(std::vector<unsigned char>);
+        /*! returns a valid packet from the receive buffer */
         std::vector<unsigned char> readReceiveBuffer(void);
+        /*! appends to the send buffer data to write to the serial */
         void appendSendBuffer(std::vector<unsigned char>);
+        /*! returns a valid packet to write to the serial */
         std::vector<unsigned char> readSendBuffer(void);
     private:
+        /*! returns the checksum for a valid packet */
         unsigned char checksum(std::vector<unsigned char>);
     private:
+        /*! the receive buffer */
         std::deque<std::vector<unsigned char>> buffer_in;
+        /*! the send buffer */
         std::deque<std::vector<unsigned char>> buffer_out;
     };
 }

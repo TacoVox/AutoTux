@@ -1,5 +1,11 @@
+/*!
+ * Implementation of the BufferWrapper.h. This class takes care
+ * of the internal buffers when reading from and writing to the
+ * serial connection.
+ *
+ * @author Ivo
+ */
 
-#include <stdio.h>
 #include <iostream>
 #include <iomanip>
 #include <mutex>
@@ -18,7 +24,7 @@ std::mutex rsm;
 // read receive buffer mutex
 std::mutex rrm;
 
-/* constructor */
+/*! constructor */
 serial::BufferWrapper::BufferWrapper() : buffer_in({}), buffer_out({})
 {
     cout << "creating buffer wrapper... ";
@@ -26,7 +32,7 @@ serial::BufferWrapper::BufferWrapper() : buffer_in({}), buffer_out({})
 }
 
 
-/* destructor */
+/*! destructor */
 serial::BufferWrapper::~BufferWrapper()
 {
     cout << "destroying buffer wrapper... ";
@@ -34,7 +40,7 @@ serial::BufferWrapper::~BufferWrapper()
 }
 
 
-/* appends a correct packet to the receive buffer */
+/*! appends a correct packet to the receive buffer */
 void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec)
 {
     // lock mutex
@@ -98,7 +104,7 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec)
 }
 
 
-/* returns the most recent valid packet from the read buffer */
+/*! returns the most recent valid packet from the read buffer */
 vector<unsigned char> serial::BufferWrapper::readReceiveBuffer(void)
 {
     rrm.lock();
@@ -123,7 +129,7 @@ vector<unsigned char> serial::BufferWrapper::readReceiveBuffer(void)
 }
 
 
-/* appends a correct packet to the send buffer */
+/*! appends a correct packet to the send buffer */
 void serial::BufferWrapper::appendSendBuffer(vector<unsigned char> vec)
 {
     // lock mutex
@@ -134,7 +140,7 @@ void serial::BufferWrapper::appendSendBuffer(vector<unsigned char> vec)
 }
 
 
-/* returns the most recent valid packet from the send buffer */
+/*! returns the most recent valid packet from the send buffer */
 vector<unsigned char> serial::BufferWrapper::readSendBuffer(void)
 {
     rsm.lock();
@@ -159,7 +165,7 @@ vector<unsigned char> serial::BufferWrapper::readSendBuffer(void)
 }
 
 
-/* calculates and returns the checksum for a valid packet */
+/*! calculates and returns the checksum for a valid packet */
 unsigned char serial::BufferWrapper::checksum(std::vector<unsigned char> vec)
 {
     unsigned char checksum = 0;
