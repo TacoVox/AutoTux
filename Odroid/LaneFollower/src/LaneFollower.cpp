@@ -57,7 +57,8 @@ namespace lane {
 
             if(SIMMODE) {
                 distance = SIMDISTANCE;
-                scanline = 462;
+                control_scanline = 462;
+                stop_scanline = 250;
 
                 P_GAIN = SIMGAIN;
                 E_GAIN = 0;
@@ -66,7 +67,8 @@ namespace lane {
 
             else {
                 distance = CARDISTANCE;
-                scanline = 462;
+                control_scanline = 462;
+                stop_scanline = 350;
 
                 P_GAIN = CARGAIN;
                 E_GAIN = 0;
@@ -111,9 +113,7 @@ namespace lane {
 
                     // Mirror image
                     // NOTE: For simulator.
-                    if(SIMMODE) {
-                        flip(m_image, m_image, -1);
-                    }
+                    flip(m_image, m_image, -1);
                     returnValue = true;
                 }
             }
@@ -136,13 +136,13 @@ namespace lane {
 
             // TODO: New datatype
             laneRecommendation.setLeft_lane(false);
-            inLeftLane = laneRecommendation.getLeft_lane();
+            inLeftLane = true;
 
             double e = 0;
 
             Mat m_image_grey = m_image.clone();
             cvtColor(m_image, m_image_grey, COLOR_BGR2GRAY);
-            threshold(m_image_grey, m_image_grey, 180, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+            threshold(m_image_grey, m_image_grey, 100, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
 
             //adaptiveThreshold(m_image_grey, m_image_grey, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY_INV, 3, 5);
 
@@ -155,8 +155,8 @@ namespace lane {
 
             for(int32_t y = m_image.rows - 8; y > m_image.rows * .5; y -= 10) {
                 // Find red pixels
-                Vec3b pixelLeft, pixelRight;
-                Point left, right;
+                Vec3b pixelLeft, pixelRight, pixelFront;
+                Point left, right, middle;
 
                 left.y = y;
                 left.x = -1;
@@ -179,20 +179,46 @@ namespace lane {
                     }
                 }
 
-                if(y == scanline) {
-                    // Testing Twiddle algorithm stuff
-                    if(!inLeftLane) {
-                        e = ((right.x - m_image.cols/2.0) - distance) / distance;
-                    }
+                middle.x = (m_image.cols/2.0);
+                middle.y = control_scanline;
 
+                for(int i = control_scanline; i > stop_scanline; i--) {
+                    pixelFront = m_image.at<Vec3b>(Point(middle.x, i));
+                    if(pixelFront.val[2] == 255) {
+                        middle.y = i;
+                        laneRecommendation.setDistance_to_line(control_scanline - middle.y);
+                        break;
+                    }
+                }
+
+                if(y == control_scanline) {
+                    // Testing Twiddle algorithm stuff
+                    if (!inLeftLane) {
+                        if (right.x > 0) {
+                            e = ((right.x - m_image.cols / 2.0) - distance) / distance;
+                        }
+
+                        else if (left.x > 0) {
+                            e = (distance - (m_image.cols / 2.0 - left.x)) / distance;
+                        }
+                    }
                     else {
-                        e = ((left.x - m_image.cols/2.0) - distance) / distance;
+                        if (left.x > 0) {
+                            e = (distance - (m_image.cols / 2.0 - left.x)) / distance;
+                        }
+
+                        else if (right.x > 0) {
+                            e = ((right.x - m_image.cols / 2.0) - distance) / distance;
+                        }
                     }
                 }
 
                 if (m_debug) {
 
-                    //line(m_image, Point(m_image.cols / 2, 0), Point(m_image.cols / 2, m_image.rows), Scalar(0,255,255));
+                    if(middle.y < control_scanline) {
+                        line(m_image, Point(middle.x, control_scanline), middle, Scalar(128, 0, 0));
+                    }
+
                     if (left.x > 0) {
                         line(m_image, Point(m_image.cols / 2, y), left, Scalar(0, 255, 0));
                         stringstream sstr;
@@ -201,7 +227,7 @@ namespace lane {
                                 0.5, CV_RGB(0, 255, 0));
                     }
                     if (right.x > 0) {
-                        line(m_image, Point(m_image.cols / 2, y), right, Scalar(0, 0, 255));
+                        line(m_image, Point(m_image.cols / 2, y), right, Scalar(0, 128, 128));
                         stringstream sstr;
                         sstr << (right.x - m_image.cols / 2);
                         putText(m_image, sstr.str().c_str(), Point(m_image.cols / 2 + 100, y - 2), FONT_HERSHEY_PLAIN,
@@ -228,7 +254,8 @@ namespace lane {
             const double y = p + i + d;
 
             double desiredSteering = 0;
-            if(fabs(e) > 1e-2) {	
+
+            if(fabs(e) > 1e-2) {
                 desiredSteering = y;
             }
 
@@ -243,7 +270,10 @@ namespace lane {
             if (desiredSteering > 0.5) desiredSteering = 0.5;
             if (desiredSteering < -0.5) desiredSteering = -0.5;
 
-            cout << "\rDS: " << desiredSteering;
+            //cout << "DS: " << desiredSteering << endl;
+
+            cout << "STOPLINE: " << laneRecommendation.getDistance_to_line() << endl;
+
             laneRecommendation.setAngle(desiredSteering);
         }
 
@@ -260,14 +290,14 @@ namespace lane {
                 Container imageContainer = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
 
                 // TODO: New datatype
-                Container laneContainer = getKeyValueDataStore().get(LaneRecommendation::ID());
+                //Container laneContainer = getKeyValueDataStore().get(LaneRecommendation::ID());
 
                 // TODO: New datatype
-                if(laneContainer.getDataType() == LaneRecommendation::ID()) {
-
-                    // TODO: New datatype
-                    getLaneRecommendation(laneContainer);
-                }
+//                if(laneContainer.getDataType() == LaneRecommendation::ID()) {
+//
+//                    // TODO: New datatype
+//                    getLaneRecommendation(laneContainer);
+//                }
 
                 if (imageContainer.getDataType() == odcore::data::image::SharedImage::ID()) {
                     has_next_frame = readSharedImage(imageContainer);

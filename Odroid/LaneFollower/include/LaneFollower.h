@@ -71,8 +71,9 @@ namespace lane {
             double m_eSum;
             double m_eOld;
 
-            int distance;
-            int scanline;
+            int32_t distance;
+            int32_t control_scanline;
+            int32_t stop_scanline;
 
             // For introduction to algorithm see
             // https://www  .youtube.com/watch?v=4Y7zG48uHRo
