@@ -246,7 +246,7 @@ namespace lane {
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode LaneFollower::body() {
             // Get configuration
             KeyValueConfiguration kv = getKeyValueConfiguration();
-            m_debug = kv.getValue<int32_t>("lanedetector.debug") == 1;
+            m_debug = kv.getValue<int32_t>("lanefollower.debug") == 1;
 
             // ?
             cout << "Entering loop:" << endl;
