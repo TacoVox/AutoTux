@@ -31,7 +31,7 @@ Parker::Parker(){}
  * Finds a parking spot where the car fits
  */
 void Parker::findSpot(SensorBoardData sbd, VehicleData vd) {
-    cout << "This is the accurate value: " << isAccurate << endl;
+    cout << "IR SENSOR VALUE: " << sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) << endl;
     switch (state) {
         case FINDOBJECT: {
             isSpot = false;
@@ -40,12 +40,12 @@ void Parker::findSpot(SensorBoardData sbd, VehicleData vd) {
             break;
         }
         case FINDGAPSTART: {
-            cout << "FINDG AP START" << endl;
+            cout << "FIND START OF GAP" << endl;
             findGapStart(sbd, vd);
             break;
         }
         case FINDGAPEND: {
-            cout << "FIND GAP END" << endl;
+            cout << "FIND END OF GAP" << endl;
             findGapEnd(sbd, vd);
             break;
         }
@@ -193,6 +193,7 @@ VehicleControl Parker::adjustBeforeParking(VehicleData vd, int add) {
  */
 void Parker::enoughSpace(){
     if((gapEnd - gapStart) > 6){
+        cout << "******************ENOUGHSPACE TO PARK***************" << endl;
         isSpot = true;
     }
     else
@@ -204,15 +205,15 @@ void Parker::enoughSpace(){
  */
 void Parker::findGapEnd(SensorBoardData sbd, VehicleData vd){
     if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 0 &&
-            sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT < 30)) {
+            sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT < 20)) {
         gapEnd = vd.getAbsTraveledPath();
         isAccurate++;
     }
     else
         isAccurate = 0;
     //To check if the readings are Accurate and have no noise
-    if(isAccurate == 3){
-        cout << "Found gap END method---------------------------" << endl;
+    if(isAccurate == 5){
+        cout << "*********END OF GAP IS DETECTED****************" << endl;
         isAccurate = 0;
         state = ENOUGHSPACE;
     }
@@ -222,15 +223,15 @@ void Parker::findGapEnd(SensorBoardData sbd, VehicleData vd){
  */
 void Parker::findGapStart(SensorBoardData sbd, VehicleData vd) {
     if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < 0 ||
-            sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 30){
+            sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 20){
         gapStart = vd.getAbsTraveledPath();
         isAccurate++;
     }
     else
         isAccurate = 0;
     //To check if the readings are Accurate and have no noise
-    if(isAccurate == 3){
-        cout << "Found gap START method---------------------------" << endl;
+    if(isAccurate == 5){
+        cout << "*********GAP HAS BEEN DETECTED****************" << endl;
         isAccurate = 0;
         state = FINDGAPEND;
     }
@@ -240,15 +241,15 @@ void Parker::findGapStart(SensorBoardData sbd, VehicleData vd) {
  */
 void Parker::findObject(SensorBoardData sbd) {
     if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 0 &&
-            sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < 30){
+            sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < 20){
         isAccurate++;
     }
     else
         isAccurate = 0;
     //To check if the readings are Accurate and have no noise
-    if(isAccurate == 3){
+    if(isAccurate == 5){
         isAccurate = 0;
-        cout << "object found method---------------------------" << endl;
+        cout << "********OBJECT HAS BEEN FOUND************" << endl;
         state = FINDGAPSTART;
     }
 }
