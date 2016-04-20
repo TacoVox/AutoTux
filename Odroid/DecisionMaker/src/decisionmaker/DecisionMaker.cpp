@@ -102,16 +102,16 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
             case DRIVING:{
 
                 // Update overtaker state info...
-                ovt.obstacleDetection(sbd, vd);
+                ovt.obstacleDetection(sbd, vd, vehicleControl);
 
                 // If overtaker is overriding control values...
                 if(ovt.getIsOverriding()) {
-                    cout << "Overtaker is OVERRIDING" << endl;
+                    //cout << "DM: OVERTAKER is OVERRIDING" << endl;
                     vehicleControl = ovt.getOvtControl();
                 }
                 //... else follow lane-follower instructions...
                 else{
-                    cout <<"Overtaker NOT overriding" << endl;
+                    //cout <<"DM: LANE FOLLOWER Instructions" << endl;
                     laneFollowing();
                 }
 

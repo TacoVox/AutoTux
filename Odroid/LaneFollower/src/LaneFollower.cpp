@@ -246,9 +246,11 @@ namespace lane {
                 m_eSum += e;
             }
 
+
             const double p = P_GAIN * e;
             const double i = I_GAIN * timeStep * m_eSum;
             const double d = E_GAIN * (e - m_eOld)/timeStep;
+
             m_eOld = e;
 
             const double y = p + i + d;
