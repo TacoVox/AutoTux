@@ -30,7 +30,7 @@ namespace lane {
         using namespace odtools::player;
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) :
-                TimeTriggeredConferenceClientModule(argc, argv, "LaneDetector"),
+                TimeTriggeredConferenceClientModule(argc, argv, "LaneFollower"),
                 m_hasAttachedToSharedImageMemory(false),
                 m_sharedImageMemory(),
                 m_image(),
@@ -197,7 +197,7 @@ namespace lane {
                 m_eSum += e;
             }
 
-	
+
             const double Kp = 1.7;
 
             // For introduction to algorithm see
