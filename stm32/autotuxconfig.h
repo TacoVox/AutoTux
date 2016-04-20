@@ -42,7 +42,9 @@
 #define RC_THROTTLE_BRAKE_TRESHOLD 1000
 
 // Number of consecutive iterations to steer in the extreme directions to change mode
-#define ITERATIONS_TO_CHANGE_MODE 10
+#define ITERATIONS_TO_CHANGE_MODE 20
+// Number of iterations you have to center to lock in the mode change
+#define ITERATIONS_TO_CENTER 10
 
 // Steer max right to activate RC mode
 #define RC_STEERING_ACTIVATION_TRESHOLD 2060
@@ -131,9 +133,9 @@ static const ioportmask_t WE_PIN_NUMBER  = 2;
 typedef enum {PWM_OUTPUT_ESC, PWM_OUTPUT_SERVO} PWM_OUTPUT_ID;
 
 // Speeds and their corresponding pulsewidths.
-typedef enum {SPEED_REVERSE, SPEED_STOP, SPEED_FORWARD} SPEED;
-#define SPEED_STEPS 3
-static const int SPEED_PULSEWIDTHS[SPEED_STEPS] = {1140, 1350, 1420};
+typedef enum {SPEED_REVERSE, SPEED_STOP, SPEED_FORWARD_LOW, SPEED_FORWARD_CRUISE} SPEED;
+#define SPEED_STEPS 4
+static const int SPEED_PULSEWIDTHS[SPEED_STEPS] = {1140, 1350, 1430, 1530};
 
 #define WHEELS_MAXLEFT_PW 1220
 #define WHEELS_CENTERED_PW 1590

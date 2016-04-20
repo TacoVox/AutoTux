@@ -4,12 +4,9 @@
 #include <containerfactory/SBDContainer.h>
 #include <containerfactory/VDContainer.h>
 #include <opendavinci/odcore/base/LIFOQueue.h>
-#include <opendavinci/odcore/data/TimeStamp.h>
 #include <opendavinci/odcore/base/KeyValueConfiguration.h>
 #include <automotivedata/generated/automotive/VehicleControl.h>
-
 #include "proxy/Proxy.h"
-#include "camera/Camera.h"
 #include "camera/OpenCVCamera.h"
 
 #define MATH_PI  3.1415926535897
@@ -25,12 +22,17 @@ namespace proxy {
     using namespace proxy::camera;
 
     Proxy::Proxy(int32_t &argc, char **argv) :
-            TimeTriggeredConferenceClientModule(argc, argv, "Proxy") { }
+            TimeTriggeredConferenceClientModule(argc, argv, "Proxy"),
+            interrupted{false},
+            bufferWrapper{},
+            m_recorder{},
+            m_camera{}
+    { }
 
     Proxy::Proxy(int32_t &argc, char **argv, shared_ptr<serial::BufferWrapper> bw) :
             TimeTriggeredConferenceClientModule(argc, argv, "Proxy"),
-            bufferWrapper{bw},
             interrupted{false},
+            bufferWrapper{bw},
             m_recorder{},
             m_camera{}
     { }
@@ -141,7 +143,9 @@ namespace proxy {
         // Speed conversion
         double delta = 0.0001;
         unsigned char speed = 1; // Assume stopped
-        if (vehicleControl.getSpeed() > 0 + delta) {
+        if (vehicleControl.getSpeed() > 1 + delta) {
+            speed = 3;
+        } else if (vehicleControl.getSpeed() > 0 + delta) {
             speed = 2; // Forward
         } else if (vehicleControl.getSpeed() < 0 - delta) {
             speed = 0; // backward

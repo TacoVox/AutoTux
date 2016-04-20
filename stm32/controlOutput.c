@@ -13,26 +13,13 @@
 #include "hardwarePWM.h"
 #include "hardwareRC.h"
 
-// maybe in serial just call the controldata packet whenever a packet
-// is valid, and then in THIS NEW THREAD increase the counter whenever
-// controlData is touched - and if
-// If counter > lastCounter or (lastCounter == EDGE && counter > EDGE)
-// see values as relevant for up to X iterations, otherwise fallback
-// to STOP_CENTER.
-// This way the serial connection can run all the time, and even if that
-// thread blocks, this thread will always be executing it's iterations
-// which makes sure the main thread does not hang on SERIAL WRITE while the
-// car is moving!
-
-
-
 
 //-----------------------------------------------------------------------------
 // Definitions
 //-----------------------------------------------------------------------------
 
 
-
+int max(int int1, int int2);
 bool handleRCMode(void);
 bool rcModeCheck(void);
 
@@ -98,16 +85,20 @@ bool handleRCMode(void) {
 	if (hardwareGetValuesRC(THROTTLE) > RC_THROTTLE_ON_TRESHOLD) {
 		if (rcModeCheck()) {
 			// Forward RC signal to hardware
-			hardwareSetValuesPWM_RC(hardwareGetValuesRC(THROTTLE), hardwareGetValuesRC(STEERING));
+			// But first attenuate speed
+			int esc_pw = hardwareGetValuesRC(THROTTLE);
+			if (esc_pw > SPEED_PULSEWIDTHS[SPEED_STOP]) {
+				// Output a fifth of the input
+				esc_pw = SPEED_PULSEWIDTHS[SPEED_STOP] + ((esc_pw - SPEED_PULSEWIDTHS[SPEED_STOP]) * 0.2);
+			} else if (esc_pw < SPEED_PULSEWIDTHS[SPEED_STOP]) {
+				// Attenuate backwards values by multiplying with 0.8
+				esc_pw = SPEED_PULSEWIDTHS[SPEED_STOP] - ((SPEED_PULSEWIDTHS[SPEED_STOP] - esc_pw) * 0.7);
+			}
 
-			// Blue LED for RC mode
-			palSetPad(GPIOD, GPIOD_LED6);
+			hardwareSetValuesPWM_RC(esc_pw, hardwareGetValuesRC(STEERING));
 			return true;
-
 		}
 	}
-	// Blue LED off
-	palClearPad(GPIOD, GPIOD_LED6);
 	return false;
 }
 
@@ -119,32 +110,88 @@ bool rcModeCheck(void) {
 	static int itAboveActivationTreshold = 0;
 	static int itBelowDeactivationTreshold = 0;
 	static bool rcMode = false;
+	static int itWindowToCenterToActivate = 0;
+	static int itWindowToCenterToDeactivate = 0;
+	static bool ledState = false; // Led state for blinking
 	icucnt_t steeringPW = hardwareGetValuesRC(STEERING);
 
-	// Only check for activation of RC mode if not already active
-	if (!rcMode && steeringPW > RC_STEERING_ACTIVATION_TRESHOLD) {
-		// Increase counter if we're on the way towards activation
-		if (itAboveActivationTreshold < ITERATIONS_TO_CHANGE_MODE) {
-			itAboveActivationTreshold++;
-		} else {
-			// Already enough iterations. Mode on
-			rcMode = true;
+	// Restore LED if messed with by blinking.
+	if (rcMode) palSetPad(GPIOD, GPIOD_LED6);
+	else palClearPad(GPIOD, GPIOD_LED6);
+
+	// If not in window to activate/deactivate, do normal check for step 1
+	if (itWindowToCenterToActivate == 0 && itWindowToCenterToDeactivate == 0) {
+		// Step 1 check
+		// Only check for activation of RC mode if not already active
+		if (!rcMode && steeringPW > RC_STEERING_ACTIVATION_TRESHOLD) {
+			// Increase counter if we're on the way towards activation
+			if (itAboveActivationTreshold < ITERATIONS_TO_CHANGE_MODE) {
+				itAboveActivationTreshold++;
+			} else {
+				// Already enough iterations. Step 1 complete
+				//rcMode = true;
+				itWindowToCenterToActivate = ITERATIONS_TO_CENTER;
+			}
+		} else if (rcMode && steeringPW < RC_STEERING_DEACTIVATION_TRESHOLD) {
+			// Increase counter if we're on the way towards deactivation
+			if (rcMode && itBelowDeactivationTreshold < ITERATIONS_TO_CHANGE_MODE) {
+				itBelowDeactivationTreshold++;
+			} else {
+				// Already enough iterations. Step 1 complete
+				itWindowToCenterToDeactivate = ITERATIONS_TO_CENTER;
+			}
 		}
-	} else if (rcMode && steeringPW < RC_STEERING_DEACTIVATION_TRESHOLD) {
-		// Increase counter if we're on the way towards deactivation
-		if (rcMode && itBelowDeactivationTreshold < ITERATIONS_TO_CHANGE_MODE) {
-			itBelowDeactivationTreshold++;
+
+	} else {
+		// Step 1 passed, waiting for step 2.
+		// Blink LED and waiting for centering
+		itAboveActivationTreshold = 0;
+		itBelowDeactivationTreshold = 0;
+
+		if (!ledState) {
+			palSetPad(GPIOD, GPIOD_LED6);
+			ledState = true;
 		} else {
-			// Already enough iterations. Mode off
+			palClearPad(GPIOD, GPIOD_LED6);
+			ledState = false;
+		}
+
+		// Step 2 - executes if steering centered after step 1 complete
+		if (itWindowToCenterToActivate > 0 && steeringPW >
+				WHEELS_CENTERED_PW - 50 && steeringPW < WHEELS_CENTERED_PW + 50) {
+			rcMode = true;
+			palSetPad(GPIOD, GPIOD_LED6);
+			itWindowToCenterToActivate = 0;
+			itWindowToCenterToDeactivate = 0;
+		}
+		if (itWindowToCenterToDeactivate > 0 && steeringPW >
+				WHEELS_CENTERED_PW - 50 && steeringPW < WHEELS_CENTERED_PW + 50) {
 			rcMode = false;
+			palClearPad(GPIOD, GPIOD_LED6);
+			itWindowToCenterToActivate = 0;
+			itWindowToCenterToDeactivate = 0;
+		}
+
+		// If step 1 complete, keep diminishing window in which we wait for centered steering
+		if (itWindowToCenterToActivate > 0) {
+			itWindowToCenterToActivate--;
+		}
+		if (itWindowToCenterToDeactivate > 0) {
+			itWindowToCenterToDeactivate--;
 		}
 	}
-
+	
 	// Reset counters if not in range
 	if (steeringPW >= RC_STEERING_DEACTIVATION_TRESHOLD) {
-		itBelowDeactivationTreshold = 0;
-	} else if (steeringPW <= RC_STEERING_ACTIVATION_TRESHOLD) {
+		itBelowDeactivationTreshold = 0;	
+	}
+	if (steeringPW <= RC_STEERING_ACTIVATION_TRESHOLD) {
 		itAboveActivationTreshold = 0;
 	}
 	return rcMode;
+}
+
+
+int max(int int1, int int2) {
+	return int1 > int2 ?  int1 : int2;
 }
