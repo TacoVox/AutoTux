@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.8)
 project(LaneFollower)
 
 # Set module paths, system dependant.
 # TODO Make cmake search for it
-SET (CMAKE_MODULE_PATH "/usr/share/cmake-2.8/Modules" ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "/opt/od/share/cmake-3.0/Modules" ${CMAKE_MODULE_PATH})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -lopencv_core -lopencv_highgui -Werror -Wextra -Wshadow -Wno-deprecated -Wfloat-equal -Wpointer-arith -Wwrite-strings -Wpacked")
 
 SET (CXX_EFFECTIVE_CXX "-Wno-error=effc++ -Weffc++ -Wmissing-format-attribute
@@ -23,15 +23,15 @@ Wwrite-strings -Wpointer-arith -Wredundant-decls -Wreturn-type -Wsequence-point 
 Warray-bounds -Wtrampolines -Wlogical-op -Wnormalized=nfc -Wvarargs -Wvector-operationperformance
 -Wvla -Wtype-limits -Wc++11-compat -Woverloaded-virtual")
 
-# Find OpenDaVINCI
-SET(OPENDAVINCI_DIR "/usr/local/include")
-FIND_PACKAGE (OpenDaVINCI REQUIRED)
-
-# Find Automotivedata
-SET(AUTOMOTIVEDATA_DIR "/usr/local/include")
-FIND_PACKAGE(AutomotiveData REQUIRED)
+# Require OpenDaVINCI
+set(OPENDAVINCI_DIR "/opt/od")
+find_package(OpenDaVINCI REQUIRED)
 
 MESSAGE( STATUS "${OPENDAVINCI_DIR}" )
+
+# Require Automotivedata
+set(AUTOMOTIVEDATA_DIR "/opt/od")
+find_package(AutomotiveData REQUIRED)
 
 MESSAGE( STATUS "${AUTOMOTIVEDATA_DIR}" )
 
