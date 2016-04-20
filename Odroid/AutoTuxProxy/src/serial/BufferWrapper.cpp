@@ -53,7 +53,7 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec)
         if (it + SBDPKTSIZE > vec.end()) {
             break;
         }
-        if (*it == '7' && *(it+DEL_POS) == ':' && *(it+END_DEL) == ',') {
+        if (*it == STR_DEL && *(it+MID_DEL_POS) == MID_DEL && *(it+END_DEL_POS) == END_DEL) {
             cout << "correct packet maybe" << endl;
             unsigned char us1 = *(it+US1_POS);
             printf("%i ", us1);
