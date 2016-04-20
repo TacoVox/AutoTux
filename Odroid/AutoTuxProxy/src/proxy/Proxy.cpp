@@ -22,12 +22,17 @@ namespace proxy {
     using namespace proxy::camera;
 
     Proxy::Proxy(int32_t &argc, char **argv) :
-            TimeTriggeredConferenceClientModule(argc, argv, "Proxy") { }
+            TimeTriggeredConferenceClientModule(argc, argv, "Proxy"),
+            interrupted{false},
+            bufferWrapper{},
+            m_recorder{},
+            m_camera{}
+    { }
 
     Proxy::Proxy(int32_t &argc, char **argv, shared_ptr<serial::BufferWrapper> bw) :
             TimeTriggeredConferenceClientModule(argc, argv, "Proxy"),
-            bufferWrapper{bw},
             interrupted{false},
+            bufferWrapper{bw},
             m_recorder{},
             m_camera{}
     { }
