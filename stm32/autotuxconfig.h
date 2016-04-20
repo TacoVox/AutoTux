@@ -35,6 +35,11 @@
 //-----------------------------------------------------------------------------
 
 
+// Use this to attenuate values from RC transmitter
+// BE CAREFUL, DON'T USE VALUES HIGHER THAN ONE UNLESS YOU KNOW WHAT YOU'RE DOING
+#define RC_FORWARD_MULTIPLIER 0.2
+#define RC_BACKWARD_MULTIPLIER 0.7
+
 // When RC is on, the throttle signal is above this treshold value
 #define RC_THROTTLE_ON_TRESHOLD 100
 
@@ -117,18 +122,21 @@ static const ioportmask_t RC_PIN_NUMBERS[] = {4, 6};
 //-----------------------------------------------------------------------------
 
 
-#define WE_TIMER &ICUD5
-#define WE_TIMER_CHANNEL ICU_CHANNEL_1
+#define WE_TICKS_PER_METER 44.07
 
-// A0
+// A2
 static const ioportid_t WE_PIN_GROUP = GPIOA;
 static const ioportmask_t WE_PIN_NUMBER  = 2;
 
 
 //-----------------------------------------------------------------------------
-// PWM hardware config
+// PWM hardware config and pulsewidth values
 //-----------------------------------------------------------------------------
 
+static const ioportid_t PWM_PIN_GROUPS[] = {GPIOA, GPIOA};
+static const ioportmask_t PWM_PIN_NUMBERS[] = {0, 1};
+
+#define PWM_TIMER &PWMD5
 
 typedef enum {PWM_OUTPUT_ESC, PWM_OUTPUT_SERVO} PWM_OUTPUT_ID;
 
@@ -145,10 +153,6 @@ static const int SPEED_PULSEWIDTHS[SPEED_STEPS] = {1140, 1350, 1430, 1530};
 #define WHEELS_CENTERED_ANGLE 90
 #define WHEELS_MAXRIGHT_ANGLE 120
 
-
-// TODO: REPLACE HARD-CODED VALUES IN HARDWAREPWM.C WITH CONFIG CONSTANTS!
-//static const ioportid_t PWM_PIN_GROUPS[] = {GPIOB, GPIOB};
-//static const ioportmask_t PWM_PIN_NUMBERS[] = {4, 6};
 
 
 

@@ -89,10 +89,12 @@ bool handleRCMode(void) {
 			int esc_pw = hardwareGetValuesRC(THROTTLE);
 			if (esc_pw > SPEED_PULSEWIDTHS[SPEED_STOP]) {
 				// Output a fifth of the input
-				esc_pw = SPEED_PULSEWIDTHS[SPEED_STOP] + ((esc_pw - SPEED_PULSEWIDTHS[SPEED_STOP]) * 0.2);
+				esc_pw = SPEED_PULSEWIDTHS[SPEED_STOP] +
+						((esc_pw - SPEED_PULSEWIDTHS[SPEED_STOP]) * RC_FORWARD_MULTIPLIER);
 			} else if (esc_pw < SPEED_PULSEWIDTHS[SPEED_STOP]) {
 				// Attenuate backwards values by multiplying with 0.8
-				esc_pw = SPEED_PULSEWIDTHS[SPEED_STOP] - ((SPEED_PULSEWIDTHS[SPEED_STOP] - esc_pw) * 0.7);
+				esc_pw = SPEED_PULSEWIDTHS[SPEED_STOP] -
+						((SPEED_PULSEWIDTHS[SPEED_STOP] - esc_pw) * RC_BACKWARD_MULTIPLIER);
 			}
 
 			hardwareSetValuesPWM_RC(esc_pw, hardwareGetValuesRC(STEERING));
