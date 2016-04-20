@@ -26,7 +26,7 @@ ENDIF()
 
 # Build the DecisionMaker
 IF(${BUILD_DECISIONMAKER})
-    ExternalProject_Add (AutoTuxProxy
+    ExternalProject_Add (DecisionMaker
         SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/DecisionMaker/"
         INSTALL_COMMAND "")
 ENDIF()
