@@ -26,7 +26,7 @@ std::shared_ptr<Container> containerfactory::VDContainer::genVDContainer(
         std::vector<unsigned char> v) {
     VehicleData vehicleData;
 
-    vehicleData.setSpeed((double)v.at(5) / 100);
+    vehicleData.setSpeed((double)(v.at(5) / 100));
 
     //Calculate the absolute travelled path
     unsigned int abstp = v.at(6) << 24;
