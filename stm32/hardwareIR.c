@@ -75,7 +75,7 @@ void hardwareIterationIR() {
  * Getter for the values. Specify an IR sensor.
  */
 int hardwareGetValuesIR(IR_SENSOR sensor) {
-	return irCm[sensor];
+	return (irCm[sensor] < IR_VALUE_CAP) ? irCm[sensor] : IR_VALUE_CAP;
 }
 
 systime_t getCallbackEndTime(void) {

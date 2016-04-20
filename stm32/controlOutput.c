@@ -87,7 +87,7 @@ bool handleRCMode(void) {
 			// Forward RC signal to hardware
 			// But first attenuate speed
 			int esc_pw = hardwareGetValuesRC(THROTTLE);
-			if (esc_pw > SPEED_PULSEWIDTHS[SPEED_STOP]) {
+			/*if (esc_pw > SPEED_PULSEWIDTHS[SPEED_STOP]) {
 				// Output a fifth of the input
 				esc_pw = SPEED_PULSEWIDTHS[SPEED_STOP] +
 						((esc_pw - SPEED_PULSEWIDTHS[SPEED_STOP]) * RC_FORWARD_MULTIPLIER);
@@ -95,6 +95,11 @@ bool handleRCMode(void) {
 				// Attenuate backwards values by multiplying with 0.8
 				esc_pw = SPEED_PULSEWIDTHS[SPEED_STOP] -
 						((SPEED_PULSEWIDTHS[SPEED_STOP] - esc_pw) * RC_BACKWARD_MULTIPLIER);
+			}*/
+
+			// Quick test
+			if (esc_pw > SPEED_PULSEWIDTHS[SPEED_STOP] + 50) {
+				esc_pw = SPEED_PULSEWIDTHS[SPEED_FORWARD_CRUISE];
 			}
 
 			hardwareSetValuesPWM_RC(esc_pw, hardwareGetValuesRC(STEERING));

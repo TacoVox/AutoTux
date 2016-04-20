@@ -15,6 +15,8 @@
 //-----------------------------------------------------------------------------
 
 
+int averageWithCircBuffer(int latestValue, US_SENSOR sensor);
+
 #define CMD_REG			0x00	// Command register
 #define START_RANGING	0x51
 #define RANGE_REG    	0x02
@@ -33,6 +35,13 @@ static const I2CConfig i2cConfig = {
 
 // The resulting centimeter values
 int usCm[US_SENSORS];
+
+// Circular buffer, values will be averaged with the others
+#define US_CIRCULAR_BUFFER_LENGTH 4
+int usCmCircBuffer[US_SENSORS][US_CIRCULAR_BUFFER_LENGTH];
+
+
+
 
 
 //-----------------------------------------------------------------------------
@@ -122,10 +131,28 @@ void hardwareIterationUSEnd() {
  * Getter for the values. Specify a US sensor.
  */
 int hardwareGetValuesUS(US_SENSOR sensor) {
-	return usCm[sensor];
+	return (usCm[sensor] < US_VALUE_CAP) ? usCm[sensor] : US_VALUE_CAP;
 }
 
 //-----------------------------------------------------------------------------
 // "Private" implementation
 //-----------------------------------------------------------------------------
 
+
+int averageWithCircBuffer(int latestValue, US_SENSOR sensor) {
+	static int currentPosition = 0;
+	// Add to next position in circular buffer
+	if (currentPosition >= US_CIRCULAR_BUFFER_LENGTH) {
+		currentPosition = 0;
+	}
+	usCmCircBuffer[sensor][currentPosition] = latestValue;
+
+	// Average
+	int totalCm = 0;
+	for (int i = 0; i < US_CIRCULAR_BUFFER_LENGTH; i++) {
+		totalCm += usCmCircBuffer[sensor][i];
+	}
+
+	// Round float division and return
+	return (int)(((float)totalCm / US_CIRCULAR_BUFFER_LENGTH) + 0.5);
+}

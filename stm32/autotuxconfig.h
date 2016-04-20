@@ -61,6 +61,8 @@
 // IR hardware config
 //-----------------------------------------------------------------------------
 
+#define IR_VALUE_CAP 25
+
 // Used to identify each sensor
 typedef enum {IR_SIDE_FRONT, IR_SIDE_REAR, IR_REAR} IR_SENSOR;
 
@@ -72,7 +74,7 @@ static const ioportmask_t ADC_PIN_NUMBERS[] = {0, 4, 5};
 #define ADC_CHANNELS 3
 
 // Samples per channel
-#define ADC_SAMPLES 4
+#define ADC_SAMPLES 10
 
 // Sample channels and rates
 #define ADC_SAMPLE_RATES ADC_SMPR2_SMP_AN8(ADC_SAMPLE_480) | ADC_SMPR1_SMP_AN14(ADC_SAMPLE_480) | ADC_SMPR1_SMP_AN15(ADC_SAMPLE_480)
@@ -97,6 +99,7 @@ static const ioportmask_t US_PIN_NUMBERS[] = {9, 8};
 
 #define US_I2C_DRIVER &I2CD3
 
+#define US_VALUE_CAP 100
 
 //-----------------------------------------------------------------------------
 // RC hardware config
@@ -143,7 +146,7 @@ typedef enum {PWM_OUTPUT_ESC, PWM_OUTPUT_SERVO} PWM_OUTPUT_ID;
 // Speeds and their corresponding pulsewidths.
 typedef enum {SPEED_REVERSE, SPEED_STOP, SPEED_FORWARD_LOW, SPEED_FORWARD_CRUISE} SPEED;
 #define SPEED_STEPS 4
-static const int SPEED_PULSEWIDTHS[SPEED_STEPS] = {1140, 1350, 1430, 1530};
+static const int SPEED_PULSEWIDTHS[SPEED_STEPS] = {1140, 1350, 1410, 1440};
 
 #define WHEELS_MAXLEFT_PW 1220
 #define WHEELS_CENTERED_PW 1590
