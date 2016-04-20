@@ -4,12 +4,9 @@
 #include <containerfactory/SBDContainer.h>
 #include <containerfactory/VDContainer.h>
 #include <opendavinci/odcore/base/LIFOQueue.h>
-#include <opendavinci/odcore/data/TimeStamp.h>
 #include <opendavinci/odcore/base/KeyValueConfiguration.h>
 #include <automotivedata/generated/automotive/VehicleControl.h>
-
 #include "proxy/Proxy.h"
-#include "camera/Camera.h"
 #include "camera/OpenCVCamera.h"
 
 #define MATH_PI  3.1415926535897
