@@ -23,18 +23,14 @@ namespace lane {
         using namespace odcore::data;
         using namespace odcore::data::image;
         using namespace odcore::wrapper;
-        using namespace autotux;
 
         using namespace lane::follower;
 
         // Debugging use only
         using namespace odtools::player;
 
-        // SET TO TRUE FOR CARMODE
-        const bool SIMMODE = true;
-
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) :
-                TimeTriggeredConferenceClientModule(argc, argv, "LaneFollower"),
+                TimeTriggeredConferenceClientModule(argc, argv, "LaneDetector"),
                 m_hasAttachedToSharedImageMemory(false),
                 m_sharedImageMemory(),
                 m_image(),
@@ -55,24 +51,6 @@ namespace lane {
             if (m_debug) {
                 cvNamedWindow("Debug Window", CV_WINDOW_AUTOSIZE);
                 cvMoveWindow("Debug Window", 300, 100);
-            }
-
-            if(SIMMODE) {
-                distance = SIMDISTANCE;
-                scanline = 462;
-
-                P_GAIN = SIMGAIN;
-                E_GAIN = 0;
-                I_GAIN = 0;
-            }
-
-            else {
-                distance = CARDISTANCE;
-                scanline = 462;
-
-                P_GAIN = CARGAIN;
-                E_GAIN = 0;
-                I_GAIN = 0;
             }
         }
 
@@ -113,33 +91,20 @@ namespace lane {
 
                     // Mirror image
                     // NOTE: For simulator.
-                    if(SIMMODE) {
-                        flip(m_image, m_image, -1);
-                    }
+                    // flip(m_image, m_image, -1);
                     returnValue = true;
                 }
             }
             return returnValue;
         }
 
-        // TODO: New datatype
-        void LaneFollower::getLaneRecommendation(odcore::data::Container &c) {
-
-            // TODO: New datatype
-            if(c.getDataType() == LaneRecommendation::ID()) {
-
-                // TODO: New datatype
-                laneRecommendation = c.getData<LaneRecommendation>();
-            }
-        }
-
         // Do magic to the image around here.
         void LaneFollower::processImage() {
-            // TODO: New datatype
-            laneRecommendation.setLeft_lane(false);
-            inLeftLane = laneRecommendation.getLeft_lane();
-
+            static bool useLeftMarking = true;
             double e = 0;
+
+            const int32_t CONTROL_SCANLINE = 462;
+            const int32_t distance = 220;
 
             Mat m_image_grey = m_image.clone();
             cvtColor(m_image, m_image_grey, COLOR_BGR2GRAY);
@@ -178,14 +143,29 @@ namespace lane {
                     }
                 }
 
-                if(y == scanline) {
+                if(y == CONTROL_SCANLINE) {
                     // Testing Twiddle algorithm stuff
-                    if(!inLeftLane) {
-                        e = ((right.x - m_image.cols/2.0) - distance) / distance;
-                    }
+                    if(right.x > 0) {
+                        if(!useLeftMarking) {
+                            //m_eSum = 0;
+                            //m_eOld = 0;
+                        }
 
-                    else {
-                        e = ((left.x - m_image.cols/2.0) - distance) / distance;
+                        e = ((right.x - m_image.cols/2.0) - distance) / distance;
+                        useLeftMarking = true;
+
+                    } else if(left.x > 0) {
+                        if(useLeftMarking) {
+                            //m_eSum = 0;
+                            //m_eOld = 0;
+                        }
+
+                        e = (distance - (m_image.cols/2.0 - left.x)) / distance;
+                        useLeftMarking = false;
+
+                    } else {
+                        //m_eSum = 0;
+                        //m_eOld = 0;
                     }
                 }
 
@@ -217,10 +197,24 @@ namespace lane {
                 m_eSum += e;
             }
 
-            const double p = P_GAIN * e;
-            const double i = I_GAIN * timeStep * m_eSum;
-            const double d = E_GAIN * (e - m_eOld)/timeStep;
+            // For introduction to algorithm see
+            // https://www  .youtube.com/watch?v=4Y7zG48uHRo
+            // Proportional gain. Values above 1 amplifies e and vice versa.
+            // 1 too low for right curve, 4 too twitchy. 2-3 seems very good
+            const double Kp = 1.3;
+            // Cross track error rate gain. Affects the angle based on how fast we
+            // are moving towards the desired center of the lane. Counters the primary
+            // proportional correction. Increase if car wobbles around centerline
+            // because of of overcorrection.
+            const double Kd = 0.0;
+            // Integral gain. Adjusts based on accumulated e values, to correct for
+            // offset.
+            const double Ki = 0;
 
+
+            const double p = Kp * e;
+            const double i = Ki * timeStep * m_eSum;
+            const double d = Kd * (e - m_eOld)/timeStep;
             m_eOld = e;
 
             const double y = p + i + d;
@@ -234,6 +228,7 @@ namespace lane {
             if (false) {
                 if (m_image.data != NULL) {
                     imshow("Camera Original Image", m_image);
+                    imshow("Camera BW Image", m_image_grey);
                     waitKey(10);
                 }
             }
@@ -242,14 +237,14 @@ namespace lane {
             if (desiredSteering > 0.5) desiredSteering = 0.5;
             if (desiredSteering < -0.5) desiredSteering = -0.5;
 
-            cout << "\rDS: " << desiredSteering;
+            cout << "DS: " << desiredSteering;
             laneRecommendation.setAngle(desiredSteering);
         }
 
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode LaneFollower::body() {
             // Get configuration
             KeyValueConfiguration kv = getKeyValueConfiguration();
-            m_debug = kv.getValue<int32_t>("lanefollower.debug") == 1;
+            m_debug = kv.getValue<int32_t>("lanedetector.debug") == 1;
 
             // ?
             cout << "Entering loop:" << endl;
@@ -257,27 +252,20 @@ namespace lane {
                    odcore::data::dmcp::ModuleStateMessage::RUNNING) {
                 bool has_next_frame = false;
 
-                Container imageContainer = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
+                Container c = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
 
-                // TODO: New datatype
-                Container laneContainer = getKeyValueDataStore().get(LaneRecommendation::ID());
-
-                // TODO: New datatype
-                if(laneContainer.getDataType() == LaneRecommendation::ID()) {
-                    // TODO: New datatype
-                    getLaneRecommendation(laneContainer);
-                }
-
-                if (imageContainer.getDataType() == odcore::data::image::SharedImage::ID()) {
-                    has_next_frame = readSharedImage(imageContainer);
+                if (c.getDataType() == odcore::data::image::SharedImage::ID()) {
+                    cout << "Read shared image";
+                    has_next_frame = readSharedImage(c);
                 }
 
                 if (has_next_frame) {
                     processImage();
                 }
 
-                Container outContainer(laneRecommendation);
-                getConference().send(outContainer);
+                Container laneRecContainer(laneRecommendation);
+
+                getConference().send(laneRecContainer);
             }
 
             return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
