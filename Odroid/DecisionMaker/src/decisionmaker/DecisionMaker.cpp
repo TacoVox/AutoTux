@@ -88,7 +88,7 @@ double DecisionMaker::getDistanceToLine() {
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() {
 
     // Set initial state of the car
-    STATE state = DRIVING;
+    STATE state = PARKING;
 
     VehicleData vd;
     SensorBoardData sbd;
