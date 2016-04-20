@@ -78,7 +78,7 @@ void Overtaker::obstacleDetection(SensorBoardData sensorData, VehicleData vehicl
             break;
         }
         case LEFT_LANE:{
-            //cout << "Overtaker: LEFT LANE" << endl;
+            cout << "Overtaker: LEFT LANE" << endl;
             //cout << "ANGLE : " << dmControl.getSteeringWheelAngle() << endl;
             if(isParallelToObstacle(sensorData)){
                 state = PARALLEL;
@@ -87,7 +87,7 @@ void Overtaker::obstacleDetection(SensorBoardData sensorData, VehicleData vehicl
             break;
         }
         case PARALLEL:{
-            //cout << "Overtaker: PARALLEL " << endl;
+            cout << "Overtaker: PARALLEL " << endl;
             //cout << "ANGLE : " << dmControl.getSteeringWheelAngle() << endl;
             if(isRightLaneClear(sensorData)){
                 cout << "SWITCHING TO RIGHT LANE" << endl;
