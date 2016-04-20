@@ -31,7 +31,7 @@ namespace lane {
         using namespace odtools::player;
 
         // SET TO TRUE FOR CARMODE
-        const bool CARMODE = false;
+        const bool SIMMODE = true;
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) :
                 TimeTriggeredConferenceClientModule(argc, argv, "LaneDetector"),
@@ -53,6 +53,24 @@ namespace lane {
             if (m_debug) {
                 cvNamedWindow("Debug Window", CV_WINDOW_AUTOSIZE);
                 cvMoveWindow("Debug Window", 300, 100);
+            }
+
+            if(SIMMODE) {
+                distance = SIMDISTANCE;
+                scanline = 462;
+
+                P_GAIN = SIMGAIN;
+                E_GAIN = 0;
+                I_GAIN = 0;
+            }
+
+            else {
+                distance = CARDISTANCE;
+                scanline = 462;
+
+                P_GAIN = CARGAIN;
+                E_GAIN = 0;
+                I_GAIN = 0;
             }
         }
 
@@ -93,7 +111,9 @@ namespace lane {
 
                     // Mirror image
                     // NOTE: For simulator.
-                    flip(m_image, m_image, -1);
+                    if(SIMMODE) {
+                        flip(m_image, m_image, -1);
+                    }
                     returnValue = true;
                 }
             }
@@ -116,12 +136,9 @@ namespace lane {
 
             // TODO: New datatype
             laneRecommendation.setLeft_lane(false);
-            bool inLeftLane = laneRecommendation.getLeft_lane();
+            inLeftLane = laneRecommendation.getLeft_lane();
 
             double e = 0;
-
-            const int32_t CONTROL_SCANLINE = 462;
-            const int32_t distance = SIMDISTANCE;
 
             Mat m_image_grey = m_image.clone();
             cvtColor(m_image, m_image_grey, COLOR_BGR2GRAY);
@@ -162,7 +179,7 @@ namespace lane {
                     }
                 }
 
-                if(y == CONTROL_SCANLINE) {
+                if(y == scanline) {
                     // Testing Twiddle algorithm stuff
                     if(!inLeftLane) {
                         e = ((right.x - m_image.cols/2.0) - distance) / distance;
@@ -203,24 +220,9 @@ namespace lane {
                 m_eSum += e;
             }
 
-			// For introduction to algorithm see
-			// https://www  .youtube.com/watch?v=4Y7zG48uHRo
-			// Proportional gain. Values above 1 amplifies e and vice versa.
-			// 1 too low for right curve, 4 too twitchy. 2-3 seems very good
-            const double Kp = SIMGAIN;
-            // Cross track error rate gain. Affects the angle based on how fast we
-			// are moving towards the desired center of the lane. Counters the primary
-	        // proportional correction. Increase if car wobbles around centerline
-			// because of of overcorrection.
-			const double Kd = 0;
-			// Integral gain. Adjusts based on accumulated e values, to correct for
-			// offset.
-			const double Ki = 0;
-
-
-            const double p = Kp * e;
-            const double i = Ki * timeStep * m_eSum;
-            const double d = Kd * (e - m_eOld)/timeStep;
+            const double p = P_GAIN * e;
+            const double i = I_GAIN * timeStep * m_eSum;
+            const double d = E_GAIN * (e - m_eOld)/timeStep;
             m_eOld = e;
 
             const double y = p + i + d;
