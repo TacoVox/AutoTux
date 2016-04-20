@@ -12,7 +12,8 @@ usb_handler::USBHandler::USBHandler(std::shared_ptr<usb_connector::USBConnector>
     running{true},
     uc{c}
 {
-
+    cout << "creating usb handler... ";
+    cout << "[OK]" << endl;
 }
 
 

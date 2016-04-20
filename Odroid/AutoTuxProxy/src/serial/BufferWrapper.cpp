@@ -21,7 +21,7 @@ std::mutex rrm;
 /* constructor */
 serial::BufferWrapper::BufferWrapper() : buffer_in({}), buffer_out({})
 {
-    cout << "creating buffer parser object... ";
+    cout << "creating buffer wrapper... ";
     cout << "[OK]" << endl;
 }
 
@@ -29,7 +29,7 @@ serial::BufferWrapper::BufferWrapper() : buffer_in({}), buffer_out({})
 /* destructor */
 serial::BufferWrapper::~BufferWrapper()
 {
-    cout << "destroying buffer wrapper object... ";
+    cout << "destroying buffer wrapper... ";
     cout << "[OK]" << endl;
 }
 
