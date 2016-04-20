@@ -68,7 +68,7 @@ void hardwareIterationWE(void) {
 	        // numberOfTicksInMeters / timeElapsed
 	        systime_t timeDelta = timeNow - startTime;
 			double seconds = ST2MS(timeDelta) / (double)1000;
-			double centimeters = (ticks / WE_TICKS_PER_METER) * 100;
+			double centimeters = ((double)ticks / WE_TICKS_PER_METER) * 100;
 	        cmPerSecond = (int)(centimeters / seconds);
 
 	        // Reset tick counter

@@ -67,6 +67,12 @@ void sensorInputGetData(unsigned char* buffer) {
 		(unsigned char)hardwareGetValuesIR(IR_REAR) : 255;
 	buffer[5] = hardwareGetValuesWESpeed() < 255 ?
 		(unsigned char)hardwareGetValuesWESpeed() : 255;
+
+	// Distance - int, split into 4 chars
+	buffer[6] = hardwareGetValuesWEDistance() >> 24 & 0xFF;
+	buffer[7] = hardwareGetValuesWEDistance() >> 16 & 0xFF;
+	buffer[8] = hardwareGetValuesWEDistance() >> 8 & 0xFF;
+	buffer[9] = hardwareGetValuesWEDistance() & 0xFF;
 }
 
 
@@ -77,13 +83,13 @@ void sensorInputDebugOutput(BaseSequentialStream* SDU) {
 	// "\033[F" for going back to previous line
 	chprintf(SDU, "\033[FTHROTTLE: %4i ", hardwareGetValuesRC(THROTTLE));
 	chprintf(SDU, "STEERING: %4i ", hardwareGetValuesRC(STEERING));
-	chprintf(SDU, "WHEEL: %f ", hardwareGetValuesWESpeed());
+	chprintf(SDU, "WHEEL: %4i ", hardwareGetValuesWESpeed());
 	chprintf(SDU, "US FRONT: %3i \r\n", hardwareGetValuesUS(US_FRONT));
 	chprintf(SDU, "US SIDE: %3i ", hardwareGetValuesUS(US_SIDE));
 	chprintf(SDU, "SIDE_FRONT: %3i ", hardwareGetValuesIR(IR_SIDE_FRONT));
 	chprintf(SDU, "SIDE_REAR: %3i ",  hardwareGetValuesIR(IR_SIDE_REAR));
 	chprintf(SDU, "REAR: %2i ", hardwareGetValuesIR(IR_REAR));
-	chprintf(SDU, "DIST: %2i ", hardwareGetValuesWEDistance());
+	chprintf(SDU, "DIST: %4i ", hardwareGetValuesWEDistance());
 
 	// For time measurement
 	/*
