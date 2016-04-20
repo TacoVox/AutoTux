@@ -1,3 +1,9 @@
+/*!
+ * Implementation of the USBConnector.h. Responsible for reading and
+ * writing from/to the usb serial connection.
+ *
+ * @author Ivo
+ */
 
 #include <iostream>
 #include <thread>
@@ -7,7 +13,7 @@
 using namespace std;
 
 
-/* constructor */
+/*! constructor */
 usb_connector::USBConnector::USBConnector()
 {
     cout << "creating usb connector... ";
@@ -15,7 +21,7 @@ usb_connector::USBConnector::USBConnector()
 }
 
 
-/* copy constructor */
+/*! copy constructor */
 usb_connector::USBConnector::USBConnector(const usb_connector::USBConnector &usb) :
     bw{usb.bw},
     ctx{usb.ctx},
@@ -23,7 +29,7 @@ usb_connector::USBConnector::USBConnector(const usb_connector::USBConnector &usb
 {}
 
 
-/* copy constructor */
+/*! copy constructor */
 usb_connector::USBConnector &
 usb_connector::USBConnector::operator=(const usb_connector::USBConnector &usb)
 {
@@ -31,7 +37,7 @@ usb_connector::USBConnector::operator=(const usb_connector::USBConnector &usb)
 }
 
 
-/* destructor */
+/*! destructor */
 usb_connector::USBConnector::~USBConnector()
 {
     cout << "destroying usb connector... ";
@@ -45,12 +51,14 @@ usb_connector::USBConnector::~USBConnector()
 }
 
 
+/*! sets the buffer wrapper for this connector */
 void usb_connector::USBConnector::set_buffer_wrapper(std::shared_ptr<serial::BufferWrapper> p)
 {
     bw = p;
 }
 
-/* initializes libusb */
+
+/*! initializes libusb */
 bool usb_connector::USBConnector::init_libusb(void)
 {
     cout << "initializing libusb... ";
@@ -64,7 +72,7 @@ bool usb_connector::USBConnector::init_libusb(void)
 }
 
 
-/* gets a list of the devices and opens the one we need */
+/*! gets a list of the devices and opens the one we need */
 bool usb_connector::USBConnector::open_device(void)
 {
     // to return
@@ -108,7 +116,7 @@ bool usb_connector::USBConnector::open_device(void)
 }
 
 
-/* claims the interface of the USB for I/O operations */
+/*! claims the interface of the USB for I/O operations */
 bool usb_connector::USBConnector::claim_interface(void)
 {
     // to return
@@ -140,7 +148,7 @@ bool usb_connector::USBConnector::claim_interface(void)
 }
 
 
-/* connects and opens stream to usb */
+/*! connects to usb */
 bool usb_connector::USBConnector::connect(void)
 {
     cout << "usb connecting..." << endl;
@@ -161,7 +169,7 @@ bool usb_connector::USBConnector::connect(void)
 }
 
 
-/* reads from the usb stream */
+/*! reads from the usb stream */
 int usb_connector::USBConnector::read(void)
 {
     cout << "reading from usb stream..." << endl; 
@@ -185,7 +193,7 @@ int usb_connector::USBConnector::read(void)
 }
 
 
-/* writes to the usb stream */
+/*! writes to the usb stream */
 int usb_connector::USBConnector::write(void)
 {
     // get data from the buffer
@@ -213,7 +221,7 @@ int usb_connector::USBConnector::write(void)
 }
 
 
-/* disconnects and closes the usb stream*/
+/*! disconnects and closes the usb stream */
 void usb_connector::USBConnector::disconnect(void)
 {
     cout << "disconnecting from usb stream... ";

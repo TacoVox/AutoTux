@@ -1,3 +1,10 @@
+/*!
+ * USBConnector header. Declares the functions and member variables.
+ *
+ * @author Ivo
+ */
+
+
 #ifndef USBCONNECTOR_H
 #define USBCONNECTOR_H
 // include
@@ -26,22 +33,37 @@ namespace usb_connector
     class USBConnector
     {
     public:
+        /*! constructor */
         USBConnector();
+        /*! destructor */
         ~USBConnector();
+        /*! copy constructor */
         USBConnector(const USBConnector&);
+        /*! copy constructor */
         USBConnector & operator=(const USBConnector&);
+        /*! connects to usb */
         bool connect(void);
+        /*! reads from the usb stream */
         int read(void);
+        /*! writes to the usb stream */
         int write(void);
+        /*! disconnects and closes the usb stream */
         void disconnect(void);
+        /*! sets the buffer wrapper for this connector */
         void set_buffer_wrapper(std::shared_ptr<serial::BufferWrapper>);
     private:
+        /*! initializes libusb */
         bool init_libusb(void);
+        /*! gets a list of the devices and opens the one we need */
         bool open_device(void);
+        /*! claims the interface of the USB for I/O operations */
         bool claim_interface(void);
     private:
+        /*! the buffer wrapper */
         std::shared_ptr<serial::BufferWrapper> bw;
+        /*! libusb context */
         struct libusb_context *ctx;
+        /*! libusb device handle */
         struct libusb_device_handle *usb_dev;
     };
 } // namespace usb_connector
