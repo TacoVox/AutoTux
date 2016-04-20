@@ -12,15 +12,16 @@
 
 
 //-----------------------------------------------------------------------------
-// Serial behaviour
+// Serial and control out behaviour
 //-----------------------------------------------------------------------------
 
 
 // Debug output. Set to 0 for normal packet output.
-#define DEBUG_OUTPUT 0
+#define DEBUG_OUTPUT 1
 
 // If more iterations than this occurs without receiving a valid packet,
-// the car is stopped and wheels are centered.
+// the serial stops sending to avoid filling buffers. The car is also
+// stopped and wheels are centered.
 #define MAX_ITERATIONS_WITHOUT_RECEIVE 5
 
 // If more bytes than this is received in the same iteration, we know we are
@@ -74,7 +75,7 @@ static const ioportmask_t ADC_PIN_NUMBERS[] = {0, 4, 5};
 #define ADC_CHANNELS 3
 
 // Samples per channel
-#define ADC_SAMPLES 10
+#define ADC_SAMPLES 4
 
 // Sample channels and rates
 #define ADC_SAMPLE_RATES ADC_SMPR2_SMP_AN8(ADC_SAMPLE_480) | ADC_SMPR1_SMP_AN14(ADC_SAMPLE_480) | ADC_SMPR1_SMP_AN15(ADC_SAMPLE_480)
@@ -99,7 +100,7 @@ static const ioportmask_t US_PIN_NUMBERS[] = {9, 8};
 
 #define US_I2C_DRIVER &I2CD3
 
-#define US_VALUE_CAP 100
+#define US_VALUE_CAP 60
 
 //-----------------------------------------------------------------------------
 // RC hardware config

@@ -37,7 +37,7 @@ static const I2CConfig i2cConfig = {
 int usCm[US_SENSORS];
 
 // Circular buffer, values will be averaged with the others
-#define US_CIRCULAR_BUFFER_LENGTH 4
+#define US_CIRCULAR_BUFFER_LENGTH 5
 int usCmCircBuffer[US_SENSORS][US_CIRCULAR_BUFFER_LENGTH];
 
 
@@ -88,7 +88,7 @@ void hardwareIterationUSStart() {
 void hardwareIterationUSEnd() {
 	static int zero_occurences = 0;
 
-	for (int i = 0; i < US_SENSORS; i++) {
+	for (int currentSensor = 0; currentSensor < US_SENSORS; currentSensor++) {
 		msg_t status = MSG_OK;
 		systime_t timeout = MS2ST(10);
 
@@ -97,7 +97,7 @@ void hardwareIterationUSEnd() {
 		// Transmit RANGE REG and get reply
 		i2cAcquireBus(US_I2C_DRIVER);
 		transferBuffer[0] = RANGE_REG;
-		status = i2cMasterTransmitTimeout(US_I2C_DRIVER, US_ADDRESS[i], transferBuffer, 1, receiveBuffer, 2, timeout);
+		status = i2cMasterTransmitTimeout(US_I2C_DRIVER, US_ADDRESS[currentSensor], transferBuffer, 1, receiveBuffer, 2, timeout);
 		i2cReleaseBus(US_I2C_DRIVER);
 
 		i2cStop(US_I2C_DRIVER);
@@ -112,8 +112,7 @@ void hardwareIterationUSEnd() {
 				zero_occurences++;
 			} else {
 				// Assign value.
-				// Average the current value with the last
-				usCm[i] = (usCm[i] + value) / 2;
+				usCm[currentSensor] = averageWithCircBuffer(value, currentSensor);
 
 			}
 			if (value > 0) {
@@ -142,8 +141,10 @@ int hardwareGetValuesUS(US_SENSOR sensor) {
 int averageWithCircBuffer(int latestValue, US_SENSOR sensor) {
 	static int currentPosition = 0;
 	// Add to next position in circular buffer
-	if (currentPosition >= US_CIRCULAR_BUFFER_LENGTH) {
+	if (currentPosition == US_CIRCULAR_BUFFER_LENGTH -1) {
 		currentPosition = 0;
+	} else {
+		currentPosition++;
 	}
 	usCmCircBuffer[sensor][currentPosition] = latestValue;
 

@@ -16,6 +16,8 @@
 #include <hal.h>
 
 // Local includes
+#include "sensorInput.h"
+#include "controlOutput.h"
 #include "serialConnection.h"
 
 
@@ -29,14 +31,21 @@ int main(void) {
 	halInit();
 	chSysInit();
 
-	// The main thread is dedicated to the serial connection.
-	// In this loop, values are also output to hardware. We will keep this solution
-	// unless we have any problems caused by USB output buffer overflow making the
-	// writing to USB block, which could cause safety issues with the car if it would
-	// ever occur. However it seems to work fine to just avoid writing to the serial
-	// connection whenever we perceive the connection as disconnected by reading Q_RESET
-	// from the stream.
-	serialConnectionLoop();
+	// Initialize sensor settings
+	sensorInputSetup();
+	controlOutputSetup();
+
+	// Start another thread for the serial connection
+	serialConnectionStart();
+
+	// Then simply read sensor values and output control values on the main thread
+	while (true) {
+		sensorInputIteration();
+		controlOutputIteration();
+
+		// Above meausred to 72 ms including ADC callback - sleep 8 to achieve 12.5 hertz
+		chThdSleepMilliseconds(8); // Comment this out to meausre time
+	}
 
 	return 0;
 }

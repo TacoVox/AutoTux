@@ -17,13 +17,10 @@
 #include "hardwareRC.h" // TODO: this should not be here
 #include "hardwareWE.h"
 
+
 //-----------------------------------------------------------------------------
 // Definitions
 //-----------------------------------------------------------------------------
-
-static THD_WORKING_AREA(sensorThreadWorkingArea, 320); // stack size in bytes
-static THD_FUNCTION(sensorThread, arg);
-void sensorInputIteration(void);
 
 
 //-----------------------------------------------------------------------------
@@ -31,7 +28,7 @@ void sensorInputIteration(void);
 //-----------------------------------------------------------------------------
 
 // Uncomment for time measurement
-// systime_t startTime, endTimeThread, endTimeCallback;
+//systime_t mstartTime, mendTime;
 
 
 /**
@@ -44,8 +41,6 @@ void sensorInputSetup (void) {
 	hardwareSetupUS();
 	hardwareSetupWE();
 	hardwareSetupRC();
-	(void)chThdCreateStatic(sensorThreadWorkingArea, sizeof(sensorThreadWorkingArea),
-						  NORMALPRIO, sensorThread, NULL);
 }
 
 
@@ -92,44 +87,27 @@ void sensorInputDebugOutput(BaseSequentialStream* SDU) {
 	chprintf(SDU, "DIST: %4i ", hardwareGetValuesWEDistance());
 
 	// For time measurement
-	/*
-	chprintf(SDU, "Start: %2i ", ST2MS(startTime));
-	chprintf(SDU, "End t: %2i ", ST2MS(endTimeThread));
-	chprintf(SDU, "End c: %2i ", ST2MS(endTimeCallback));
-	*/
+
+	//chprintf(SDU, "Start: %4i ", ST2MS(mstartTime));
+	//chprintf(SDU, "End t: %4i ", ST2MS(mendTime));
+	//chprintf(SDU, "End c: %2i ", ST2MS(endTimeCallback));
 }
 
-//-----------------------------------------------------------------------------
-// "Private" implementation
-//-----------------------------------------------------------------------------
-
-static THD_FUNCTION(sensorThread, arg) {
-	(void) arg;
-	sensorInputIteration();
-}
 
 
 /**
  * Thread iteration
  */
 void sensorInputIteration(void) {
+	hardwareIterationUSStart();
+	hardwareIterationIR();
 
-	//startTime = chVTGetSystemTime();
-	while(true) { // Comment this out to meausre time
-		hardwareIterationUSStart();
-		hardwareIterationIR();
-		//while(hardwareGetValuesIR(IR_REAR) == 0) {
-		//	chThdSleepMilliseconds(1);
-		//}
-		//endTimeCallback = chVTGetSystemTime();
-
-		chThdSleepMilliseconds(70); // TODO: not 65 if less is needed
-		hardwareIterationUSEnd();
-
-		// Above meausred to 72 ms including ADC callback - sleep 8 to achieve 12.5 hertz
-		chThdSleepMilliseconds(8); // Comment this out to meausre time
-	} // Comment this out to meausre time
-	//endTimeThread =	chVTGetSystemTime();
-
-
+	chThdSleepMilliseconds(70);
+	hardwareIterationUSEnd();
 }
+
+
+//-----------------------------------------------------------------------------
+// "Private" implementation
+//-----------------------------------------------------------------------------
+

@@ -22,6 +22,9 @@
 int max(int int1, int int2);
 bool handleRCMode(void);
 bool rcModeCheck(void);
+unsigned char* controlData;
+bool controlValuesAreNew = false;
+
 
 //-----------------------------------------------------------------------------
 // "Public" interface
@@ -45,28 +48,62 @@ void controlOutputStopCenter(void) {
 		hardwareSetValuesPWM(PWM_OUTPUT_ESC, SPEED_STOP);
 		hardwareSetValuesPWM(PWM_OUTPUT_SERVO, WHEELS_CENTERED_ANGLE);
 	}
+
+	// Regardless, reset controlData to corresponding values.
+	controlData[CONTROL_BYTE_SPEED] = SPEED_STOP;
+	controlData[CONTROL_BYTE_ANGLE] = WHEELS_CENTERED_ANGLE;
+}
+
+
+
+/**
+ * Output control data to engine and wheels (unless in RC mode).
+ */
+void controlOutputSetData(unsigned char* newControlData) {
+	// Value copy!
+	for (int i = 0; i < CONTROL_BYTE_COUNT; i++) {
+		controlData[i] = newControlData[i];
+	}
+	// Touch this variable
+	controlValuesAreNew = true;
 }
 
 
 /**
  * Output control data to engine and wheels (unless in RC mode).
  */
-void controlOutput(unsigned char* controlData) {
+void controlOutputIteration() {
+	static int iterationsNoNewValues = 0;
+
 	if (!handleRCMode()) {
-		// RC mode not activated - the only RC input we care about is braking
+		// RC mode not activated - check only for RC transmitter brake
 		if (hardwareGetValuesRC(THROTTLE) >= RC_THROTTLE_ON_TRESHOLD &&
 				hardwareGetValuesRC(THROTTLE) <= RC_THROTTLE_BRAKE_TRESHOLD) {
 
-			// Stop the car
+			// RC transmitter brake - stop the car
 			hardwareSetValuesPWM(PWM_OUTPUT_ESC, SPEED_STOP);
 
 		} else {
-			// Drive according to controlData
-			// Speed controlled by int corresponding to SPEED enum in config
-			hardwareSetValuesPWM(PWM_OUTPUT_ESC, controlData[CONTROL_BYTE_SPEED]);
+			// Normal automatic drive. See if we have newly received values
+			if (controlValuesAreNew) {
+				// Drive according to controlData
+				// Speed controlled by int corresponding to SPEED enum in config
+				hardwareSetValuesPWM(PWM_OUTPUT_ESC, controlData[CONTROL_BYTE_SPEED]);
 
-			// Wheel angle: 90 degress +- ~30 degrees.
-			hardwareSetValuesPWM(PWM_OUTPUT_SERVO, controlData[CONTROL_BYTE_ANGLE]);
+				// Wheel angle: 90 degress +- ~30 degrees.
+				hardwareSetValuesPWM(PWM_OUTPUT_SERVO, controlData[CONTROL_BYTE_ANGLE]);
+
+				controlValuesAreNew = false;
+				iterationsNoNewValues = 0;
+			} else {
+				// No new values! Worrying.
+				if (iterationsNoNewValues > MAX_ITERATIONS_WITHOUT_RECEIVE) {
+					// Stop the car and center wheels!
+					controlOutputStopCenter();
+				} else {
+					iterationsNoNewValues++;
+				}
+			}
 		}
 	}
 }
@@ -87,7 +124,7 @@ bool handleRCMode(void) {
 			// Forward RC signal to hardware
 			// But first attenuate speed
 			int esc_pw = hardwareGetValuesRC(THROTTLE);
-			/*if (esc_pw > SPEED_PULSEWIDTHS[SPEED_STOP]) {
+			if (esc_pw > SPEED_PULSEWIDTHS[SPEED_STOP]) {
 				// Output a fifth of the input
 				esc_pw = SPEED_PULSEWIDTHS[SPEED_STOP] +
 						((esc_pw - SPEED_PULSEWIDTHS[SPEED_STOP]) * RC_FORWARD_MULTIPLIER);
@@ -95,11 +132,6 @@ bool handleRCMode(void) {
 				// Attenuate backwards values by multiplying with 0.8
 				esc_pw = SPEED_PULSEWIDTHS[SPEED_STOP] -
 						((SPEED_PULSEWIDTHS[SPEED_STOP] - esc_pw) * RC_BACKWARD_MULTIPLIER);
-			}*/
-
-			// Quick test
-			if (esc_pw > SPEED_PULSEWIDTHS[SPEED_STOP] + 50) {
-				esc_pw = SPEED_PULSEWIDTHS[SPEED_FORWARD_CRUISE];
 			}
 
 			hardwareSetValuesPWM_RC(esc_pw, hardwareGetValuesRC(STEERING));
