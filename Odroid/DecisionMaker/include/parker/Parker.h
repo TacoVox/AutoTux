@@ -5,6 +5,8 @@
 #ifndef DECISIONMAKER_PARKER_H
 #define DECISIONMAKER_PARKER_H
 
+
+
 #include "opendavinci/odcore/data/Container.h"
 #include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 
@@ -14,6 +16,27 @@ namespace parker {
     class Parker {
 
     private:
+
+        //REAL CAR
+        const double SPOT_SIZE = 0.70;
+        const double ADJUST_BEFORE_PARKING = 0.10;
+        const double BACK_AROUND_CORNER = 0.15;
+        const double BACKING_STRAIGHT = 0.10;
+        const double BACKING_LEFT = 0.10;
+        const double ADJUST_IN_SPOT_FORWARD = 0.10;
+        const double ADJUST_IN_SPOT_BACK = 0.10;
+
+        /*
+        //SIMULATION
+        const double SPOT_SIZE = 7;
+        const double ADJUST_BEFORE_PARKING = 2;
+        const double BACK_AROUND_CORNER = 5;
+        const double BACKING_STRAIGHT = 2;
+        const double BACKING_LEFT = 2.5;
+        const double ADJUST_IN_SPOT_FORWARD = 1.5;
+        const double ADJUST_IN_SPOT_BACK = 1;
+        //----------------------------------------
+        */
 
         const double INFRARED_REAR_RIGHT = 2;
         const double INFRARED_REAR_BACK = 1;

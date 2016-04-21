@@ -70,27 +70,27 @@ VehicleControl Parker::parallelPark(SensorBoardData sbd, VehicleData vd){
     }
     switch(parkstate){
         case PHASE0:{
-            vc = adjustBeforeParking(vd, 2);
+            vc = adjustBeforeParking(vd, ADJUST_BEFORE_PARKING);
             break;
         }
         case PHASE1:{
-            vc = backAroundCorner(vd, 5);
+            vc = backAroundCorner(vd, BACK_AROUND_CORNER);
             break;
         }
         case PHASE2:{
-            vc = backingStraight(vd, 2);
+            vc = backingStraight(vd, BACKING_STRAIGHT);
             break;
         }
         case PHASE3:{
-            vc = backingLeft(vd, 2.5);
+            vc = backingLeft(vd, BACKING_LEFT);
             break;
         }
         case PHASE4:{
-            vc = adjustInSpotForward(vd, 1.5);
+            vc = adjustInSpotForward(vd, ADJUST_IN_SPOT_FORWARD);
             break;
         }
         case PHASE5:{
-            vc = adjustInSpotBack(vd, 1);
+            vc = adjustInSpotBack(vd, ADJUST_IN_SPOT_BACK);
             break;
         }
         case SAFETYSTOP:{
@@ -196,7 +196,7 @@ VehicleControl Parker::adjustBeforeParking(VehicleData vd, int add) {
  * Checks if the gap is big enough to park in
  */
 void Parker::enoughSpace(){
-    if((gapEnd - gapStart) > 6){
+    if((gapEnd - gapStart) > SPOT_SIZE){
         cout << "******************ENOUGHSPACE TO PARK***************" << endl;
         isSpot = true;
     }
