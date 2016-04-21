@@ -37,7 +37,7 @@ std::shared_ptr<Container> containerfactory::VDContainer::genVDContainer(
 
     cout << "value before convertion: " << abstp << endl;
 
-    vehicleData.setAbsTraveledPath((double)(abstp / 100));
+    vehicleData.setAbsTraveledPath((abstp / 100.0));
 
     cout << "value after convertion: " << vehicleData.getAbsTraveledPath() << endl;
 
