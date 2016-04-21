@@ -141,6 +141,7 @@ VehicleControl Parker::adjustInSpotForward(VehicleData vd, double add){
 VehicleControl Parker::backingLeft(VehicleData vd, double add){
     controlTemp.setSteeringWheelAngle(-0.5); // 45
     if(carPosition + add < vd.getAbsTraveledPath()){
+        cout << "Backing left finished" << endl;
         controlTemp.setSpeed(0);
         carPosition = carPosition + add;
         parkstate = PHASE4;
