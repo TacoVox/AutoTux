@@ -127,7 +127,7 @@ vector<unsigned char> serial::BufferWrapper::readReceiveBuffer(void)
         buffer_in.clear();
         // put the packet again so we always have a valid packet
         // with the most recent data to read
-        buffer_in.push_front(vec);
+        //buffer_in.push_front(vec);
         rrm.unlock();
         return vec;
     }
@@ -163,7 +163,7 @@ vector<unsigned char> serial::BufferWrapper::readSendBuffer(void)
         buffer_out.clear();
         // put the packet again so we always have a valid packet
         // with the most recent data to send
-        buffer_out.push_front(v);
+        //buffer_out.push_front(v);
         rsm.unlock();
         return v;
     }
