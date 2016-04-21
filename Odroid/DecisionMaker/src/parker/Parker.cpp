@@ -124,11 +124,11 @@ VehicleControl Parker::adjustInSpotBack(VehicleData vd, double add) {
 VehicleControl Parker::adjustInSpotForward(VehicleData vd, double add){
     if(carPosition + add > vd.getAbsTraveledPath()){
         controlTemp.setSpeed(1);
-        controlTemp.setSteeringWheelAngle(30);
+        controlTemp.setSteeringWheelAngle(0); //30
     }
     else if(carPosition + add < vd.getAbsTraveledPath()){
         controlTemp.setSpeed(0);
-        controlTemp.setSteeringWheelAngle(30);
+        controlTemp.setSteeringWheelAngle(0); //30
         carPosition = carPosition + add;
         parkstate = PHASE5;
     }
