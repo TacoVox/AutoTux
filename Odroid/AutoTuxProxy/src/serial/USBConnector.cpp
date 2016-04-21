@@ -14,7 +14,10 @@ using namespace std;
 
 
 /*! constructor */
-usb_connector::USBConnector::USBConnector()
+usb_connector::USBConnector::USBConnector() :
+    bw{},
+    ctx{},
+    usb_dev{}
 {
     cout << "creating usb connector... ";
     cout << "[OK]" << endl;
@@ -172,7 +175,6 @@ bool usb_connector::USBConnector::connect(void)
 /*! reads from the usb stream */
 int usb_connector::USBConnector::read(void)
 {
-    cout << "reading from usb stream..." << endl; 
     // allocate memory for use when reading from the usb
     unsigned char *data = new unsigned char[READ_LEN];
     // read from the usb device
@@ -180,8 +182,6 @@ int usb_connector::USBConnector::read(void)
     int res = libusb_bulk_transfer(usb_dev, USB_ENDPOINT_IN,
                                    data, READ_LEN, &transferred, 20);
     if (res == 0) {
-        cout << "READ successful" << endl;
-        cout << "bytes received: " << transferred << endl;
         // the vector holding the data from the read
         vector<unsigned char> vec(data, data + transferred);
         // append to the receive buffer
@@ -207,14 +207,9 @@ int usb_connector::USBConnector::write(void)
     unsigned char *data = new unsigned char[len];
     // copy data from vector to array
     copy(vec.begin(), vec.end(), data);
-    cout << "writing to usb stream..." << endl;
     int transferred;
     int res = libusb_bulk_transfer(usb_dev, USB_ENDPOINT_OUT,
                                    data, len, &transferred, 20);
-    if (res == 0) {
-        cout << "WRITE successful" << endl;
-        cout << "bytes sent: " << transferred << endl;
-    }
     // delete allocated memory
     delete [] data;
     return res;

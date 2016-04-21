@@ -61,7 +61,6 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec)
         }
         if (*it == STR_DEL && *(it+STR_DEL_POS) == STR_DEL &&
                 *(it+MID_DEL_POS) == MID_DEL && *(it+END_DEL_POS) == END_DEL) {
-            cout << "correct packet maybe" << endl;
             unsigned char us1 = *(it+US1_POS);
             printf("US1:%i ", us1);
             unsigned char us2 = *(it+US2_POS);
@@ -83,10 +82,9 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec)
             unsigned char dis4 = *(it+DIS_POS_4);
             printf("DIS4:%i ", dis4);
             unsigned char check = *(it+CHK_SUM);
-            printf("CHECK:%i \n", check);
+            printf("CHECK:%i\n", check);
             // fill the vector
             ret_vec = {us1, us2, ir1, ir2, ir3, wheel, dis1, dis2, dis3, dis4};
-            //ret_vec((it+US1_POS), (it+CHK_SUM));
             // check if correct checksum
             if (check == checksum(ret_vec)) {
                 cout << "checksum OK" << endl;

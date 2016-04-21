@@ -50,6 +50,6 @@ namespace proxy {
             Mat m_mat;
         };
     }
-};
+}
 
 #endif
