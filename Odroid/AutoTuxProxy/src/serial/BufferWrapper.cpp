@@ -178,7 +178,7 @@ unsigned char serial::BufferWrapper::checksum(std::vector<unsigned char> vec)
     if (vec.size() == 0) return chksum;
     for (auto it = vec.begin(); it != vec.end(); ++it) {
         // the checksum is calculated by XOR all elements
-        chksum ^= (unsigned char)*it;
+        chksum = (unsigned char)(chksum ^ *it);
     }
     return chksum;
 }
