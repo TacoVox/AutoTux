@@ -76,7 +76,7 @@ VehicleControl Parker::parallelPark(SensorBoardData sbd, VehicleData vd){
         case PHASE1:{
             vc = backAroundCorner(vd, BACK_AROUND_CORNER);
             break;
-        }
+        }/*
         case PHASE2:{
             vc = backingStraight(vd, BACKING_STRAIGHT);
             break;
@@ -96,7 +96,7 @@ VehicleControl Parker::parallelPark(SensorBoardData sbd, VehicleData vd){
         case SAFETYSTOP:{
             vc = goBackToLane(vd);
             break;
-        }
+        }*/
     }
     return vc;
 }
@@ -137,7 +137,7 @@ VehicleControl Parker::adjustInSpotForward(VehicleData vd, int add){
  * Drives the car back into the spot for straighting it up in the hardcoded procedure
  */
 VehicleControl Parker::backingLeft(VehicleData vd, int add){
-    controlTemp.setSteeringWheelAngle(-45);
+    controlTemp.setSteeringWheelAngle(-0.5); // 45
     if(carPosition + add < vd.getAbsTraveledPath()){
         controlTemp.setSpeed(0);
         carPosition = carPosition + add;
@@ -166,7 +166,7 @@ VehicleControl Parker::backAroundCorner(VehicleData vd, int add){
     if(carPosition + add > vd.getAbsTraveledPath()){
         cout << "Starts back around corner" << endl;
         controlTemp.setSpeed(-1);
-        controlTemp.setSteeringWheelAngle(45);
+        controlTemp.setSteeringWheelAngle(-0.5); //45
     }
     else if(carPosition + add < vd.getAbsTraveledPath()){
         controlTemp.setSpeed(0);
