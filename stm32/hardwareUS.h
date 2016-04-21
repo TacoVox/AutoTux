@@ -27,4 +27,10 @@ void hardwareIterationUSEnd(void);
  */
 int hardwareGetValuesUS(US_SENSOR);
 
+/*
+ * Getter for the light sensor reading
+ */
+unsigned char hardwareGetValuesUSLight(void);
+
+
 #endif /* HARDWAREUS_H_ */

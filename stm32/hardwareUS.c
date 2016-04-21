@@ -18,6 +18,9 @@
 int averageWithCircBuffer(int latestValue, US_SENSOR sensor);
 
 #define CMD_REG			0x00	// Command register
+#define GAIN_REG		0x01
+#define LIGHT_REG		0x01
+#define GAIN_SETTING	0x16	// Sets maximum analog gain to 265
 #define START_RANGING	0x51
 #define RANGE_REG    	0x02
 
@@ -35,6 +38,7 @@ static const I2CConfig i2cConfig = {
 
 // The resulting centimeter values
 int usCm[US_SENSORS];
+unsigned char lightSensorReading;
 
 // Circular buffer, values will be averaged with the others
 #define US_CIRCULAR_BUFFER_LENGTH 5
@@ -57,6 +61,23 @@ void hardwareSetupUS() {
     		PAL_MODE_ALTERNATE(4) | PAL_STM32_OTYPE_OPENDRAIN);
     palSetPadMode(US_PIN_GROUPS[1], US_PIN_NUMBERS[1],
     		PAL_MODE_ALTERNATE(4) | PAL_STM32_OTYPE_OPENDRAIN);
+
+
+    // Configure the max gain of the sensors
+    systime_t timeout = MS2ST(10);
+
+	transferBuffer[0] = GAIN_REG;
+	transferBuffer[1] = GAIN_SETTING;
+
+	// Transmit CMD and START RANGING
+	i2cStart(US_I2C_DRIVER, &i2cConfig);
+	i2cAcquireBus(US_I2C_DRIVER);
+	for (int i = 0; i < US_SENSORS; i++) {
+		i2cMasterTransmitTimeout(US_I2C_DRIVER, US_ADDRESS[i],
+				transferBuffer, 2, receiveBuffer, 0, timeout);
+	}
+	i2cReleaseBus(US_I2C_DRIVER);
+	i2cStop(US_I2C_DRIVER);
 }
 
 
@@ -67,7 +88,7 @@ void hardwareSetupUS() {
  * Starts the ranging process. 65 ms later, the range can be read.
  */
 void hardwareIterationUSStart() {
-	for (int i = 0; i < US_SENSORS; i++) {
+
 		systime_t timeout = MS2ST(10);
 
 		transferBuffer[0] = CMD_REG;
@@ -76,31 +97,28 @@ void hardwareIterationUSStart() {
 		// Transmit CMD and START RANGING
 		i2cStart(US_I2C_DRIVER, &i2cConfig);
 		i2cAcquireBus(US_I2C_DRIVER);
-		i2cMasterTransmitTimeout(US_I2C_DRIVER, US_ADDRESS[i],
-				transferBuffer, 2, receiveBuffer, 0, timeout);
+		for (int i = 0; i < US_SENSORS; i++) {
+			i2cMasterTransmitTimeout(US_I2C_DRIVER, US_ADDRESS[i],
+					transferBuffer, 2, receiveBuffer, 0, timeout);
+		}
 		i2cReleaseBus(US_I2C_DRIVER);
-
 		i2cStop(US_I2C_DRIVER);
-	}
+
 }
 
 
 void hardwareIterationUSEnd() {
+	msg_t status = MSG_OK;
+	systime_t timeout = MS2ST(10);
 	static int zero_occurences = 0;
 
+	i2cStart(US_I2C_DRIVER, &i2cConfig);
+	i2cAcquireBus(US_I2C_DRIVER);
 	for (int currentSensor = 0; currentSensor < US_SENSORS; currentSensor++) {
-		msg_t status = MSG_OK;
-		systime_t timeout = MS2ST(10);
-
-		i2cStart(US_I2C_DRIVER, &i2cConfig);
 
 		// Transmit RANGE REG and get reply
-		i2cAcquireBus(US_I2C_DRIVER);
 		transferBuffer[0] = RANGE_REG;
 		status = i2cMasterTransmitTimeout(US_I2C_DRIVER, US_ADDRESS[currentSensor], transferBuffer, 1, receiveBuffer, 2, timeout);
-		i2cReleaseBus(US_I2C_DRIVER);
-
-		i2cStop(US_I2C_DRIVER);
 
 		// Store the value
 		if (status == MSG_OK) {
@@ -124,6 +142,16 @@ void hardwareIterationUSEnd() {
 			//usCm[i] = (int)i2cGetErrors(US_I2C_DRIVER);
 		}
 	}
+
+	// Also check the light sensor reading on US_FRONT!
+	transferBuffer[0] = LIGHT_REG;
+	status = i2cMasterTransmitTimeout(US_I2C_DRIVER, US_ADDRESS[US_FRONT], transferBuffer, 1, receiveBuffer, 1, timeout);
+	if (status == MSG_OK) {
+		lightSensorReading = receiveBuffer[0];
+	}
+
+	i2cReleaseBus(US_I2C_DRIVER);
+	i2cStop(US_I2C_DRIVER);
 }
 
 /*
@@ -131,6 +159,14 @@ void hardwareIterationUSEnd() {
  */
 int hardwareGetValuesUS(US_SENSOR sensor) {
 	return (usCm[sensor] < US_VALUE_CAP) ? usCm[sensor] : US_VALUE_CAP;
+}
+
+
+/*
+ * Getter for the light sensor reading
+ */
+unsigned char hardwareGetValuesUSLight(void) {
+	return lightSensorReading;
 }
 
 //-----------------------------------------------------------------------------

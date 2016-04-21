@@ -100,7 +100,7 @@ static const ioportmask_t US_PIN_NUMBERS[] = {9, 8};
 
 #define US_I2C_DRIVER &I2CD3
 
-#define US_VALUE_CAP 60
+#define US_VALUE_CAP 90
 
 //-----------------------------------------------------------------------------
 // RC hardware config
@@ -126,7 +126,7 @@ static const ioportmask_t RC_PIN_NUMBERS[] = {4, 6};
 //-----------------------------------------------------------------------------
 
 
-#define WE_TICKS_PER_METER 44.07
+#define WE_TICKS_PER_METER 61.7 // 44.07
 
 // A2
 static const ioportid_t WE_PIN_GROUP = GPIOA;

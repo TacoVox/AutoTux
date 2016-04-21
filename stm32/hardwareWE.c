@@ -59,6 +59,7 @@ void hardwareIterationWE(void) {
 		if (previousEncoderState == FALSE && palReadPad(WE_PIN_GROUP, WE_PIN_NUMBER)) {
 	        previousEncoderState = TRUE;
 	        ticks++;
+			distanceTicks++;
 	    } else if (previousEncoderState == TRUE && palReadPad(WE_PIN_GROUP, WE_PIN_NUMBER) == FALSE) {
 	        previousEncoderState = FALSE;
 	    }
@@ -72,12 +73,11 @@ void hardwareIterationWE(void) {
 	        cmPerSecond = (int)(centimeters / seconds);
 
 	        // Reset tick counter
-			distanceTicks += ticks;
 	        ticks = 0;
 	        startTime = chVTGetSystemTime();
 	    }
 
-		chThdSleepMilliseconds(5);
+		chThdSleepMilliseconds(1);
 	}
 }
 

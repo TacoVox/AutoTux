@@ -7,7 +7,7 @@
 
 #define CONTROL_DATA_BYTES 2	// Actual data bytes
 #define CONTROL_DATA_PACKET_SIZE 6 // Size of whole packet
-#define SENSOR_DATA_BYTES 10 // Actual data bytes
+#define SENSOR_DATA_BYTES 11 // Actual data bytes
 
 typedef enum {PACKET_OK, NO_PACKET} PACKET_STATUS;
 

@@ -68,6 +68,9 @@ void sensorInputGetData(unsigned char* buffer) {
 	buffer[7] = hardwareGetValuesWEDistance() >> 16 & 0xFF;
 	buffer[8] = hardwareGetValuesWEDistance() >> 8 & 0xFF;
 	buffer[9] = hardwareGetValuesWEDistance() & 0xFF;
+
+	// Light sensor
+	buffer[10] = hardwareGetValuesUSLight();
 }
 
 
@@ -85,6 +88,7 @@ void sensorInputDebugOutput(BaseSequentialStream* SDU) {
 	chprintf(SDU, "SIDE_REAR: %3i ",  hardwareGetValuesIR(IR_SIDE_REAR));
 	chprintf(SDU, "REAR: %2i ", hardwareGetValuesIR(IR_REAR));
 	chprintf(SDU, "DIST: %4i ", hardwareGetValuesWEDistance());
+	chprintf(SDU, "LIGHT: %3i ", hardwareGetValuesUSLight());
 
 	// For time measurement
 
