@@ -14,7 +14,7 @@
 #include <deque>
 
 // packet values positions
-#define SBDPKTSIZE      15
+#define SBDPKTSIZE      16
 #define STR_DEL_POS     1
 #define MID_DEL_POS     2
 #define US1_POS         3
@@ -27,12 +27,18 @@
 #define DIS_POS_2       10
 #define DIS_POS_3       11
 #define DIS_POS_4       12
-#define CHK_SUM         13
-#define END_DEL_POS     14
+#define LIGHT_SEN       13
+#define CHK_SUM         14
+#define END_DEL_POS     15
 
 // packet delimiters
-#define STR_DEL         0x31
+// '1'
+#define STR_DEL_ONE     0x31
+// '2'
+#define STR_DEL_TWO     0x32
+// ':'
 #define MID_DEL         0x3A
+// ','
 #define END_DEL         0x2C
 
 namespace serial
