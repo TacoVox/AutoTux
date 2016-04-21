@@ -49,12 +49,12 @@ namespace parker {
         void findGapStart(automotive::miniature::SensorBoardData, automotive::VehicleData);
         void findGapEnd(automotive::miniature::SensorBoardData, automotive::VehicleData);
         void enoughSpace();
-        automotive::VehicleControl adjustBeforeParking(automotive::VehicleData, int);
-        automotive::VehicleControl backAroundCorner(automotive::VehicleData, int);
-        automotive::VehicleControl backingStraight(automotive::VehicleData, int);
-        automotive::VehicleControl backingLeft(automotive::VehicleData, int);
-        automotive::VehicleControl adjustInSpotForward(automotive::VehicleData, int);
-        automotive::VehicleControl adjustInSpotBack(automotive::VehicleData, int);
+        automotive::VehicleControl adjustBeforeParking(automotive::VehicleData, double);
+        automotive::VehicleControl backAroundCorner(automotive::VehicleData, double);
+        automotive::VehicleControl backingStraight(automotive::VehicleData, double);
+        automotive::VehicleControl backingLeft(automotive::VehicleData, double);
+        automotive::VehicleControl adjustInSpotForward(automotive::VehicleData, double);
+        automotive::VehicleControl adjustInSpotBack(automotive::VehicleData, double);
 
         bool isNotSafe(automotive::miniature::SensorBoardData);
         automotive::VehicleControl goBackToLane(automotive::VehicleData);

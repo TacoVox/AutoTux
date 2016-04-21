@@ -102,7 +102,7 @@ VehicleControl Parker::parallelPark(SensorBoardData sbd, VehicleData vd){
 /**
  * Drives the car back for adjusting the hardcoded procedure
  */
-VehicleControl Parker::adjustInSpotBack(VehicleData vd, int add) {
+VehicleControl Parker::adjustInSpotBack(VehicleData vd, double add) {
     if(carPosition + add > vd.getAbsTraveledPath()){
         controlTemp.setSpeed(-1);
         controlTemp.setSteeringWheelAngle(-15);
@@ -117,7 +117,7 @@ VehicleControl Parker::adjustInSpotBack(VehicleData vd, int add) {
 /**
  * Drives the car forward for adjusting the hardcoded procedure
  */
-VehicleControl Parker::adjustInSpotForward(VehicleData vd, int add){
+VehicleControl Parker::adjustInSpotForward(VehicleData vd, double add){
     if(carPosition + add > vd.getAbsTraveledPath()){
         controlTemp.setSpeed(1);
         controlTemp.setSteeringWheelAngle(30);
@@ -134,7 +134,7 @@ VehicleControl Parker::adjustInSpotForward(VehicleData vd, int add){
 /**
  * Drives the car back into the spot for straighting it up in the hardcoded procedure
  */
-VehicleControl Parker::backingLeft(VehicleData vd, int add){
+VehicleControl Parker::backingLeft(VehicleData vd, double add){
     controlTemp.setSteeringWheelAngle(-0.5); // 45
     if(carPosition + add < vd.getAbsTraveledPath()){
         controlTemp.setSpeed(0);
@@ -147,7 +147,7 @@ VehicleControl Parker::backingLeft(VehicleData vd, int add){
 /**
  * Drives the car straight back into the spot in the hardcoded procedure
  */
-VehicleControl Parker::backingStraight(VehicleData vd, int add) {
+VehicleControl Parker::backingStraight(VehicleData vd, double add) {
     if(carPosition + add > vd.getAbsTraveledPath())
         controlTemp.setSpeed(-1);
     else {
@@ -160,7 +160,7 @@ VehicleControl Parker::backingStraight(VehicleData vd, int add) {
 /**
  * The car backs around the first corner of the object in the hardcoded procedure
  */
-VehicleControl Parker::backAroundCorner(VehicleData vd, int add){
+VehicleControl Parker::backAroundCorner(VehicleData vd, double add){
     if(carPosition + add > vd.getAbsTraveledPath()){
         cout << "Starts back around corner" << endl;
         controlTemp.setSpeed(-1);
@@ -177,7 +177,7 @@ VehicleControl Parker::backAroundCorner(VehicleData vd, int add){
 /**
  * Adjust the car for the front object before starting the hardcoded procedure
  */
-VehicleControl Parker::adjustBeforeParking(VehicleData vd, int add) {
+VehicleControl Parker::adjustBeforeParking(VehicleData vd, double add) {
     if(gapEnd + add > vd.getAbsTraveledPath()){
         cout << "Inside adjustbeforeparking " << endl;
         controlTemp.setSpeed(1);
