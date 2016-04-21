@@ -14,7 +14,10 @@ using namespace std;
 
 
 /*! constructor */
-usb_connector::USBConnector::USBConnector()
+usb_connector::USBConnector::USBConnector() :
+    bw{},
+    ctx{},
+    usb_dev{}
 {
     cout << "creating usb connector... ";
     cout << "[OK]" << endl;
