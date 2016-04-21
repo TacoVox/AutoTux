@@ -165,7 +165,7 @@ VehicleControl Parker::backAroundCorner(VehicleData vd, double add){
     if(carPosition + add > vd.getAbsTraveledPath()){
         cout << "Starts back around corner" << endl;
         controlTemp.setSpeed(-1);
-        controlTemp.setSteeringWheelAngle(-0.5); //45
+        controlTemp.setSteeringWheelAngle(0.5); //45
     }
     else if(carPosition + add < vd.getAbsTraveledPath()){
         controlTemp.setSpeed(0);
