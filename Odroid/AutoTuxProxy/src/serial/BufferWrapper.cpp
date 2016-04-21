@@ -63,27 +63,27 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec)
                 *(it+MID_DEL_POS) == MID_DEL && *(it+END_DEL_POS) == END_DEL) {
             cout << "correct packet maybe" << endl;
             unsigned char us1 = *(it+US1_POS);
-            printf("us1:%i ", us1);
+            printf("US1:%i ", us1);
             unsigned char us2 = *(it+US2_POS);
-            printf("us2:%i ", us2);
+            printf("US2:%i ", us2);
             unsigned char ir1 = *(it+IR1_POS);
-            printf("ir1:%i ", ir1);
+            printf("IR1:%i ", ir1);
             unsigned char ir2 = *(it+IR2_POS);
-            printf("ir2:%i ", ir2);
+            printf("IR2:%i ", ir2);
             unsigned char ir3 = *(it+IR3_POS);
-            printf("ir3:%i ", ir3);
+            printf("IR3:%i ", ir3);
             unsigned char wheel = *(it+WHL_POS);
-            printf("wheel:%i ", wheel);
+            printf("WHEEL:%i ", wheel);
             unsigned char dis1 = *(it+DIS_POS_1);
-            printf("dis1:%i ", dis1);
+            printf("DIS1:%i ", dis1);
             unsigned char dis2 = *(it+DIS_POS_2);
-            printf("dis2:%i ", dis2);
+            printf("DIS2:%i ", dis2);
             unsigned char dis3 = *(it+DIS_POS_3);
-            printf("dis3:%i ", dis3);
+            printf("DIS3:%i ", dis3);
             unsigned char dis4 = *(it+DIS_POS_4);
-            printf("dis4:%i ", dis4);
+            printf("DIS4:%i ", dis4);
             unsigned char check = *(it+CHK_SUM);
-            printf("check:%i \n", check);
+            printf("CHECK:%i \n", check);
             // fill the vector
             ret_vec = {us1, us2, ir1, ir2, ir3, wheel, dis1, dis2, dis3, dis4};
             //ret_vec((it+US1_POS), (it+CHK_SUM));
@@ -105,8 +105,6 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec)
     }
     // push in front of the buffer if valid data
     if (ret_vec.size() != 0) {
-        // for now
-        ret_vec.push_back(0);
         buffer_in.push_front(ret_vec);
     }
     // unlock mutex
@@ -127,7 +125,7 @@ vector<unsigned char> serial::BufferWrapper::readReceiveBuffer(void)
         buffer_in.clear();
         // put the packet again so we always have a valid packet
         // with the most recent data to read
-        buffer_in.push_front(vec);
+        //buffer_in.push_front(vec);
         rrm.unlock();
         return vec;
     }
@@ -163,7 +161,7 @@ vector<unsigned char> serial::BufferWrapper::readSendBuffer(void)
         buffer_out.clear();
         // put the packet again so we always have a valid packet
         // with the most recent data to send
-        buffer_out.push_front(v);
+        //buffer_out.push_front(v);
         rsm.unlock();
         return v;
     }
