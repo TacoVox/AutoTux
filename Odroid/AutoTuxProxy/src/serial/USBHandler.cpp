@@ -83,7 +83,8 @@ bool usb_handler::USBHandler::is_reconnect(int error_code)
     case LIBUSB_ERROR_NOT_SUPPORTED:
     case LIBUSB_ERROR_OTHER:
         return true;
-        //break;
+    default:
+        return false;
     }
     return false;
 }

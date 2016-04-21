@@ -132,7 +132,7 @@ namespace proxy {
 
         //Angle conversion
         int degrees = (int)(vehicleControl.getSteeringWheelAngle() * 180 / MATH_PI);
-        unsigned char angle = degrees + 90;
+        unsigned char angle = (unsigned char)(degrees + 90);
 
         // Speed conversion
         double delta = 0.0001;
@@ -158,7 +158,7 @@ namespace proxy {
         unsigned char cs = 0;
 
         for (auto it = v.begin(); it < v.end(); it++)
-            cs ^= *it;
+            cs = (unsigned char)(cs ^ *it);
 
         return cs;
     }

@@ -4,23 +4,25 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 # Project name
 PROJECT(AutoTuxProxy)
 
-SET (CMAKE_MODULE_PATH "/opt/od/share/cmake-2.8/Modules" ${CMAKE_MODULE_PATH})
-SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${CXX_OPTIONS} -pipe -std=c++11 -lusb-1.0 -lopencv_core -lopencv_highgui -lopencv_imgproc")
-# set flags here for cmake
-SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O -Wall -Weffc++ -pedantic \
-     -Wextra -Waggregate-return -Wcast-align -Wcast-qual  -Wchar-subscripts \
-     -Wcomment -Wconversion -Wdisabled-optimization -Wfloat-equal  -Wformat  \
-     -Wformat=2 -Wformat-nonliteral -Wformat-security -Wformat-y2k -Wimplicit \
-     -Wimport  -Winit-self  -Winline -Winvalid-pch -Wunsafe-loop-optimizations \
-     -Wlong-long -Wmissing-braces -Wmissing-field-initializers \
-     -Wmissing-format-attribute -Wmissing-include-dirs -Wmissing-noreturn \
-     -Wpacked  -Wpadded -Wparentheses  -Wpointer-arith -Wredundant-decls \
-     -Wreturn-type -Wsequence-point  -Wshadow -Wsign-compare \
-     -Wstack-protector -Wstrict-aliasing -Wstrict-aliasing=2 -Wswitch \
-     -Wswitch-default -Wswitch-enum -Wtrigraphs  -Wuninitialized \
-     -Wunknown-pragmas  -Wunreachable-code -Wunused -Wunused-function \
-     -Wunused-label  -Wunused-parameter -Wunused-value  -Wunused-variable \
-     -Wvariadic-macros -Wvolatile-register-var  -Wwrite-strings")
+SET(CMAKE_MODULE_PATH "/opt/od/share/cmake-2.8/Modules" ${CMAKE_MODULE_PATH})
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${CXX_OPTIONS} -pipe -std=c++11 -lusb-1.0 -lopencv_core -lopencv_highgui -lopencv_imgproc")
+# SET warning flags here and append them to the CMAKE_CXX_FLAGS
+SET(WARN "${WARN} -g -O -Wall -Weffc++ -pedantic -Wvolatile-register-var")
+SET(WARN "${WARN} -Wconversion -Wcast-align -Wwrite-strings -Wunused-variable")
+SET(WARN "${WARN} -Wcast-qual -Wchar-subscripts -Wvariadic-macros -Wimport")
+SET(WARN "${WARN} -Wcomment -Wunused-parameter -Wextra -Wdisabled-optimization")
+SET(WARN "${WARN} -Wfloat-equal -Wformat=2 -Wformat-nonliteral")
+SET(WARN "${WARN} -Wformat-security -Wformat-y2k -Wwrite-strings")
+SET(WARN "${WARN} -Winit-self -Wformat -Winline -Winvalid-pch -Wmissing-braces")
+SET(WARN "${WARN} -Wunsafe-loop-optimizations -Wlong-long -Wreturn-type")
+SET(WARN "${WARN} -Wmissing-field-initializers -Wmissing-format-attribute")
+SET(WARN "${WARN} -Wmissing-include-dirs -Wpacked -Wparentheses -Wunused-value")
+SET(WARN "${WARN} -Wmissing-noreturn -Wsequence-point -Wshadow -Wsign-compare")
+SET(WARN "${WARN} -Wpointer-arith -Wredundant-decls -Wstack-protector -Wswitch")
+SET(WARN "${WARN} -Wstrict-aliasing -Wstrict-aliasing=2 -Wswitch-enum -Wunused")
+SET(WARN "${WARN} -Wunknown-pragmas -Wunreachable-code -Wswitch-default")
+SET(WARN "${WARN} -Wunused-function -Wunused-label -Wtrigraphs -Wuninitialized")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARN} -pedantic-errors -Werror")
 
 # Find OpenDaVINCI
 SET(OPENDAVINCI_DIR "/opt/od")
