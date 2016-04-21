@@ -4,7 +4,6 @@
 
 #include <iostream>
 
-
 #include "decisionmaker/DecisionMaker.h"
 #include "overtaker/Overtaker.h"
 
@@ -31,7 +30,7 @@ VehicleControl vehicleControl;
  */
 DecisionMaker::DecisionMaker(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "DecisionMaker"),
-        laneRecommendation() , ovt(), parker(){
+        ovt(), parker(), containerVehicleData(), containerSensorBoardData(), laneRecommendation(){
 }
 
 DecisionMaker::~DecisionMaker() {}
