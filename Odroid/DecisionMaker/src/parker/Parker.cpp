@@ -35,6 +35,7 @@ Parker::~Parker(){}
  */
 void Parker::findSpot(SensorBoardData sbd, VehicleData vd) {
     cout << "IR SENSOR VALUE: " << sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) << endl;
+    cout << "DISTANCE IS: " << vd.getAbsTraveledPath() << endl;
     switch (state) {
         case FINDOBJECT: {
             isSpot = false;
