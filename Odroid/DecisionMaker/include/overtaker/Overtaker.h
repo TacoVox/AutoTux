@@ -16,7 +16,7 @@ namespace  overtaker{
     public:
         Overtaker();
         virtual ~Overtaker();
-        void obstacleDetection(automotive::miniature::SensorBoardData, automotive::VehicleData);
+        void obstacleDetection(automotive::miniature::SensorBoardData, automotive::VehicleData, automotive::VehicleControl);
 
         bool getIsOverriding();
         VehicleControl getOvtControl();
@@ -25,8 +25,9 @@ namespace  overtaker{
         VehicleControl ovtControl;
         bool isOverridingControls;
         double traveledPath;
-        enum STATE {FREE_LANE, APPROACHING, LEFT_SWITCH, PARALLEL, RIGHT_SWITCH};
+        enum STATE {FREE_LANE, APPROACHING, LEFT_SWITCH, LEFT_SWITCH_LT, LEFT_SWITCH_RT, LEFT_LANE, PARALLEL, RIGHT_SWITCH};
         enum STATE state;
+        double enterSwitchAngle;
 
         const double ULTRASONIC_FRONT_RIGHT = 4;
         const double ULTRASONIC_FRONT_FORWARD = 3;
@@ -34,9 +35,10 @@ namespace  overtaker{
         const double INFRARED_REAR_RIGHT = 2;
 
         bool isObstacleOnLane(automotive::miniature::SensorBoardData, const double);
-        void switchToLeftLane(automotive::VehicleData, const double, const double);
+        void switchToLeftLane(automotive::VehicleData, automotive::VehicleControl, const double, const double);
+        bool isParallelToObstacle(automotive::miniature::SensorBoardData);
         bool isRightLaneClear(automotive::miniature::SensorBoardData);
-        void switchToRightLane(automotive::VehicleData, const double, const double);
+        void switchToRightLane(automotive::VehicleData, automotive::VehicleControl, const double, const double);
         bool isObstacleDetected(automotive::miniature::SensorBoardData, const double, const double);
 
     };

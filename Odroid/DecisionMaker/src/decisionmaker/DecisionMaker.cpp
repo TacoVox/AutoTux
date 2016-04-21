@@ -23,10 +23,6 @@ using namespace overtaker;
 
 enum STATE {DRIVING, PARKING};
 
-// takes the values of the argument passed to the constructor
-int32_t ptrargc;
-char** ptrargv;
-
 // Shared pointer to Container
 VehicleControl vehicleControl;
 
@@ -36,8 +32,6 @@ VehicleControl vehicleControl;
 DecisionMaker::DecisionMaker(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "DecisionMaker"),
         laneRecommendation() , ovt(), parker(){
-    ptrargc = argc;
-    ptrargv = argv;
 }
 
 DecisionMaker::~DecisionMaker() {}
@@ -88,13 +82,13 @@ double DecisionMaker::getDistanceToLine() {
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() {
 
     // Set initial state of the car
-    STATE state = DRIVING;
+    STATE state = PARKING;
 
     VehicleData vd;
     SensorBoardData sbd;
 
     // Set initial speed
-    vehicleControl.setSpeed(2);
+    vehicleControl.setSpeed(0.8);
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
 
@@ -103,23 +97,21 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
 
         // 2. Update sensor board data values
         sbd = containerSensorBoardData.getData<SensorBoardData>();
-
+	
         switch (state){
             case DRIVING:{
+                ovt.obstacleDetection(sbd, vd, vehicleControl);
 
-                // Update overtaker state info...
-                /*ovt.obstacleDetection(sbd, vd);
-
-                // If overtaker is overriding control values...
+                    // If overtaker is overriding control values...
                 if(ovt.getIsOverriding()) {
-                    cout << "Overtaker is OVERRIDING" << endl;
+                    //cout << "DM: OVERTAKER is OVERRIDING" << endl;
                     vehicleControl = ovt.getOvtControl();
                 }
-                //... else follow lane-follower instructions...
+                    //... else follow lane-follower instructions...
                 else{
-                    cout <<"Overtaker NOT overriding" << endl;*/
+                    //cout <<"DM: LANE FOLLOWER Instructions" << endl;
                     laneFollowing();
-                //}
+                }
 
                 break;
             }
@@ -136,12 +128,13 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                 }
                 else{
                     parker.findSpot(sbd, vd);
-                    vehicleControl.setSpeed(1);
+                    vehicleControl.setSpeed(0.8);
                     laneFollowing();
                 }
                 break;
             }
         }
+        
 	cout << "Steering: " << vehicleControl.getSteeringWheelAngle() << endl;
         // Pack and send control values
         Container control(vehicleControl);

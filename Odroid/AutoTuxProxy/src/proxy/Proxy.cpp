@@ -103,22 +103,17 @@ namespace proxy {
         while (getModuleStateAndWaitForRemainingTimeInTimeslice() == dmcp::ModuleStateMessage::RUNNING && !interrupted) {
             // ========= READ =================================
             // call buffer wrapper to get vector
-            cout << "reading from the read buffer" << endl;
             vector<unsigned char> v = bufferWrapper->readReceiveBuffer();
 
             //If there is something to send --> send it
-            if (v.size() >= 5) {
+            if (v.size() == 10) {
                 getConference().send(*SBDContainer::instance()->
                         genSBDContainer(v));
-            }
-            if (v.size() == 10) {
                 getConference().send(*VDContainer::instance()->
                         genVDContainer(v));
             }
 
-            cout << "Will append to SendBuffer" << endl;
             bufferWrapper->appendSendBuffer(cdContToVec(getKeyValueDataStore().get(VehicleControl::ID())));
-            cout << "Appended received data to send buffer" << endl;
 
             // Camera things
             if(m_camera.get() != NULL) {
@@ -127,7 +122,6 @@ namespace proxy {
                 distribute(c);
             }
         }
-        cout << "Done with the PacketBroadCaster body" << endl;
 
         return dmcp::ModuleExitCodeMessage::OKAY;
     }

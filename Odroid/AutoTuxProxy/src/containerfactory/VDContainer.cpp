@@ -4,6 +4,7 @@
 
 #include "containerfactory/VDContainer.h"
 #include <automotivedata/generated/automotive/VehicleData.h>
+#include <iostream>
 
 using namespace odcore::data;
 using namespace automotive;
@@ -34,7 +35,7 @@ std::shared_ptr<Container> containerfactory::VDContainer::genVDContainer(
     abstp = abstp | v.at(8) << 8;
     abstp = abstp | v.at(9);
 
-    vehicleData.setAbsTraveledPath((double)(abstp / 100));
+    vehicleData.setAbsTraveledPath((abstp / 100.0));
 
     return (std::shared_ptr<Container>)(new Container(vehicleData));
 }
