@@ -133,8 +133,6 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                 break;
             }
         }
-        
-	cout << "Steering: " << vehicleControl.getSteeringWheelAngle() << endl;
         // Pack and send control values
         Container control(vehicleControl);
         getConference().send(control);
