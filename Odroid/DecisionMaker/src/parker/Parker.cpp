@@ -75,15 +75,17 @@ VehicleControl Parker::parallelPark(SensorBoardData sbd, VehicleData vd){
         case PHASE1:{
             vc = backAroundCorner(vd, BACK_AROUND_CORNER);
             break;
-        }/*
+        }
         case PHASE2:{
             vc = backingStraight(vd, BACKING_STRAIGHT);
             break;
         }
+
         case PHASE3:{
             vc = backingLeft(vd, BACKING_LEFT);
             break;
         }
+        /*
         case PHASE4:{
             vc = adjustInSpotForward(vd, ADJUST_IN_SPOT_FORWARD);
             break;
