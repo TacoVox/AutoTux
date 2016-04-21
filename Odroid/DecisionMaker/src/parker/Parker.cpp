@@ -197,6 +197,7 @@ VehicleControl Parker::adjustBeforeParking(VehicleData vd, double add) {
  * Checks if the gap is big enough to park in
  */
 void Parker::enoughSpace(){
+    cout << "ENDGAP: " << gapEnd << " Startgap: " << gapStart << " Space site: " << gapEnd - gapStart << endl;
     if((gapEnd - gapStart) > SPOT_SIZE){
         cout << "******************ENOUGHSPACE TO PARK***************" << endl;
         isSpot = true;
