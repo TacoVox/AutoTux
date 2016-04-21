@@ -35,11 +35,7 @@ std::shared_ptr<Container> containerfactory::VDContainer::genVDContainer(
     abstp = abstp | v.at(8) << 8;
     abstp = abstp | v.at(9);
 
-    cout << "value before convertion: " << abstp << endl;
-
     vehicleData.setAbsTraveledPath((abstp / 100.0));
-
-    cout << "value after convertion: " << vehicleData.getAbsTraveledPath() << endl;
 
     return (std::shared_ptr<Container>)(new Container(vehicleData));
 }
