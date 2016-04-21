@@ -174,11 +174,11 @@ vector<unsigned char> serial::BufferWrapper::readSendBuffer(void)
 /*! calculates and returns the checksum for a valid packet */
 unsigned char serial::BufferWrapper::checksum(std::vector<unsigned char> vec)
 {
-    unsigned char checksum = 0;
-    if (vec.size() == 0) return checksum;
+    unsigned char chksum = 0;
+    if (vec.size() == 0) return chksum;
     for (auto it = vec.begin(); it != vec.end(); ++it) {
         // the checksum is calculated by XOR all elements
-        checksum ^= *it;
+        chksum ^= (unsigned char)*it;
     }
-    return checksum;
+    return chksum;
 }

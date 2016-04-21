@@ -36,6 +36,9 @@ usb_connector::USBConnector::USBConnector(const usb_connector::USBConnector &usb
 usb_connector::USBConnector &
 usb_connector::USBConnector::operator=(const usb_connector::USBConnector &usb)
 {
+    bw = usb.bw;
+    ctx = usb.ctx;
+    usb_dev = usb.usb_dev;
     return *this;
 }
 
@@ -199,7 +202,7 @@ int usb_connector::USBConnector::write(void)
     // get data from the buffer
     vector<unsigned char> vec = bw->readSendBuffer();
     // get data to send from the send buffer
-    int len = vec.size();
+    long unsigned int len = vec.size();
     // check for length, if 0 return
     if (len == 0) return EMPTY_DATA;
     // allocate memory for the data to write, we get a vector
@@ -209,7 +212,7 @@ int usb_connector::USBConnector::write(void)
     copy(vec.begin(), vec.end(), data);
     int transferred;
     int res = libusb_bulk_transfer(usb_dev, USB_ENDPOINT_OUT,
-                                   data, len, &transferred, 20);
+                                   data, (unsigned int)len, &transferred, 20);
     // delete allocated memory
     delete [] data;
     return res;
