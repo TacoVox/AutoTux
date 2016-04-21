@@ -68,6 +68,7 @@ VehicleControl Parker::parallelPark(SensorBoardData sbd, VehicleData vd){
     }
     switch(parkstate){
         case PHASE0:{
+            cout << "This is the distance: " << vd.getAbsTraveledPath() << endl;
             vc = adjustBeforeParking(vd, ADJUST_BEFORE_PARKING);
             break;
         }
