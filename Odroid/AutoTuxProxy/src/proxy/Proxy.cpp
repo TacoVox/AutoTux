@@ -106,7 +106,7 @@ namespace proxy {
             vector<unsigned char> v = bufferWrapper->readReceiveBuffer();
 
             //If there is something to send --> send it
-            if (v.size() == 10) {
+            if (v.size() == 11) {
                 getConference().send(*SBDContainer::instance()->
                         genSBDContainer(v));
                 getConference().send(*VDContainer::instance()->

@@ -43,6 +43,7 @@ serial::BufferWrapper::~BufferWrapper()
 /*! appends a correct packet to the receive buffer */
 void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec)
 {
+    cout << "size of vector: " << vec.size() << endl;
     // lock mutex
     arb.lock();
     // return if the length of the vedcor is too short
@@ -59,7 +60,7 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec)
         if (it + SBDPKTSIZE > vec.end()) {
             break;
         }
-        if (*it == STR_DEL && *(it+STR_DEL_POS) == STR_DEL &&
+        if (*it == STR_DEL_ONE && *(it+STR_DEL_POS) == STR_DEL_TWO &&
                 *(it+MID_DEL_POS) == MID_DEL && *(it+END_DEL_POS) == END_DEL) {
             unsigned char us1 = *(it+US1_POS);
             printf("US1:%i ", us1);
@@ -81,10 +82,12 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec)
             printf("DIS3:%i ", dis3);
             unsigned char dis4 = *(it+DIS_POS_4);
             printf("DIS4:%i ", dis4);
+            unsigned char light = *(it+LIGHT_SEN);
+            printf("LIGHT:%i ", light);
             unsigned char check = *(it+CHK_SUM);
             printf("CHECK:%i\n", check);
             // fill the vector
-            ret_vec = {us1, us2, ir1, ir2, ir3, wheel, dis1, dis2, dis3, dis4};
+            ret_vec = {us1, us2, ir1, ir2, ir3, wheel, dis1, dis2, dis3, dis4, light};
             // check if correct checksum
             if (check == checksum(ret_vec)) {
                 cout << "checksum OK" << endl;
