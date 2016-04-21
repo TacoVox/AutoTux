@@ -97,7 +97,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
 
         // 2. Update sensor board data values
         sbd = containerSensorBoardData.getData<SensorBoardData>();
-
+	
         switch (state){
             case DRIVING:{
                 ovt.obstacleDetection(sbd, vd, vehicleControl);
@@ -128,13 +128,14 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                 }
                 else{
                     parker.findSpot(sbd, vd);
-                    vehicleControl.setSpeed(1);
+                    vehicleControl.setSpeed(0.8);
                     laneFollowing();
                 }
                 break;
             }
         }
-        cout << "Steering: " << vehicleControl.getSteeringWheelAngle() << endl;
+        
+	cout << "Steering: " << vehicleControl.getSteeringWheelAngle() << endl;
         // Pack and send control values
         Container control(vehicleControl);
         getConference().send(control);
