@@ -44,7 +44,7 @@ int main(void) {
 		controlOutputIteration();
 
 		// Above meausred to 72 ms including ADC callback - sleep 8 to achieve 12.5 hertz
-		chThdSleepMilliseconds(8); // Comment this out to meausre time
+		chThdSleepMilliseconds(8); 
 	}
 
 	return 0;
