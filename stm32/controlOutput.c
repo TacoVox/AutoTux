@@ -22,7 +22,7 @@
 int max(int int1, int int2);
 bool handleRCMode(void);
 bool rcModeCheck(void);
-unsigned char* controlData;
+unsigned char controlData[CONTROL_BYTE_COUNT];
 bool controlValuesAreNew = false;
 
 
@@ -64,6 +64,7 @@ void controlOutputSetData(unsigned char* newControlData) {
 	for (int i = 0; i < CONTROL_BYTE_COUNT; i++) {
 		controlData[i] = newControlData[i];
 	}
+
 	// Touch this variable
 	controlValuesAreNew = true;
 }

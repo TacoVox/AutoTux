@@ -140,13 +140,14 @@ int hardwareGetValuesUS(US_SENSOR sensor) {
 
 int averageWithCircBuffer(int latestValue, US_SENSOR sensor) {
 	static int currentPosition = 0;
+
 	// Add to next position in circular buffer
+	usCmCircBuffer[sensor][currentPosition] = latestValue;
 	if (currentPosition == US_CIRCULAR_BUFFER_LENGTH -1) {
 		currentPosition = 0;
 	} else {
 		currentPosition++;
 	}
-	usCmCircBuffer[sensor][currentPosition] = latestValue;
 
 	// Average
 	int totalCm = 0;

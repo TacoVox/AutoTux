@@ -17,7 +17,7 @@
 
 
 // Debug output. Set to 0 for normal packet output.
-#define DEBUG_OUTPUT 1
+#define DEBUG_OUTPUT 0
 
 // If more iterations than this occurs without receiving a valid packet,
 // the serial stops sending to avoid filling buffers. The car is also

@@ -27,7 +27,7 @@ static THD_FUNCTION(wheelEncoderThread, arg);
 uint8_t ticks;
 unsigned int distanceTicks;
 unsigned int distanceTraveled;
-bool previousState;
+bool previousEncoderState;
 int cmPerSecond;
 systime_t startTime;
 systime_t timeNow;
@@ -56,11 +56,11 @@ void hardwareIterationWE(void) {
 	systime_t startTime = chVTGetSystemTime();
 
 	while(true){
-		if (previousState == FALSE && palReadPad(WE_PIN_GROUP, WE_PIN_NUMBER)) {
-	        previousState = TRUE;
+		if (previousEncoderState == FALSE && palReadPad(WE_PIN_GROUP, WE_PIN_NUMBER)) {
+	        previousEncoderState = TRUE;
 	        ticks++;
-	    } else if (previousState == TRUE && palReadPad(WE_PIN_GROUP, WE_PIN_NUMBER) == FALSE) {
-	        previousState = FALSE;
+	    } else if (previousEncoderState == TRUE && palReadPad(WE_PIN_GROUP, WE_PIN_NUMBER) == FALSE) {
+	        previousEncoderState = FALSE;
 	    }
 		timeNow = chVTGetSystemTime();
 	    if (ST2MS(timeNow) > ST2MS(startTime) + 1000) {

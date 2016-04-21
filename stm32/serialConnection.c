@@ -70,7 +70,7 @@ static THD_FUNCTION(serialThread, arg) {
 	unsigned int itTime = 0;
 
 	// Latest received control bytes. Should only be forwarded on valid packet.
-	unsigned char controlData[CONTROL_BYTE_COUNT] = DEFAULT_CONTROL_BYTES;
+	static unsigned char controlData[CONTROL_BYTE_COUNT] = DEFAULT_CONTROL_BYTES;
 
 	// Main serial connection loop.
 	while(true) {
