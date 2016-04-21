@@ -25,7 +25,10 @@ bool isParked = false;
 int isAccurate = 0;
 VehicleControl controlTemp;
 
-Parker::Parker(){}
+Parker::Parker() :
+    carPosition(0), vc(){}
+
+Parker::~Parker(){}
 
 /**
  * Finds a parking spot where the car fits
@@ -204,8 +207,8 @@ void Parker::enoughSpace(){
  * Finds end of the gap
  */
 void Parker::findGapEnd(SensorBoardData sbd, VehicleData vd){
-    if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 0 &&
-            sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT < 20)) {
+    if((sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT)) > 0 &&
+            (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < 20)) {
         gapEnd = vd.getAbsTraveledPath();
         isAccurate++;
     }
@@ -260,7 +263,7 @@ bool Parker::getFoundSpot(){
     return isSpot;
 }
 /**
- * Returns if the car has fintished parking
+ * Returns if the car has finished parking
  */
 bool Parker::getIsParked() {
     return isParked;

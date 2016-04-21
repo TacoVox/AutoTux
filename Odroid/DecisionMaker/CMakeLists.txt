@@ -6,6 +6,8 @@ PROJECT(DecisionMaker)
 
 SET (CMAKE_MODULE_PATH "/opt/od/share/cmake-2.8/Modules" ${CMAKE_MODULE_PATH})
 SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${CXX_OPTIONS} -pipe -std=c++11")
+SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O -Wall -Weffc++ -pedantic")
+
 #[[SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O -Wall -Weffc++ -pedantic
     -pedantic-errors -Wextra -Waggregate-return -Wcast-align
     -Wcast-qual  -Wchar-subscripts  -Wcomment -Wconversion
@@ -37,8 +39,8 @@ SET(AUTOMOTIVEDATA_DIR "/opt/od")
 FIND_PACKAGE(AutomotiveData REQUIRED)
 
 # Set header files from OpenDaVINCI.
-INCLUDE_DIRECTORIES(${OPENDAVINCI_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${AUTOMOTIVEDATA_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(SYSTEM ${OPENDAVINCI_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(SYSTEM ${AUTOMOTIVEDATA_INCLUDE_DIRS})
 # Set include directory.
 INCLUDE_DIRECTORIES(include)
 
