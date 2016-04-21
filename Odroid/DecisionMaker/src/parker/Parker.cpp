@@ -179,10 +179,12 @@ VehicleControl Parker::backAroundCorner(VehicleData vd, int add){
  */
 VehicleControl Parker::adjustBeforeParking(VehicleData vd, int add) {
     if(gapEnd + add > vd.getAbsTraveledPath()){
+        cout << "Inside adjustbeforeparking " << endl;
         controlTemp.setSpeed(1);
         controlTemp.setSteeringWheelAngle(0);
     }
     else if(gapEnd + add < vd.getAbsTraveledPath()){
+        cout << "Switching to PHASE1" << endl;
         controlTemp.setSpeed(0);
         parkstate = PHASE1;
         carPosition = vd.getAbsTraveledPath();
