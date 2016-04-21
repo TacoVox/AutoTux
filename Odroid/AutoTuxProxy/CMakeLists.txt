@@ -4,23 +4,29 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 # Project name
 PROJECT(AutoTuxProxy)
 
-SET (CMAKE_MODULE_PATH "/opt/od/share/cmake-2.8/Modules" ${CMAKE_MODULE_PATH})
-SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${CXX_OPTIONS} -pipe -std=c++11 -lusb-1.0 -lopencv_core -lopencv_highgui -lopencv_imgproc")
+SET(CMAKE_MODULE_PATH "/opt/od/share/cmake-2.8/Modules" ${CMAKE_MODULE_PATH})
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${CXX_OPTIONS} -pipe -std=c++11 -lusb-1.0 -lopencv_core -lopencv_highgui -lopencv_imgproc")
 # set flags here for cmake
-SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O -Wall -Weffc++ -pedantic
-    -Wextra -Waggregate-return -Wcast-align -Wcast-qual  -Wchar-subscripts
-    -Wcomment -Wconversion -Wdisabled-optimization -Wfloat-equal  -Wformat
-    -Wformat=2 -Wformat-nonliteral -Wformat-security -Wformat-y2k -Wimplicit
-    -Wimport  -Winit-self  -Winline -Winvalid-pch -Wunsafe-loop-optimizations
-    -Wlong-long -Wmissing-braces -Wmissing-field-initializers
-    -Wmissing-format-attribute -Wmissing-include-dirs -Wmissing-noreturn
-    -Wpacked  -Wpadded -Wparentheses  -Wpointer-arith -Wredundant-decls
-    -Wreturn-type -Wsequence-point  -Wshadow -Wsign-compare
-    -Wstack-protector -Wstrict-aliasing -Wstrict-aliasing=2 -Wswitch
-    -Wswitch-default -Wswitch-enum -Wtrigraphs  -Wuninitialized
-    -Wunknown-pragmas  -Wunreachable-code -Wunused -Wunused-function
-    -Wunused-label  -Wunused-parameter -Wunused-value  -Wunused-variable
-    -Wvariadic-macros -Wvolatile-register-var  -Wwrite-strings")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O -Wall -Weffc++ -pedantic")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra -Waggregate-return -Wcast-align")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wcast-qual -Wchar-subscripts")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wcomment -Wconversion -Wdisabled-optimization")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wfloat-equal -Wformat -Wformat=2")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wformat-nonliteral -Wformat-security")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wformat-y2k -Wimplicit -Wimport")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Winit-self -Winline -Winvalid-pch")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunsafe-loop-optimizations -Wlong-long")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wmissing-braces -Wmissing-field-initializers")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wmissing-format-attribute -Wmissing-include-dirs")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wmissing-noreturn -Wpacked -Wpadded -Wparentheses")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpointer-arith -Wredundant-decls -Wreturn-type")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wsequence-point -Wshadow -Wsign-compare -Wstack-protector")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wstrict-aliasing -Wstrict-aliasing=2 -Wswitch")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wswitch-default -Wswitch-enum -Wtrigraphs -Wuninitialized")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunknown-pragmas -Wunreachable-code -Wunused")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-function -Wunused-label -Wunused-parameter")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-value -Wunused-variable")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wvariadic-macros -Wvolatile-register-var -Wwrite-strings")
 
 # Find OpenDaVINCI
 SET(OPENDAVINCI_DIR "/opt/od")
