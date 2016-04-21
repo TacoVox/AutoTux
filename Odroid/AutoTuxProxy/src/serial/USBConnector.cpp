@@ -185,6 +185,7 @@ int usb_connector::USBConnector::read(void)
     int res = libusb_bulk_transfer(usb_dev, USB_ENDPOINT_IN,
                                    data, READ_LEN, &transferred, 20);
     if (res == 0) {
+        cout << "bytes read: " << transferred << endl;
         // the vector holding the data from the read
         vector<unsigned char> vec(data, data + transferred);
         // append to the receive buffer
@@ -213,6 +214,9 @@ int usb_connector::USBConnector::write(void)
     int transferred;
     int res = libusb_bulk_transfer(usb_dev, USB_ENDPOINT_OUT,
                                    data, (unsigned int)len, &transferred, 20);
+    if (res == 0) {
+        cout << "bytes sent: " << transferred << endl;
+    }
     // delete allocated memory
     delete [] data;
     return res;
