@@ -21,6 +21,9 @@
 #include "serialConnection.h"
 
 
+#include "LEDDriver.h"
+
+
 //-----------------------------------------------------------------------------
 // Implementation - main loop.
 //-----------------------------------------------------------------------------
@@ -35,11 +38,20 @@ int main(void) {
 	sensorInputSetup();
 	controlOutputSetup();
 
+	// Init LED
+
+	init(16);
+	//setColor(1 | 2 | 4 | 8, 255, 255, 0);
+	write();
 	// Start another thread for the serial connection
 	serialConnectionStart();
 
 	// Then simply read sensor values and output control values on the main thread
 	while (true) {
+
+		//testPatternFB();
+
+
 		sensorInputIteration();
 		controlOutputIteration();
 
