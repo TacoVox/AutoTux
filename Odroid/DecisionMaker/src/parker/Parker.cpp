@@ -34,6 +34,7 @@ Parker::~Parker(){}
  * Finds a parking spot where the car fits
  */
 void Parker::findSpot(SensorBoardData sbd, VehicleData vd) {
+    cout << "Sensor value: " << sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) << endl;
     switch (state) {
         case FINDOBJECT: {
             isSpot = false;

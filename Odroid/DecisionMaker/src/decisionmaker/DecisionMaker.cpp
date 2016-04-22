@@ -90,13 +90,20 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
     vehicleControl.setSpeed(0.8);
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
+        // 1. Update sensor board data values
+        containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
+        sbd = containerSensorBoardData.getData<SensorBoardData>();
 
-        // 1. Update vehicle data values
+        // 2. Update vehicle data values
+        containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
         vd = containerVehicleData.getData<VehicleData>();
 
-        // 2. Update sensor board data values
-        sbd = containerSensorBoardData.getData<SensorBoardData>();
-	
+        laneRecommendation = getKeyValueDataStore().get(autotux::LaneRecommendation::ID());
+
+
+        cout << "SensorValues: " <<  sbd.getValueForKey_MapOfDistances(2) << endl;
+        cout << "Distance: " << vd.getAbsTraveledPath() << endl;
+
         switch (state){
             case DRIVING:{
                 ovt.obstacleDetection(sbd, vd, vehicleControl);
@@ -126,8 +133,8 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                     }
                 }
                 else{
-                    parker.findSpot(sbd, vd);
-                    vehicleControl.setSpeed(0.8);
+                    //parker.findSpot(sbd, vd);
+                    vehicleControl.setSpeed(2);
                     laneFollowing();
                 }
                 break;
@@ -144,6 +151,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
 /**
  * This method is a data listener that listens to the broadcast made by odsupercomponent for LaneRecommendation
 */
+/*
 void decisionmaker::DecisionMaker::nextContainer(odcore::data::Container &c) {
 
     if(c.getDataType() == LaneRecommendation::ID()){
@@ -156,3 +164,4 @@ void decisionmaker::DecisionMaker::nextContainer(odcore::data::Container &c) {
 
 }
 
+*/
