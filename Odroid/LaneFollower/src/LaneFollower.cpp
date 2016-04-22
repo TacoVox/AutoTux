@@ -30,7 +30,7 @@ namespace lane {
         // Debugging use only
         using namespace odtools::player;
 
-        // SET TO TRUE FOR CARMODE
+        // SET TO TRUE WHEN USING THE SIMULATOR
         const bool SIMMODE = true;
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) :
@@ -113,46 +113,55 @@ namespace lane {
 
                     // Mirror image
                     // NOTE: For simulator.
-                    flip(m_image, m_image, -1);
+                    if(SIMMODE)
+                    {
+                        flip(m_image, m_image, -1);
+                    }
+
                     returnValue = true;
                 }
             }
             return returnValue;
         }
 
-        // TODO: New datatype
-        void LaneFollower::getLaneRecommendation(odcore::data::Container &c) {
-
-            // TODO: New datatype
-            if(c.getDataType() == LaneRecommendation::ID()) {
-
-                // TODO: New datatype
-                laneRecommendation = c.getData<LaneRecommendation>();
-            }
-        }
+//        void LaneFollower::getLaneRecommendation(odcore::data::Container &c) {
+//
+//            // TODO: New datatype
+//            if(c.getDataType() == LaneRecommendation::ID()) {
+//
+//                // TODO: New datatype
+//                laneRecommendation = c.getData<LaneRecommendation>();
+//            }
+//        }
 
         // Do magic to the image around here.
         void LaneFollower::processImage() {
 
             // TODO: New datatype
             laneRecommendation.setLeft_lane(false);
-            inLeftLane = true;
+            inLeftLane = false;
 
             double e = 0;
 
+            // Copy the image to a matrix (this is the one we use for detection)
             Mat m_image_grey = m_image.clone();
+
+            // Make the new image grayscale
             cvtColor(m_image, m_image_grey, COLOR_BGR2GRAY);
-            threshold(m_image_grey, m_image_grey, 100, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
 
-            //adaptiveThreshold(m_image_grey, m_image_grey, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY_INV, 3, 5);
+            // Make the image binary, threshold set to 180 at the moment
+            threshold(m_image_grey, m_image_grey, 180, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
 
+            // Find contours on the image
             vector<vector<Point>> contours;
             findContours(m_image_grey, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
 
+            // Draw the contours red
             for(size_t idx = 0; idx < contours.size(); idx++) {
                 drawContours(m_image, contours, (int)idx, Scalar(0,0,255));
             }
 
+            // Lane detection loop
             for(int32_t y = m_image.rows - 8; y > m_image.rows * .5; y -= 10) {
                 // Find red pixels
                 Vec3b pixelLeft, pixelRight, pixelFront;
@@ -161,6 +170,7 @@ namespace lane {
                 left.y = y;
                 left.x = -1;
 
+                // Find first red pixel to the left (left line)
                 for (int x = m_image.cols / 2; x > 0; x--) {
                     pixelLeft = m_image.at<Vec3b>(Point(x, y));
                     if (pixelLeft.val[2] == 255) {
@@ -171,6 +181,8 @@ namespace lane {
 
                 right.y = y;
                 right.x = -1;
+
+                // Find first red pixel to the right (right line)
                 for (int x = m_image.cols / 2; x < m_image.cols; x++) {
                     pixelRight = m_image.at<Vec3b>(Point(x, y));
                     if (pixelRight.val[2] == 255) {
@@ -182,6 +194,7 @@ namespace lane {
                 middle.x = (m_image.cols/2.0);
                 middle.y = control_scanline;
 
+                // Find first red pixel in front (stopline)
                 for(int i = control_scanline; i > stop_scanline; i--) {
                     pixelFront = m_image.at<Vec3b>(Point(middle.x, i));
                     if(pixelFront.val[2] == 255) {
@@ -191,8 +204,10 @@ namespace lane {
                     }
                 }
 
+                // If the loop is currently checking at the height of our set control line
                 if(y == control_scanline) {
-                    // Testing Twiddle algorithm stuff
+
+                    // Right lane logic (prefer right line following)
                     if (!inLeftLane) {
                         if (right.x > 0) {
                             e = ((right.x - m_image.cols / 2.0) - distance) / distance;
@@ -202,6 +217,8 @@ namespace lane {
                             e = (distance - (m_image.cols / 2.0 - left.x)) / distance;
                         }
                     }
+
+                    // Left lane logic (prefer left line following)
                     else {
                         if (left.x > 0) {
                             e = (distance - (m_image.cols / 2.0 - left.x)) / distance;
@@ -213,12 +230,15 @@ namespace lane {
                     }
                 }
 
+                // Draw debug lines
                 if (m_debug) {
 
+                    // Draw line from control line to stop line if there is one
                     if(middle.y < control_scanline) {
                         line(m_image, Point(middle.x, control_scanline), middle, Scalar(128, 0, 0));
                     }
 
+                    // Draw lines from middle to the discovered left pixels
                     if (left.x > 0) {
                         line(m_image, Point(m_image.cols / 2, y), left, Scalar(0, 255, 0));
                         stringstream sstr;
@@ -226,6 +246,8 @@ namespace lane {
                         putText(m_image, sstr.str().c_str(), Point(m_image.cols / 2 - 100, y - 2), FONT_HERSHEY_PLAIN,
                                 0.5, CV_RGB(0, 255, 0));
                     }
+
+                    // Draw lines from middle to the discovered right pixels
                     if (right.x > 0) {
                         line(m_image, Point(m_image.cols / 2, y), right, Scalar(0, 128, 128));
                         stringstream sstr;
