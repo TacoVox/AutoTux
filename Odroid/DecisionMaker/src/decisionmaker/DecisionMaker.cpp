@@ -30,7 +30,7 @@ VehicleControl vehicleControl;
  */
 DecisionMaker::DecisionMaker(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "DecisionMaker"),
-        ovt(), parker(), containerVehicleData(), containerSensorBoardData(), laneRecommendation(){
+        ovt(), parker(), containerVehicleData(), containerSensorBoardData(), laneRecommendation(), stopped(false){
 }
 
 DecisionMaker::~DecisionMaker() {}
@@ -45,6 +45,25 @@ void DecisionMaker::tearDown(){
  * Sets wheelangledata to the LaneRecommandation
 */
 void DecisionMaker::laneFollowing() {
+
+    if(stopped) {
+        cout << "GOING TO SLEEP" << endl;
+        sleep(3);
+        cout << "WAKING UP" << endl;
+        vehicleControl.setSpeed(2);
+        stopped = false;
+    }
+    else if(getDistanceToLine() == -1){
+        vehicleControl.setSpeed(2);
+    }
+    else if(getDistanceToLine() < 50) {
+        vehicleControl.setSpeed(0);
+        stopped = true;
+    }
+    else if(getDistanceToLine() < 150) {
+        vehicleControl.setSpeed(1);
+    }
+
     vehicleControl.setSteeringWheelAngle(getAngle());
 }
 
