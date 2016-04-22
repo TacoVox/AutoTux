@@ -98,7 +98,7 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec)
                 // clear the return vector
                 ret_vec.clear();
                 // find where next packet starts
-                it = find(it+1, vec.end(), '7');
+                it = find(it+1, vec.end(), STR_DEL_ONE);
                 // if not found, break
                 if (it == vec.end()) break;
             }
