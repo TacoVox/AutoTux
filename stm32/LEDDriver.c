@@ -5,6 +5,10 @@
 #include <hal.h>
 
 
+// seems to be around 21 ms per NOP - maybe it's because one oscillation 
+// in 68mhz is 5.95 ns, and it usually takes three for each iteration of the NOP
+// for loops (the NOP, the boolean check and the counter increase)?
+
 
 #define HIGH_TIME_1 38 // 800 ns // 40
 #define LOW_TIME_1 22 // 450 ns // 20
