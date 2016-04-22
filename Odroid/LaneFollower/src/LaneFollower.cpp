@@ -294,6 +294,10 @@ namespace lane {
             if (desiredSteering > 0.5) desiredSteering = 0.5;
             if (desiredSteering < -0.5) desiredSteering = -0.5;
 
+            if(laneRecommendation.getDistance_to_line() < 5 ||
+                    laneRecommendation.getDistance_to_line() > 150)
+                laneRecommendation.setDistance_to_line(-1);
+
             //cout << "DS: " << desiredSteering << endl;
 
             cout << "STOPLINE: " << laneRecommendation.getDistance_to_line() << endl;

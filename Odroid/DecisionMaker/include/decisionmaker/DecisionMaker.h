@@ -44,6 +44,8 @@ namespace decisionmaker{
         bool isDataQuality();
         double getDistanceToLine();
         void laneFollowing();
+
+        bool stopped;
     };
 
 } //DecisionMaker
