@@ -9,7 +9,7 @@
 #define HIGH_TIME_1 38 // 800 ns // 40
 #define LOW_TIME_1 22 // 450 ns // 20
 #define HIGH_TIME_0 18 // 400 ns // 15 // 12 för lågt, 24 för högt
-#define LOW_TIME_0 43 // 850 ns // 40
+#define LOW_TIME_0 43 // 850 ns // 40 - TRY 41
 #define RESET_TIME 5 // 50 microseconds
 #define RESET_TIME_CLEAR 5
 
