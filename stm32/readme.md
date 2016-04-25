@@ -11,7 +11,7 @@ The low-level code for the AutoTux project.
 
 ## How to build and flash
 - Compiler: gcc-arm-eabi-none should be available in your favourite packet manager
-- Use st-flash, part of st-link to flash the STM: https://github.com/texane/stlink
+- The make_and_flash script needs st-flash, part of st-link to flash the STM: https://github.com/texane/stlink
 - You may need some other library like libnewlib - just google any error messages that gets printed when running the makefile and you'll quickly find out what you're missing. 
 
 ## Licence notes
