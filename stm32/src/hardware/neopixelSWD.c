@@ -15,8 +15,9 @@
  *
  * With push-pull, the behaviour is much less sensitive to voltage
  * variations caused by other components. However, for some reasons
- * (probably the hardware specifics of the internal resistors of the STM32)
- * the zeroes are understood as ones if we use the same HIGH_TIME_0!
+ * (probably the hardware specifics of the internal resistors of the STM32,
+ * maybe the signal is just very fast at going high, but slower when going
+ * low) the zeroes are understood as ones if we use the same HIGH_TIME_0!
  * Here we need to use a significantly lower HIGH_TIME_0.
  */
 #define HIGH_TIME_1 38 // 800 ns // 40
