@@ -4,7 +4,8 @@ The STM32 code for the AutoTux project.
 ## Coding guidelines
 - Make sure all function names start with the file name where applicable.
 - Make sure all constant names start with the file names or other clear indicator of what they concern.
-- Make sure there are NO global variables that concern only one function - if so, use a static local variable instead! If a global variable to the file is needed, make it <b>static</b> in the file and it will be inaccessible to other files.
+- Make sure there are NO global variables that concern only one function - if so, use a static local variable instead!
+- If a variable needs to be global in the file, make it <b>static</b> and it will be inaccessible to other files.
 - Similarly, any function that shouldn't be accessible outside the module should be defined as static! 
 - Use the specific variable you need, such as <b>uint32_t</b> or <b>uint8_t</b>, instead of the generic ones.
 - Use <b>const</b> for all parameters in functions that we don't need to change in the function. Note: there are several ways to use const depending on if arguments are pointers etc.
