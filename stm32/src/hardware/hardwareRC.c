@@ -40,7 +40,7 @@ static ICUConfig icuConfigSteering = {
 
 
 // The resulting pulsewidth values
-icucnt_t pw[RC_CHANNELS];
+static icucnt_t pw[RC_CHANNELS];
 
 
 //-----------------------------------------------------------------------------

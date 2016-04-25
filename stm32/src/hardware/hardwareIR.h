@@ -26,7 +26,4 @@ void hardwareIterationIR(void);
 int hardwareGetValuesIR(IR_SENSOR);
 
 
-systime_t getCallbackEndTime(void);
-
-
 #endif /* HARDWAREIR_H_ */

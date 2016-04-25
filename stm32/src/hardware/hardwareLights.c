@@ -42,7 +42,7 @@ void hardwareSetupLights(void) {
 	neopixelInit(&cfg, &colorBuffer);
 
 	// Headlights
-	neopixelSetColor(colorBuffer, LED(1) | LED(2) | LED(5) | LED(6), 50, 50, 50);
+	neopixelSetColor(colorBuffer, LED(1) | LED(2) | LED(5) | LED(6), 30, 30, 30);
 
 	// Tail lights
 	neopixelSetColor(colorBuffer, LED(9) | LED(14), 40, 0, 0);

@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
 
 
-int averageWithCircBuffer(int latestValue, US_SENSOR sensor);
+static int averageWithCircBuffer(int latestValue, US_SENSOR sensor);
 
 #define CMD_REG			0x00	// Command register
 #define GAIN_REG		0x01
@@ -37,12 +37,12 @@ static const I2CConfig i2cConfig = {
 
 
 // The resulting centimeter values
-int usCm[US_SENSORS];
-unsigned char lightSensorReading;
+static int usCm[US_SENSORS];
+static unsigned char lightSensorReading;
 
 // Circular buffer, values will be averaged with the others
 #define US_CIRCULAR_BUFFER_LENGTH 5
-int usCmCircBuffer[US_SENSORS][US_CIRCULAR_BUFFER_LENGTH];
+static int usCmCircBuffer[US_SENSORS][US_CIRCULAR_BUFFER_LENGTH];
 
 
 
@@ -174,7 +174,7 @@ unsigned char hardwareGetValuesUSLight(void) {
 //-----------------------------------------------------------------------------
 
 
-int averageWithCircBuffer(int latestValue, US_SENSOR sensor) {
+static int averageWithCircBuffer(int latestValue, US_SENSOR sensor) {
 	static int currentPosition = 0;
 
 	// Add to next position in circular buffer
