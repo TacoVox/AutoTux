@@ -8,6 +8,23 @@
 #include <hal.h>
 
 /**
+ * Usage example:
+ *
+ * 	uint8_t* colorBuffer = 0;
+ * 	neopixelConfig cfg = {
+ * 		GPIOA,
+ * 		6,
+ * 		16,
+ * 		false
+ * 	};
+ * 	neopixelInit(&cfg, &colorBuffer);
+ * 	neopixelSetColor(colorBuffer, LED(1), LED(2), 255, 220, 0);
+ * 	chThdSleepMilliseconds(1000);
+ * 	neopixelWrite(&cfg, colorBuffer);
+ */
+
+
+/**
  * Configuration struct for the neopixel SW driver.
  * It should be possible to run different LED chains
  * on different pins with different configs.
