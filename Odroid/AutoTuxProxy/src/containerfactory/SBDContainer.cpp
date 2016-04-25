@@ -30,7 +30,7 @@ shared_ptr<Container> containerfactory::SBDContainer::genSBDContainer(vector<uns
     //Iterate over the vector and put the stuff in the map
     int i = 1;
     for(vector<unsigned char>::iterator it = values.begin(); it != values.end(); ++it) {
-        sensordata[i] = (double)*it;
+        sensordata[i] = (double)*it / 100.0;
         i++;
     }
 
