@@ -19,7 +19,7 @@
 #include "hardware/sensorInput.h"
 #include "hardware/controlOutput.h"
 #include "serial/serialConnection.h"
-
+#include "hardware/neopixelSWD.h"
 
 
 //-----------------------------------------------------------------------------
@@ -36,7 +36,7 @@ int main(void) {
 	sensorInputSetup();
 	controlOutputSetup();
 
-	// Start another thread for the serial connection
+	// Start the serial connection. Creates its own thread.
 	serialConnectionStart();
 
 	// Then simply read sensor values and output control values on the main thread

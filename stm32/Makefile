@@ -117,7 +117,7 @@ CSRC = $(STARTUPSRC) \
        $(CHIBIOS)/os/various/shell.c \
        $(CHIBIOS)/os/hal/lib/streams/memstreams.c \
        $(CHIBIOS)/os/hal/lib/streams/chprintf.c \
-       conf/usbcfg.c src/main.c src/hardware/sensorInput.c src/hardware/hardwareIR.c src/hardware/hardwareUS.c src/hardware/hardwareRC.c src/hardware/hardwarePWM.c src/hardware/hardwareWE.c src/hardware/controlOutput.c src/hardware/neopixelSWD.c src/serial/serialConnection.c src/serial/packetHandler.c 
+       conf/usbcfg.c src/main.c src/hardware/sensorInput.c src/hardware/hardwareIR.c src/hardware/hardwareUS.c src/hardware/hardwareRC.c src/hardware/hardwarePWM.c src/hardware/hardwareWE.c src/hardware/controlOutput.c src/hardware/neopixelSWD.c src/hardware/hardwareLights.c src/serial/serialConnection.c src/serial/packetHandler.c 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
 CPPSRC =

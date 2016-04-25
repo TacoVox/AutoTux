@@ -12,18 +12,17 @@
 #include "controlOutput.h"
 #include "hardwarePWM.h"
 #include "hardwareRC.h"
-
+#include "hardwareLights.h"
 
 //-----------------------------------------------------------------------------
 // Definitions
 //-----------------------------------------------------------------------------
 
 
-int max(int int1, int int2);
-bool handleRCMode(void);
-bool rcModeCheck(void);
-unsigned char controlData[CONTROL_BYTE_COUNT];
-bool controlValuesAreNew = false;
+static bool handleRCMode(void);
+static bool rcModeCheck(void);
+static unsigned char controlData[CONTROL_BYTE_COUNT];
+static bool controlValuesAreNew = false;
 
 
 //-----------------------------------------------------------------------------
@@ -37,6 +36,7 @@ bool controlValuesAreNew = false;
 void controlOutputSetup(void) {
 	// TODO: also initialize RC here later?
 	hardwareSetupPWM();
+	hardwareSetupLights();
 }
 
 
@@ -75,14 +75,18 @@ void controlOutputSetData(unsigned char* newControlData) {
  */
 void controlOutputIteration() {
 	static int iterationsNoNewValues = 0;
+	bool rcBrake = false;
+	bool rcMode = false;
+	rcMode = handleRCMode();
 
-	if (!handleRCMode()) {
+	if (!rcMode) {
 		// RC mode not activated - check only for RC transmitter brake
 		if (hardwareGetValuesRC(THROTTLE) >= RC_THROTTLE_ON_TRESHOLD &&
 				hardwareGetValuesRC(THROTTLE) <= RC_THROTTLE_BRAKE_TRESHOLD) {
 
 			// RC transmitter brake - stop the car
 			hardwareSetValuesPWM(PWM_OUTPUT_ESC, SPEED_STOP);
+			rcBrake = true;
 
 		} else {
 			// Normal automatic drive. See if we have newly received values
@@ -107,6 +111,9 @@ void controlOutputIteration() {
 			}
 		}
 	}
+
+	// Update lights
+	hardwareIterationLights(LIGHT_BIT_FLASH_LEFT, rcMode, rcBrake);
 }
 
 

@@ -1,32 +1,26 @@
 /*
- * hardwarePWM.h
+ * hardwareLights.h
  *
- *  Created on: Apr 4, 2016
- *      Author: jerker
  */
 
-#ifndef HARDWAREPWM_H_
-#define HARDWAREPWM_H_
+#ifndef HARDWARELIGHTS_H_
+#define HARDWARELIGHTS_H_
 
-#include "autotuxconfig.h"
+#include "../autotuxconfig.h"
 
+
+#define LIGHT_BIT_BRAKE (1 << 0)
+#define LIGHT_BIT_REVERSE (1 << 1)
+#define LIGHT_BIT_FLASH_LEFT (1 << 2)
+#define LIGHT_BIT_FLASH_RIGHT (1 << 3)
 
 /*
- * Sets up the PWM pins etc
+ * Sets up the light pin etc
  */
-void hardwareSetupPWM(void);
+void hardwareSetupLights(void);
+
+void hardwareIterationLights(unsigned char lightByte, bool rcMode, bool rcBrakeLight);
 
 
-/*
- * Setter for the values. Specify an output channel ID and the control byte
- */
-void hardwareSetValuesPWM(PWM_OUTPUT_ID, int value);
 
-
-/*
- * Setter for the values, pulsewidths directly from RC transmitter.
- */
-void hardwareSetValuesPWM_RC(icucnt_t throttle, icucnt_t steering);
-
-
-#endif /* HARDWAREPWM_H_ */
+#endif /* HARDWARELIGHTS_H_ */

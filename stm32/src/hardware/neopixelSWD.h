@@ -11,7 +11,7 @@
  * 		false
  * 	};
  * 	neopixelInit(&cfg, &colorBuffer);
- * 	neopixelSetColor(colorBuffer, LED(1), LED(2), 255, 220, 0);
+ * 	neopixelSetColor(colorBuffer, LED(1) | LED(2), 255, 220, 0);
  * 	chThdSleepMilliseconds(1000);
  * 	neopixelWrite(&cfg, colorBuffer);
  *
@@ -66,7 +66,7 @@ typedef struct {
 
 
 /** LEDs start from 0 */
-#define LED(i) 2^(i - 1)
+#define LED(i) (1 << i)
 
 void neopixelInit(neopixelConfig* cfg, uint8_t** colorBuffer);
 void neopixelSetColor(uint8_t* colorBuffer, uint32_t ledMask, unsigned char R, unsigned char G, unsigned char B);

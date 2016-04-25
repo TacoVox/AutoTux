@@ -6,17 +6,28 @@
 // in 68mhz is 5.95 ns, and it usually takes three for each iteration of the NOP
 // for loops (the NOP, the boolean check and the counter increase)?
 
-
+/*
+ * The below values work fine with OPEN DRAIN mode.
+ * #define HIGH_TIME_1 38 // 800 ns // 40
+ * #define LOW_TIME_1 22 // 450 ns // 20
+ * #define HIGH_TIME_0 18 // 400 ns // 15 // 12 för lågt, 24 för högt
+ * #define LOW_TIME_0 43 // 850 ns // 40
+ *
+ * With push-pull, the behaviour is much less sensitive to voltage
+ * variations caused by other components. However, for some reasons
+ * (probably the hardware specifics of the internal resistors of the STM32)
+ * the zeroes are understood as ones if we use the same HIGH_TIME_0!
+ * Here we need to use a significantly lower HIGH_TIME_0.
+ */
 #define HIGH_TIME_1 38 // 800 ns // 40
 #define LOW_TIME_1 22 // 450 ns // 20
-#define HIGH_TIME_0 18 // 400 ns // 15 // 12 för lågt, 24 för högt
-#define LOW_TIME_0 43 // 850 ns // 40
+#define HIGH_TIME_0 5 // 400 ns // 15 // 12 för lågt, 24 för högt
+#define LOW_TIME_0 55 // 850 ns // 40
 #define RESET_TIME_CLEAR 10000 // 50 microseconds
 
-
-
 void neopixelInit(neopixelConfig* cfg, uint8_t** colorBuffer) {
-	palSetPadMode(cfg->port, cfg->pin, PAL_MODE_OUTPUT_OPENDRAIN);
+	//palSetPadMode(cfg->port, cfg->pin, PAL_MODE_OUTPUT_OPENDRAIN);
+	palSetPadMode(cfg->port, cfg->pin, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);
 
 	// Allocate memory, set all elements to 0
 	uint8_t* allocatedBuffer = chHeapAlloc(NULL, sizeof(unsigned char) * cfg->numberOfLEDs * 3 * 8);

@@ -1,101 +1,168 @@
 /*
- * hardwarePWM.c
- *
- *  Created on: Apr 4, 2016
- *      Author: jerker
+ * hardwareLights.c
  */
 
-#include <hal.h>
-#include "hardwareRC.h"
+#include "neopixelSWD.h"
+#include "hardwareLights.h"
 
 
 //-----------------------------------------------------------------------------
 // Definitions
 //-----------------------------------------------------------------------------
 
+#define ITERATIONS_PER_FLASH_STATE 4
 
-int map(int x, int in_min, int in_max, int out_min, int out_max);
+void updateColorBuffer(void);
+void setLightBools(unsigned char lightByte, bool rcMode, bool rcBrakeLight);
+bool checkBrakeBit(unsigned char lightByte);
+bool checkReverseBit(unsigned char lightByte);
+bool checkFlashLeftBit(unsigned char lightByte);
+bool checkFlashRightBit(unsigned char lightByte);
 
-static PWMConfig pwmcfg = {
-	1000000, // 1Mhz freq
-    20000,   // 20 ms period
-	NULL,
-	{ // Move this to config
-			{PWM_OUTPUT_ACTIVE_HIGH, NULL}, // Channel 1 and 2 active
-			{PWM_OUTPUT_ACTIVE_HIGH, NULL},
-			{PWM_OUTPUT_DISABLED, NULL},
-			{PWM_OUTPUT_DISABLED, NULL}
-	},
-	0,
-	0
+static uint8_t* colorBuffer = 0;
+static neopixelConfig cfg = {
+	GPIOA, // TODO: move pin to config
+	6,
+	16,
+	false
 };
-
+static bool brakeLight, flashLeft, flashRight, reverseLight, rcLight;
+static bool lightsHaveChanged, flashState;
 
 //-----------------------------------------------------------------------------
-// "Public" interface
+// Public interface
 //-----------------------------------------------------------------------------
 
 
 /*
- * Sets up the pins etc.
+ * Sets up the pin and color buffer.
  */
-void hardwareSetupPWM(void) {
-	palSetPadMode(PWM_PIN_GROUPS[0], PWM_PIN_NUMBERS[0], PAL_MODE_ALTERNATE(2));
-	palSetPadMode(PWM_PIN_GROUPS[1], PWM_PIN_NUMBERS[1], PAL_MODE_ALTERNATE(2));
-	pwmStart(PWM_TIMER, &pwmcfg);
-	pwmEnableChannel(&PWMD5, 0, SPEED_PULSEWIDTHS[SPEED_STOP]);
-	pwmEnableChannel(&PWMD5, 1, WHEELS_CENTERED_PW);
+void hardwareSetupLights(void) {
+
+	neopixelInit(&cfg, &colorBuffer);
+
+	// Headlights
+	neopixelSetColor(colorBuffer, LED(1) | LED(2) | LED(5) | LED(6), 50, 50, 50);
+
+	// Tail lights
+	neopixelSetColor(colorBuffer, LED(9) | LED(14), 40, 0, 0);
+
+	// Sleep a while to make sure voltage on the car stabilizes before write occurs
+	chThdSleepMilliseconds(100);
+	lightsHaveChanged = true;
 }
 
-
-
-/*
- * Setter for the values. Specify an output channel ID
+/**
+ *
  */
-void hardwareSetValuesPWM(PWM_OUTPUT_ID pwm_id, int value) {
-	if (pwm_id == PWM_OUTPUT_SERVO) {
-		// Map angle linearly to pulsewidth. Different mappings on either side,
-		// based on the pulsewidths we perceived as producing the max steering
-		// angles.
-		if (value < 90) {
-			pwmEnableChannel(&PWMD5, 1, map(value, WHEELS_MAXLEFT_ANGLE,
-					WHEELS_CENTERED_ANGLE, WHEELS_MAXLEFT_PW, WHEELS_CENTERED_PW));
-		} else if (value > 90) {
-			pwmEnableChannel(&PWMD5, 1, map(value, WHEELS_CENTERED_ANGLE,
-					WHEELS_MAXRIGHT_ANGLE, WHEELS_CENTERED_PW, WHEELS_MAXRIGHT_PW));
+void hardwareIterationLights(unsigned char lightByte, bool rcMode, bool rcBrakeLight) {
+	static uint8_t flashStateCounter = 0;
+
+	// First process inputs, refine into bools for which lights are on and off
+	setLightBools(lightByte, rcMode, rcBrakeLight);
+
+	// If flashing is turned on, change state regularly.
+	if (flashLeft || flashRight) {
+		if (flashStateCounter < ITERATIONS_PER_FLASH_STATE - 1) {
+			flashStateCounter++;
 		} else {
-			// Center
-			pwmEnableChannel(&PWMD5, 1, WHEELS_CENTERED_PW);
+			flashStateCounter = 0;
+			flashState = !flashState;
+			lightsHaveChanged = true;
 		}
-	} else if (pwm_id == PWM_OUTPUT_ESC) {
-		// Set ESC pw to what is stored at SPEED_PULSEWIDTHS[value] provided that
-		// "value" is in the valid range of speed steps
-		if (value >= 0 && value <= SPEED_STEPS - 1) {
-			pwmEnableChannel(&PWMD5, 0, SPEED_PULSEWIDTHS[value]);
-		}
+	}
+
+	// Rebuild color buffer and write if anything has changed.
+	if (lightsHaveChanged) {
+		updateColorBuffer();
+
+		neopixelWrite(&cfg, colorBuffer);
+		lightsHaveChanged = false;
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Implementation. The static functions below are inaccessible to other modules
+//-----------------------------------------------------------------------------
+
+void updateColorBuffer(void) {
+	// Let flashing activate and deactivate "naturally" aligned with the
+	// flashState pace.
+	if (flashLeft && flashState) {
+		neopixelSetColor(colorBuffer, LED(7) | LED(8), 230, 130, 0);
+	}
+	if (flashRight && flashState) {
+		neopixelSetColor(colorBuffer, LED(0) | LED(15), 230, 130, 0);
+	}
+	if (!flashState) {
+		// Turn off all corner leds
+		neopixelSetColor(colorBuffer, LED(0) | LED(7) | LED(8) | LED(15), 0, 0, 0);
+
+	}
+
+	if (reverseLight) {
+		neopixelSetColor(colorBuffer, LED(11), 60, 60, 60);
+	} else {
+		neopixelSetColor(colorBuffer, LED(11), 0, 0, 0);
+	}
+
+	if (brakeLight) {
+		neopixelSetColor(colorBuffer, LED(10) | LED(13), 255, 0, 0);
+	} else {
+		neopixelSetColor(colorBuffer, LED(10) | LED(13), 0, 0, 0);
+	}
+
+	if (rcLight) {
+		neopixelSetColor(colorBuffer, LED(3) | LED(4) | LED(12), 0, 0, 150);
+	} else {
+		neopixelSetColor(colorBuffer, LED(3) | LED(4) | LED(12), 0, 0, 0);
 	}
 }
 
 
-/*
- * Setter for the values, pulsewidths directly from RC transmitter.
- */
-void hardwareSetValuesPWM_RC(icucnt_t throttle, icucnt_t steering) {
-	pwmEnableChannel(&PWMD5, 0, throttle);
-	pwmEnableChannel(&PWMD5, 1, steering);
-}
-
-//-----------------------------------------------------------------------------
-// "Private" implementation
-//-----------------------------------------------------------------------------
-
 /**
- * Map function, borrowed from the Arduino reference manual!
- * Adapted to not allow out of bound values.
+ * Choose which lights should be on and off
  */
-int map(int x, int in_min, int in_max, int out_min, int out_max) {
-	if (x < in_min) x = in_min;
-	if (x > in_max) x = in_max;
-	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+void setLightBools(unsigned char lightByte, bool rcMode, bool rcBrakeLight) {
+	// Assumption: rcLight = (rcMode || rcBrakeLight)
+	if (rcLight != (rcMode || rcBrakeLight)) {
+		rcLight = (rcMode || rcBrakeLight);
+		lightsHaveChanged = true;
+	}
+
+	// Assumption: brakeLight = (rcBrakeLight || brake bit set in lightByte)
+	if (brakeLight != (rcBrakeLight || checkBrakeBit(lightByte))) {
+		brakeLight = (rcBrakeLight || checkBrakeBit(lightByte));
+		lightsHaveChanged = true;
+	}
+
+	// Similar below
+	if (reverseLight != checkReverseBit(lightByte)) {
+		reverseLight = checkReverseBit(lightByte);
+		lightsHaveChanged = true;
+	}
+	if (flashLeft != checkFlashLeftBit(lightByte)) {
+		flashLeft = checkFlashLeftBit(lightByte);
+		lightsHaveChanged = true;
+	}
+	if (flashRight != checkFlashRightBit(lightByte)) {
+		flashRight = checkFlashRightBit(lightByte);
+		lightsHaveChanged = true;
+	}
 }
 
+bool checkBrakeBit(unsigned char lightByte) {
+	return (lightByte &  LIGHT_BIT_BRAKE) == LIGHT_BIT_BRAKE;
+}
+
+bool checkReverseBit(unsigned char lightByte) {
+	return (lightByte &  LIGHT_BIT_REVERSE) == LIGHT_BIT_REVERSE;
+}
+
+bool checkFlashLeftBit(unsigned char lightByte) {
+	return (lightByte &  LIGHT_BIT_FLASH_LEFT) == LIGHT_BIT_FLASH_LEFT;
+}
+
+bool checkFlashRightBit(unsigned char lightByte) {
+	return (lightByte &  LIGHT_BIT_FLASH_RIGHT) == LIGHT_BIT_FLASH_RIGHT;
+}
