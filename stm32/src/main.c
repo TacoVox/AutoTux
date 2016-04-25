@@ -16,7 +16,10 @@
 #include <hal.h>
 
 // Local includes
-#include "serialConnection.h"
+#include "hardware/sensorInput.h"
+#include "hardware/controlOutput.h"
+#include "serial/serialConnection.h"
+#include "hardware/neopixelSWD.h"
 
 
 //-----------------------------------------------------------------------------
@@ -29,14 +32,23 @@ int main(void) {
 	halInit();
 	chSysInit();
 
-	// The main thread is dedicated to the serial connection.
-	// In this loop, values are also output to hardware. We will keep this solution
-	// unless we have any problems caused by USB output buffer overflow making the
-	// writing to USB block, which could cause safety issues with the car if it would
-	// ever occur. However it seems to work fine to just avoid writing to the serial
-	// connection whenever we perceive the connection as disconnected by reading Q_RESET
-	// from the stream.
-	serialConnectionLoop();
+	// Initialize sensor settings
+	sensorInputSetup();
+	controlOutputSetup();
+
+	// Start the serial connection. Creates its own thread.
+	serialConnectionStart();
+
+	// Then simply read sensor values and output control values on the main thread
+	while (true) {
+		sensorInputIteration();
+		controlOutputIteration();
+
+		// Above meausred to 72 ms including ADC callback - sleep 8 to achieve 12.5 hertz
+		chThdSleepMilliseconds(8);
+		// Sleep 28 to achieve 10 hz
+		// chThdSleepMilliseconds(28);
+	}
 
 	return 0;
 }

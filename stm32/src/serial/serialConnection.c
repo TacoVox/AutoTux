@@ -13,9 +13,9 @@
 #include "usbcfg.h"
 
 // Local includes
-#include "autotuxconfig.h"
-#include "sensorInput.h"
-#include "controlOutput.h"
+#include "../autotuxconfig.h"
+#include "../hardware/sensorInput.h"
+#include "../hardware/controlOutput.h"
 #include "packetHandler.h"
 
 
@@ -27,8 +27,8 @@
 // Initializes the USB serial driver.
 void initializeUSB(void);
 
-// Initializes everything related to sensors and control output
-void initializeHW(void);
+static THD_WORKING_AREA(serialThreadWorkingArea, 300); // stack size in bytes
+static THD_FUNCTION(serialThread, arg);
 
 
 //-----------------------------------------------------------------------------
@@ -36,15 +36,19 @@ void initializeHW(void);
 //-----------------------------------------------------------------------------
 
 
-int serialConnectionLoop(void) {
+void serialConnectionStart(void) {
+	// Initialize USB serial driver and start thread
 	initializeUSB();
-	initializeHW();
+	(void)chThdCreateStatic(serialThreadWorkingArea, sizeof(serialThreadWorkingArea),
+						  NORMALPRIO, serialThread, NULL);
+}
+
+
+static THD_FUNCTION(serialThread, arg) {
+	(void) arg;
 
 	// Buffer for last received byte.
 	msg_t charbuf;
-
-	// Last received control data bytes. Initialized to car stopped, wheels centered
-	unsigned char controlData[CONTROL_DATA_BYTES] = DEFAULT_CONTROL_BYTES;
 
 	// Counter for iterations without valid packet received.
 	int iterationsWithoutReceive = 0;
@@ -62,23 +66,24 @@ int serialConnectionLoop(void) {
 	// Sensor data bytes to be sent to the Odroid.
 	unsigned char sensorData[SENSOR_DATA_BYTES];
 
-	// TODO: MOVE TO OUTPUT HARDWARE FILE
-	// Car initial state: stopped, wheels centered
-	controlOutputStopCenter();
-
 	// Time of the iteration. Used to adapt the sleeping
 	unsigned int itTime = 0;
+
+	// Latest received control bytes. Should only be forwarded on valid packet.
+	static unsigned char controlData[CONTROL_BYTE_COUNT] = DEFAULT_CONTROL_BYTES;
 
 	// Main serial connection loop.
 	while(true) {
 		itTime = ST2MS(chVTGetSystemTime());
 		
+
 		//---------------------------------------------------------------------
-		// Reset all LEDS
+		// Reset all serial related LEDs
 		//---------------------------------------------------------------------
 		palClearPad(GPIOD, GPIOD_LED4); // Green
 		palClearPad(GPIOD, GPIOD_LED5); // Red
 		palClearPad(GPIOD, GPIOD_LED3); // Orange
+
 
 		//---------------------------------------------------------------------
 		// Receiving part
@@ -90,6 +95,7 @@ int serialConnectionLoop(void) {
 		bytesReceived = 0;
 		while (charbuf != Q_TIMEOUT && charbuf != Q_RESET &&
 				bytesReceived < MAX_RECEIVE_BYTES_IN_ITERATION) {
+
 			// Received another byte
 			bytesReceived++;
 
@@ -116,10 +122,15 @@ int serialConnectionLoop(void) {
 		if (packetHandlerGetBufferSize() >= CONTROL_DATA_PACKET_SIZE &&
 				bytesReceived > 0) {
 			if (packetHandlerReadPacketFromBuffer(controlData) == PACKET_OK) {
+
 				// Valid packet - green LED
 				palSetPad(GPIOD, GPIOD_LED4);
 				receivedValidPacket = TRUE;
 				iterationsWithoutReceive = 0;
+
+				// Inform controlOutput of the new data
+				controlOutputSetData(controlData);
+
 			} else {
 				if (!DEBUG_OUTPUT) {
 					// Broken packet or garbage - orange LED
@@ -148,23 +159,6 @@ int serialConnectionLoop(void) {
 
 
 		//---------------------------------------------------------------------
-		// Output to hardware
-		//---------------------------------------------------------------------
-
-		// Unless we received no data for a number of iterations or too much data at once,
-		// controlData contains the latest valid instructions. Output them to hardware.
-		if (connectionLinkActive && bytesReceived <= MAX_RECEIVE_BYTES_IN_ITERATION) {
-			// Forward control data to hardware
-			controlOutput(controlData);
-		} else {
-			// Serial connection rules violated. Stop the car and center wheels!
-			// TODO: MAYBE it would be good style here to overwrite controlData to stop-center values?
-			// On the other hand, connectionLinkActive should only be TRUE again if a new valid
-			// packet is received.
-			controlOutputStopCenter();
-		}
-
-		//---------------------------------------------------------------------
 		// Sending part
 		//---------------------------------------------------------------------
 		if (usbConnected && connectionLinkActive) {
@@ -189,7 +183,6 @@ int serialConnectionLoop(void) {
 			chThdSleepMilliseconds(60);
 		}
 	}
-	return 0;
 }
 
 
@@ -207,14 +200,4 @@ void initializeUSB(void) {
 	chThdSleepMilliseconds(1500);
 	usbStart(serusbcfg.usbp, &usbcfg);
   	usbConnectBus(serusbcfg.usbp);
-}
-
-
-/**
- * Initializes everything related to sensors and control output
- */
-void initializeHW(void) {
-	// Initialize sensor settings
-	sensorInputSetup();
-	controlOutputSetup();
 }

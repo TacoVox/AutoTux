@@ -14,7 +14,7 @@
 //-----------------------------------------------------------------------------
 
 
-int map(int x, int in_min, int in_max, int out_min, int out_max);
+static int map(int x, int in_min, int in_max, int out_min, int out_max);
 
 static PWMConfig pwmcfg = {
 	1000000, // 1Mhz freq
@@ -40,10 +40,9 @@ static PWMConfig pwmcfg = {
  * Sets up the pins etc.
  */
 void hardwareSetupPWM(void) {
-	// TODO: Move pins and timer driver to config!
-	palSetPadMode(GPIOA, 0, PAL_MODE_ALTERNATE(2));
-	palSetPadMode(GPIOA, 1, PAL_MODE_ALTERNATE(2));
-	pwmStart(&PWMD5, &pwmcfg);
+	palSetPadMode(PWM_PIN_GROUPS[0], PWM_PIN_NUMBERS[0], PAL_MODE_ALTERNATE(2));
+	palSetPadMode(PWM_PIN_GROUPS[1], PWM_PIN_NUMBERS[1], PAL_MODE_ALTERNATE(2));
+	pwmStart(PWM_TIMER, &pwmcfg);
 	pwmEnableChannel(&PWMD5, 0, SPEED_PULSEWIDTHS[SPEED_STOP]);
 	pwmEnableChannel(&PWMD5, 1, WHEELS_CENTERED_PW);
 }
@@ -94,7 +93,7 @@ void hardwareSetValuesPWM_RC(icucnt_t throttle, icucnt_t steering) {
  * Map function, borrowed from the Arduino reference manual!
  * Adapted to not allow out of bound values.
  */
-int map(int x, int in_min, int in_max, int out_min, int out_max) {
+static int map(int x, int in_min, int in_max, int out_min, int out_max) {
 	if (x < in_min) x = in_min;
 	if (x > in_max) x = in_max;
 	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;

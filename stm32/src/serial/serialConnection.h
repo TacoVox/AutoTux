@@ -9,7 +9,7 @@
 /**
  * Setup the serial connection and run the loop
  */
-void serialConnectionLoop(void);
+void serialConnectionStart(void);
 
 
 #endif /* SERIALCONNECTION_H_ */

@@ -14,6 +14,12 @@ void sensorInputSetup(void);
 
 
 /**
+ * Prepare all the sensor values
+ */
+void sensorInputIteration(void);
+
+
+/**
  * Fills a char array with all sensor data
  */
 void sensorInputGetData(unsigned char* buffer);
