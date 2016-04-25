@@ -22,22 +22,33 @@ namespace parker {
         const double ADJUST_BEFORE_PARKING = 0.20;
         const double BACK_AROUND_CORNER = 0.45;
         const double BACKING_STRAIGHT = 0.13;
-        const double BACKING_LEFT = 0.43;
+        const double BACKING_LEFT = 0.45;
         const double ADJUST_IN_SPOT_FORWARD = 0.10;
         const double ADJUST_IN_SPOT_BACK = 0.10;
-        */
 
+        const double SENSOR_MIN = 0.03
+        const double SENSOR_MAX = 0.04
+        */
+        //-----------------------------------------
         //SIMULATION
         const double SPOT_SIZE = 7;
-        const double ADJUST_BEFORE_PARKING = 2;
+        const double ADJUST_BEFORE_PARKING = 2.2;
         const double BACK_AROUND_CORNER = 5;
         const double BACKING_STRAIGHT = 2;
         const double BACKING_LEFT = 2.5;
         const double ADJUST_IN_SPOT_FORWARD = 1.5;
         const double ADJUST_IN_SPOT_BACK = 1;
+
+        const double SENSOR_MIN = 0.2;
+        const double SENSOR_MAX = 0.5;
         //----------------------------------------
 
 
+        const int FREQUENCY = 5;
+
+        const double ULTRASONIC_FRONT_FORWARD = 3;
+        const double ULTRASONIC_FRONT_RIGHT = 4;
+        const double INFRARED_FRONT_RIGHT = 0;
         const double INFRARED_REAR_RIGHT = 2;
         const double INFRARED_REAR_BACK = 1;
 
@@ -55,7 +66,7 @@ namespace parker {
         automotive::VehicleControl backingLeft(automotive::VehicleData, double);
         automotive::VehicleControl adjustInSpotForward(automotive::VehicleData, double);
         automotive::VehicleControl adjustInSpotBack(automotive::VehicleData, double);
-
+        automotive::VehicleControl midOfSpot(automotive::miniature::SensorBoardData);
         bool isNotSafe(automotive::miniature::SensorBoardData);
         automotive::VehicleControl goBackToLane(automotive::VehicleData);
 
