@@ -8,7 +8,7 @@
 #include <hal.h>
 
 // Local includes
-#include "autotuxconfig.h"
+#include "../autotuxconfig.h"
 #include "controlOutput.h"
 #include "hardwarePWM.h"
 #include "hardwareRC.h"

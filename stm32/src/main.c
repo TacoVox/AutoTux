@@ -16,9 +16,9 @@
 #include <hal.h>
 
 // Local includes
-#include "sensorInput.h"
-#include "controlOutput.h"
-#include "serialConnection.h"
+#include "hardware/sensorInput.h"
+#include "hardware/controlOutput.h"
+#include "serial/serialConnection.h"
 
 
 

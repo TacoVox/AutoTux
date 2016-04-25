@@ -13,9 +13,9 @@
 #include "usbcfg.h"
 
 // Local includes
-#include "autotuxconfig.h"
-#include "sensorInput.h"
-#include "controlOutput.h"
+#include "../autotuxconfig.h"
+#include "../hardware/sensorInput.h"
+#include "../hardware/controlOutput.h"
 #include "packetHandler.h"
 
 
