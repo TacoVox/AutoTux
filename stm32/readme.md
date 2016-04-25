@@ -1,5 +1,5 @@
 # STM32
-The low-level code for the AutoTux project.
+The STM32 code for the AutoTux project.
 
 ## Coding guidelines
 - Make sure all function names start with the file name where applicable.
