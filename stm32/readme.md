@@ -1,7 +1,8 @@
-This is the low-level part of AutoTux.
+# STM32
+The low-level code for the AutoTux project.
 
 
-Licence notes:
+## Licence notes:
 Based on the USB CDC example from ChibiOS. The ChibiOS files are licenced under the Apache licence, as stated in each relevant file (the files from ChibiOS are in the conf/ and lib/Chibios directories). 
 
 This is stated by ChibiOS regarding the STM demos:
