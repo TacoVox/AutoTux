@@ -21,7 +21,7 @@
 #include "serialConnection.h"
 
 
-#include "LEDDriver.h"
+#include "neopixelSWD.h"
 
 
 //-----------------------------------------------------------------------------
@@ -38,25 +38,38 @@ int main(void) {
 	sensorInputSetup();
 	controlOutputSetup();
 
-	// Init LED
 
-	init(16);
-	//setColor(1 | 2 | 4 | 8, 255, 255, 0);
-	write();
+	// Init LEDs
+	uint8_t* colorBuffer = 0;
+	neopixelConfig cfg = {
+			GPIOA,
+			6,
+			16,
+			false
+	};
+	neopixelInit(&cfg, &colorBuffer);
+
+
+	neopixelSetColor(colorBuffer, 1 | 2 | 4 | 8, 255, 220, 0);
+	/*for (int i = 0; i < cfg.numberOfLEDs * 3; i++) {
+		if (colorBuffer[i] != 0) palSetPad(GPIOD, GPIOD_LED3);
+	}*/
+
+	chThdSleepMilliseconds(1000);
+	neopixelWrite(&cfg, colorBuffer);
+
 	// Start another thread for the serial connection
-	serialConnectionStart();
+	//serialConnectionStart();
 
 	// Then simply read sensor values and output control values on the main thread
 	while (true) {
 
-		//testPatternFB();
 
-
-		sensorInputIteration();
-		controlOutputIteration();
+		//sensorInputIteration();
+		//controlOutputIteration();
 
 		// Above meausred to 72 ms including ADC callback - sleep 8 to achieve 12.5 hertz
-		chThdSleepMilliseconds(8);
+		//chThdSleepMilliseconds(8);
 		// Sleep 28 to achieve 10 hz
 		// chThdSleepMilliseconds(28);
 	}
