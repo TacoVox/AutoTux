@@ -6,19 +6,19 @@
  */
 
 
-#include "serial/USBHandler.h"
 #include <thread>
 #include <chrono>
 #include <iostream>
 #include <cstring>
+#include "serial/USBHandler.h"
 
 using namespace std;
 
 
 /*! constructor */
-usb_handler::USBHandler::USBHandler(std::shared_ptr<usb_connector::USBConnector> c) :
+usb_handler::USBHandler::USBHandler(std::shared_ptr<usb_connector::USBConnector> ptr) :
     running{true},
-    uc{c}
+    uc{ptr}
 {
     cout << "creating usb handler... ";
     cout << "[OK]" << endl;
@@ -45,15 +45,20 @@ void usb_handler::USBHandler::run()
         // read from usb
         int res1 = uc->read();
         cout << "result from read: " << res1 << endl;
+        // if not successful read, check if we
+        // need to reconnect
         if (res1 != 0) {
             if (is_reconnect(res1)) reconnect();
         }
         // write it to usb
         int res2 = uc->write();
         cout << "result from write: " << res2 << endl;
+        // if not successful write, check if we
+        // need to reconnect
         if (res2 != 0) {
             if (is_reconnect(res2)) reconnect();
         }
+        // sleep for 67, approximation to keep the frequency (30)
         this_thread::sleep_for(chrono::milliseconds(67));
     }
 }
@@ -67,9 +72,9 @@ void usb_handler::USBHandler::stop()
 
 
 /*! sets the usb connector for this handler */
-void usb_handler::USBHandler::set_usb_connector(std::shared_ptr<usb_connector::USBConnector> c)
+void usb_handler::USBHandler::set_usb_connector(std::shared_ptr<usb_connector::USBConnector> ptr)
 {
-    uc = c;
+    uc = ptr;
 }
 
 
@@ -100,5 +105,4 @@ bool usb_handler::USBHandler::is_reconnect(int error_code)
     default:
         return false;
     }
-    return false;
 }

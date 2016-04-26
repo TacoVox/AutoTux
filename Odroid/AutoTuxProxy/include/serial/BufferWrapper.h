@@ -60,7 +60,7 @@ namespace serial
         std::vector<unsigned char> readSendBuffer(void);
     private:
         /*! returns the checksum for a valid packet */
-        unsigned char checksum(std::vector<unsigned char>);
+        unsigned char checksum(const std::vector<unsigned char> *);
     private:
         /*! the receive buffer */
         std::deque<std::vector<unsigned char>> buffer_in;
