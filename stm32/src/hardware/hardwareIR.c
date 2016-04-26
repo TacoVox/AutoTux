@@ -1,8 +1,7 @@
-/*
- * hardwareIR.c
+/** @file	hardwareIR.c
+ * 	@brief Reads the IR sensors.
  *
- *  Created on: Apr 4, 2016
- *      Author: jerker
+ * Uses ADC with several samples for each measurements.
  */
 
 
@@ -14,22 +13,26 @@
 // Definitions
 //-----------------------------------------------------------------------------
 
-// Prototype for the adc callback function.
 static void adcCallback(ADCDriver *adcp, adcsample_t *buffer, size_t n);
 
-// Sample buffer array + array for averages
+/**
+ *	Sample buffer array
+ */
 static adcsample_t irSamples[ADC_SAMPLES * ADC_CHANNELS] = {0};
+
+/**
+ * Array for averages
+ */
 static adcsample_t irAvg[ADC_CHANNELS];
 
-// The resulting centimeter values
+/**
+ * The resulting centimeter values
+ */
 static int irCm[ADC_CHANNELS];
 
-// ADC config.
-// Note that changing autotuxhardware.h should be enough on pin layout change.
-// Channels:
-// 6 = side front
-// 14 = side rear
-// 15 = rear
+/**
+ * ADC group config
+ */
 static const ADCConversionGroup adc_group = {
   false, // No circular buffer (stop after filling the buffer each time)
   ADC_CHANNELS,
@@ -46,7 +49,7 @@ static const ADCConversionGroup adc_group = {
 
 
 //-----------------------------------------------------------------------------
-// "Public" interface
+// Public interface
 //-----------------------------------------------------------------------------
 
 
@@ -67,7 +70,6 @@ void hardwareIterationIR() {
 	adcStartConversion(&ADCD1, &adc_group, &irSamples[0], ADC_SAMPLES);
 }
 
-
 /*
  * Getter for the values. Specify an IR sensor.
  */
@@ -77,12 +79,13 @@ int hardwareGetValuesIR(IR_SENSOR sensor) {
 
 
 //-----------------------------------------------------------------------------
-// "Private" implementation
+// Implementation. The static functions below are inaccessible to other modules
 //-----------------------------------------------------------------------------
 
 
 /*
- * Callback function, runs when ADC is completed.
+ * @brief Callback function, runs when ADC is completed.
+ *
  * (Could be generalized with a loop)
  */
 void adcCallback(ADCDriver *adcp, adcsample_t *buffer, size_t n) {

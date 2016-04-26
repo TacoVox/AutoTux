@@ -1,8 +1,5 @@
-/*
- * hardwarePWM.c
- *
- *  Created on: Apr 4, 2016
- *      Author: jerker
+/** @file	hardwarePWM.c
+ * 	@brief Handles the PWM output that controls the servo and ESC.
  */
 
 #include <hal.h>
@@ -16,6 +13,9 @@
 
 static int map(int x, int in_min, int in_max, int out_min, int out_max);
 
+/**
+ * Configuration for the PWM driver.
+ */
 static PWMConfig pwmcfg = {
 	1000000, // 1Mhz freq
     20000,   // 20 ms period
@@ -32,7 +32,7 @@ static PWMConfig pwmcfg = {
 
 
 //-----------------------------------------------------------------------------
-// "Public" interface
+// Public interface
 //-----------------------------------------------------------------------------
 
 
@@ -48,9 +48,8 @@ void hardwareSetupPWM(void) {
 }
 
 
-
 /*
- * Setter for the values. Specify an output channel ID
+ * Setter for the values. Specify an output channel ID.
  */
 void hardwareSetValuesPWM(PWM_OUTPUT_ID pwm_id, int value) {
 	if (pwm_id == PWM_OUTPUT_SERVO) {
@@ -78,19 +77,20 @@ void hardwareSetValuesPWM(PWM_OUTPUT_ID pwm_id, int value) {
 
 
 /*
- * Setter for the values, pulsewidths directly from RC transmitter.
+ * Setter for the values, pulse widths directly from RC transmitter.
  */
 void hardwareSetValuesPWM_RC(icucnt_t throttle, icucnt_t steering) {
 	pwmEnableChannel(&PWMD5, 0, throttle);
 	pwmEnableChannel(&PWMD5, 1, steering);
 }
 
+
 //-----------------------------------------------------------------------------
-// "Private" implementation
+// Implementation. The static functions below are inaccessible to other modules
 //-----------------------------------------------------------------------------
 
 /**
- * Map function, borrowed from the Arduino reference manual!
+ * Map function, actually borrowed from the Arduino reference manual!
  * Adapted to not allow out of bound values.
  */
 static int map(int x, int in_min, int in_max, int out_min, int out_max) {
@@ -98,4 +98,3 @@ static int map(int x, int in_min, int in_max, int out_min, int out_max) {
 	if (x > in_max) x = in_max;
 	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
-
