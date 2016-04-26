@@ -14,18 +14,15 @@
 // Definitions
 //-----------------------------------------------------------------------------
 
-systime_t callbackEndTime;
-
-
 // Prototype for the adc callback function.
-void adcCallback(ADCDriver *adcp, adcsample_t *buffer, size_t n);
+static void adcCallback(ADCDriver *adcp, adcsample_t *buffer, size_t n);
 
 // Sample buffer array + array for averages
-adcsample_t irSamples[ADC_SAMPLES * ADC_CHANNELS] = {0};
-adcsample_t irAvg[ADC_CHANNELS];
+static adcsample_t irSamples[ADC_SAMPLES * ADC_CHANNELS] = {0};
+static adcsample_t irAvg[ADC_CHANNELS];
 
 // The resulting centimeter values
-int irCm[ADC_CHANNELS];
+static int irCm[ADC_CHANNELS];
 
 // ADC config.
 // Note that changing autotuxhardware.h should be enough on pin layout change.
@@ -75,12 +72,9 @@ void hardwareIterationIR() {
  * Getter for the values. Specify an IR sensor.
  */
 int hardwareGetValuesIR(IR_SENSOR sensor) {
-	return irCm[sensor];
+	return (irCm[sensor] < IR_VALUE_CAP) ? irCm[sensor] : IR_VALUE_CAP;
 }
 
-systime_t getCallbackEndTime(void) {
-	return callbackEndTime;
-}
 
 //-----------------------------------------------------------------------------
 // "Private" implementation
@@ -107,7 +101,7 @@ void adcCallback(ADCDriver *adcp, adcsample_t *buffer, size_t n) {
 		// Formula: irCm[0] = (int)(2914.0f / (irAvg[0] + 5.0f))- 1;
 		// Here we also add the previous value and divide by 2 to average out
 		irCm[0] = (irCm[0] + (int)(2914.0f / (irAvg[0] + 5.0f))- 1) / 2;
-		irCm[1] = (irCm[0] + (int)(2914.0f / (irAvg[1] + 5.0f))- 1) / 2;
-		irCm[2] = (irCm[0] + (int)(2914.0f / (irAvg[2] + 5.0f))- 1) / 2;
+		irCm[1] = (irCm[1] + (int)(2914.0f / (irAvg[1] + 5.0f))- 1) / 2;
+		irCm[2] = (irCm[2] + (int)(2914.0f / (irAvg[2] + 5.0f))- 1) / 2;
   }
 }

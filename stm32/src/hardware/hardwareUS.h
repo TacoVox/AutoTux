@@ -8,7 +8,7 @@
 #ifndef HARDWAREUS_H_
 #define HARDWAREUS_H_
 
-#include "autotuxconfig.h"
+#include "../autotuxconfig.h"
 
 /*
  * Sets up the US sensor pins etc.
@@ -26,5 +26,11 @@ void hardwareIterationUSEnd(void);
  * Getter for the values. Specify a US sensor.
  */
 int hardwareGetValuesUS(US_SENSOR);
+
+/*
+ * Getter for the light sensor reading
+ */
+unsigned char hardwareGetValuesUSLight(void);
+
 
 #endif /* HARDWAREUS_H_ */
