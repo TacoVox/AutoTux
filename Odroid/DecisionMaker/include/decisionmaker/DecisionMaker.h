@@ -10,6 +10,7 @@
 #include <parker/Parker.h>
 #include "opendavinci/odcore/data/Container.h"
 
+#include "opendavinci/odcore/base/LIFOQueue.h"
 #include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
 #include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 
@@ -25,7 +26,7 @@ namespace decisionmaker{
         DecisionMaker(const int32_t &argc, char **argv);
         virtual ~DecisionMaker();
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
-        virtual void nextContainer(odcore::data::Container &c);
+        //virtual void nextContainer(odcore::data::Container &c);
 
     private:
         overtaker::Overtaker ovt;
@@ -33,6 +34,7 @@ namespace decisionmaker{
 
         virtual void setUp();
         virtual void tearDown();
+
         odcore::data::Container containerVehicleData;
         odcore::data::Container containerSensorBoardData;
 
@@ -42,6 +44,8 @@ namespace decisionmaker{
         bool isDataQuality();
         double getDistanceToLine();
         void laneFollowing();
+
+        bool stopped;
     };
 
 } //DecisionMaker

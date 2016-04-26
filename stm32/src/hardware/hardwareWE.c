@@ -25,7 +25,9 @@ static THD_FUNCTION(wheelEncoderThread, arg);
 
 // The resulting pulsewidth values
 uint8_t ticks;
-bool previousState;
+unsigned int distanceTicks;
+unsigned int distanceTraveled;
+bool previousEncoderState;
 int cmPerSecond;
 systime_t startTime;
 systime_t timeNow;
@@ -52,14 +54,14 @@ void hardwareIterationWE(void) {
 	// Try measuring every fifth iteration for now
 
 	systime_t startTime = chVTGetSystemTime();
-    const float ticksPerMeter = 47.7;
 
 	while(true){
-		if (previousState == FALSE && palReadPad(WE_PIN_GROUP, WE_PIN_NUMBER)) {
-	        previousState = TRUE;
+		if (previousEncoderState == FALSE && palReadPad(WE_PIN_GROUP, WE_PIN_NUMBER)) {
+	        previousEncoderState = TRUE;
 	        ticks++;
-	    } else if (previousState == TRUE && palReadPad(WE_PIN_GROUP, WE_PIN_NUMBER) == FALSE) {
-	        previousState = FALSE;
+			distanceTicks++;
+	    } else if (previousEncoderState == TRUE && palReadPad(WE_PIN_GROUP, WE_PIN_NUMBER) == FALSE) {
+	        previousEncoderState = FALSE;
 	    }
 		timeNow = chVTGetSystemTime();
 	    if (ST2MS(timeNow) > ST2MS(startTime) + 1000) {
@@ -67,7 +69,7 @@ void hardwareIterationWE(void) {
 	        // numberOfTicksInMeters / timeElapsed
 	        systime_t timeDelta = timeNow - startTime;
 			double seconds = ST2MS(timeDelta) / (double)1000;
-			double centimeters = (ticks / ticksPerMeter) * 100;
+			double centimeters = ((double)ticks / WE_TICKS_PER_METER) * 100;
 	        cmPerSecond = (int)(centimeters / seconds);
 
 	        // Reset tick counter
@@ -75,7 +77,7 @@ void hardwareIterationWE(void) {
 	        startTime = chVTGetSystemTime();
 	    }
 
-		chThdSleepMilliseconds(5);
+		chThdSleepMilliseconds(1);
 	}
 }
 
@@ -87,12 +89,19 @@ static THD_FUNCTION(wheelEncoderThread, arg) {
 /*
  * Getter for the values. Specify a US sensor.
  */
-int hardwareGetValuesWE(void) {
+int hardwareGetValuesWESpeed(void) {
 	return cmPerSecond;
+}
+
+/*
+ * Returns distance traveled in centimeters
+ */
+
+int hardwareGetValuesWEDistance(void) {
+	distanceTraveled = ((int)(((float)distanceTicks / (float)WE_TICKS_PER_METER) * 100)+0.5);
+	return distanceTraveled;
 }
 
 //-----------------------------------------------------------------------------
 // "Private" implementation
 //-----------------------------------------------------------------------------
-
-

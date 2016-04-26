@@ -12,7 +12,7 @@
 
 
 //-----------------------------------------------------------------------------
-// Serial behaviour
+// Serial and control out behaviour
 //-----------------------------------------------------------------------------
 
 
@@ -20,7 +20,8 @@
 #define DEBUG_OUTPUT 0
 
 // If more iterations than this occurs without receiving a valid packet,
-// the car is stopped and wheels are centered.
+// the serial stops sending to avoid filling buffers. The car is also
+// stopped and wheels are centered.
 #define MAX_ITERATIONS_WITHOUT_RECEIVE 5
 
 // If more bytes than this is received in the same iteration, we know we are
@@ -34,6 +35,11 @@
 // RC mode behavior. If recalibrating PWM values, also see PWM hardware config.
 //-----------------------------------------------------------------------------
 
+
+// Use this to attenuate values from RC transmitter
+// BE CAREFUL, DON'T USE VALUES HIGHER THAN ONE UNLESS YOU KNOW WHAT YOU'RE DOING
+#define RC_FORWARD_MULTIPLIER 0.2
+#define RC_BACKWARD_MULTIPLIER 0.7
 
 // When RC is on, the throttle signal is above this treshold value
 #define RC_THROTTLE_ON_TRESHOLD 100
@@ -55,6 +61,8 @@
 //-----------------------------------------------------------------------------
 // IR hardware config
 //-----------------------------------------------------------------------------
+
+#define IR_VALUE_CAP 25
 
 // Used to identify each sensor
 typedef enum {IR_SIDE_FRONT, IR_SIDE_REAR, IR_REAR} IR_SENSOR;
@@ -92,6 +100,7 @@ static const ioportmask_t US_PIN_NUMBERS[] = {9, 8};
 
 #define US_I2C_DRIVER &I2CD3
 
+#define US_VALUE_CAP 90
 
 //-----------------------------------------------------------------------------
 // RC hardware config
@@ -117,25 +126,28 @@ static const ioportmask_t RC_PIN_NUMBERS[] = {4, 6};
 //-----------------------------------------------------------------------------
 
 
-#define WE_TIMER &ICUD5
-#define WE_TIMER_CHANNEL ICU_CHANNEL_1
+#define WE_TICKS_PER_METER 61.7 // 44.07
 
-// A0
+// A2
 static const ioportid_t WE_PIN_GROUP = GPIOA;
 static const ioportmask_t WE_PIN_NUMBER  = 2;
 
 
 //-----------------------------------------------------------------------------
-// PWM hardware config
+// PWM hardware config and pulsewidth values
 //-----------------------------------------------------------------------------
 
+static const ioportid_t PWM_PIN_GROUPS[] = {GPIOA, GPIOA};
+static const ioportmask_t PWM_PIN_NUMBERS[] = {0, 1};
+
+#define PWM_TIMER &PWMD5
 
 typedef enum {PWM_OUTPUT_ESC, PWM_OUTPUT_SERVO} PWM_OUTPUT_ID;
 
 // Speeds and their corresponding pulsewidths.
 typedef enum {SPEED_REVERSE, SPEED_STOP, SPEED_FORWARD_LOW, SPEED_FORWARD_CRUISE} SPEED;
 #define SPEED_STEPS 4
-static const int SPEED_PULSEWIDTHS[SPEED_STEPS] = {1140, 1350, 1430, 1530};
+static const int SPEED_PULSEWIDTHS[SPEED_STEPS] = {1140, 1350, 1410, 1440};
 
 #define WHEELS_MAXLEFT_PW 1220
 #define WHEELS_CENTERED_PW 1590
@@ -145,10 +157,6 @@ static const int SPEED_PULSEWIDTHS[SPEED_STEPS] = {1140, 1350, 1430, 1530};
 #define WHEELS_CENTERED_ANGLE 90
 #define WHEELS_MAXRIGHT_ANGLE 120
 
-
-// TODO: REPLACE HARD-CODED VALUES IN HARDWAREPWM.C WITH CONFIG CONSTANTS!
-//static const ioportid_t PWM_PIN_GROUPS[] = {GPIOB, GPIOB};
-//static const ioportmask_t PWM_PIN_NUMBERS[] = {4, 6};
 
 
 

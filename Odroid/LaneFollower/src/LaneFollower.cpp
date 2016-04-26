@@ -23,11 +23,15 @@ namespace lane {
         using namespace odcore::data;
         using namespace odcore::data::image;
         using namespace odcore::wrapper;
+        using namespace autotux;
 
         using namespace lane::follower;
 
         // Debugging use only
         using namespace odtools::player;
+
+        // SET TO TRUE WHEN USING THE SIMULATOR
+        const bool SIMMODE = true;
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) :
                 TimeTriggeredConferenceClientModule(argc, argv, "LaneDetector"),
@@ -46,11 +50,29 @@ namespace lane {
         // This method will run before body()
         void LaneFollower::setUp() {
             // Set up debug window
-            cout << "Setup LaneFollower" << endl;
-            cout << "LaneFollower Debug: " << m_debug << endl;
             if (m_debug) {
                 cvNamedWindow("Debug Window", CV_WINDOW_AUTOSIZE);
                 cvMoveWindow("Debug Window", 300, 100);
+            }
+
+            if(SIMMODE) {
+                distance = SIMDISTANCE;
+                control_scanline = 462;
+                stop_scanline = 250;
+
+                P_GAIN = SIMGAIN;
+                E_GAIN = 0;
+                I_GAIN = 0;
+            }
+
+            else {
+                distance = CARDISTANCE;
+                control_scanline = 462;
+                stop_scanline = 350;
+
+                P_GAIN = CARGAIN;
+                E_GAIN = 0;
+                I_GAIN = 0;
             }
         }
 
@@ -91,40 +113,64 @@ namespace lane {
 
                     // Mirror image
                     // NOTE: For simulator.
-                    // flip(m_image, m_image, -1);
+                    if(SIMMODE)
+                    {
+                        flip(m_image, m_image, -1);
+                    }
+
                     returnValue = true;
                 }
             }
             return returnValue;
         }
 
+//        void LaneFollower::getLaneRecommendation(odcore::data::Container &c) {
+//
+//            // TODO: New datatype
+//            if(c.getDataType() == LaneRecommendation::ID()) {
+//
+//                // TODO: New datatype
+//                laneRecommendation = c.getData<LaneRecommendation>();
+//            }
+//        }
+
         // Do magic to the image around here.
         void LaneFollower::processImage() {
-            static bool useLeftMarking = true;
+
+            // TODO: New datatype
+            laneRecommendation.setLeft_lane(false);
+            inLeftLane = false;
+
             double e = 0;
 
-            const int32_t CONTROL_SCANLINE = 462;
-            const int32_t distance = 220;
-
+            // Copy the image to a matrix (this is the one we use for detection)
             Mat m_image_grey = m_image.clone();
+
+            // Make the new image grayscale
             cvtColor(m_image, m_image_grey, COLOR_BGR2GRAY);
+
+            // Make the image binary, threshold set to 180 at the moment
             threshold(m_image_grey, m_image_grey, 180, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
 
+            // Find contours on the image
             vector<vector<Point>> contours;
             findContours(m_image_grey, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
 
+            // Draw the contours red
             for(size_t idx = 0; idx < contours.size(); idx++) {
                 drawContours(m_image, contours, (int)idx, Scalar(0,0,255));
             }
 
+            // Lane detection loop
             for(int32_t y = m_image.rows - 8; y > m_image.rows * .5; y -= 10) {
                 // Find red pixels
-                Vec3b pixelLeft, pixelRight;
-                Point left, right;
+                Vec3b pixelLeft, pixelRight, pixelFront;
+                Point left, right, middle;
 
                 left.y = y;
                 left.x = -1;
 
+                // Find first red pixel to the left (left line)
                 for (int x = m_image.cols / 2; x > 0; x--) {
                     pixelLeft = m_image.at<Vec3b>(Point(x, y));
                     if (pixelLeft.val[2] == 255) {
@@ -135,6 +181,8 @@ namespace lane {
 
                 right.y = y;
                 right.x = -1;
+
+                // Find first red pixel to the right (right line)
                 for (int x = m_image.cols / 2; x < m_image.cols; x++) {
                     pixelRight = m_image.at<Vec3b>(Point(x, y));
                     if (pixelRight.val[2] == 255) {
@@ -143,33 +191,54 @@ namespace lane {
                     }
                 }
 
-                if(y == CONTROL_SCANLINE) {
-                    // Testing Twiddle algorithm stuff
-                    if(right.x > 0) {
-                        if(!useLeftMarking) {
-                            //m_eSum = 0;
-                            //m_eOld = 0;
-                        }
+                middle.x = (m_image.cols/2.0);
+                middle.y = control_scanline;
 
-                        e = ((right.x - m_image.cols/2.0) - distance) / distance;
-                        useLeftMarking = true;
-
-                    } else if(left.x > 0) {
-                        if(useLeftMarking) {
-                            //m_eSum = 0;
-                            //m_eOld = 0;
-                        }
-
-                        e = (distance - (m_image.cols/2.0 - left.x)) / distance;
-                        useLeftMarking = false;
-
-                    } else {
-                        //m_eSum = 0;
-                        //m_eOld = 0;
+                // Find first red pixel in front (stopline)
+                for(int i = control_scanline; i > stop_scanline; i--) {
+                    pixelFront = m_image.at<Vec3b>(Point(middle.x, i));
+                    if(pixelFront.val[2] == 255) {
+                        middle.y = i;
+                        laneRecommendation.setDistance_to_line(control_scanline - middle.y);
+                        break;
                     }
                 }
 
+                // If the loop is currently checking at the height of our set control line
+                if(y == control_scanline) {
+
+                    // Right lane logic (prefer right line following)
+                    if (!inLeftLane) {
+                        if (right.x > 0) {
+                            e = ((right.x - m_image.cols / 2.0) - distance) / distance;
+                        }
+
+                        else if (left.x > 0) {
+                            e = (distance - (m_image.cols / 2.0 - left.x)) / distance;
+                        }
+                    }
+
+                    // Left lane logic (prefer left line following)
+                    else {
+                        if (left.x > 0) {
+                            e = (distance - (m_image.cols / 2.0 - left.x)) / distance;
+                        }
+
+                        else if (right.x > 0) {
+                            e = ((right.x - m_image.cols / 2.0) - distance) / distance;
+                        }
+                    }
+                }
+
+                // Draw debug lines
                 if (m_debug) {
+
+                    // Draw line from control line to stop line if there is one
+                    if(middle.y < control_scanline) {
+                        line(m_image, Point(middle.x, control_scanline), middle, Scalar(128, 0, 0));
+                    }
+
+                    // Draw lines from middle to the discovered left pixels
                     if (left.x > 0) {
                         line(m_image, Point(m_image.cols / 2, y), left, Scalar(0, 255, 0));
                         stringstream sstr;
@@ -177,8 +246,10 @@ namespace lane {
                         putText(m_image, sstr.str().c_str(), Point(m_image.cols / 2 - 100, y - 2), FONT_HERSHEY_PLAIN,
                                 0.5, CV_RGB(0, 255, 0));
                     }
+
+                    // Draw lines from middle to the discovered right pixels
                     if (right.x > 0) {
-                        line(m_image, Point(m_image.cols / 2, y), right, Scalar(0, 0, 255));
+                        line(m_image, Point(m_image.cols / 2, y), right, Scalar(0, 128, 128));
                         stringstream sstr;
                         sstr << (right.x - m_image.cols / 2);
                         putText(m_image, sstr.str().c_str(), Point(m_image.cols / 2 + 100, y - 2), FONT_HERSHEY_PLAIN,
@@ -197,38 +268,24 @@ namespace lane {
                 m_eSum += e;
             }
 
-            // For introduction to algorithm see
-            // https://www  .youtube.com/watch?v=4Y7zG48uHRo
-            // Proportional gain. Values above 1 amplifies e and vice versa.
-            // 1 too low for right curve, 4 too twitchy. 2-3 seems very good
-            const double Kp = 1.3;
-            // Cross track error rate gain. Affects the angle based on how fast we
-            // are moving towards the desired center of the lane. Counters the primary
-            // proportional correction. Increase if car wobbles around centerline
-            // because of of overcorrection.
-            const double Kd = 0.0;
-            // Integral gain. Adjusts based on accumulated e values, to correct for
-            // offset.
-            const double Ki = 0;
 
+            const double p = P_GAIN * e;
+            const double i = I_GAIN * timeStep * m_eSum;
+            const double d = E_GAIN * (e - m_eOld)/timeStep;
 
-            const double p = Kp * e;
-            const double i = Ki * timeStep * m_eSum;
-            const double d = Kd * (e - m_eOld)/timeStep;
             m_eOld = e;
 
             const double y = p + i + d;
 
             double desiredSteering = 0;
+
             if(fabs(e) > 1e-2) {
                 desiredSteering = y;
             }
 
-            // Make this use debug flag when finished? Or remove?
-            if (false) {
+            if (m_debug) {
                 if (m_image.data != NULL) {
                     imshow("Camera Original Image", m_image);
-                    imshow("Camera BW Image", m_image_grey);
                     waitKey(10);
                 }
             }
@@ -237,7 +294,14 @@ namespace lane {
             if (desiredSteering > 0.5) desiredSteering = 0.5;
             if (desiredSteering < -0.5) desiredSteering = -0.5;
 
-            cout << "DS: " << desiredSteering;
+            if(laneRecommendation.getDistance_to_line() < 5 ||
+                    laneRecommendation.getDistance_to_line() > 150)
+                laneRecommendation.setDistance_to_line(-1);
+
+            //cout << "DS: " << desiredSteering << endl;
+
+            cout << "STOPLINE: " << laneRecommendation.getDistance_to_line() << endl;
+
             laneRecommendation.setAngle(desiredSteering);
         }
 
@@ -247,25 +311,32 @@ namespace lane {
             m_debug = kv.getValue<int32_t>("lanedetector.debug") == 1;
 
             // ?
-            cout << "Entering loop:" << endl;
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() ==
                    odcore::data::dmcp::ModuleStateMessage::RUNNING) {
                 bool has_next_frame = false;
 
-                Container c = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
+                Container imageContainer = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
 
-                if (c.getDataType() == odcore::data::image::SharedImage::ID()) {
-                    cout << "Read shared image";
-                    has_next_frame = readSharedImage(c);
+                // TODO: New datatype
+                //Container laneContainer = getKeyValueDataStore().get(LaneRecommendation::ID());
+
+                // TODO: New datatype
+//                if(laneContainer.getDataType() == LaneRecommendation::ID()) {
+//
+//                    // TODO: New datatype
+//                    getLaneRecommendation(laneContainer);
+//                }
+
+                if (imageContainer.getDataType() == odcore::data::image::SharedImage::ID()) {
+                    has_next_frame = readSharedImage(imageContainer);
                 }
 
                 if (has_next_frame) {
                     processImage();
                 }
 
-                Container laneRecContainer(laneRecommendation);
-
-                getConference().send(laneRecContainer);
+                Container outContainer(laneRecommendation);
+                getConference().send(outContainer);
             }
 
             return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;

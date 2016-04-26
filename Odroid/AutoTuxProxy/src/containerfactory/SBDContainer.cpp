@@ -31,11 +31,11 @@ shared_ptr<Container> containerfactory::SBDContainer::genSBDContainer(vector<uns
 
     //Receiving order: (US1 byte)(US2 byte)(IR1 byte)(IR2 byte)(IR3 byte)
     //OD order: (IR1 byte)(IR3 byte)(IR2 byte)(US1 byte)(US2 byte)
-    sensordata[0] = values.at(2);
-    sensordata[1] = values.at(4);
-    sensordata[2] = values.at(3);
-    sensordata[3] = values.at(0);
-    sensordata[4] = values.at(1);
+    sensordata[0] = values.at(2) / 100.0;
+    sensordata[1] = values.at(4) / 100.0;
+    sensordata[2] = values.at(3) / 100.0;
+    sensordata[3] = values.at(0) / 100.0;
+    sensordata[4] = values.at(1) / 100.0;
 
     //Wrap the information in a SensorBoardData object
     SensorBoardData sensorBoardData;

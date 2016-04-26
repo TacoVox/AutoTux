@@ -4,7 +4,6 @@
 
 #include <iostream>
 
-
 #include "decisionmaker/DecisionMaker.h"
 #include "overtaker/Overtaker.h"
 
@@ -31,7 +30,7 @@ VehicleControl vehicleControl;
  */
 DecisionMaker::DecisionMaker(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "DecisionMaker"),
-        laneRecommendation() , ovt(), parker(){
+        ovt(), parker(), containerVehicleData(), containerSensorBoardData(), laneRecommendation(), stopped(false){
 }
 
 DecisionMaker::~DecisionMaker() {}
@@ -46,6 +45,27 @@ void DecisionMaker::tearDown(){
  * Sets wheelangledata to the LaneRecommandation
 */
 void DecisionMaker::laneFollowing() {
+
+    /*
+    if(stopped) {
+        cout << "GOING TO SLEEP" << endl;
+        sleep(3);
+        cout << "WAKING UP" << endl;
+        vehicleControl.setSpeed(2);
+        stopped = false;
+    }
+    else if(getDistanceToLine() == -1){
+        vehicleControl.setSpeed(2);
+    }
+    else if(getDistanceToLine() < 50) {
+        vehicleControl.setSpeed(0);
+        stopped = true;
+    }
+    else if(getDistanceToLine() < 150) {
+        vehicleControl.setSpeed(1);
+    }
+    */
+
     vehicleControl.setSteeringWheelAngle(getAngle());
 }
 
@@ -88,16 +108,22 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
     SensorBoardData sbd;
 
     // Set initial speed
-    vehicleControl.setSpeed(0.8);
+    vehicleControl.setSpeed(1.0);
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
+        // 1. Update sensor board data values
+        containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
+        sbd = containerSensorBoardData.getData<SensorBoardData>();
 
-        // 1. Update vehicle data values
+        // 2. Update vehicle data values
+        containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
         vd = containerVehicleData.getData<VehicleData>();
 
-        // 2. Update sensor board data values
-        sbd = containerSensorBoardData.getData<SensorBoardData>();
-	
+        laneRecommendation = getKeyValueDataStore().get(autotux::LaneRecommendation::ID());
+
+        //cout << "SensorValues: " <<  sbd.getValueForKey_MapOfDistances(2) << endl;
+        cout << "Distance: " << vd.getAbsTraveledPath() << endl;
+
         switch (state){
             case DRIVING:{
                 ovt.obstacleDetection(sbd, vd, vehicleControl);
@@ -127,15 +153,13 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                     }
                 }
                 else{
-                    parker.findSpot(sbd, vd);
-                    vehicleControl.setSpeed(0.8);
+                    //parker.findSpot(sbd, vd);
+                    vehicleControl.setSpeed(1);
                     laneFollowing();
                 }
                 break;
             }
         }
-        
-	cout << "Steering: " << vehicleControl.getSteeringWheelAngle() << endl;
         // Pack and send control values
         Container control(vehicleControl);
         getConference().send(control);
@@ -147,6 +171,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
 /**
  * This method is a data listener that listens to the broadcast made by odsupercomponent for LaneRecommendation
 */
+/*
 void decisionmaker::DecisionMaker::nextContainer(odcore::data::Container &c) {
 
     if(c.getDataType() == LaneRecommendation::ID()){
@@ -159,3 +184,4 @@ void decisionmaker::DecisionMaker::nextContainer(odcore::data::Container &c) {
 
 }
 
+*/
