@@ -64,7 +64,7 @@
 
 
 /**
- *
+ * Initializes the color buffer and the pin selected in the neopixelConfig.
  */
 void neopixelInit(neopixelConfig* cfg, uint8_t** colorBuffer) {
 	palSetPadMode(cfg->port, cfg->pin, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);
@@ -80,8 +80,10 @@ void neopixelInit(neopixelConfig* cfg, uint8_t** colorBuffer) {
 
 
 /**
- * Nice way of setting colors by bit masks, for example LED(1) | LED(2). Works for
- * the 32 first LEDs. Be responsible, no error checking with the configured LED count.
+ * @brief Nice way of setting colors by bit masks, for example LED(1) | LED(2).
+ *
+ * Works for the 32 first LEDs. Be responsible, no error checking with the
+ * configured LED count.
  */
 void neopixelSetColor(uint8_t* colorBuffer, uint32_t ledMask,
 		unsigned char R, unsigned char G, unsigned char B) {
@@ -96,7 +98,11 @@ void neopixelSetColor(uint8_t* colorBuffer, uint32_t ledMask,
 	}
 }
 
+/**
+ * Writes the color buffer to the LEDs.
+ */
 void neopixelWrite(neopixelConfig* cfg, uint8_t* colorBuffer) {
+	// For timing reasons, we prepare variables before we start writing
 	uint32_t currentLED;
 	uint32_t currentLEDColor;
 	int c = 0;
@@ -127,14 +133,11 @@ void neopixelWrite(neopixelConfig* cfg, uint8_t* colorBuffer) {
 				for (c = 0; c < LOW_TIME_0 ; c++) __asm__("nop");
 			}
 		}
-		//for (c = 0; c < 10; c++) __asm__("nop");
 	}
 
 	if (cfg->enforceLatchTime) {
-		//palClearPad(GPIOA, 6);
+		// Make sure to keep the signal low for at least 50 us
 		for (c = 0; c < RESET_TIME_CLEAR; c++) __asm__("nop");
 	}
 	chSysUnlock();
 }
-
-

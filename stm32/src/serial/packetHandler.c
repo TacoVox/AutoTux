@@ -1,9 +1,19 @@
-/*
- * Takes care of sensor input for the stm32 part of AutoTux.
- * Returns a char array of the data that should be passed to the
- * high-level board.
+/** @file	packetHandler.c
+ * 	@brief	Handles sending and receiving packets, manages a receive buffer.
+ *
+ * 	When receiving bytes, they are put into the receive buffer. If the buffer
+ * 	gets full, it gets shifted so the oldest half gets discarded. The using
+ * 	code in the serial connection will call packetHandlerReadPacketFromBuffer
+ * 	when appropriate. This will go through the buffer from the most recent end,
+ * 	trying to find the end of a packet, it will then find the rest and try to
+ * 	initialize and validate the packet. When it has successfully initiated a
+ * 	packet, everything older than the end of that packet is discarded.
+ * 	If no packet found, the buffer is left untouched.
+ *
+ * 	We track the active characters in the buffer with a counter, so when we shift
+ * 	the values back half a buffer size, we never "clear" the "free" side of buffer
+ * 	by changing the values to '\0' or similar.
  */
-
 
 #include <ch.h>
 #include <chprintf.h>
@@ -18,22 +28,37 @@
 //-----------------------------------------------------------------------------
 
 
+static void strnshift(unsigned char* bufferString, int size, int n);
+static char generateChecksum(unsigned char* data, int dataSize);
+
+
+/**
+ * The internal receive buffer size.
+ */
 #define BUFFER_SIZE 128
 
-unsigned char buffer[BUFFER_SIZE];
-int bufferCounter = 0;
+/**
+ * The internal receive buffer.
+ */
+static unsigned char buffer[BUFFER_SIZE];
 
-void strnshift(unsigned char* bufferString, int size, int n);
-char generateChecksum(unsigned char* data, int dataSize);
+/**
+ * Points to the next free position in the receive buffer
+ *
+ * (Which also implies it's value represents the currently used characters of
+ * the buffer).
+ */
+static int bufferCounter = 0;
 
 
 //-----------------------------------------------------------------------------
-// "Public" interface
+// Public interface
 //-----------------------------------------------------------------------------
 
 
 /**
- * Sends a packet based on the data array to the serial connection
+ * @brief Sends a packet based on the data array to the serial connection
+ *
  * NOTE: provide the size of the actual data array!
  */
 void packetHandlerSend(unsigned char* data, int size, BaseSequentialStream* SDU) {
@@ -51,9 +76,11 @@ void packetHandlerSend(unsigned char* data, int size, BaseSequentialStream* SDU)
 
 
 /**
- * Appends char to buffer. Will automatically discard half the buffer
- * (the oldest part) if buffer size is reached. (The buffer is cleared
- * by the createPacketFromBuffer function on successful packet read).
+ * @brief Append char to receive buffer.
+ *
+ * Will automatically discard half the buffer (the oldest part) if buffer size
+ * is reached. (The buffer is cleared by the createPacketFromBuffer function on
+ * successful packet read).
  */
 void packetHandlerAddToRcvBuffer(unsigned char latestByte) {
 	buffer[bufferCounter] = latestByte;
@@ -65,11 +92,14 @@ void packetHandlerAddToRcvBuffer(unsigned char latestByte) {
 	}
 }
 
-
 /**
- * Tries to read a packet from buffer, starting from the end of the buffer
- * and going back until the first valid packet is instantiated. If successful,
- * shifts the buffer and returns PACKET_OK. Otherwise NO_PACKET.
+ * @brief Tries to read a packet from the receive buffer.
+ *
+ * The function starts from the end of the buffer and moves backward until the
+ * first valid packet is instantiated. If successful, shifts the buffer (discarding
+ * anything up until and including the packet end) and returns PACKET_OK.
+ * Otherwise NO_PACKET.
+ *
  * Initialize the char* with CONTROL_DATA_SIZE.
  * NOTE that implementation currently relies on the packet size being one digit.
  */
@@ -124,35 +154,35 @@ PACKET_STATUS packetHandlerReadPacketFromBuffer(unsigned char* data) {
 	}
 }
 
-
+/**
+ * Getter for the currently used buffer size.
+ */
 int packetHandlerGetBufferSize(void) {
 	return bufferCounter;
 }
 
 
 //-----------------------------------------------------------------------------
-// "Private" implementation
+// Implementation. The static functions below are inaccessible to other modules
 //-----------------------------------------------------------------------------
 
 
 /**
  * Shifts the string n positions to the left.
  */
-void strnshift(unsigned char* bufferString, int size, int n) {
+static void strnshift(unsigned char* bufferString, int size, int n) {
 	for (int i = 0; i < n && i + n < size; i++) {
 		bufferString[i] = bufferString[i + n];
  	}
 }
 
-
 /**
  * Generates a checksum by XORing all data bytes.
  */
-char generateChecksum(unsigned char* data, int dataSize) {
+static char generateChecksum(unsigned char* data, int dataSize) {
 	unsigned char checksum = 0;
 	for (int i = 0; i < dataSize; i++) {
 		checksum ^= data[i];
 	}
 	return checksum;
 }
-

@@ -12,12 +12,12 @@
 // Definitions
 //-----------------------------------------------------------------------------
 
-void updateColorBuffer(void);
-void setLightBools(unsigned char lightByte, bool rcMode, bool rcBrakeLight);
-bool checkBrakeBit(unsigned char lightByte);
-bool checkReverseBit(unsigned char lightByte);
-bool checkFlashLeftBit(unsigned char lightByte);
-bool checkFlashRightBit(unsigned char lightByte);
+static void updateColorBuffer(void);
+static void setLightBools(unsigned char lightByte, bool rcMode, bool rcBrakeLight);
+static bool checkBrakeBit(unsigned char lightByte);
+static bool checkReverseBit(unsigned char lightByte);
+static bool checkFlashLeftBit(unsigned char lightByte);
+static bool checkFlashRightBit(unsigned char lightByte);
 
 /**
  * Holds the color buffer for the LED strip
@@ -112,7 +112,7 @@ void hardwareIterationLights(unsigned char lightByte, bool rcMode, bool rcBrakeL
 /**
  * Updates the color buffer based on the booleans holding the state of each light.
  */
-void updateColorBuffer(void) {
+static void updateColorBuffer(void) {
 	// Let flashing activate and deactivate "naturally" aligned with the
 	// flashState pace.
 	if (flashLeft && flashState) {
@@ -149,7 +149,7 @@ void updateColorBuffer(void) {
 /**
  * Helper function that chooses which lights should be on and off.
  */
-void setLightBools(unsigned char lightByte, bool rcMode, bool rcBrakeLight) {
+static void setLightBools(unsigned char lightByte, bool rcMode, bool rcBrakeLight) {
 	// Assumption: rcLight = (rcMode || rcBrakeLight)
 	if (rcLight != (rcMode || rcBrakeLight)) {
 		rcLight = (rcMode || rcBrakeLight);
@@ -180,27 +180,27 @@ void setLightBools(unsigned char lightByte, bool rcMode, bool rcBrakeLight) {
 /**
  * Returns true if the brake bit is set in the light control byte.
  */
-bool checkBrakeBit(unsigned char lightByte) {
+static bool checkBrakeBit(unsigned char lightByte) {
 	return (lightByte &  LIGHT_BIT_BRAKE) == LIGHT_BIT_BRAKE;
 }
 
 /**
  * Returns true if the reverse bit is set in the light control byte.
  */
-bool checkReverseBit(unsigned char lightByte) {
+static bool checkReverseBit(unsigned char lightByte) {
 	return (lightByte &  LIGHT_BIT_REVERSE) == LIGHT_BIT_REVERSE;
 }
 
 /**
  * Returns true if the flash left bit is set in the light control byte.
  */
-bool checkFlashLeftBit(unsigned char lightByte) {
+static bool checkFlashLeftBit(unsigned char lightByte) {
 	return (lightByte &  LIGHT_BIT_FLASH_LEFT) == LIGHT_BIT_FLASH_LEFT;
 }
 
 /**
  * Returns true if the flash right bit is set in the light control byte.
  */
-bool checkFlashRightBit(unsigned char lightByte) {
+static bool checkFlashRightBit(unsigned char lightByte) {
 	return (lightByte &  LIGHT_BIT_FLASH_RIGHT) == LIGHT_BIT_FLASH_RIGHT;
 }
