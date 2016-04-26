@@ -45,7 +45,7 @@ namespace decisionmaker{
         double getDistanceToLine();
         void laneFollowing();
 
-        bool stopped;
+        int stopCounter;
     };
 
 } //DecisionMaker

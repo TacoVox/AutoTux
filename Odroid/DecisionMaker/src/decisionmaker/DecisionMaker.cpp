@@ -30,7 +30,7 @@ VehicleControl vehicleControl;
  */
 DecisionMaker::DecisionMaker(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "DecisionMaker"),
-        ovt(), parker(), containerVehicleData(), containerSensorBoardData(), laneRecommendation(), stopped(false){
+        ovt(), parker(), containerVehicleData(), containerSensorBoardData(), laneRecommendation(), stopCounter(0){
 }
 
 DecisionMaker::~DecisionMaker() {}
@@ -46,25 +46,32 @@ void DecisionMaker::tearDown(){
 */
 void DecisionMaker::laneFollowing() {
 
-    /*
-    if(stopped) {
-        cout << "GOING TO SLEEP" << endl;
-        sleep(3);
-        cout << "WAKING UP" << endl;
-        vehicleControl.setSpeed(2);
-        stopped = false;
+    if(stopCounter > 0) {
+
+        if(stopCounter == 60) {
+            cout << "WAKING UP" << endl;
+            vehicleControl.setSpeed(2);
+            stopCounter = 0;
+        }
+
+        else {
+            cout << "SLEEPING..." << endl;
+            stopCounter++;
+        }
     }
+
     else if(getDistanceToLine() == -1){
         vehicleControl.setSpeed(2);
     }
+
     else if(getDistanceToLine() < 50) {
         vehicleControl.setSpeed(0);
-        stopped = true;
+        stopCounter = 1;
     }
+
     else if(getDistanceToLine() < 150) {
         vehicleControl.setSpeed(1);
     }
-    */
 
     vehicleControl.setSteeringWheelAngle(getAngle());
 }
@@ -108,7 +115,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
     SensorBoardData sbd;
 
     // Set initial speed
-    vehicleControl.setSpeed(1.0);
+    vehicleControl.setSpeed(2.0);
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
         // 1. Update sensor board data values
