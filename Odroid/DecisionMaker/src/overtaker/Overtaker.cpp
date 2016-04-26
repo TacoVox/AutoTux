@@ -23,27 +23,20 @@ Overtaker::~Overtaker(){}
 void Overtaker::obstacleDetection(SensorBoardData sensorData, VehicleData vehicleData, VehicleControl dmControl) {
 
     switch(state){
+
         case FREE_LANE:{
-            //cout << "Overtaker: FREE-LANE" << endl;
+            cout << "Overtaker: FREE-LANE" << endl;
             //cout << "ANGLE : " << dmControl.getSteeringWheelAngle() << endl;
 
-            if(isObstacleOnLane(sensorData, 15.0)){
-                cout << "OBSTACLE DETECTED" << endl;
-                state = APPROACHING;
-            }
-            break;
-        }
-        case APPROACHING:{
-            //cout << "Overtaker: APPROACHING" << endl;
-            //cout << "ANGLE : " << dmControl.getSteeringWheelAngle() << endl;
-
-            if(isObstacleOnLane(sensorData, 8.0)){
+            // If close to obstacle switch lane to overtake...
+            if(isObstacleOnLane(sensorData, OVT_TRIGGER)){
                 cout << "SWITCHING TO LEFT LANE" << endl;
 
                 enterSwitchAngle = dmControl.getSteeringWheelAngle();
-                cout << "**** angle : " << dmControl.getSteeringWheelAngle() << endl;
+                cout << "**** angle : " << enterSwitchAngle << endl;
 
                 traveledPath = vehicleData.getAbsTraveledPath();
+                ovtControl.setSpeed(0.5);
                 isOverridingControls = true;
 
                 // If we are on a left curve...
@@ -64,17 +57,32 @@ void Overtaker::obstacleDetection(SensorBoardData sensorData, VehicleData vehicl
         case LEFT_SWITCH:{
             cout << "Overtaker: LEFT-SWITCH" << endl;
             //cout << "ANGLE : " << dmControl.getSteeringWheelAngle() << endl;
-            switchToLeftLane(vehicleData, dmControl, traveledPath, 2.6);
+            switchToLeftLane(vehicleData, traveledPath, LEFT_SWITCH_DIST);
             break;
         }
         case LEFT_SWITCH_LT:{
             cout << "Overtaker: LEFT-SWITCH on LEFT CURVE" << endl;
-            switchToLeftLane(vehicleData, dmControl, traveledPath, 3.6);
+            switchToLeftLane(vehicleData, traveledPath, LEFT_SWITCH_LT_DIST);
             break;
         }
         case LEFT_SWITCH_RT:{
             cout << "Overtaker: LEFT-SWITCH on RIGHT CURVE" << endl;
-            switchToLeftLane(vehicleData, dmControl, traveledPath, 3.2);
+            switchToLeftLane(vehicleData, traveledPath, LEFT_SWITCH_RT_DIST);
+            break;
+        }
+        case ADJUST_LEFT_SWICH:{
+            cout << "Overtaker: ADJUST LEFT SWITCH" << endl;
+            adjustLeftSwitch(vehicleData, traveledPath, ADJUST_L_S_DIST);
+            break;
+        }
+        case ADJUST_LEFT_SWITCH_LT:{
+            cout << "Overtaker: ADJUST LEFT SWITCH on Left Curve" << endl;
+            adjustLeftSwitch(vehicleData, traveledPath, ADJUST_L_S_LT_DIST);
+            break;
+        }
+        case ADJUST_LEFT_SWITCH_RT:{
+            cout << "Overtaker: ADJUST LEFT SWITCH on Right Curve" << endl;
+            adjustLeftSwitch(vehicleData, traveledPath, ADJUST_L_S_RT_DIST);
             break;
         }
         case LEFT_LANE:{
@@ -91,18 +99,58 @@ void Overtaker::obstacleDetection(SensorBoardData sensorData, VehicleData vehicl
             //cout << "ANGLE : " << dmControl.getSteeringWheelAngle() << endl;
             if(isRightLaneClear(sensorData)){
                 cout << "SWITCHING TO RIGHT LANE" << endl;
-                cout << "**** angle : " << dmControl.getSteeringWheelAngle() << endl;
+                ovtControl.setSpeed(0.5);
+                // ***enter-switch-angle
+                enterSwitchAngle = dmControl.getSteeringWheelAngle();
+
+                cout << "**** angle : " << enterSwitchAngle << endl;
                 traveledPath = vehicleData.getAbsTraveledPath();
                 isOverridingControls = true;
 
-                state = RIGHT_SWITCH;
+                // *** Differentiate right-switches
+                if(enterSwitchAngle < -0.1){
+                    state = RIGHT_SWITCH_LT;
+                }else if(enterSwitchAngle > 0.1){
+                    state = RIGHT_SWITCH_RT;
+                }else{
+                    state = RIGHT_SWITCH;
+                }
+
             }
             break;
         }
         case RIGHT_SWITCH:{
             cout << "Overtaker: RIGHT-SWITCH" << endl;
             //cout << "ANGLE : " << dmControl.getSteeringWheelAngle() << endl;
-            switchToRightLane(vehicleData, dmControl, traveledPath, 2.6);
+
+            switchToRightLane(vehicleData, traveledPath, RIGHT_SWITCH_DIST);
+            break;
+        }
+        case RIGHT_SWITCH_LT:{
+            cout << "Overtaker: RIGHT-SWITCH on Left Turn" << endl;
+
+            switchToRightLane(vehicleData, traveledPath, RIGHT_SWITCH_LT_DIST);
+            break;
+        }
+        case RIGHT_SWITCH_RT:{
+            cout << "Overtaker: RIGHT-SWITCH on Right turn" << endl;
+
+            switchToRightLane(vehicleData, traveledPath, RIGHT_SWITCH_RT_DIST);
+            break;
+        }
+        case ADJUST_RIGHT_SWITCH:{
+            cout << "Overtaker: ADJUST RIGHT-SWITCH" << endl;
+            adjustRightSwitch(vehicleData, traveledPath, ADJUST_R_S_DIST);
+            break;
+        }
+        case ADJUST_RIGHT_SWITCH_LT:{
+            cout << "Overtaker: ADJUST RIGHT-SWITCH on Left Curve" << endl;
+            adjustRightSwitch(vehicleData, traveledPath, ADJUST_R_S_LT_DIST);
+            break;
+        }
+        case ADJUST_RIGHT_SWITCH_RT:{
+            cout << "Overtaker: ADJUST RIGHT-SWITCH on Right Curve" << endl;
+            adjustRightSwitch(vehicleData, traveledPath, ADJUST_R_S_RT_DIST);
             break;
         }
     }
@@ -134,8 +182,43 @@ bool Overtaker::isObstacleOnLane(SensorBoardData sbd, const double range){
 /* @doc Moves the car towards left lane for a distance
  *      of 'maxTrv' starting from 'trvStart'.
  * */
-void Overtaker::switchToLeftLane(VehicleData vehicleData, VehicleControl currControl, const double trvStart, const double maxTrv) {
+void Overtaker::switchToLeftLane(VehicleData vehicleData, const double trvStart, const double maxTrv) {
 
+    // Measure path traveled in 'blind-mode'
+    double traveled = vehicleData.getAbsTraveledPath() - trvStart;
+
+    cout << "traveled " << traveled << endl;
+
+    // Exit state if traveled enough...
+    if(traveled > maxTrv){
+
+        ovtControl.setSpeed(1.0);
+        traveledPath = vehicleData.getAbsTraveledPath();
+
+        if(state == LEFT_SWITCH_RT){
+            state = ADJUST_LEFT_SWITCH_RT;
+        }else if(state == LEFT_SWITCH_LT){
+            state = ADJUST_LEFT_SWITCH_LT;
+        }else{
+            state = ADJUST_LEFT_SWICH;
+        }
+
+        return;
+    }
+
+    // ... else keep steering left
+    if(state == LEFT_SWITCH_RT){
+        ovtControl.setSteeringWheelAngle(-0.45);
+    }else{
+        ovtControl.setSteeringWheelAngle(-0.5235);
+    }
+
+
+}
+
+void Overtaker::adjustLeftSwitch(VehicleData vehicleData, const double trvStart, const double maxTrv) {
+
+    // To-Do...
     // Measure path traveled in 'blind-mode'
     double traveled = vehicleData.getAbsTraveledPath() - trvStart;
 
@@ -148,16 +231,8 @@ void Overtaker::switchToLeftLane(VehicleData vehicleData, VehicleControl currCon
         return;
     }
 
-    // ... else keep steering left
-    if(state == LEFT_SWITCH_RT){
-        ovtControl.setSteeringWheelAngle(-enterSwitchAngle);
-    }else {
-        ovtControl.setSteeringWheelAngle(-0.5);
-    }
-
-    ovtControl.setSpeed(2);
-
-
+    //... else keep steering right
+    ovtControl.setSteeringWheelAngle(0.5);
 }
 
 bool Overtaker::isParallelToObstacle(SensorBoardData sensorData) {
@@ -179,10 +254,40 @@ bool Overtaker::isParallelToObstacle(SensorBoardData sensorData) {
 /* @doc Moves the car towards right lane for a distance
  *      of 'maxTrv' starting from 'trvStart'.
  * */
-void Overtaker::switchToRightLane(VehicleData vehicleData, VehicleControl currControl, const double trvStart, const double maxTrv) {
+void Overtaker::switchToRightLane(VehicleData vehicleData, const double trvStart, const double maxTrv) {
 
     // Measure path traveled in 'blind-mode'
     double traveled = vehicleData.getAbsTraveledPath() - trvStart;
+
+    cout << "traveled :" << traveled << endl;
+
+    // Exit state if traveled enough...
+    if(traveled > maxTrv){
+
+        ovtControl.setSpeed(1.0);
+        traveledPath = vehicleData.getAbsTraveledPath();
+
+        if(state == RIGHT_SWITCH_LT){
+            state = ADJUST_RIGHT_SWITCH_LT;
+        }else if(state == RIGHT_SWITCH_RT){
+            state = ADJUST_RIGHT_SWITCH_RT;
+        }else{
+            state = ADJUST_RIGHT_SWITCH;
+        }
+
+        return;
+    }
+
+    // ... else keep steering right
+    ovtControl.setSteeringWheelAngle(0.5235);
+}
+
+void Overtaker::adjustRightSwitch(VehicleData vehicleData, const double trvStart, const double maxTrv) {
+
+    // Measure path traveled in 'blind-mode'
+    double traveled = vehicleData.getAbsTraveledPath() - trvStart;
+
+    cout << "traveled " << traveled << endl;
 
     // Exit state if traveled enough...
     if(traveled > maxTrv){
@@ -191,10 +296,8 @@ void Overtaker::switchToRightLane(VehicleData vehicleData, VehicleControl currCo
         return;
     }
 
-    // ... else keep steering right
-    ovtControl.setSteeringWheelAngle(0.5235);
-    ovtControl.setSpeed(2);
-
+    //... else keep steering left
+    ovtControl.setSteeringWheelAngle(-0.5);
 }
 
 /* @doc Returns TRUE if the right lane is free
