@@ -10,9 +10,7 @@
 #include <ch.h>
 #include <chprintf.h>
 #include <hal.h>
-#include "usbcfg.h"
-
-// Local includes
+#include "../../chibiconf/usbcfg.h"
 #include "../autotuxconfig.h"
 #include "../hardware/sensorInput.h"
 #include "../hardware/controlOutput.h"
