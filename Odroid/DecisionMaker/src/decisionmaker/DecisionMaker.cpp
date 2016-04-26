@@ -109,7 +109,7 @@ double DecisionMaker::getDistanceToLine() {
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() {
 
     // Set initial state of the car
-    STATE state = DRIVING;
+    STATE state = PARKING;
 
     VehicleData vd;
     SensorBoardData sbd;
@@ -129,7 +129,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
         laneRecommendation = getKeyValueDataStore().get(autotux::LaneRecommendation::ID());
 
         //cout << "SensorValues: " <<  sbd.getValueForKey_MapOfDistances(2) << endl;
-        //cout << "Distance: " << vd.getAbsTraveledPath() << endl;
+        cout << "Distance: " << vd.getAbsTraveledPath() << endl;
 
         switch (state){
             case DRIVING:{
@@ -161,7 +161,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                 }
                 else{
                     //parker.findSpot(sbd, vd);
-                    vehicleControl.setSpeed(2);
+                    vehicleControl.setSpeed(1);
                     laneFollowing();
                 }
                 break;
