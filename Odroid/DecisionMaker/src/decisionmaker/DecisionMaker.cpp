@@ -162,7 +162,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                 }
                 else{
                     if(!isStopLine) {
-                        parker.findSpot(sbd, vd);
+                        //parker.findSpot(sbd, vd);
                         speed = 1;
                     }
                     laneFollowing();

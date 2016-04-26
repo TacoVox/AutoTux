@@ -13,9 +13,6 @@ using namespace odcore::data;
 using namespace automotive;
 using namespace automotive::miniature;
 
-
-
-
 Parker::Parker() :
         parkstate(PHASE0),
         state(FINDOBJECT),
