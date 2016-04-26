@@ -46,6 +46,7 @@ void DecisionMaker::tearDown(){
 */
 void DecisionMaker::laneFollowing() {
 
+    /*
     if(stopped) {
         cout << "GOING TO SLEEP" << endl;
         sleep(3);
@@ -63,6 +64,7 @@ void DecisionMaker::laneFollowing() {
     else if(getDistanceToLine() < 150) {
         vehicleControl.setSpeed(1);
     }
+    */
 
     vehicleControl.setSteeringWheelAngle(getAngle());
 }
@@ -106,7 +108,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
     SensorBoardData sbd;
 
     // Set initial speed
-    vehicleControl.setSpeed(0.8);
+    vehicleControl.setSpeed(1.0);
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
         // 1. Update sensor board data values
@@ -119,8 +121,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
 
         laneRecommendation = getKeyValueDataStore().get(autotux::LaneRecommendation::ID());
 
-
-        cout << "SensorValues: " <<  sbd.getValueForKey_MapOfDistances(2) << endl;
+        //cout << "SensorValues: " <<  sbd.getValueForKey_MapOfDistances(2) << endl;
         cout << "Distance: " << vd.getAbsTraveledPath() << endl;
 
         switch (state){
@@ -153,7 +154,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                 }
                 else{
                     //parker.findSpot(sbd, vd);
-                    vehicleControl.setSpeed(2);
+                    vehicleControl.setSpeed(1);
                     laneFollowing();
                 }
                 break;
