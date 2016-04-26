@@ -8,20 +8,22 @@
 #include <hal.h>
 
 // Local includes
-#include "autotuxconfig.h"
+#include "../autotuxconfig.h"
 #include "controlOutput.h"
 #include "hardwarePWM.h"
 #include "hardwareRC.h"
-
+#include "hardwareLights.h"
 
 //-----------------------------------------------------------------------------
 // Definitions
 //-----------------------------------------------------------------------------
 
 
-int max(int int1, int int2);
-bool handleRCMode(void);
-bool rcModeCheck(void);
+static bool handleRCMode(void);
+static bool rcModeCheck(void);
+static unsigned char controlData[CONTROL_BYTE_COUNT];
+static bool controlValuesAreNew = false;
+
 
 //-----------------------------------------------------------------------------
 // "Public" interface
@@ -34,6 +36,7 @@ bool rcModeCheck(void);
 void controlOutputSetup(void) {
 	// TODO: also initialize RC here later?
 	hardwareSetupPWM();
+	hardwareSetupLights();
 }
 
 
@@ -45,30 +48,71 @@ void controlOutputStopCenter(void) {
 		hardwareSetValuesPWM(PWM_OUTPUT_ESC, SPEED_STOP);
 		hardwareSetValuesPWM(PWM_OUTPUT_SERVO, WHEELS_CENTERED_ANGLE);
 	}
+
+	// Regardless, reset controlData to corresponding values.
+	controlData[CONTROL_BYTE_SPEED] = SPEED_STOP;
+	controlData[CONTROL_BYTE_ANGLE] = WHEELS_CENTERED_ANGLE;
+}
+
+
+
+/**
+ * Output control data to engine and wheels (unless in RC mode).
+ */
+void controlOutputSetData(unsigned char* newControlData) {
+	// Value copy!
+	for (int i = 0; i < CONTROL_BYTE_COUNT; i++) {
+		controlData[i] = newControlData[i];
+	}
+
+	// Touch this variable
+	controlValuesAreNew = true;
 }
 
 
 /**
  * Output control data to engine and wheels (unless in RC mode).
  */
-void controlOutput(unsigned char* controlData) {
-	if (!handleRCMode()) {
-		// RC mode not activated - the only RC input we care about is braking
+void controlOutputIteration() {
+	static int iterationsNoNewValues = 0;
+	bool rcBrake = false;
+	bool rcMode = handleRCMode();
+
+	if (!rcMode) {
+		// RC mode not activated - check only for RC transmitter brake
 		if (hardwareGetValuesRC(THROTTLE) >= RC_THROTTLE_ON_TRESHOLD &&
 				hardwareGetValuesRC(THROTTLE) <= RC_THROTTLE_BRAKE_TRESHOLD) {
 
-			// Stop the car
+			// RC transmitter brake - stop the car
 			hardwareSetValuesPWM(PWM_OUTPUT_ESC, SPEED_STOP);
+			rcBrake = true;
 
 		} else {
-			// Drive according to controlData
-			// Speed controlled by int corresponding to SPEED enum in config
-			hardwareSetValuesPWM(PWM_OUTPUT_ESC, controlData[CONTROL_BYTE_SPEED]);
+			// Normal automatic drive. See if we have newly received values
+			if (controlValuesAreNew) {
+				// Drive according to controlData
+				// Speed controlled by int corresponding to SPEED enum in config
+				hardwareSetValuesPWM(PWM_OUTPUT_ESC, controlData[CONTROL_BYTE_SPEED]);
 
-			// Wheel angle: 90 degress +- ~30 degrees.
-			hardwareSetValuesPWM(PWM_OUTPUT_SERVO, controlData[CONTROL_BYTE_ANGLE]);
+				// Wheel angle: 90 degress +- ~30 degrees.
+				hardwareSetValuesPWM(PWM_OUTPUT_SERVO, controlData[CONTROL_BYTE_ANGLE]);
+
+				controlValuesAreNew = false;
+				iterationsNoNewValues = 0;
+			} else {
+				// No new values! Worrying.
+				if (iterationsNoNewValues > MAX_ITERATIONS_WITHOUT_RECEIVE) {
+					// Stop the car and center wheels!
+					controlOutputStopCenter();
+				} else {
+					iterationsNoNewValues++;
+				}
+			}
 		}
 	}
+
+	// Update lights
+	hardwareIterationLights(LIGHT_BIT_FLASH_LEFT, rcMode, rcBrake);
 }
 
 
@@ -89,10 +133,12 @@ bool handleRCMode(void) {
 			int esc_pw = hardwareGetValuesRC(THROTTLE);
 			if (esc_pw > SPEED_PULSEWIDTHS[SPEED_STOP]) {
 				// Output a fifth of the input
-				esc_pw = SPEED_PULSEWIDTHS[SPEED_STOP] + ((esc_pw - SPEED_PULSEWIDTHS[SPEED_STOP]) * 0.2);
+				esc_pw = SPEED_PULSEWIDTHS[SPEED_STOP] +
+						((esc_pw - SPEED_PULSEWIDTHS[SPEED_STOP]) * RC_FORWARD_MULTIPLIER);
 			} else if (esc_pw < SPEED_PULSEWIDTHS[SPEED_STOP]) {
 				// Attenuate backwards values by multiplying with 0.8
-				esc_pw = SPEED_PULSEWIDTHS[SPEED_STOP] - ((SPEED_PULSEWIDTHS[SPEED_STOP] - esc_pw) * 0.7);
+				esc_pw = SPEED_PULSEWIDTHS[SPEED_STOP] -
+						((SPEED_PULSEWIDTHS[SPEED_STOP] - esc_pw) * RC_BACKWARD_MULTIPLIER);
 			}
 
 			hardwareSetValuesPWM_RC(esc_pw, hardwareGetValuesRC(STEERING));
@@ -110,17 +156,16 @@ bool rcModeCheck(void) {
 	static int itAboveActivationTreshold = 0;
 	static int itBelowDeactivationTreshold = 0;
 	static bool rcMode = false;
-	static int itWindowToCenterToActivate = 0;
-	static int itWindowToCenterToDeactivate = 0;
+	static int itWindowToCenterToSwitch = 0;
 	static bool ledState = false; // Led state for blinking
 	icucnt_t steeringPW = hardwareGetValuesRC(STEERING);
 
-	// Restore LED if messed with by blinking.
+	// Restore LED state - will be changed only if blinking occurs below
 	if (rcMode) palSetPad(GPIOD, GPIOD_LED6);
 	else palClearPad(GPIOD, GPIOD_LED6);
 
 	// If not in window to activate/deactivate, do normal check for step 1
-	if (itWindowToCenterToActivate == 0 && itWindowToCenterToDeactivate == 0) {
+	if (itWindowToCenterToSwitch == 0) {
 		// Step 1 check
 		// Only check for activation of RC mode if not already active
 		if (!rcMode && steeringPW > RC_STEERING_ACTIVATION_TRESHOLD) {
@@ -130,7 +175,7 @@ bool rcModeCheck(void) {
 			} else {
 				// Already enough iterations. Step 1 complete
 				//rcMode = true;
-				itWindowToCenterToActivate = ITERATIONS_TO_CENTER;
+				itWindowToCenterToSwitch = ITERATIONS_TO_CENTER;
 			}
 		} else if (rcMode && steeringPW < RC_STEERING_DEACTIVATION_TRESHOLD) {
 			// Increase counter if we're on the way towards deactivation
@@ -138,7 +183,7 @@ bool rcModeCheck(void) {
 				itBelowDeactivationTreshold++;
 			} else {
 				// Already enough iterations. Step 1 complete
-				itWindowToCenterToDeactivate = ITERATIONS_TO_CENTER;
+				itWindowToCenterToSwitch  = ITERATIONS_TO_CENTER;
 			}
 		}
 
@@ -157,27 +202,17 @@ bool rcModeCheck(void) {
 		}
 
 		// Step 2 - executes if steering centered after step 1 complete
-		if (itWindowToCenterToActivate > 0 && steeringPW >
+		if (itWindowToCenterToSwitch > 0 && steeringPW >
 				WHEELS_CENTERED_PW - 50 && steeringPW < WHEELS_CENTERED_PW + 50) {
-			rcMode = true;
-			palSetPad(GPIOD, GPIOD_LED6);
-			itWindowToCenterToActivate = 0;
-			itWindowToCenterToDeactivate = 0;
-		}
-		if (itWindowToCenterToDeactivate > 0 && steeringPW >
-				WHEELS_CENTERED_PW - 50 && steeringPW < WHEELS_CENTERED_PW + 50) {
-			rcMode = false;
-			palClearPad(GPIOD, GPIOD_LED6);
-			itWindowToCenterToActivate = 0;
-			itWindowToCenterToDeactivate = 0;
+			// Toggle RC mode and close iteration window
+			rcMode = !rcMode;
+			itWindowToCenterToSwitch = 0;
 		}
 
-		// If step 1 complete, keep diminishing window in which we wait for centered steering
-		if (itWindowToCenterToActivate > 0) {
-			itWindowToCenterToActivate--;
-		}
-		if (itWindowToCenterToDeactivate > 0) {
-			itWindowToCenterToDeactivate--;
+		// If step 1 complete but not step 2, keep diminishing window in which we wait
+		// for centered steering
+		if (itWindowToCenterToSwitch > 0) {
+			itWindowToCenterToSwitch--;
 		}
 	}
 	
@@ -191,7 +226,3 @@ bool rcModeCheck(void) {
 	return rcMode;
 }
 
-
-int max(int int1, int int2) {
-	return int1 > int2 ?  int1 : int2;
-}

@@ -8,7 +8,7 @@
 #ifndef HARDWAREPWM_H_
 #define HARDWAREPWM_H_
 
-#include "autotuxconfig.h"
+#include "../autotuxconfig.h"
 
 
 /*

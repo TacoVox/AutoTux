@@ -2,7 +2,6 @@
 # NOTE: Makefile provided by ChibiOS.
 # Build global options
 #
-
 # Compiler options here.
 ifeq ($(USE_OPT),)
   USE_OPT = -std=c99 -O0 -ggdb -fomit-frame-pointer -falign-functions=16 -Wall -Wextra 
@@ -87,7 +86,7 @@ endif
 PROJECT = ch
 
 # Imported source files and paths
-CHIBIOS = lib/ChibiOS_16.1.4/
+CHIBIOS = lib/ChibiOS_16.1.4
 # Startup files.
 include $(CHIBIOS)/os/common/ports/ARMCMx/compilers/GCC/mk/startup_stm32f4xx.mk
 # HAL-OSAL files (optional).
@@ -118,8 +117,7 @@ CSRC = $(STARTUPSRC) \
        $(CHIBIOS)/os/various/shell.c \
        $(CHIBIOS)/os/hal/lib/streams/memstreams.c \
        $(CHIBIOS)/os/hal/lib/streams/chprintf.c \
-       usbcfg.c main.c sensorInput.c hardwareIR.c hardwareUS.c hardwareRC.c hardwarePWM.c packetHandler.c hardwareWE.c controlOutput.c serialConnection.c
-
+       conf/usbcfg.c src/main.c src/hardware/sensorInput.c src/hardware/hardwareIR.c src/hardware/hardwareUS.c src/hardware/hardwareRC.c src/hardware/hardwarePWM.c src/hardware/hardwareWE.c src/hardware/controlOutput.c src/hardware/neopixelSWD.c src/hardware/hardwareLights.c src/serial/serialConnection.c src/serial/packetHandler.c 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
 CPPSRC =
@@ -149,8 +147,8 @@ ASMSRC = $(STARTUPASM) $(PORTASM) $(OSALASM)
 
 INCDIR = $(STARTUPINC) $(KERNINC) $(PORTINC) $(OSALINC) \
          $(HALINC) $(PLATFORMINC) $(BOARDINC) $(TESTINC) \
-         $(CHIBIOS)/os/hal/lib/streams $(CHIBIOS)/os/various
-
+         $(CHIBIOS)/os/hal/lib/streams $(CHIBIOS)/os/various \
+		conf 
 #
 # Project, sources and paths
 ##############################################################################
