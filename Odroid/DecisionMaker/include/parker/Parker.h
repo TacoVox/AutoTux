@@ -16,7 +16,7 @@ namespace parker {
     class Parker {
 
     private:
-        /*
+
         //REAL CAR
         const double SPOT_SIZE = 0.70;
         const double ADJUST_BEFORE_PARKING = 0.20;
@@ -26,22 +26,22 @@ namespace parker {
         const double ADJUST_IN_SPOT_FORWARD = 0.10;
         const double ADJUST_IN_SPOT_BACK = 0.10;
 
-        const double SENSOR_MIN = 0.03
-        const double SENSOR_MAX = 0.04
-        */
+        const double SENSOR_MIN = 0.03;
+        const double SENSOR_MAX = 0.04;
+
         //-----------------------------------------
 
         //SIMULATION
-        const double SPOT_SIZE = 7;
-        const double ADJUST_BEFORE_PARKING = 2;
-        const double BACK_AROUND_CORNER = 5;
-        const double BACKING_STRAIGHT = 2;
-        const double BACKING_LEFT = 2.5;
-        const double ADJUST_IN_SPOT_FORWARD = 1.5;
-        const double ADJUST_IN_SPOT_BACK = 1;
-
-        const double SENSOR_MIN = 0.2;
-        const double SENSOR_MAX = 0.5;
+//        const double SPOT_SIZE = 7;
+//        const double ADJUST_BEFORE_PARKING = 2;
+//        const double BACK_AROUND_CORNER = 5;
+//        const double BACKING_STRAIGHT = 2;
+//        const double BACKING_LEFT = 2.5;
+//        const double ADJUST_IN_SPOT_FORWARD = 1.5;
+//        const double ADJUST_IN_SPOT_BACK = 1;
+//
+//        const double SENSOR_MIN = 0.2;
+//        const double SENSOR_MAX = 0.5;
         //----------------------------------------
 
 
