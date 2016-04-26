@@ -15,6 +15,9 @@
  * 	chThdSleepMilliseconds(1000);
  * 	neopixelWrite(&cfg, colorBuffer);
  *
+ *  Buffer initialization inspired by omriiluz driver:
+ *  https://github.com/omriiluz/WS2812B-LED-Driver-ChibiOS
+ *
  * 	TODO:
  * 	To make the driver work well with larger chains, it's good to be able to
  * 	send an ARRAY of the leds we want to affect in setColor. Add one function
@@ -22,7 +25,7 @@
  * 	an INTEGER ARRAY affectedLeds and an INTEGER ARRAYSIZE affectedLedCount.
  *
  * 	TODO:
- * 	Clean up LED driver and put it on github or example, define the timings as
+ * 	Clean up LED driver and put it on github, for example, define the timings as
  * 	macros relative to the frequency - IFNDEF FREQUENCY_MHZ DEFINE FREQUENCY_MHZ
  * 	168 should allow anyone to define another frequency.
  * 	OSC_TIME = 1 000 000 000 / (double)(FREQUENCY_MHZ * 000 000) = 5.95.
