@@ -21,8 +21,8 @@ bool checkFlashRightBit(unsigned char lightByte);
 
 static uint8_t* colorBuffer = 0;
 static neopixelConfig cfg = {
-	GPIOA, // TODO: move pin to config
-	6,
+	LED_PORT,
+	LED_PIN,
 	16,
 	false
 };
@@ -38,14 +38,13 @@ static bool lightsHaveChanged, flashState;
  * Sets up the pin and color buffer.
  */
 void hardwareSetupLights(void) {
-
 	neopixelInit(&cfg, &colorBuffer);
 
 	// Headlights
-	neopixelSetColor(colorBuffer, LED(1) | LED(2) | LED(5) | LED(6), 30, 30, 30);
+	neopixelSetColor(colorBuffer, HEADLIGHT_LEDS, HEADLIGHT_R, HEADLIGHT_G, HEADLIGHT_B);
 
 	// Tail lights
-	neopixelSetColor(colorBuffer, LED(9) | LED(14), 40, 0, 0);
+	neopixelSetColor(colorBuffer, TAILLIGHT_LEDS, TAILLIGHT_R, TAILLIGHT_G, TAILLIGHT_B);
 
 	// Sleep a while to make sure voltage on the car stabilizes before write occurs
 	chThdSleepMilliseconds(100);
@@ -89,33 +88,32 @@ void updateColorBuffer(void) {
 	// Let flashing activate and deactivate "naturally" aligned with the
 	// flashState pace.
 	if (flashLeft && flashState) {
-		neopixelSetColor(colorBuffer, LED(7) | LED(8), 230, 130, 0);
+		neopixelSetColor(colorBuffer, FLASHLEFT_LEDS, FLASH_R, FLASH_G, FLASH_B);
 	}
 	if (flashRight && flashState) {
-		neopixelSetColor(colorBuffer, LED(0) | LED(15), 230, 130, 0);
+		neopixelSetColor(colorBuffer, FLASHLEFT_LEDS, FLASH_R, FLASH_G, FLASH_B);
 	}
 	if (!flashState) {
 		// Turn off all corner leds
-		neopixelSetColor(colorBuffer, LED(0) | LED(7) | LED(8) | LED(15), 0, 0, 0);
-
+		neopixelSetColor(colorBuffer, FLASHLEFT_LEDS | FLASHRIGHT_LEDS, 0, 0, 0);
 	}
 
 	if (reverseLight) {
-		neopixelSetColor(colorBuffer, LED(11), 60, 60, 60);
+		neopixelSetColor(colorBuffer, REVERSE_LEDS, REVERSE_R, REVERSE_G, REVERSE_B);
 	} else {
-		neopixelSetColor(colorBuffer, LED(11), 0, 0, 0);
+		neopixelSetColor(colorBuffer, REVERSE_LEDS, 0, 0, 0);
 	}
 
 	if (brakeLight) {
-		neopixelSetColor(colorBuffer, LED(10) | LED(13), 255, 0, 0);
+		neopixelSetColor(colorBuffer, BRAKE_LEDS, BRAKE_R, BRAKE_G, BRAKE_B);
 	} else {
-		neopixelSetColor(colorBuffer, LED(10) | LED(13), 0, 0, 0);
+		neopixelSetColor(colorBuffer, BRAKE_LEDS, 0, 0, 0);
 	}
 
 	if (rcLight) {
-		neopixelSetColor(colorBuffer, LED(3) | LED(4) | LED(12), 0, 0, 150);
+		neopixelSetColor(colorBuffer, RCLIGHT_LEDS, RCLIGHT_R, RCLIGHT_G, RCLIGHT_B);
 	} else {
-		neopixelSetColor(colorBuffer, LED(3) | LED(4) | LED(12), 0, 0, 0);
+		neopixelSetColor(colorBuffer, RCLIGHT_LEDS, 0, 0, 0);
 	}
 }
 

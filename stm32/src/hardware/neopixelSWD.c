@@ -27,8 +27,8 @@
 #define RESET_TIME_CLEAR 10000 // 50 microseconds
 
 void neopixelInit(neopixelConfig* cfg, uint8_t** colorBuffer) {
-	//palSetPadMode(cfg->port, cfg->pin, PAL_MODE_OUTPUT_OPENDRAIN);
 	palSetPadMode(cfg->port, cfg->pin, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);
+	palSetPad(cfg->port, cfg->pin);
 
 	// Allocate memory, set all elements to 0
 	uint8_t* allocatedBuffer = chHeapAlloc(NULL, sizeof(unsigned char) * cfg->numberOfLEDs * 3 * 8);
@@ -57,15 +57,14 @@ void neopixelSetColor(uint8_t* colorBuffer, uint32_t ledMask,
 }
 
 void neopixelWrite(neopixelConfig* cfg, uint8_t* colorBuffer) {
-	uint32_t currentLEDColor;
 	uint32_t currentLED;
+	uint32_t currentLEDColor;
 	int c = 0;
 	int bit = 0;
-	chSysLock();
-
 	ioportid_t port = cfg->port;
 	ioportmask_t pin = cfg->pin;
 
+	chSysLock();
 	for (currentLED = 0; currentLED < cfg->numberOfLEDs; currentLED++) {
 
 		currentLEDColor = colorBuffer[currentLED * 3] << 16 | colorBuffer[currentLED * 3 + 1] << 8 |
