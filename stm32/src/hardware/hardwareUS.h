@@ -8,7 +8,7 @@
 #ifndef HARDWAREUS_H_
 #define HARDWAREUS_H_
 
-#include "autotuxconfig.h"
+#include "../autotuxconfig.h"
 
 /*
  * Sets up the US sensor pins etc.

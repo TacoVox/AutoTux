@@ -16,12 +16,10 @@
 #include <hal.h>
 
 // Local includes
-#include "sensorInput.h"
-#include "controlOutput.h"
-#include "serialConnection.h"
-
-
-#include "LEDDriver.h"
+#include "hardware/sensorInput.h"
+#include "hardware/controlOutput.h"
+#include "serial/serialConnection.h"
+#include "hardware/neopixelSWD.h"
 
 
 //-----------------------------------------------------------------------------
@@ -38,20 +36,11 @@ int main(void) {
 	sensorInputSetup();
 	controlOutputSetup();
 
-	// Init LED
-
-	init(16);
-	//setColor(1 | 2 | 4 | 8, 255, 255, 0);
-	write();
-	// Start another thread for the serial connection
+	// Start the serial connection. Creates its own thread.
 	serialConnectionStart();
 
 	// Then simply read sensor values and output control values on the main thread
 	while (true) {
-
-		//testPatternFB();
-
-
 		sensorInputIteration();
 		controlOutputIteration();
 

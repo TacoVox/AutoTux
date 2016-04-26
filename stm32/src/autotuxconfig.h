@@ -158,6 +158,43 @@ static const int SPEED_PULSEWIDTHS[SPEED_STEPS] = {1140, 1350, 1410, 1440};
 #define WHEELS_MAXRIGHT_ANGLE 120
 
 
+//-----------------------------------------------------------------------------
+// LED config
+//-----------------------------------------------------------------------------
+
+#define LED_PORT GPIOA
+#define LED_PIN 6
+
+#define HEADLIGHT_LEDS LED(1) | LED(2) | LED(5) | LED(6)
+#define HEADLIGHT_R 30
+#define HEADLIGHT_G 30
+#define HEADLIGHT_B 30
+
+#define TAILLIGHT_LEDS LED(9) | LED(14)
+#define TAILLIGHT_R 40
+#define TAILLIGHT_G 0
+#define TAILLIGHT_B 0
+
+#define FLASHLEFT_LEDS LED(7) | LED(8)
+#define FLASHRIGHT_LEDS LED(0) | LED(15)
+#define FLASH_R 230
+#define FLASH_G 130
+#define FLASH_B 0
+
+#define REVERSE_LEDS LED(11)
+#define REVERSE_R 30
+#define REVERSE_G 30
+#define REVERSE_B 30
+
+#define BRAKE_LEDS LED(10) | LED(13)
+#define BRAKE_R 255
+#define BRAKE_G 0
+#define BRAKE_B 0
+
+#define RCLIGHT_LEDS LED(3) | LED(4) | LED(12)
+#define RCLIGHT_R 0
+#define RCLIGHT_G 0
+#define RCLIGHT_B 150
 
 
 #endif /* AUTOTUXCONFIG_H_ */

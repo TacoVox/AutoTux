@@ -28,7 +28,7 @@
 #ifndef _HALCONF_H_
 #define _HALCONF_H_
 
-#include "mcuconf.h"
+#include "../chibiconf/mcuconf.h"
 
 //#if !defined (STM32F407xx) || defined(__DOXYGEN)
 //#define STM32F407xx TRUE

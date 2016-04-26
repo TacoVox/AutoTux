@@ -14,7 +14,7 @@
 //-----------------------------------------------------------------------------
 
 
-int map(int x, int in_min, int in_max, int out_min, int out_max);
+static int map(int x, int in_min, int in_max, int out_min, int out_max);
 
 static PWMConfig pwmcfg = {
 	1000000, // 1Mhz freq
@@ -93,7 +93,7 @@ void hardwareSetValuesPWM_RC(icucnt_t throttle, icucnt_t steering) {
  * Map function, borrowed from the Arduino reference manual!
  * Adapted to not allow out of bound values.
  */
-int map(int x, int in_min, int in_max, int out_min, int out_max) {
+static int map(int x, int in_min, int in_max, int out_min, int out_max) {
 	if (x < in_min) x = in_min;
 	if (x > in_max) x = in_max;
 	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;

@@ -1,0 +1,166 @@
+/*
+ * hardwareLights.c
+ */
+
+#include "neopixelSWD.h"
+#include "hardwareLights.h"
+
+
+//-----------------------------------------------------------------------------
+// Definitions
+//-----------------------------------------------------------------------------
+
+#define ITERATIONS_PER_FLASH_STATE 4
+
+void updateColorBuffer(void);
+void setLightBools(unsigned char lightByte, bool rcMode, bool rcBrakeLight);
+bool checkBrakeBit(unsigned char lightByte);
+bool checkReverseBit(unsigned char lightByte);
+bool checkFlashLeftBit(unsigned char lightByte);
+bool checkFlashRightBit(unsigned char lightByte);
+
+static uint8_t* colorBuffer = 0;
+static neopixelConfig cfg = {
+	LED_PORT,
+	LED_PIN,
+	16,
+	false
+};
+static bool brakeLight, flashLeft, flashRight, reverseLight, rcLight;
+static bool lightsHaveChanged, flashState;
+
+//-----------------------------------------------------------------------------
+// Public interface
+//-----------------------------------------------------------------------------
+
+
+/*
+ * Sets up the pin and color buffer.
+ */
+void hardwareSetupLights(void) {
+	neopixelInit(&cfg, &colorBuffer);
+
+	// Headlights
+	neopixelSetColor(colorBuffer, HEADLIGHT_LEDS, HEADLIGHT_R, HEADLIGHT_G, HEADLIGHT_B);
+
+	// Tail lights
+	neopixelSetColor(colorBuffer, TAILLIGHT_LEDS, TAILLIGHT_R, TAILLIGHT_G, TAILLIGHT_B);
+
+	// Sleep a while to make sure voltage on the car stabilizes before write occurs
+	chThdSleepMilliseconds(100);
+	lightsHaveChanged = true;
+}
+
+/**
+ *
+ */
+void hardwareIterationLights(unsigned char lightByte, bool rcMode, bool rcBrakeLight) {
+	static uint8_t flashStateCounter = 0;
+
+	// First process inputs, refine into bools for which lights are on and off
+	setLightBools(lightByte, rcMode, rcBrakeLight);
+
+	// If flashing is turned on, change state regularly.
+	if (flashLeft || flashRight) {
+		if (flashStateCounter < ITERATIONS_PER_FLASH_STATE - 1) {
+			flashStateCounter++;
+		} else {
+			flashStateCounter = 0;
+			flashState = !flashState;
+			lightsHaveChanged = true;
+		}
+	}
+
+	// Rebuild color buffer and write if anything has changed.
+	if (lightsHaveChanged) {
+		updateColorBuffer();
+
+		neopixelWrite(&cfg, colorBuffer);
+		lightsHaveChanged = false;
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Implementation. The static functions below are inaccessible to other modules
+//-----------------------------------------------------------------------------
+
+void updateColorBuffer(void) {
+	// Let flashing activate and deactivate "naturally" aligned with the
+	// flashState pace.
+	if (flashLeft && flashState) {
+		neopixelSetColor(colorBuffer, FLASHLEFT_LEDS, FLASH_R, FLASH_G, FLASH_B);
+	}
+	if (flashRight && flashState) {
+		neopixelSetColor(colorBuffer, FLASHLEFT_LEDS, FLASH_R, FLASH_G, FLASH_B);
+	}
+	if (!flashState) {
+		// Turn off all corner leds
+		neopixelSetColor(colorBuffer, FLASHLEFT_LEDS | FLASHRIGHT_LEDS, 0, 0, 0);
+	}
+
+	if (reverseLight) {
+		neopixelSetColor(colorBuffer, REVERSE_LEDS, REVERSE_R, REVERSE_G, REVERSE_B);
+	} else {
+		neopixelSetColor(colorBuffer, REVERSE_LEDS, 0, 0, 0);
+	}
+
+	if (brakeLight) {
+		neopixelSetColor(colorBuffer, BRAKE_LEDS, BRAKE_R, BRAKE_G, BRAKE_B);
+	} else {
+		neopixelSetColor(colorBuffer, BRAKE_LEDS, 0, 0, 0);
+	}
+
+	if (rcLight) {
+		neopixelSetColor(colorBuffer, RCLIGHT_LEDS, RCLIGHT_R, RCLIGHT_G, RCLIGHT_B);
+	} else {
+		neopixelSetColor(colorBuffer, RCLIGHT_LEDS, 0, 0, 0);
+	}
+}
+
+
+/**
+ * Choose which lights should be on and off
+ */
+void setLightBools(unsigned char lightByte, bool rcMode, bool rcBrakeLight) {
+	// Assumption: rcLight = (rcMode || rcBrakeLight)
+	if (rcLight != (rcMode || rcBrakeLight)) {
+		rcLight = (rcMode || rcBrakeLight);
+		lightsHaveChanged = true;
+	}
+
+	// Assumption: brakeLight = (rcBrakeLight || brake bit set in lightByte)
+	if (brakeLight != (rcBrakeLight || checkBrakeBit(lightByte))) {
+		brakeLight = (rcBrakeLight || checkBrakeBit(lightByte));
+		lightsHaveChanged = true;
+	}
+
+	// Similar below
+	if (reverseLight != checkReverseBit(lightByte)) {
+		reverseLight = checkReverseBit(lightByte);
+		lightsHaveChanged = true;
+	}
+	if (flashLeft != checkFlashLeftBit(lightByte)) {
+		flashLeft = checkFlashLeftBit(lightByte);
+		lightsHaveChanged = true;
+	}
+	if (flashRight != checkFlashRightBit(lightByte)) {
+		flashRight = checkFlashRightBit(lightByte);
+		lightsHaveChanged = true;
+	}
+}
+
+bool checkBrakeBit(unsigned char lightByte) {
+	return (lightByte &  LIGHT_BIT_BRAKE) == LIGHT_BIT_BRAKE;
+}
+
+bool checkReverseBit(unsigned char lightByte) {
+	return (lightByte &  LIGHT_BIT_REVERSE) == LIGHT_BIT_REVERSE;
+}
+
+bool checkFlashLeftBit(unsigned char lightByte) {
+	return (lightByte &  LIGHT_BIT_FLASH_LEFT) == LIGHT_BIT_FLASH_LEFT;
+}
+
+bool checkFlashRightBit(unsigned char lightByte) {
+	return (lightByte &  LIGHT_BIT_FLASH_RIGHT) == LIGHT_BIT_FLASH_RIGHT;
+}
