@@ -31,7 +31,7 @@ namespace lane {
         using namespace odtools::player;
 
         // SET TO TRUE WHEN USING THE SIMULATOR
-        const bool SIMMODE = true;
+        const bool SIMMODE = false;
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) :
                 TimeTriggeredConferenceClientModule(argc, argv, "LaneDetector"),
