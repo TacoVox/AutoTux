@@ -23,7 +23,7 @@ namespace ui {
         int xsize;
         int ysize;
         bool interrupted;
-        std::unique_ptr<Header> header;
+        Header header;
         Footer footer;
         void init(void);
     };

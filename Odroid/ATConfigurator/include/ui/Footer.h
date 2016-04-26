@@ -7,17 +7,20 @@
 
 #include <ncurses.h>
 #include <memory>
+#include <ctime>
 
 namespace ui {
     class Footer {
     public:
+        Footer(void);
         Footer(int, int);
         WINDOW* getFooter(void);
+        void refresh(void);
     private:
         int xsize;
         int ysize;
         WINDOW* _footer;
-        void dateLoop(void);
+        std::time_t time;
     };
 }
 

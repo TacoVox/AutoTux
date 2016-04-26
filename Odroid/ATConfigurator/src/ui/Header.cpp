@@ -5,6 +5,9 @@
 #include "ui/Header.h"
 #include <string>
 
+ui::Header::Header() : xsize(80), ysize(40),
+                       _header(newwin(1, xsize, 0, 0)) {}
+
 ui::Header::Header(int x, int y) : xsize(x), ysize(y),
                                    _header(newwin(1, xsize, 0, 0)) {
     std::string title = "AutoTux Configurator - v0.1";
@@ -18,6 +21,6 @@ WINDOW *ui::Header::getHeader(void) {
     return _header;
 }
 
-ui::Header::~Header() {
 
-}
+
+

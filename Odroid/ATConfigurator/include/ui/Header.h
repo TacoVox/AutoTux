@@ -10,8 +10,8 @@
 namespace ui {
     class Header {
     public:
+        Header(void);
         Header(int, int);
-        ~Header();
         WINDOW* getHeader(void);
     private:
         int xsize;
