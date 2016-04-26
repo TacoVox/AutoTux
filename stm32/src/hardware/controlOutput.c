@@ -78,8 +78,7 @@ void controlOutputSetData(unsigned char* newControlData) {
 void controlOutputIteration() {
 	static int iterationsNoNewValues = 0;
 	bool rcBrake = false;
-	bool rcMode = false;
-	rcMode = handleRCMode();
+	bool rcMode = handleRCMode();
 
 	if (!rcMode) {
 		// RC mode not activated - check only for RC transmitter brake
