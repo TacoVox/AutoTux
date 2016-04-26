@@ -1,4 +1,4 @@
-/** @file	hardwareLights.c
+/** @file	hardwareLights.h
  * 	@brief Handles the lights of the car.
  *
  * Uses neopixelSWD as the driver for the LEDs.

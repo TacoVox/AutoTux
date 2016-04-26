@@ -1,10 +1,12 @@
+/** @file	neopixelSWD.c
+ * 	@brief	Software driver for WS2812 neooixel in ChibiOS.
+ *
+ * 	Uses software bitbanging.
+ */
+
 #include <hal.h>
 #include "neopixelSWD.h"
 
-
-// seems to be around 21 ms per NOP - maybe it's because one oscillation
-// in 68mhz is 5.95 ns, and it usually takes three for each iteration of the NOP
-// for loops (the NOP, the boolean check and the counter increase)?
 
 /*
  * The below values work fine with OPEN DRAIN mode.
@@ -19,13 +21,47 @@
  * maybe the signal is just very fast at going high, but slower when going
  * low) the zeroes are understood as ones if we use the same HIGH_TIME_0!
  * Here we need to use a significantly lower HIGH_TIME_0.
+ *
+ * In general, the time seems to be around 21 ms per NOP - maybe it's because
+ * one oscillation in 68mhz is 5.95 ns, and it usually takes three for each
+ * iteration of the NOP for loops (the NOP, the boolean check and the counter
+ * increase)?
  */
-#define HIGH_TIME_1 38 // 800 ns // 40
-#define LOW_TIME_1 22 // 450 ns // 20
-#define HIGH_TIME_0 5 // 400 ns // 15 // 12 för lågt, 24 för högt
-#define LOW_TIME_0 55 // 850 ns // 40
-#define RESET_TIME_CLEAR 10000 // 50 microseconds
 
+/**
+ * The number of NOP loop iterations the signal should be high when sending a 1.
+ */
+#define HIGH_TIME_1 38
+
+/**
+ * The number of NOP loop iterations the signal should be low when sending a 1.
+ */
+#define LOW_TIME_1 22 // 450 ns // 20
+
+/**
+ * The number of NOP loop iterations the signal should be high when sending a 0.
+ */
+#define HIGH_TIME_0 5 // 400 ns // 15 // 12 för lågt, 24 för högt
+
+/**
+ * The number of NOP loop iterations the signal should be low when sending a 0.
+ */
+#define LOW_TIME_0 55 // 850 ns // 40
+
+/**
+ * The number of NOP loop iterations the signal should be high when sending a 1.
+ */
+#define RESET_TIME_CLEAR 2400 // 50 microseconds
+
+
+//-----------------------------------------------------------------------------
+// Public interface
+//-----------------------------------------------------------------------------
+
+
+/**
+ *
+ */
 void neopixelInit(neopixelConfig* cfg, uint8_t** colorBuffer) {
 	palSetPadMode(cfg->port, cfg->pin, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);
 	palSetPad(cfg->port, cfg->pin);

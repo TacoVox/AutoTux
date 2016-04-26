@@ -12,10 +12,10 @@
 #include "sensorInput.h"
 
 // Input
-#include "hardwareIR.h"
-#include "hardwareUS.h"
-#include "hardwareRC.h" // TODO: this should not be here
-#include "hardwareWE.h"
+#include "hardware/hardwareIR.h"
+#include "hardware/hardwareUS.h"
+#include "hardware/hardwareRC.h" // TODO: this should not be here
+#include "hardware/hardwareWE.h"
 
 
 //-----------------------------------------------------------------------------

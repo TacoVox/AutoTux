@@ -1,4 +1,4 @@
-/** @file	hardwareRC.c
+/** @file	hardwareRC.h
  * 	@brief Reads the PWM signals from the RC receiver using ICU timers.
  */
 

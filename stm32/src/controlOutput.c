@@ -8,11 +8,11 @@
 #include <hal.h>
 
 // Local includes
-#include "../autotuxconfig.h"
+#include "autotuxconfig.h"
 #include "controlOutput.h"
-#include "hardwarePWM.h"
-#include "hardwareRC.h"
-#include "hardwareLights.h"
+#include "hardware/hardwarePWM.h"
+#include "hardware/hardwareRC.h"
+#include "hardware/hardwareLights.h"
 
 //-----------------------------------------------------------------------------
 // Definitions

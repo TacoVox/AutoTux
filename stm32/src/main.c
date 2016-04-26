@@ -16,8 +16,8 @@
 #include <hal.h>
 
 // Local includes
-#include "hardware/sensorInput.h"
-#include "hardware/controlOutput.h"
+#include "sensorInput.h"
+#include "controlOutput.h"
 #include "serial/serialConnection.h"
 #include "hardware/neopixelSWD.h"
 

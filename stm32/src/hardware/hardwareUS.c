@@ -1,8 +1,5 @@
-/*
- * hardwareUS.c
- *
- *  Created on: Apr 4, 2016
- *      Author: jerker
+/** @file	hardwareUS.c
+ * 	@brief Reads the US sensor values using i2c. Averages values with a circular buffer.
  */
 
 #include <hal.h>
@@ -17,16 +14,28 @@
 
 static int averageWithCircBuffer(int latestValue, US_SENSOR sensor);
 
-#define CMD_REG			0x00	// Command register
-#define GAIN_REG		0x01
-#define LIGHT_REG		0x01
-#define GAIN_SETTING	0x16	// Sets maximum analog gain to 265
-#define START_RANGING	0x51
-#define RANGE_REG    	0x02
 
+#define CMD_REG	0x00		//!< The command register of the US sensors (write)
+#define GAIN_REG 0x01		//!< The gain register of the US sensors (write)
+#define LIGHT_REG 0x01		//!< The light register of the US sensors (read)
+#define RANGE_REG 0x02		//!< The range egister of the US sensors (read)
+#define GAIN_SETTING 0x16	//!< Sets maximum analog gain to 265
+#define START_RANGING 0x51	//!< The range command of the US sensors
+
+
+/**
+ * Transfer buffer for the i2c communication.
+ */
 static uint8_t transferBuffer[2];
+
+/**
+ * Receive buffer for the i2c communication.
+ */
 static uint8_t receiveBuffer[2];
 
+/**
+ * I2C driver configuration.
+ */
 static const I2CConfig i2cConfig = {
     OPMODE_I2C,
 	 /*400000,
@@ -35,21 +44,29 @@ static const I2CConfig i2cConfig = {
 	STD_DUTY_CYCLE,
 };
 
-
-// The resulting centimeter values
+/**
+ * The resulting centimeter values
+ */
 static int usCm[US_SENSORS];
+
+/**
+ * The resulting light sensor values
+ */
 static unsigned char lightSensorReading;
 
-// Circular buffer, values will be averaged with the others
+/*
+ * Circular buffer length
+ */
 #define US_CIRCULAR_BUFFER_LENGTH 5
+
+/**
+ * Circular buffer, new values will be averaged with the others
+ */
 static int usCmCircBuffer[US_SENSORS][US_CIRCULAR_BUFFER_LENGTH];
 
 
-
-
-
 //-----------------------------------------------------------------------------
-// "Public" interface
+// Public interface
 //-----------------------------------------------------------------------------
 
 
@@ -81,10 +98,9 @@ void hardwareSetupUS() {
 }
 
 
-
-
 /*
- * Call this each time an US read should be performed.
+ * @brief Call this each time an US read should be performed.
+ *
  * Starts the ranging process. 65 ms later, the range can be read.
  */
 void hardwareIterationUSStart() {
@@ -106,7 +122,11 @@ void hardwareIterationUSStart() {
 
 }
 
-
+/*
+ * @brief Fetches the values from the US sensors.
+ *
+ * Should be preceeded by a corresponding start call that starts the ranging.
+ */
 void hardwareIterationUSEnd() {
 	msg_t status = MSG_OK;
 	systime_t timeout = MS2ST(10);
@@ -161,7 +181,6 @@ int hardwareGetValuesUS(US_SENSOR sensor) {
 	return (usCm[sensor] < US_VALUE_CAP) ? usCm[sensor] : US_VALUE_CAP;
 }
 
-
 /*
  * Getter for the light sensor reading
  */
@@ -169,11 +188,15 @@ unsigned char hardwareGetValuesUSLight(void) {
 	return lightSensorReading;
 }
 
+
 //-----------------------------------------------------------------------------
-// "Private" implementation
+// Implementation. The static functions below are inaccessible to other modules
 //-----------------------------------------------------------------------------
 
 
+/**
+ * Averages the new value with the circular buffer and returns the result.
+ */
 static int averageWithCircBuffer(int latestValue, US_SENSOR sensor) {
 	static int currentPosition = 0;
 
