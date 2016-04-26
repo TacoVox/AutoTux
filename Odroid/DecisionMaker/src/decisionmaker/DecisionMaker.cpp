@@ -30,7 +30,8 @@ VehicleControl vehicleControl;
  */
 DecisionMaker::DecisionMaker(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "DecisionMaker"),
-        ovt(), parker(), containerVehicleData(), containerSensorBoardData(), laneRecommendation(), stopCounter(0){
+        ovt(), parker(), containerVehicleData(), containerSensorBoardData(), laneRecommendation(), stopCounter(0),
+        speed(), isStopLine(false){
 }
 
 DecisionMaker::~DecisionMaker() {}
@@ -50,29 +51,29 @@ void DecisionMaker::laneFollowing() {
 
         if(stopCounter == 60) {
             cout << "WAKING UP" << endl;
-            vehicleControl.setSpeed(2);
             stopCounter = 0;
+            isStopLine = false;
         }
 
         else {
             cout << "SLEEPING..." << endl;
             stopCounter++;
+            isStopLine = true;
         }
     }
 
     else if(getDistanceToLine() == -1){
-        vehicleControl.setSpeed(2);
     }
 
     else if(getDistanceToLine() < 50) {
-        vehicleControl.setSpeed(0);
+        speed = 0;
         stopCounter = 1;
     }
 
     else if(getDistanceToLine() < 150) {
-        vehicleControl.setSpeed(1);
+        speed = 1;
     }
-
+    vehicleControl.setSpeed(speed);
     vehicleControl.setSteeringWheelAngle(getAngle());
 }
 
@@ -160,8 +161,10 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                     }
                 }
                 else{
-                    //parker.findSpot(sbd, vd);
-                    vehicleControl.setSpeed(1);
+                    if(!isStopLine) {
+                        parker.findSpot(sbd, vd);
+                        speed = 1;
+                    }
                     laneFollowing();
                 }
                 break;

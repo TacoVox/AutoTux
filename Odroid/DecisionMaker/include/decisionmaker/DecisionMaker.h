@@ -39,6 +39,10 @@ namespace decisionmaker{
         odcore::data::Container containerSensorBoardData;
 
         odcore::data::Container laneRecommendation;
+
+        double speed;
+        bool isStopLine;
+
         double getAngle();
         bool isInLeftLane();
         bool isDataQuality();
