@@ -1,8 +1,8 @@
-/*
- * hardwareW.c
+/** @file	hardwareWE.c
+ * 	@brief Measurements and calculations using the Wheel Encoder.
  *
- *  Created on: Apr 4, 2016
- *      Author: jerker
+ *	Created on the 4th of April.\n
+ *  Includes speed measurements and distance calculations.
  */
 
 #include <hal.h>
@@ -23,14 +23,39 @@ systime_t measurementStart;
 static THD_WORKING_AREA(wheelEncoderThreadWorkingArea, 60); // Stack size in bytes
 static THD_FUNCTION(wheelEncoderThread, arg);
 
-// The resulting pulsewidth values
+
+/**
+ *	Each tick represents a black stripe measured by the wheel encoder.
+ */
 uint8_t ticks;
+
+/**
+ *	Ticks used to measure distance traveled
+ */
 unsigned int distanceTicks;
+/**
+ *	Used in distance calculations
+ */
 unsigned int distanceTraveled;
+/**
+	TRUE if the wheel encoder state has changed (i.e. passed from a black strip to wheel)
+	FALSE otherwise. A FALSE state will ıncrement ticks and distanceTicks.
+*/
 bool previousEncoderState;
+/**
+	centimeters traveled / seconds passed.
+	Calculated in hardwareIterationWE using ticks as well as timeDelta.
+*/
+
 int cmPerSecond;
+/**
+	Systime at boot and is reset approx every 1000ms.
+*/
+
 systime_t startTime;
 systime_t timeNow;
+
+
 
 
 //-----------------------------------------------------------------------------
@@ -38,7 +63,7 @@ systime_t timeNow;
 //-----------------------------------------------------------------------------
 
 
-/*
+/**
  * Sets up the pin and the thread
  */
 void hardwareSetupWE(void) {
