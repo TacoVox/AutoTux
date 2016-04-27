@@ -1,5 +1,5 @@
 /** @file	packetHandler.c
- * 	@brief	Handles sending and receiving packets, manages a receive buffer.
+ * 	@brief	Handles sending and parsing of received packets, manages a receive buffer.
  *
  * 	When receiving bytes, they are put into the receive buffer. If the buffer
  * 	gets full, it gets shifted so the oldest half gets discarded. The using
@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "packetHandler.h"
+#include "../autotuxconfig.h"
 
 
 //-----------------------------------------------------------------------------

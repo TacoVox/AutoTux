@@ -56,7 +56,7 @@ static const ADCConversionGroup adc_group = {
 /*
  * Sets up the IR sensor pins etc.
  */
-void hardwareSetupIR() {
+void hardwareIRSetup() {
 	adcStart(&ADCD1, NULL);
 	for (int i = 0; i < ADC_CHANNELS; i++) {
 		palSetPadMode(ADC_PIN_GROUPS[i], ADC_PIN_NUMBERS[i], PAL_MODE_INPUT_ANALOG);
@@ -66,14 +66,14 @@ void hardwareSetupIR() {
 /*
  * Call this each time an analog read should be performed.
  */
-void hardwareIterationIR() {
+void hardwareIRIteration() {
 	adcStartConversion(&ADCD1, &adc_group, &irSamples[0], ADC_SAMPLES);
 }
 
 /*
  * Getter for the values. Specify an IR sensor.
  */
-int hardwareGetValuesIR(IR_SENSOR sensor) {
+int hardwareIRGetValues(IR_SENSOR sensor) {
 	return (irCm[sensor] < IR_VALUE_CAP) ? irCm[sensor] : IR_VALUE_CAP;
 }
 

@@ -1,51 +1,71 @@
-/*
- * Takes care of sensor input for the stm32 part of AutoTux.
- * Returns a char array of the data that should be passed to the
- * high-level board.
+/** @file sensorInput.c
+ *  @brief Takes care of sensor input for the stm32 part of AutoTux.
+ *
+ * Runs on the main thread, and serialConnection can use the getter
+ * sensorInputGetData that returns a char array of the data that should be passed
+ * to the high-level board.
+ *
+ * This module also has a function for printing debug output, since
+ * it's common to want to look at the sensor value readings.
  */
 
 
+// ChibiOS includes
 #include <ch.h>
 #include <chprintf.h>
 #include <hal.h>
 
+// Local includes
 #include "sensorInput.h"
-
-// Input
 #include "hardware/hardwareIR.h"
 #include "hardware/hardwareUS.h"
-#include "hardware/hardwareRC.h" // TODO: this should not be here
 #include "hardware/hardwareWE.h"
 
+// Include RC in debug output
+#ifdef DEBUG
+#include "hardware/hardwareRC.h"
+#endif
+
 
 //-----------------------------------------------------------------------------
-// Definitions
+// Public interface
 //-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-// "Public" interface
-//-----------------------------------------------------------------------------
-
-// Uncomment for time measurement
-//systime_t mstartTime, mendTime;
 
 
 /**
  * Initialize pins and settings for sensors.
- * Also start the sensor thread.
  */
 void sensorInputSetup (void) {
 	// Initialize sensors
-	hardwareSetupIR();
+	hardwareIRSetup();
 	hardwareSetupUS();
 	hardwareSetupWE();
+
+	#ifdef DEBUG
 	hardwareSetupRC();
+	#endif
 }
 
+/**
+ * Called each iteration of the main loop to read sensor values.
+ */
+void sensorInputIteration(void) {
+	// Start ranging on US sensors
+	hardwareIterationUSStart();
+
+	// Read IR sensor values
+	hardwareIRIteration();
+
+	// Make sure to wait a while, then fetch the ranging values from US sensors
+	chThdSleepMilliseconds(70);
+	hardwareIterationUSEnd();
+}
 
 /**
- * Fills a char array with all sensor data
+ * @brief Fills a char array with all the latest sensor data.
+ *
+ * serialConnection sends this array to packetHandler which in turn
+ * build and sends a sensor data packet.
  */
 void sensorInputGetData(unsigned char* buffer) {
 	// Normal packet output. Allow only values up to 255 to be sure not
@@ -54,12 +74,12 @@ void sensorInputGetData(unsigned char* buffer) {
 		(unsigned char)hardwareGetValuesUS(US_FRONT) : 255;
 	buffer[1] = hardwareGetValuesUS(US_SIDE) < 255 ?
 		(unsigned char)hardwareGetValuesUS(US_SIDE) : 255;
-	buffer[2] = hardwareGetValuesIR(IR_SIDE_FRONT) < 255 ?
-		(unsigned char)hardwareGetValuesIR(IR_SIDE_FRONT) : 255;
-	buffer[3] = hardwareGetValuesIR(IR_SIDE_REAR) < 255 ?
-		(unsigned char)hardwareGetValuesIR(IR_SIDE_REAR) : 255;
-	buffer[4] = hardwareGetValuesIR(IR_REAR) ?
-		(unsigned char)hardwareGetValuesIR(IR_REAR) : 255;
+	buffer[2] = hardwareIRGetValues(IR_SIDE_FRONT) < 255 ?
+		(unsigned char)hardwareIRGetValues(IR_SIDE_FRONT) : 255;
+	buffer[3] = hardwareIRGetValues(IR_SIDE_REAR) < 255 ?
+		(unsigned char)hardwareIRGetValues(IR_SIDE_REAR) : 255;
+	buffer[4] = hardwareIRGetValues(IR_REAR) ?
+		(unsigned char)hardwareIRGetValues(IR_REAR) : 255;
 	buffer[5] = hardwareGetValuesWESpeed() < 255 ?
 		(unsigned char)hardwareGetValuesWESpeed() : 255;
 
@@ -73,45 +93,24 @@ void sensorInputGetData(unsigned char* buffer) {
 	buffer[10] = hardwareGetValuesUSLight();
 }
 
-
 /**
  * Print sensor values to serial
  */
 void sensorInputDebugOutput(BaseSequentialStream* SDU) {
 	// "\033[F" for going back to previous line
-	chprintf(SDU, "\033[FTHROTTLE: %4i ", hardwareGetValuesRC(THROTTLE));
+	chprintf(SDU, "\033[");
+
+	#ifdef DEBUG
+	chprintf(SDU, "FTHROTTLE: %4i ", hardwareGetValuesRC(THROTTLE));
 	chprintf(SDU, "STEERING: %4i ", hardwareGetValuesRC(STEERING));
+	#endif
+
 	chprintf(SDU, "WHEEL: %4i ", hardwareGetValuesWESpeed());
 	chprintf(SDU, "US FRONT: %3i \r\n", hardwareGetValuesUS(US_FRONT));
 	chprintf(SDU, "US SIDE: %3i ", hardwareGetValuesUS(US_SIDE));
-	chprintf(SDU, "SIDE_FRONT: %3i ", hardwareGetValuesIR(IR_SIDE_FRONT));
-	chprintf(SDU, "SIDE_REAR: %3i ",  hardwareGetValuesIR(IR_SIDE_REAR));
-	chprintf(SDU, "REAR: %2i ", hardwareGetValuesIR(IR_REAR));
+	chprintf(SDU, "SIDE_FRONT: %3i ", hardwareIRGetValues(IR_SIDE_FRONT));
+	chprintf(SDU, "SIDE_REAR: %3i ",  hardwareIRGetValues(IR_SIDE_REAR));
+	chprintf(SDU, "REAR: %2i ", hardwareIRGetValues(IR_REAR));
 	chprintf(SDU, "DIST: %4i ", hardwareGetValuesWEDistance());
 	chprintf(SDU, "LIGHT: %3i ", hardwareGetValuesUSLight());
-
-	// For time measurement
-
-	//chprintf(SDU, "Start: %4i ", ST2MS(mstartTime));
-	//chprintf(SDU, "End t: %4i ", ST2MS(mendTime));
-	//chprintf(SDU, "End c: %2i ", ST2MS(endTimeCallback));
 }
-
-
-
-/**
- * Thread iteration
- */
-void sensorInputIteration(void) {
-	hardwareIterationUSStart();
-	hardwareIterationIR();
-
-	chThdSleepMilliseconds(70);
-	hardwareIterationUSEnd();
-}
-
-
-//-----------------------------------------------------------------------------
-// "Private" implementation
-//-----------------------------------------------------------------------------
-

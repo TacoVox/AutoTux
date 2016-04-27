@@ -1,5 +1,10 @@
-/**
- * Control output
+/** @file	controlOutput.c
+ * 	@brief	Handles the output of control data to the hardware.
+ *
+ *  Control data is received by the serialConnection which calls the setter
+ *  controlOutputSetData in this module. In case any problems occur with the
+ *  communication, this module will make sure that if no valid values are
+ *  received for a while, the car will 	stop.
  */
 
 
@@ -14,19 +19,33 @@
 #include "hardware/hardwareRC.h"
 #include "hardware/hardwareLights.h"
 
+
 //-----------------------------------------------------------------------------
 // Definitions
 //-----------------------------------------------------------------------------
 
 
+static void controlOutputStopCenter(void);
 static bool handleRCMode(void);
 static bool rcModeCheck(void);
-static unsigned char controlData[CONTROL_BYTE_COUNT];
+
+
+/**
+ * Holds the latest control data received from the serial connection.
+ */
+static unsigned char controlData[CONTROL_DATA_BYTES];
+
+/**
+ * @brief Whether control values are so new they have not been output to HW yet.
+ *
+ * Used to notice whenever we haven't received valid communication for a while,
+ * so we can take appropriate measure (stop the car, center wheels).
+ */
 static bool controlValuesAreNew = false;
 
 
 //-----------------------------------------------------------------------------
-// "Public" interface
+// Public interface
 //-----------------------------------------------------------------------------
 
 
@@ -38,39 +57,21 @@ void controlOutputSetup(void) {
 	hardwareSetupPWM();
 	hardwareSetupLights();
 
-	hardwareIterationLights(0, false, false);
+	//hardwareIterationLights(0, false, false);
 }
-
-
-/**
- * Engine stopped, wheels centered (unless in RC mode).
- */
-void controlOutputStopCenter(void) {
-	if (!handleRCMode()) {
-		hardwareSetValuesPWM(PWM_OUTPUT_ESC, SPEED_STOP);
-		hardwareSetValuesPWM(PWM_OUTPUT_SERVO, WHEELS_CENTERED_ANGLE);
-	}
-
-	// Regardless, reset controlData to corresponding values.
-	controlData[CONTROL_BYTE_SPEED] = SPEED_STOP;
-	controlData[CONTROL_BYTE_ANGLE] = WHEELS_CENTERED_ANGLE;
-}
-
-
 
 /**
  * Output control data to engine and wheels (unless in RC mode).
  */
 void controlOutputSetData(unsigned char* newControlData) {
 	// Value copy!
-	for (int i = 0; i < CONTROL_BYTE_COUNT; i++) {
+	for (int i = 0; i < CONTROL_DATA_BYTES; i++) {
 		controlData[i] = newControlData[i];
 	}
 
 	// Touch this variable
 	controlValuesAreNew = true;
 }
-
 
 /**
  * Output control data to engine and wheels (unless in RC mode).
@@ -114,20 +115,34 @@ void controlOutputIteration() {
 	}
 
 	// Update lights
-	//hardwareIterationLights(LIGHT_BIT_FLASH_LEFT, rcMode, rcBrake);
+	hardwareIterationLights(LIGHT_BIT_FLASH_LEFT, rcMode, rcBrake);
 }
 
 
 //-----------------------------------------------------------------------------
-// "Private" implementation
+// Implementation. The static functions below are inaccessible to other modules
 //-----------------------------------------------------------------------------
 
+
+/**
+ * Stop engine and center wheels (unless in RC mode).
+ */
+static void controlOutputStopCenter(void) {
+	if (!handleRCMode()) {
+		hardwareSetValuesPWM(PWM_OUTPUT_ESC, SPEED_STOP);
+		hardwareSetValuesPWM(PWM_OUTPUT_SERVO, WHEELS_CENTERED_ANGLE);
+	}
+
+	// Regardless, reset controlData to corresponding values.
+	controlData[CONTROL_BYTE_SPEED] = SPEED_STOP;
+	controlData[CONTROL_BYTE_ANGLE] = WHEELS_CENTERED_ANGLE;
+}
 
 /**
  * Returns true if RC mode is active and RC signal was forwarded to hardware.
  * Returns false if RC mode off.
  */
-bool handleRCMode(void) {
+static bool handleRCMode(void) {
 	if (hardwareGetValuesRC(THROTTLE) > RC_THROTTLE_ON_TRESHOLD) {
 		if (rcModeCheck()) {
 			// Forward RC signal to hardware
@@ -154,7 +169,7 @@ bool handleRCMode(void) {
  * Turns RC mode on or off based on the amount of consecutive iterations
  * with the values from the RC transmitter above or under certain treshold values.
  */
-bool rcModeCheck(void) {
+static bool rcModeCheck(void) {
 	static int itAboveActivationTreshold = 0;
 	static int itBelowDeactivationTreshold = 0;
 	static bool rcMode = false;
@@ -227,4 +242,3 @@ bool rcModeCheck(void) {
 	}
 	return rcMode;
 }
-

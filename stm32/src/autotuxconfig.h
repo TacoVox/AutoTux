@@ -17,18 +17,43 @@
 
 
 // Debug output. Set to 0 for normal packet output.
-#define DEBUG_OUTPUT 0
+#define DEBUG_OUTPUT 1
+
+#if DEBUG_OUTPUT == 1
+#define DEBUG
+#endif
 
 // If more iterations than this occurs without receiving a valid packet,
 // the serial stops sending to avoid filling buffers. The car is also
 // stopped and wheels are centered.
+
+#ifdef DEBUG
+#define MAX_ITERATIONS_WITHOUT_RECEIVE 200
+#else
 #define MAX_ITERATIONS_WITHOUT_RECEIVE 5
+#endif
 
 // If more bytes than this is received in the same iteration, we know we are
 // either getting lots of garbage data or we have a serious issue with keeping
 // a good communication rate with the Odroid. The car will stop and the wheels
 // will be centered.
 #define MAX_RECEIVE_BYTES_IN_ITERATION 200
+
+
+/**
+ * Actual data bytes in the control packet
+ */
+#define CONTROL_DATA_BYTES 2
+
+/**
+ * Size of the whole control data packet including header and end delimiter
+ */
+#define CONTROL_DATA_PACKET_SIZE 6
+
+/**
+ * Actual data bytes in the sensor data packet
+ */
+#define SENSOR_DATA_BYTES 11
 
 
 //-----------------------------------------------------------------------------
@@ -126,7 +151,7 @@ static const ioportmask_t RC_PIN_NUMBERS[] = {4, 6};
 //-----------------------------------------------------------------------------
 
 
-#define WE_TICKS_PER_METER 61.7 // 44.07
+#define WE_TICKS_PER_METER 68.49 // 44.07
 
 // A2
 static const ioportid_t WE_PIN_GROUP = GPIOA;

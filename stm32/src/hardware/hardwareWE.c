@@ -85,8 +85,7 @@ int cmPerSecond;
 	Systime at boot and is reset approx every 1000ms.
 */
 
-systime_t startTime;
-systime_t timeNow;
+static volatile systime_t startTime;
 
 
 //-----------------------------------------------------------------------------
@@ -100,9 +99,9 @@ systime_t timeNow;
 // TODO: Refactor this function
 
 void hardwareSetupWE(void) {
-	palSetPadMode(WE_PIN_GROUP, WE_PIN_NUMBER, PAL_MODE_INPUT_PULLUP);
+	palSetPadMode(WE_PIN_GROUP, WE_PIN_NUMBER, PAL_MODE_INPUT_PULLDOWN);
 	extStart(&EXTD1, &extcfg); /*!< Set up the interrupt */
-	startTime = chVTGetSystemTime();
+	startTime = chVTGetSystemTimeX();
 
     /*//Set up the thread here
 	// TODO: Remove the thread started after verifying interrupt routine works
@@ -147,27 +146,25 @@ static void hardwareWEIncrTicks(EXTDriver *extp, expchannel_t channel) {
 	(void)extp;
   	(void)channel;
 
-	chSysLockFromISR(); /*!< Starts Kernel Lock Mode */
+	//chSysLockFromISR(); /*!< Starts Kernel Lock Mode */
+	//chSysUnlockFromISR(); /*!< Ends Kernel Lock Mode */
 
 	distanceTicks++;
 	ticks++;
-	chSysUnlockFromISR(); /*!< Ends Kernel Lock Mode */
-	timeNow = chVTGetSystemTime();
 
 	// Calculation starts here once elapsed time has exceeded 1s
-
-	if (ST2MS(timeNow) > ST2MS(startTime) + 1000) {
+	if (ST2MS(chVTTimeElapsedSinceX(startTime)) > 1000) {
 
 		// Do speed calculations here since they depend on time elapsed
 
-		systime_t timeDelta = timeNow - startTime;
+		systime_t timeDelta = chVTTimeElapsedSinceX(startTime);
 		double seconds = ST2MS(timeDelta) / (double)1000;
 		double centimeters = ((double)ticks / WE_TICKS_PER_METER) * 100;
 		cmPerSecond = (int)(centimeters / seconds);
 
-		// Reset tick counter
+		// Reset speed tick counter
 		ticks = 0;
-		startTime = chVTGetSystemTime();
+		startTime = chVTGetSystemTimeX();
 	}
 }
 

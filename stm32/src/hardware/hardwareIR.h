@@ -13,17 +13,17 @@
 /*
  * Sets up the IR sensor pins etc.
  */
-void hardwareSetupIR(void);
+void hardwareIRSetup(void);
 
 /*
  * Call this each time an analog read should be performed.
  */
-void hardwareIterationIR(void);
+void hardwareIRIteration(void);
 
 /*
  * Getter for the values. Specify an IR sensor.
  */
-int hardwareGetValuesIR(IR_SENSOR);
+int hardwareIRGetValues(IR_SENSOR);
 
 
 #endif /* HARDWAREIR_H_ */

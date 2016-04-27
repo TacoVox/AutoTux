@@ -1,5 +1,5 @@
-/** @file	packetHandler.c
- * 	@brief	Handles sending and receiving packets, manages a receive buffer.
+/** @file	packetHandler.h
+ * 	@brief	Handles sending and parsing of received packets, manages a receive buffer.
  *
  * 	When receiving bytes, they are put into the receive buffer. If the buffer
  * 	gets full, it gets shifted so the oldest half gets discarded. The using
@@ -18,20 +18,6 @@
 #ifndef PACKETHANDLER_H_
 #define PACKETHANDLER_H_
 
-/**
- * Actual data bytes in the control packet
- */
-#define CONTROL_DATA_BYTES 2
-
-/**
- * Size of the whole control data packet including header and end delimiter
- */
-#define CONTROL_DATA_PACKET_SIZE 6
-
-/**
- * Actual data bytes in the sensor data packet
- */
-#define SENSOR_DATA_BYTES 11
 
 /**
  * Returned from the packet reading function.
