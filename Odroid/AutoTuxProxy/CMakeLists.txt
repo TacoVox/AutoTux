@@ -49,3 +49,13 @@ FILE(GLOB_RECURSE thisproject-sources "${CMAKE_CURRENT_SOURCE_DIR}/src/*/*.cpp" 
 ADD_LIBRARY(${PROJECT_NAME}lib-static STATIC ${thisproject-sources})
 ADD_EXECUTABLE(${PROJECT_NAME} "${CMAKE_CURRENT_SOURCE_DIR}/apps/${PROJECT_NAME}.cpp")
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_NAME}lib-static ${LIBRARIES})
+
+# find CxxTest
+find_package(CxxTest REQUIRED)
+if (CXXTEST_FOUND)
+    include_directories(${CXXTEST_INCLUDE_DIR})
+    enable_testing()
+    CXXTEST_ADD_TEST(bwTest1 bwTest1.cpp "${CMAKE_CURRENT_SOURCE_DIR}/testsuite/BufferWrapperTestSuite1.h")
+    #add_executable(bwTest1 "${CMAKE_CURRENT_SOURCE_DIR}/apps/bwTest1.cpp")
+    target_link_libraries(bwTest1 ${PROJECT_NAME}lib-static ${LIBRARIES})
+endif()

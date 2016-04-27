@@ -60,8 +60,8 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec)
         if (it + SBDPKTSIZE > vec.end()) {
             break;
         }
-        if (*it == STR_DEL_ONE && *(it+STR_DEL_POS) == STR_DEL_TWO &&
-                *(it+MID_DEL_POS) == MID_DEL && *(it+END_DEL_POS) == END_DEL) {
+        if (*it == DEL_ONE && *(it+DEL_TWO_POS) == DEL_TWO &&
+                *(it+DEL_DBCOLON_POS) == DEL_DBCOLON && *(it+DEL_COMMA_POS) == DEL_COMMA) {
             unsigned char us1 = *(it+US1_POS);
             printf("US1:%i ", us1);
             unsigned char us2 = *(it+US2_POS);
@@ -98,7 +98,7 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec)
                 // clear the return vector
                 ret_vec.clear();
                 // find where next packet starts
-                it = find(it+1, vec.end(), STR_DEL_ONE);
+                it = find(it+1, vec.end(), DEL_ONE);
                 // if not found, break
                 if (it == vec.end()) break;
             }
