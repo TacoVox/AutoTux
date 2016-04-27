@@ -332,7 +332,7 @@ message autotux.LaneRecommendation [id = 272] {
     bool quality [id = 3];
 }
 
-message autotux.config.LaneFollower [id = 300] {
+message autotux.config.LaneFollowerMSG [id = 300] {
     uint32 roadWidth [id = 1];
     double gainP [id = 2];
     double gainI [id = 3];
@@ -342,10 +342,10 @@ message autotux.config.LaneFollower [id = 300] {
     uint8 lightThreshold [id = 7];
 }
 
-message autotux.DecisionMaker [id = 301 ] {
+message autotux.DecisionMakerMSG [id = 301 ] {
     uint8 state [id = 1];
 }
 
-message autotux.Overtaking [id = 302 ] {
+message autotux.OvertakingMSG [id = 302 ] {
     bool leftlane [id = 1];
 }
