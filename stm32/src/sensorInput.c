@@ -40,10 +40,6 @@ void sensorInputSetup (void) {
 	hardwareIRSetup();
 	hardwareUSSetup();
 	hardwareSetupWE();
-
-	#ifdef DEBUG
-	hardwareSetupRC();
-	#endif
 }
 
 /**

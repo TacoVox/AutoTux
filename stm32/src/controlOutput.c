@@ -55,7 +55,8 @@ static bool controlValuesAreNew = false;
 void controlOutputSetup(void) {
 	// TODO: also initialize RC here later?
 	hardwarePWMSetup();
-	hardwareLightsSetup();
+	hardwareRCSetup();
+	//hardwareLightsSetup();
 
 	//hardwareIterationLights(0, false, false);
 }
@@ -115,7 +116,7 @@ void controlOutputIteration() {
 	}
 
 	// Update lights
-	hardwareLightsIteration(LIGHT_BIT_FLASH_LEFT, rcMode, rcBrake);
+	//hardwareLightsIteration(LIGHT_BIT_FLASH_LEFT, rcMode, rcBrake);
 }
 
 

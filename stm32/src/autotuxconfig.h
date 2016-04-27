@@ -17,7 +17,7 @@
 
 
 // Debug output. Set to 0 for normal packet output.
-#define DEBUG_OUTPUT 1
+#define DEBUG_OUTPUT 0
 
 #if DEBUG_OUTPUT == 1
 #define DEBUG
@@ -172,7 +172,7 @@ typedef enum {PWM_OUTPUT_ESC, PWM_OUTPUT_SERVO} PWM_OUTPUT_ID;
 // Speeds and their corresponding pulsewidths.
 typedef enum {SPEED_REVERSE, SPEED_STOP, SPEED_FORWARD_LOW, SPEED_FORWARD_CRUISE} SPEED;
 #define SPEED_STEPS 4
-static const int SPEED_PULSEWIDTHS[SPEED_STEPS] = {1140, 1350, 1425, 1440};
+static const int SPEED_PULSEWIDTHS[SPEED_STEPS] = {1130, 1350, 1425, 1440};
 
 #define WHEELS_MAXLEFT_PW 1220
 #define WHEELS_CENTERED_PW 1590
