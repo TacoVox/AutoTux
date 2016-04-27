@@ -69,7 +69,7 @@ namespace lane {
             cv::Mat m_image;
 
             automotive::VehicleControl m_vehicleControl;
-            autotux::LaneRecommendation laneRecommendation;
+            autotux::LaneRecommendationMSG laneRecommendation;
 
             odcore::data::TimeStamp m_previousTime;
             double m_eSum;

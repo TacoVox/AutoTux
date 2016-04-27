@@ -14,7 +14,7 @@ using namespace overtaker;
  * */
 Overtaker::Overtaker():
     isOverridingControls(false), traveledPath(0), state(FREE_LANE),
-    enterSwitchAngle(0){}
+    enterSwitchAngle(0), leftLane(false){}
 
 Overtaker::~Overtaker(){}
 
@@ -36,8 +36,9 @@ void Overtaker::obstacleDetection(SensorBoardData sensorData, VehicleData vehicl
                 cout << "**** angle : " << enterSwitchAngle << endl;
 
                 traveledPath = vehicleData.getAbsTraveledPath();
-                ovtControl.setSpeed(0.5);
+                ovtControl.setSpeed(1);
                 isOverridingControls = true;
+                leftLane = true;
 
                 // If we are on a left curve...
                 if(enterSwitchAngle < -0.1){
@@ -99,13 +100,14 @@ void Overtaker::obstacleDetection(SensorBoardData sensorData, VehicleData vehicl
             //cout << "ANGLE : " << dmControl.getSteeringWheelAngle() << endl;
             if(isRightLaneClear(sensorData)){
                 cout << "SWITCHING TO RIGHT LANE" << endl;
-                ovtControl.setSpeed(0.5);
+                ovtControl.setSpeed(1);
                 // ***enter-switch-angle
                 enterSwitchAngle = dmControl.getSteeringWheelAngle();
 
                 cout << "**** angle : " << enterSwitchAngle << endl;
                 traveledPath = vehicleData.getAbsTraveledPath();
                 isOverridingControls = true;
+                leftLane = false;
 
                 // *** Differentiate right-switches
                 if(enterSwitchAngle < -0.1){
@@ -330,4 +332,8 @@ bool Overtaker::isObstacleDetected(SensorBoardData sensorData, const double sens
 
     return false;
 
+}
+
+bool Overtaker::isLeftLane() {
+    return leftLane;
 }
