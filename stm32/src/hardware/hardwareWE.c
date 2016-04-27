@@ -22,7 +22,7 @@ static void hardwareWEIncrTicks(EXTDriver *extp, expchannel_t channel);
 //	Thread Definitions
 //--
 
-// TODO: Remove all thread initializations after verifying interrupt routine works. 
+// TODO: Remove all thread initializations after verifying interrupt routine works.
 
 /*static THD_WORKING_AREA(wheelEncoderThreadWorkingArea, 60); // Stack size in bytes
 static THD_FUNCTION(wheelEncoderThread, arg);*/
@@ -65,7 +65,6 @@ static const EXTConfig extcfg;
 // "Public" interface
 //-----------------------------------------------------------------------------
 
-
 /**
  * Sets up the pin and the thread
  */
@@ -74,9 +73,11 @@ static const EXTConfig extcfg;
 
 void hardwareSetupWE(void) {
 	palSetPadMode(WE_PIN_GROUP, WE_PIN_NUMBER, PAL_MODE_INPUT_PULLUP);
-	extStart(&EXTD1, &extcfg); //!< Set up interrupt
+	extStart(&EXTD1, &extcfg); /*!< Set up the interrupt */
 	startTime = chVTGetSystemTime();
+
     /*//Set up the thread here
+	// TODO: Remove the thread started after verifying interrupt routine works
     (void)chThdCreateStatic(wheelEncoderThreadWorkingArea, sizeof(wheelEncoderThreadWorkingArea),
 						  NORMALPRIO, wheelEncoderThread, NULL);*/
 }
@@ -118,13 +119,18 @@ static void hardwareWEIncrTicks(EXTDriver *extp, expchannel_t channel) {
 	(void)extp;
   	(void)channel;
 
-	chSysLockFromISR();
+	chSysLockFromISR(); /*!< Starts Kernel Lock Mode */
+
 	distanceTicks++;
 	ticks++;
 	timeNow = chVTGetSystemTime();
+
+	// Calculation starts here once elapsed time has exceeded 1s
+
 	if (ST2MS(timeNow) > ST2MS(startTime) + 1000) {
-		// Do calculations here
-		// numberOfTicksInMeters / timeElapsed
+
+		// Do speed calculations here since they depend on time elapsed
+
 		systime_t timeDelta = timeNow - startTime;
 		double seconds = ST2MS(timeDelta) / (double)1000;
 		double centimeters = ((double)ticks / WE_TICKS_PER_METER) * 100;
@@ -134,22 +140,24 @@ static void hardwareWEIncrTicks(EXTDriver *extp, expchannel_t channel) {
 		ticks = 0;
 		startTime = chVTGetSystemTime();
 	}
-	chSysUnlockFromISR();
+	chSysUnlockFromISR(); /*!< Ends Kernel Lock Mode */
 }
+
+// TODO: Delete me after verifying interrupt routine works
 
 /*static THD_FUNCTION(wheelEncoderThread, arg) {
 	(void) arg;
 	hardwareIterationWE();
 }*/
 
-/*
- * Getter for the values. Specify a US sensor.
+/**
+ * Returns speed in cm/s
  */
 int hardwareGetValuesWESpeed(void) {
 	return cmPerSecond;
 }
 
-/*
+/**
  * Returns distance traveled in centimeters
  */
 
@@ -161,6 +169,9 @@ int hardwareGetValuesWEDistance(void) {
 //-----------------------------------------------------------------------------
 // Thread Interrupt Config
 //-----------------------------------------------------------------------------
+
+//TODO: Consider moving this into config file
+
 static const EXTConfig extcfg = {
   {
     {EXT_CH_MODE_DISABLED, NULL},

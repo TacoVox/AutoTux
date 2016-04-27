@@ -19,13 +19,10 @@ void hardwareSetupWE(void);
 
 
 /*
- * Getter for the values. Specify a WE sensor.
+ * Getter for the values. Either speed or distance.
  */
 
-//int hardwareGetValuesWE(void);
-
-
-int hardwareGetValuesWESpeed(void);
-int hardwareGetValuesWEDistance(void);
+int hardwareGetValuesWESpeed(void); /*!< Returns speed in cm/s */
+int hardwareGetValuesWEDistance(void); /*!< Returns distance in cm */
 
 #endif /* HARDWAREWE_H_ */
