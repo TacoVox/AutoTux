@@ -5,7 +5,7 @@
 #include "ui/Header.h"
 #include <string>
 
-ui::Header::Header() : xsize(80), ysize(40),
+ui::Header::Header() : xsize(80), ysize(20),
                        _header(newwin(1, xsize, 0, 0)) {}
 
 ui::Header::Header(int x, int y) : xsize(x), ysize(y),

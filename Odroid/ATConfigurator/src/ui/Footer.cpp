@@ -4,7 +4,7 @@
 
 #include "ui/Footer.h"
 
-ui::Footer::Footer(void) : xsize(80), ysize(40),
+ui::Footer::Footer(void) : xsize(80), ysize(20),
                            _footer(newwin(1, xsize, ysize - 1, 0)),
                            time(std::time(nullptr)) {}
 
