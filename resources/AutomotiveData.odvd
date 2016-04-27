@@ -326,7 +326,7 @@ message from.opendlv.proxy.reverefh16.Steering [id = 199] {
     double steeringwheelangle [id = 2];
 }
 
-message autotux.LaneRecommendation [id = 272] {
+message autotux.LaneRecommendationMSG [id = 272] {
     double angle [id = 1];
     double distance_to_line [id = 2];
     bool quality [id = 3];
