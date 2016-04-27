@@ -87,36 +87,36 @@ public:
 
     void testCheckSum(void) {
 
-        std::vector<unsigned char> ret_vec;
+        std::vector<unsigned char> test_vec;
 
-        ret_vec.push_back('0');      // us1
-        ret_vec.push_back('0');      // us2
-        ret_vec.push_back('0');      // ir1
-        ret_vec.push_back('0');      // ir2
-        ret_vec.push_back('0');      // ir3
-        ret_vec.push_back('0');      // wheel
-        ret_vec.push_back('0');      // dis1
-        ret_vec.push_back('0');      // dis2
-        ret_vec.push_back('0');       // dis3
-        ret_vec.push_back('0');       // dis4
-        ret_vec.push_back('0');       // light
-        TS_ASSERT_EQUALS((unsigned char) 48, bw.checksum(&ret_vec));
+        test_vec.push_back('0');      // us1
+        test_vec.push_back('0');      // us2
+        test_vec.push_back('0');      // ir1
+        test_vec.push_back('0');      // ir2
+        test_vec.push_back('0');      // ir3
+        test_vec.push_back('0');      // wheel
+        test_vec.push_back('0');      // dis1
+        test_vec.push_back('0');      // dis2
+        test_vec.push_back('0');       // dis3
+        test_vec.push_back('0');       // dis4
+        test_vec.push_back('0');       // light
+        TS_ASSERT_EQUALS((unsigned char) 48, bw.checksum(&test_vec));
 
         // clear after first test
-        ret_vec.clear();
+        test_vec.clear();
 
-        ret_vec.push_back('2');      // us1
-        ret_vec.push_back('3');      // us2
-        ret_vec.push_back('4');      // ir1
-        ret_vec.push_back('5');      // ir2
-        ret_vec.push_back('6');      // ir3
-        ret_vec.push_back('0');      // wheel
-        ret_vec.push_back('0');      // dis1
-        ret_vec.push_back('0');      // dis2
-        ret_vec.push_back('0');       // dis3
-        ret_vec.push_back('0');       // dis4
-        ret_vec.push_back('0');       // light
-        TS_ASSERT_EQUALS((unsigned char) 54, bw.checksum(&ret_vec));
+        test_vec.push_back('2');      // us1
+        test_vec.push_back('3');      // us2
+        test_vec.push_back('4');      // ir1
+        test_vec.push_back('5');      // ir2
+        test_vec.push_back('6');      // ir3
+        test_vec.push_back('0');      // wheel
+        test_vec.push_back('0');      // dis1
+        test_vec.push_back('0');      // dis2
+        test_vec.push_back('0');       // dis3
+        test_vec.push_back('0');       // dis4
+        test_vec.push_back('0');       // light
+        TS_ASSERT_EQUALS((unsigned char) 54, bw.checksum(&test_vec));
     }
 
     void testAppendReceiveBufferValid(void) {
