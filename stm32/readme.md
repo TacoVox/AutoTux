@@ -12,11 +12,11 @@ The STM32 code for the AutoTux project.
 - Consider using <b>volatile</b> on variables that are updated by interrupt routines/callbacks etc.
 - Follow the comment style you see in the files: 
 
-++ Have a top comment in each file
-++ Have separators for different sections of the file
-++ Use javadoc style short descriptions of variables and functions. If you have more than one line, write a short description on the first line tagged with @breif. Then have an ampty line and after that the more detailed description.
-++ Don't put comments above prototypes for static functions.
-++ Avoid inline comments on variables but if you are going to use them, use the format "//!< comment".
+  - Have a top comment in each file
+  - Have separators for different sections of the file
+  - Use javadoc style short descriptions of variables and functions. If you have more than one line, write a short description on the first line tagged with @breif. Then have an ampty line and after that the more detailed description.
+  - Don't put comments above prototypes for static functions.
+  - Avoid inline comments on variables but if you are going to use them, use the format "//!< comment".
 
 ## How to build and flash
 - Compiler: gcc-arm-eabi-none should be available in your favourite packet manager
