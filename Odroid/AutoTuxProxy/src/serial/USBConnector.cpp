@@ -58,9 +58,9 @@ usb_connector::USBConnector::~USBConnector()
 
 
 /*! sets the buffer wrapper for this connector */
-void usb_connector::USBConnector::set_buffer_wrapper(std::shared_ptr<serial::BufferWrapper> p)
+void usb_connector::USBConnector::set_buffer_wrapper(std::shared_ptr<serial::BufferWrapper> ptr)
 {
-    bw = p;
+    bw = ptr;
 }
 
 
@@ -97,14 +97,15 @@ bool usb_connector::USBConnector::open_device(void)
     cout << "opening device... ";
     // go through the devices list searching for the one we need
     for (ssize_t i = 0; i < dev_count; i++) {
-        libusb_device_descriptor desc;
+        struct libusb_device_descriptor dev_desc;
         // for each device in the list, get its descriptor
-        int r = libusb_get_device_descriptor(devs[i], &desc);
+        int r = libusb_get_device_descriptor(devs[i], &dev_desc);
         if (r < 0) {
             cout << "[FAIL] dev_desc" << endl;
         }
-        // if the device matches, open it
-        if (desc.idVendor == USB_VENDOR_ID && desc.idProduct == USB_PRODUCT_ID) {
+        else if (dev_desc.idVendor == USB_VENDOR_ID &&
+                    dev_desc.idProduct == USB_PRODUCT_ID) {
+            // if the device matches, open it
             int open = libusb_open(devs[i], &usb_dev);
             if (open != 0) {
                 cout << "[FAIL] error code: " << open << endl;
@@ -127,8 +128,8 @@ bool usb_connector::USBConnector::claim_interface(void)
 {
     // to return
     bool result = false;
-    // check if the kernel is active on the device we want
-    // to operate on
+    // check if the kernel is active on the device and
+    // the interface we want to operate on
     int d = libusb_kernel_driver_active(usb_dev, 1);
     if (d == 1) {
         cout << "freeing interface... ";
@@ -180,8 +181,11 @@ int usb_connector::USBConnector::read(void)
 {
     // allocate memory for use when reading from the usb
     unsigned char *data = new unsigned char[READ_LEN];
-    // read from the usb device
+    // actual bytes read
     int transferred;
+    // pass to the transfer the usb device, the endpoint (read in),
+    // the char array to store the data read, the size, an int for
+    // the actual bytes read and the timeout for the operation
     int res = libusb_bulk_transfer(usb_dev, USB_ENDPOINT_IN,
                                    data, READ_LEN, &transferred, 20);
     if (res == 0) {
@@ -193,6 +197,7 @@ int usb_connector::USBConnector::read(void)
     }
     // delete the allocated memory
     delete [] data;
+    // return the result from the read
     return res;
 }
 
@@ -200,9 +205,9 @@ int usb_connector::USBConnector::read(void)
 /*! writes to the usb stream */
 int usb_connector::USBConnector::write(void)
 {
-    // get data from the buffer
+    // get data from the send buffer
     vector<unsigned char> vec = bw->readSendBuffer();
-    // get data to send from the send buffer
+    // get length
     long unsigned int len = vec.size();
     // check for length, if 0 return
     if (len == 0) return EMPTY_DATA;
@@ -211,7 +216,11 @@ int usb_connector::USBConnector::write(void)
     unsigned char *data = new unsigned char[len];
     // copy data from vector to array
     copy(vec.begin(), vec.end(), data);
+    // actual bytes written
     int transferred;
+    // pass to the transfer the usb device, the endpoint (write out),
+    // the char array to write, the size, an int for
+    // the actual bytes written and the timeout for the operation
     int res = libusb_bulk_transfer(usb_dev, USB_ENDPOINT_OUT,
                                    data, (unsigned int)len, &transferred, 20);
     if (res == 0) {
@@ -219,6 +228,7 @@ int usb_connector::USBConnector::write(void)
     }
     // delete allocated memory
     delete [] data;
+    // return result from the write
     return res;
 }
 

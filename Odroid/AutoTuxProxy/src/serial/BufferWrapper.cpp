@@ -41,23 +41,22 @@ serial::BufferWrapper::~BufferWrapper()
 
 
 /*! appends a correct packet to the receive buffer */
-void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec)
+void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> data)
 {
-    cout << "size of vector: " << vec.size() << endl;
     // lock mutex
     arb.lock();
     // return if the length of the vedcor is too short
-    if (vec.size() < SBDPKTSIZE) {
+    if (data.size() < SBDPKTSIZE) {
         // unlock mutex
         arb.unlock();
         return;
     }
     // the vector to hold the correct packet
-    vector<unsigned char> ret_vec;
+    vector<unsigned char> valid_pkt;
     // loop through the received data from the read and look
     // for a correct packet
-    for (auto it = vec.begin(); it != vec.end(); it++) {
-        if (it + SBDPKTSIZE > vec.end()) {
+    for (auto it = data.begin(); it != data.end(); it++) {
+        if (it + SBDPKTSIZE > data.end()) {
             break;
         }
         if (*it == DEL_ONE && *(it+DEL_TWO_POS) == DEL_TWO &&
@@ -87,26 +86,26 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> vec)
             unsigned char check = *(it+CHK_SUM);
             printf("CHECK:%i\n", check);
             // fill the vector
-            ret_vec = {us1, us2, ir1, ir2, ir3, wheel, dis1, dis2, dis3, dis4, light};
+            valid_pkt = {us1, us2, ir1, ir2, ir3, wheel, dis1, dis2, dis3, dis4, light};
             // check if correct checksum
-            if (check == checksum(ret_vec)) {
+            if (check == checksum(&valid_pkt)) {
                 cout << "checksum OK" << endl;
                 break;
             }
             else {
                 cout << "checksum FAIL" << endl;
                 // clear the return vector
-                ret_vec.clear();
+                valid_pkt.clear();
                 // find where next packet starts
-                it = find(it+1, vec.end(), DEL_ONE);
+                it = find(it+1, data.end(), DEL_ONE);
                 // if not found, break
-                if (it == vec.end()) break;
+                if (it == data.end()) break;
             }
         }
     }
     // push in front of the buffer if valid data
-    if (ret_vec.size() != 0) {
-        buffer_in.push_front(ret_vec);
+    if (valid_pkt.size() != 0) {
+        buffer_in.push_front(valid_pkt);
     }
     // unlock mutex
     arb.unlock();
@@ -124,9 +123,6 @@ vector<unsigned char> serial::BufferWrapper::readReceiveBuffer(void)
         std::vector<unsigned char> vec = buffer_in.at(0);
         // clear the buffer
         buffer_in.clear();
-        // put the packet again so we always have a valid packet
-        // with the most recent data to read
-        //buffer_in.push_front(vec);
         rrm.unlock();
         return vec;
     }
@@ -160,9 +156,6 @@ vector<unsigned char> serial::BufferWrapper::readSendBuffer(void)
         vector<unsigned char> v = buffer_out.at(0);
         // clear the buffer
         buffer_out.clear();
-        // put the packet again so we always have a valid packet
-        // with the most recent data to send
-        //buffer_out.push_front(v);
         rsm.unlock();
         return v;
     }
@@ -175,11 +168,11 @@ vector<unsigned char> serial::BufferWrapper::readSendBuffer(void)
 
 
 /*! calculates and returns the checksum for a valid packet */
-unsigned char serial::BufferWrapper::checksum(std::vector<unsigned char> vec)
+unsigned char serial::BufferWrapper::checksum(const std::vector<unsigned char> *pkt)
 {
     unsigned char chksum = 0;
-    if (vec.size() == 0) return chksum;
-    for (auto it = vec.begin(); it != vec.end(); ++it) {
+    if (pkt->size() == 0) return chksum;
+    for (auto it = pkt->begin(); it != pkt->end(); ++it) {
         // the checksum is calculated by XOR all elements
         chksum = (unsigned char)(chksum ^ *it);
     }
