@@ -1,21 +1,40 @@
-/**
- * Serial connection.
+/** @file	serialConnection.c
+ * 	@brief	Handles the serial connection.
+ *
+ * 	Reads sensor data through sensorInput and uses packetHandler to send a packet
+ * 	with sensor data.
+ *
+ * 	Every byte received gets appended to packetHandler's buffer. When we think we
+ * 	have enough bytes to parse a control data packet, we ask packetHandler to do
+ * 	so and if it says the parsing was successful, we call a setter in
+ * 	controlOutput to forward the control data values to the hardware.
+ *
+ * 	Because the USB serial output buffer is limited, and writing to the serial
+ * 	driver when the buffer is full is blocking the thread, we take care not to
+ * 	send anything if we haven't received any (valid) packets for a while. However,
+ * 	since the serial connection is now running in it's own thread, it's really
+ * 	not a big problem if this thread is blocking anymore.
+ *
+ * 	And in case any problems occur with the communication, the controlOutput module
+ * 	will make sure that if no valid values are received for a while, the car will
+ * 	stop.
  */
 
 
 // General includes
 #include <stdio.h>
 #include <string.h>
+
 // ChibiOS includes
 #include <ch.h>
-#include <chprintf.h>
 #include <hal.h>
-#include "usbcfg.h"
+#include <chprintf.h>
+#include <chibiconf/usbcfg.h>
 
 // Local includes
-#include "autotuxconfig.h"
-#include "sensorInput.h"
-#include "controlOutput.h"
+#include "../autotuxconfig.h"
+#include "../sensorInput.h"
+#include "../controlOutput.h"
 #include "packetHandler.h"
 
 
@@ -24,27 +43,47 @@
 //-----------------------------------------------------------------------------
 
 
-// Initializes the USB serial driver.
-void initializeUSB(void);
+static void initializeUSB(void);
+static THD_FUNCTION(serialThread, arg);
 
-// Initializes everything related to sensors and control output
-void initializeHW(void);
+/**
+ * Working area for the serial thread. Currently 300 bytes stack size.
+ */
+static THD_WORKING_AREA(serialThreadWorkingArea, 300);
 
 
 //-----------------------------------------------------------------------------
-// Implementation - main loop.
+// Public interface
 //-----------------------------------------------------------------------------
 
 
-int serialConnectionLoop(void) {
+/**
+ * @brief Starts the serial connection.
+ *
+ * First initializes the USB serial driver and then starts the thread
+ * dedicated to serial communication.
+ */
+void serialConnectionStart(void) {
+	// Initialize USB serial driver and start thread
 	initializeUSB();
-	initializeHW();
+	(void)chThdCreateStatic(serialThreadWorkingArea, sizeof(serialThreadWorkingArea),
+						  NORMALPRIO, serialThread, NULL);
+}
+
+
+//-----------------------------------------------------------------------------
+// Implementation. The static functions below are inaccessible to other modules
+//-----------------------------------------------------------------------------
+
+
+/**
+ * Main loop for the serial thread.
+ */
+static THD_FUNCTION(serialThread, arg) {
+	(void) arg;
 
 	// Buffer for last received byte.
 	msg_t charbuf;
-
-	// Last received control data bytes. Initialized to car stopped, wheels centered
-	unsigned char controlData[CONTROL_DATA_BYTES] = DEFAULT_CONTROL_BYTES;
 
 	// Counter for iterations without valid packet received.
 	int iterationsWithoutReceive = 0;
@@ -62,19 +101,24 @@ int serialConnectionLoop(void) {
 	// Sensor data bytes to be sent to the Odroid.
 	unsigned char sensorData[SENSOR_DATA_BYTES];
 
-	// TODO: MOVE TO OUTPUT HARDWARE FILE
-	// Car initial state: stopped, wheels centered
-	controlOutputStopCenter();
+	// Time of the iteration. Used to adapt the sleeping
+	unsigned int itTime = 0;
+
+	// Latest received control bytes. Should only be forwarded on valid packet.
+	unsigned char controlData[CONTROL_DATA_BYTES] = DEFAULT_CONTROL_BYTES;
 
 	// Main serial connection loop.
 	while(true) {
+		itTime = ST2MS(chVTGetSystemTime());
+		
 
 		//---------------------------------------------------------------------
-		// Reset all LEDS
+		// Reset all serial related LEDs
 		//---------------------------------------------------------------------
 		palClearPad(GPIOD, GPIOD_LED4); // Green
 		palClearPad(GPIOD, GPIOD_LED5); // Red
 		palClearPad(GPIOD, GPIOD_LED3); // Orange
+
 
 		//---------------------------------------------------------------------
 		// Receiving part
@@ -86,6 +130,7 @@ int serialConnectionLoop(void) {
 		bytesReceived = 0;
 		while (charbuf != Q_TIMEOUT && charbuf != Q_RESET &&
 				bytesReceived < MAX_RECEIVE_BYTES_IN_ITERATION) {
+
 			// Received another byte
 			bytesReceived++;
 
@@ -112,10 +157,15 @@ int serialConnectionLoop(void) {
 		if (packetHandlerGetBufferSize() >= CONTROL_DATA_PACKET_SIZE &&
 				bytesReceived > 0) {
 			if (packetHandlerReadPacketFromBuffer(controlData) == PACKET_OK) {
+
 				// Valid packet - green LED
 				palSetPad(GPIOD, GPIOD_LED4);
 				receivedValidPacket = TRUE;
 				iterationsWithoutReceive = 0;
+
+				// Inform controlOutput of the new data
+				controlOutputSetData(controlData);
+
 			} else {
 				if (!DEBUG_OUTPUT) {
 					// Broken packet or garbage - orange LED
@@ -144,23 +194,6 @@ int serialConnectionLoop(void) {
 
 
 		//---------------------------------------------------------------------
-		// Output to hardware
-		//---------------------------------------------------------------------
-
-		// Unless we received no data for a number of iterations or too much data at once,
-		// controlData contains the latest valid instructions. Output them to hardware.
-		if (connectionLinkActive && bytesReceived <= MAX_RECEIVE_BYTES_IN_ITERATION) {
-			// Forward control data to hardware
-			controlOutput(controlData);
-		} else {
-			// Serial connection rules violated. Stop the car and center wheels!
-			// TODO: MAYBE it would be good style here to overwrite controlData to stop-center values?
-			// On the other hand, connectionLinkActive should only be TRUE again if a new valid
-			// packet is received.
-			controlOutputStopCenter();
-		}
-
-		//---------------------------------------------------------------------
 		// Sending part
 		//---------------------------------------------------------------------
 		if (usbConnected && connectionLinkActive) {
@@ -175,17 +208,23 @@ int serialConnectionLoop(void) {
 				sensorInputDebugOutput((BaseSequentialStream*) &SDU1);
 			}
 		}
-
-		chThdSleepMilliseconds(100);
+		
+		if (ST2MS(chVTGetSystemTime()) > itTime) {
+			// itTime - ST2MS(chTimeNow()) is the time in MS of this iteration.
+			// Sleep 100 - this value to get 10Hz.
+			 chThdSleepMilliseconds(67 - (itTime - ST2MS(chVTGetSystemTime())));
+		} else {
+			// System timer recently overflowed, rare but can happen. Sleep a fixed amount
+			chThdSleepMilliseconds(60);
+		}
 	}
-	return 0;
 }
 
 
 /**
- * Initializes USB serial driver
+ * Initializes serial driver for USB
  */
-void initializeUSB(void) {
+static void initializeUSB(void) {
  	// Initialize serial over USB
 	sduObjectInit(&SDU1);
  	sduStart(&SDU1, &serusbcfg);
@@ -196,14 +235,4 @@ void initializeUSB(void) {
 	chThdSleepMilliseconds(1500);
 	usbStart(serusbcfg.usbp, &usbcfg);
   	usbConnectBus(serusbcfg.usbp);
-}
-
-
-/**
- * Initializes everything related to sensors and control output
- */
-void initializeHW(void) {
-	// Initialize sensor settings
-	sensorInputSetup();
-	controlOutputSetup();
 }

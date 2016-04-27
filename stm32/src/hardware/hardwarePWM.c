@@ -1,8 +1,5 @@
-/*
- * hardwarePWM.c
- *
- *  Created on: Apr 4, 2016
- *      Author: jerker
+/** @file	hardwarePWM.c
+ * 	@brief Handles the PWM output that controls the servo and ESC.
  */
 
 #include <hal.h>
@@ -14,8 +11,11 @@
 //-----------------------------------------------------------------------------
 
 
-int map(int x, int in_min, int in_max, int out_min, int out_max);
+static int map(int x, int in_min, int in_max, int out_min, int out_max);
 
+/**
+ * Configuration for the PWM driver.
+ */
 static PWMConfig pwmcfg = {
 	1000000, // 1Mhz freq
     20000,   // 20 ms period
@@ -32,28 +32,26 @@ static PWMConfig pwmcfg = {
 
 
 //-----------------------------------------------------------------------------
-// "Public" interface
+// Public interface
 //-----------------------------------------------------------------------------
 
 
 /*
  * Sets up the pins etc.
  */
-void hardwareSetupPWM(void) {
-	// TODO: Move pins and timer driver to config!
-	palSetPadMode(GPIOA, 0, PAL_MODE_ALTERNATE(2));
-	palSetPadMode(GPIOA, 1, PAL_MODE_ALTERNATE(2));
-	pwmStart(&PWMD5, &pwmcfg);
+void hardwarePWMSetup(void) {
+	palSetPadMode(PWM_PIN_GROUPS[0], PWM_PIN_NUMBERS[0], PAL_MODE_ALTERNATE(2));
+	palSetPadMode(PWM_PIN_GROUPS[1], PWM_PIN_NUMBERS[1], PAL_MODE_ALTERNATE(2));
+	pwmStart(PWM_TIMER, &pwmcfg);
 	pwmEnableChannel(&PWMD5, 0, SPEED_PULSEWIDTHS[SPEED_STOP]);
 	pwmEnableChannel(&PWMD5, 1, WHEELS_CENTERED_PW);
 }
 
 
-
 /*
- * Setter for the values. Specify an output channel ID
+ * Setter for the values. Specify an output channel ID.
  */
-void hardwareSetValuesPWM(PWM_OUTPUT_ID pwm_id, int value) {
+void hardwarePWMSetValues(PWM_OUTPUT_ID pwm_id, int value) {
 	if (pwm_id == PWM_OUTPUT_SERVO) {
 		// Map angle linearly to pulsewidth. Different mappings on either side,
 		// based on the pulsewidths we perceived as producing the max steering
@@ -79,24 +77,24 @@ void hardwareSetValuesPWM(PWM_OUTPUT_ID pwm_id, int value) {
 
 
 /*
- * Setter for the values, pulsewidths directly from RC transmitter.
+ * Setter for the values, pulse widths directly from RC transmitter.
  */
-void hardwareSetValuesPWM_RC(icucnt_t throttle, icucnt_t steering) {
+void hardwarePWMSetValuesRC(icucnt_t throttle, icucnt_t steering) {
 	pwmEnableChannel(&PWMD5, 0, throttle);
 	pwmEnableChannel(&PWMD5, 1, steering);
 }
 
+
 //-----------------------------------------------------------------------------
-// "Private" implementation
+// Implementation. The static functions below are inaccessible to other modules
 //-----------------------------------------------------------------------------
 
 /**
- * Map function, borrowed from the Arduino reference manual!
+ * Map function, actually borrowed from the Arduino reference manual!
  * Adapted to not allow out of bound values.
  */
-int map(int x, int in_min, int in_max, int out_min, int out_max) {
+static int map(int x, int in_min, int in_max, int out_min, int out_max) {
 	if (x < in_min) x = in_min;
 	if (x > in_max) x = in_max;
 	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
-

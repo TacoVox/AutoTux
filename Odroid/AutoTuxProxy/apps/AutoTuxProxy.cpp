@@ -3,7 +3,7 @@
 //
 #include <iostream>
 #include <thread>
-#include <signal.h>
+#include <csignal>
 #include "serial/BufferWrapper.h"
 #include "proxy/Proxy.h"
 #include "serial/USBHandler.h"
@@ -11,36 +11,40 @@
 using namespace std;
 using namespace serial;
 using namespace usb_handler;
+using namespace usb_connector;
 using namespace proxy::camera;
 
-void exit_handler(int);
+shared_ptr<USBHandler> uh;
+
+static void handler(int);
 
 int32_t main(int32_t argc, char **argv) {
 
-    signal(SIGINT, exit_handler);
+    signal(SIGINT, handler);
 
     cout << "Starting up AutoTuxProxy..." << endl;
 
-    shared_ptr<BufferWrapper> bw = (shared_ptr<BufferWrapper>)new BufferWrapper();
+    shared_ptr<BufferWrapper> bw = (shared_ptr<BufferWrapper>) new BufferWrapper();
+    shared_ptr<USBConnector> uc = (shared_ptr<USBConnector>) new USBConnector();
+    uh = (shared_ptr<USBHandler>) new USBHandler(uc);
 
-    shared_ptr<proxy::Proxy> prx = (shared_ptr<proxy::Proxy>) new proxy::Proxy(argc, argv, bw);
-    thread prxthread(&proxy::Proxy::runModule, prx);
+    uc->set_buffer_wrapper(bw);
 
-    shared_ptr<USBHandler> uc = (shared_ptr<USBHandler>) new USBHandler(bw);
-    thread ucthread(&USBHandler::run, uc);
+    thread ucthread(&USBHandler::run, uh);
+    ucthread.detach();
 
-    //Waiting for the thread to terminate
-    ucthread.join();
-    cout << "USBHandler stopped" << endl;
-    prxthread.join();
-    cout << "Proxy stopped" << endl;
+    proxy::Proxy proxy(argc, argv, bw);
+    proxy.runModule();
 
     return 0;
 }
 
 
-void exit_handler(int num)
+static void handler(int signum)
 {
-    cout << "caught signal: " << num << endl;
-    exit(1);
+    cout << "caught signal: " << signum << endl;
+    uh->stop();
+    uh->~USBHandler();
+    exit(signum);
 }
+

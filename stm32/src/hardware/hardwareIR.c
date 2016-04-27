@@ -1,8 +1,7 @@
-/*
- * hardwareIR.c
+/** @file	hardwareIR.c
+ * 	@brief Reads the IR sensors.
  *
- *  Created on: Apr 4, 2016
- *      Author: jerker
+ * Uses ADC with several samples for each measurements.
  */
 
 
@@ -14,25 +13,26 @@
 // Definitions
 //-----------------------------------------------------------------------------
 
-systime_t callbackEndTime;
+static void adcCallback(ADCDriver *adcp, adcsample_t *buffer, size_t n);
 
+/**
+ *	Sample buffer array
+ */
+static adcsample_t irSamples[ADC_SAMPLES * ADC_CHANNELS] = {0};
 
-// Prototype for the adc callback function.
-void adcCallback(ADCDriver *adcp, adcsample_t *buffer, size_t n);
+/**
+ * Array for averages
+ */
+static adcsample_t irAvg[ADC_CHANNELS];
 
-// Sample buffer array + array for averages
-adcsample_t irSamples[ADC_SAMPLES * ADC_CHANNELS] = {0};
-adcsample_t irAvg[ADC_CHANNELS];
+/**
+ * The resulting centimeter values
+ */
+static int irCm[ADC_CHANNELS];
 
-// The resulting centimeter values
-int irCm[ADC_CHANNELS];
-
-// ADC config.
-// Note that changing autotuxhardware.h should be enough on pin layout change.
-// Channels:
-// 6 = side front
-// 14 = side rear
-// 15 = rear
+/**
+ * ADC group config
+ */
 static const ADCConversionGroup adc_group = {
   false, // No circular buffer (stop after filling the buffer each time)
   ADC_CHANNELS,
@@ -49,14 +49,14 @@ static const ADCConversionGroup adc_group = {
 
 
 //-----------------------------------------------------------------------------
-// "Public" interface
+// Public interface
 //-----------------------------------------------------------------------------
 
 
 /*
  * Sets up the IR sensor pins etc.
  */
-void hardwareSetupIR() {
+void hardwareIRSetup() {
 	adcStart(&ADCD1, NULL);
 	for (int i = 0; i < ADC_CHANNELS; i++) {
 		palSetPadMode(ADC_PIN_GROUPS[i], ADC_PIN_NUMBERS[i], PAL_MODE_INPUT_ANALOG);
@@ -66,29 +66,26 @@ void hardwareSetupIR() {
 /*
  * Call this each time an analog read should be performed.
  */
-void hardwareIterationIR() {
+void hardwareIRIteration() {
 	adcStartConversion(&ADCD1, &adc_group, &irSamples[0], ADC_SAMPLES);
 }
-
 
 /*
  * Getter for the values. Specify an IR sensor.
  */
-int hardwareGetValuesIR(IR_SENSOR sensor) {
-	return irCm[sensor];
+int hardwareIRGetValues(IR_SENSOR sensor) {
+	return (irCm[sensor] < IR_VALUE_CAP) ? irCm[sensor] : IR_VALUE_CAP;
 }
 
-systime_t getCallbackEndTime(void) {
-	return callbackEndTime;
-}
 
 //-----------------------------------------------------------------------------
-// "Private" implementation
+// Implementation. The static functions below are inaccessible to other modules
 //-----------------------------------------------------------------------------
 
 
 /*
- * Callback function, runs when ADC is completed.
+ * @brief Callback function, runs when ADC is completed.
+ *
  * (Could be generalized with a loop)
  */
 void adcCallback(ADCDriver *adcp, adcsample_t *buffer, size_t n) {
@@ -107,7 +104,7 @@ void adcCallback(ADCDriver *adcp, adcsample_t *buffer, size_t n) {
 		// Formula: irCm[0] = (int)(2914.0f / (irAvg[0] + 5.0f))- 1;
 		// Here we also add the previous value and divide by 2 to average out
 		irCm[0] = (irCm[0] + (int)(2914.0f / (irAvg[0] + 5.0f))- 1) / 2;
-		irCm[1] = (irCm[0] + (int)(2914.0f / (irAvg[1] + 5.0f))- 1) / 2;
-		irCm[2] = (irCm[0] + (int)(2914.0f / (irAvg[2] + 5.0f))- 1) / 2;
+		irCm[1] = (irCm[1] + (int)(2914.0f / (irAvg[1] + 5.0f))- 1) / 2;
+		irCm[2] = (irCm[2] + (int)(2914.0f / (irAvg[2] + 5.0f))- 1) / 2;
   }
 }

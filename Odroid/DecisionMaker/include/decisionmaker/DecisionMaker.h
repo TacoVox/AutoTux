@@ -6,6 +6,8 @@
 #define DECISIONMAKER_DecisionMaker_H
 
 #include <opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h>
+#include <overtaker/Overtaker.h>
+#include <parker/Parker.h>
 #include "opendavinci/odcore/data/Container.h"
 
 #include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
@@ -26,6 +28,9 @@ namespace decisionmaker{
         virtual void nextContainer(odcore::data::Container &c);
 
     private:
+        overtaker::Overtaker ovt;
+        parker::Parker parker;
+
         virtual void setUp();
         virtual void tearDown();
         odcore::data::Container containerVehicleData;

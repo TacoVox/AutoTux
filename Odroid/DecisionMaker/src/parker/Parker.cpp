@@ -8,281 +8,222 @@
 #include "parker/Parker.h"
 
 using namespace std;
-
-using namespace odcore::base;
-using namespace odcore::base::module;
+using namespace parker;
 using namespace odcore::data;
 using namespace automotive;
 using namespace automotive::miniature;
 
-using namespace parker;
+enum STATE {FINDOBJECT, FINDGAPSTART, FINDGAPEND, ENOUGHSPACE};
+enum PARKSTATE {PHASE0,PHASE1, PHASE2, PHASE3, PHASE4, PHASE5, SAFETYSTOP};
+PARKSTATE parkstate = PHASE0;
+STATE state = FINDOBJECT;
 
-Parker::Parker(const int32_t &argc, char **argv) :
-        TimeTriggeredConferenceClientModule(argc, argv, "Parker") {}
+double gapStart = 0;
+double gapEnd = 0;
+bool isSpot = false;
+bool isParked = false;
+VehicleControl controlTemp;
 
-Parker::~Parker() {}
+Parker::Parker(){
 
-void Parker::setUp(){
-    cout << "Parker starts" << endl;
-    foundSpot = false;
 }
-void Parker::tearDown(){
-    cout << "This is when Parker stops" << endl;
-}
 
-odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode Parker::body() {
-
-    gapStart = 0;
-    gapEnd = 0;
-
-
-    while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
-
-        absTraveled = 0;
-        parkPosition = 0;
-        int max = 0;
-        state = FINDOBJECT;
-        //If the decisionmaker is in PARKING state
-        while(*parking){
-            // 1. Get most recent vehicle data:
-            Container containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
-            VehicleData vd = containerVehicleData.getData<VehicleData>();
-
-            // 2. Get most recent sensor board data describing virtual sensor data:
-            Container containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
-            SensorBoardData sbd = containerSensorBoardData.getData<SensorBoardData>();
-
-            absTraveled = vd.getAbsTraveledPath();
-
-            if(isSafe(sbd)){
-                cout << "SafetyStop Has been activated" << endl;
-                state = SAFETYSTOP;
-            }
-
-            switch (state){
-                case FINDOBJECT:{
-                    findObject(sbd);
-                    break;
-                }
-                case FINDGAPSTART:{
-                    findGapStart(sbd, vd);
-                    break;
-                }
-                case FINDGAPEND:{
-                    findGapEnd(sbd, vd);
-                    break;
-                }
-                case ENOUGHSPACE:{
-                    enoughSpace();
-                    break;
-                }
-                case ADJUST:{
-                    adjustCar(absTraveled);
-                    break;
-                }
-                case PARK:{
-                    parallelPark();
-                    break;
-                }
-                case SAFETYSTOP:{
-                    goBackToLane();
-                    break;
-                }
-            }
-            *parkingControler = vc; //Sends the controldata to the DecisionMaker
+void Parker::findSpot(SensorBoardData sbd, VehicleData vd) {
+    cout << "This is the sensorvalue: " << sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) << endl;
+    switch (state) {
+        case FINDOBJECT: {
+            isSpot = false;
+            cout << "FIND OBJECT" << endl;
+            findObject(sbd);
+            break;
+        }
+        case FINDGAPSTART: {
+            cout << "FINDG AP START" << endl;
+            findGapStart(sbd, vd);
+            break;
+        }
+        case FINDGAPEND: {
+            cout << "FIND GAP END" << endl;
+            findGapEnd(sbd, vd);
+            break;
+        }
+        case ENOUGHSPACE: {
+            cout << "ENOUGH SPACE" << endl;
+            enoughSpace();
+            break;
         }
     }
-    return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
 }
-/**
- * Switch for the different phases that the car will do for the parking
- */
-void Parker::parallelPark(){
+
+VehicleControl Parker::parallelPark(SensorBoardData sbd, VehicleData vd){
+
+    if(isNotSafe((sbd))){
+        parkstate = SAFETYSTOP;
+    }
+    cout << "gapEnd " << gapEnd << endl;
+    cout << "This is the absPath " << vd.getAbsTraveledPath() << endl;
     switch(parkstate){
+        case PHASE0:{
+            vc = adjustBeforeParking(vd, 2);
+            break;
+        }
         case PHASE1:{
-            backAroundObj();
+            vc = backAroundCorner(vd, 5);
             break;
         }
         case PHASE2:{
-            backingStraight();
+            vc = backingStraight(vd, 2);
             break;
         }
         case PHASE3:{
-            backingLeft();
+            vc = backingLeft(vd, 2.5);
             break;
         }
         case PHASE4:{
-            adjustInSpotForward();
+            vc = adjustInSpotForward(vd, 1.5);
             break;
         }
         case PHASE5:{
-            adjustInSpotBack();
+            vc = adjustInSpotBack(vd, 1);
             break;
         }
-
+        case SAFETYSTOP:{
+            vc = goBackToLane(vd);
+            break;
+        }
+        break;
     }
+    return vc;
 }
 
-/**
- * Returns true or false if the back of the car gets to close to the object behind
- */
-bool Parker::isSafe(SensorBoardData sbd){
-    return((sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > 0.5) &&
-            (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) < 1));
+VehicleControl Parker::adjustInSpotBack(VehicleData vd, int add) {
+    if(carPosition + add > vd.getAbsTraveledPath()){
+        controlTemp.setSpeed(-0.3);
+        controlTemp.setSteeringWheelAngle(-15);
+    }
+    else if(carPosition + add < vd.getAbsTraveledPath()){
+        controlTemp.setSpeed(0);
+        isParked = true;
+    }
+    return controlTemp;
 }
-/**
- * Method to go back to the lane if there is something wrong with the parking
- */
-void Parker::goBackToLane(){
-    if(parkPosition + 4 > absTraveled){
-        vc.setSpeed(0.6);
-        vc.setSteeringWheelAngle(-25);
+
+VehicleControl Parker::adjustInSpotForward(VehicleData vd, int add){
+    if(carPosition + add > vd.getAbsTraveledPath()){
+        controlTemp.setSpeed(0.3);
+        controlTemp.setSteeringWheelAngle(30);
     }
-    else if(parkPosition + 7 > absTraveled){
-        vc.setSteeringWheelAngle(30);
-    }
-    else {
-        state = FINDOBJECT;
-        foundSpot = false;
-    }
-}
-/**
- * Adjust the car to be in a good place inside the spot
- */
-void Parker::adjustInSpotBack() {
-    if(parkPosition + 0.5 > absTraveled){
-        vc.setSpeed(-0.3);
-        vc.setSteeringWheelAngle(-15);
-    }
-    else if(parkPosition + 0.5 < absTraveled){
-        vc.setSpeed(0);
-    }
-}
-/**
- * Adjust to be straighter Forward
- */
-void Parker::adjustInSpotForward(){
-    if(parkPosition + 1.5 > absTraveled){
-        vc.setSpeed(0.3);
-        vc.setSteeringWheelAngle(30);
-    }
-    else if(parkPosition + 1.5 < absTraveled){
-        vc.setSpeed(0);
-        vc.setSteeringWheelAngle(30);
-        parkPosition += 1.5;
+    else if(carPosition + add < vd.getAbsTraveledPath()){
+        controlTemp.setSpeed(0);
+        controlTemp.setSteeringWheelAngle(30);
+        carPosition = carPosition + add;
         parkstate = PHASE5;
     }
+    return controlTemp;
 }
-/**
- * Placing the car inside the spot
- */
-void Parker::backingLeft(){
-    vc.setSteeringWheelAngle(-45);
-    if(parkPosition + 2.5 < absTraveled){
-        vc.setSpeed(0);
-        parkPosition += 2.5;
+
+VehicleControl Parker::backingLeft(VehicleData vd, int add){
+    controlTemp.setSteeringWheelAngle(-45);
+    if(carPosition + add < vd.getAbsTraveledPath()){
+        controlTemp.setSpeed(0);
+        carPosition = carPosition + add;
         parkstate = PHASE4;
     }
+    return controlTemp;
 }
-/**
- * Goes back straight
- */
-void Parker::backingStraight() {
-    if(parkPosition + 2 > absTraveled)
-        vc.setSpeed(-0.5);
+
+VehicleControl Parker::backingStraight(VehicleData vd, int add) {
+    if(carPosition + add > vd.getAbsTraveledPath())
+        controlTemp.setSpeed(-0.5);
     else {
         parkstate = PHASE3;
-        parkPosition += 2;
+        carPosition = carPosition + add;
     }
+    return controlTemp;
 }
-/**
- * Backs around the bottom left corner of the object
- */
-void Parker::backAroundObj(){
-    if(parkPosition + 5 > absTraveled){
-        vc.setSpeed(-0.6);
-        vc.setSteeringWheelAngle(45);
+
+VehicleControl Parker::backAroundCorner(VehicleData vd, int add){
+    if(carPosition + add > vd.getAbsTraveledPath()){
+        cout << "Starts back around corner" << endl;
+        controlTemp.setSpeed(-0.6);
+        controlTemp.setSteeringWheelAngle(45);
     }
-    else if(parkPosition + 5 < absTraveled){
-        vc.setSpeed(0);
-        vc.setSteeringWheelAngle(0);
-        parkPosition += 5;
+    else if(carPosition + add < vd.getAbsTraveledPath()){
+        controlTemp.setSpeed(0);
+        controlTemp.setSteeringWheelAngle(0);
+        carPosition = carPosition + add ;
         parkstate = PHASE2;
     }
+    return controlTemp;
 }
-/**
- * Adjusts the car before the parking begin
- */
-void Parker::adjustCar(double absTraveled) {
-    cout << "Enters ADJUST" << endl;
-    if(gapEnd + 2 > absTraveled){
-        vc.setSpeed(.6);
-        vc.setSteeringWheelAngle(0);
+VehicleControl Parker::adjustBeforeParking(VehicleData vd, int add) {
+    if(gapEnd + add > vd.getAbsTraveledPath()){
+        controlTemp.setSpeed(.6);
+        controlTemp.setSteeringWheelAngle(0);
     }
-    else if(gapEnd + 2 < absTraveled){
-        vc.setSpeed(0);
-        state = PARK;
+    else if(gapEnd + add < vd.getAbsTraveledPath()){
+        controlTemp.setSpeed(0);
         parkstate = PHASE1;
-        parkPosition = absTraveled;
+        carPosition = vd.getAbsTraveledPath();
     }
+    return controlTemp;
 }
-/**
- * Calculates if the Space is enough to park in
- */
+
 void Parker::enoughSpace(){
-    if((gapEnd - gapStart) > 6){
-        state = ADJUST;
-        foundSpot = true;
+    if((gapEnd - gapStart) > 7){
+        isSpot = true;
     }
     else
         state = FINDOBJECT;
 }
-/**
- * Finds the end of the gap when noticeing another object
- */
+
 void Parker::findGapEnd(SensorBoardData sbd, VehicleData vd){
-    if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 0) {
+    if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 1.2) {
         cout << "Found gap END method---------------------------" << endl;
         gapEnd = vd.getAbsTraveledPath();
         state = ENOUGHSPACE;
     }
 }
-/*
- * Finds the first gap from the detected object and changes state
- */
+
 void Parker::findGapStart(SensorBoardData sbd, VehicleData vd) {
-    if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < 0){
+    if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < 1.2){
         gapStart = vd.getAbsTraveledPath();
         state = FINDGAPEND;
         cout << "Found gap START method---------------------------" << endl;
     }
 }
-/**
- * This method detects if there is an object and change state
- */
 
 void Parker::findObject(SensorBoardData sbd) {
-    if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 0){
+    if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 1.2){
         cout << "object found method---------------------------" << endl;
         state = FINDGAPSTART;
     }
 }
 
-/**
- * This method sets the bool parking passed from DecisionMaker
- */
-void Parker::setParking(std::shared_ptr<bool> parking){
-    this->parking = parking;
-}
-/**
- * This sets the pointer to which is the VehicleControl
- */
-void Parker::setParkingControler(std::shared_ptr<Container> parkingControler){
-    this->parkingControler = parkingControler;
-}
-/**
- * This returns a bool if there has been a parking spot found
- */
 bool Parker::getFoundSpot(){
-    return foundSpot;
+    return isSpot;
+}
+
+bool Parker::getIsParked() {
+    return isParked;
+}
+
+bool Parker::isNotSafe(SensorBoardData sbd){
+    return((sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > 0.5) &&
+           (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) < 1));
+}
+
+VehicleControl Parker::goBackToLane(VehicleData vd){
+    if(carPosition + 4 > vd.getAbsTraveledPath()){
+        vc.setSpeed(0.6);
+        vc.setSteeringWheelAngle(-25);
+    }
+    else if(carPosition + 7 > vd.getAbsTraveledPath()){
+        vc.setSteeringWheelAngle(30);
+    }
+    else {
+        state = FINDOBJECT;
+        parkstate = PHASE0;
+        isSpot = false;
+    }
 }
