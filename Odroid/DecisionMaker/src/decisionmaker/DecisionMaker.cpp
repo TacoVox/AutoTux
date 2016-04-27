@@ -30,7 +30,8 @@ VehicleControl vehicleControl;
  */
 DecisionMaker::DecisionMaker(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "DecisionMaker"),
-        ovt(), parker(), containerVehicleData(), containerSensorBoardData(), laneRecommendation(), stopped(false){
+        ovt(), parker(), containerVehicleData(), containerSensorBoardData(), laneRecommendation(), stopCounter(0),
+        speed(), isStopLine(false){
 }
 
 DecisionMaker::~DecisionMaker() {}
@@ -46,26 +47,33 @@ void DecisionMaker::tearDown(){
 */
 void DecisionMaker::laneFollowing() {
 
-    /*
-    if(stopped) {
-        cout << "GOING TO SLEEP" << endl;
-        sleep(3);
-        cout << "WAKING UP" << endl;
-        vehicleControl.setSpeed(2);
-        stopped = false;
-    }
-    else if(getDistanceToLine() == -1){
-        vehicleControl.setSpeed(2);
-    }
-    else if(getDistanceToLine() < 50) {
-        vehicleControl.setSpeed(0);
-        stopped = true;
-    }
-    else if(getDistanceToLine() < 150) {
-        vehicleControl.setSpeed(1);
-    }
-    */
+    if(stopCounter > 0) {
 
+        if(stopCounter == 60) {
+            cout << "WAKING UP" << endl;
+            stopCounter = 0;
+            isStopLine = false;
+        }
+
+        else {
+            cout << "SLEEPING..." << endl;
+            stopCounter++;
+            isStopLine = true;
+        }
+    }
+
+    else if(getDistanceToLine() == -1){
+    }
+
+    else if(getDistanceToLine() < 50) {
+        speed = 0;
+        stopCounter = 1;
+    }
+
+    else if(getDistanceToLine() < 150) {
+        speed = 1;
+    }
+    vehicleControl.setSpeed(speed);
     vehicleControl.setSteeringWheelAngle(getAngle());
 }
 
@@ -108,7 +116,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
     SensorBoardData sbd;
 
     // Set initial speed
-    vehicleControl.setSpeed(1.0);
+    vehicleControl.setSpeed(2.0);
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
         // 1. Update sensor board data values
@@ -153,8 +161,10 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                     }
                 }
                 else{
-                    //parker.findSpot(sbd, vd);
-                    vehicleControl.setSpeed(1);
+                    if(!isStopLine) {
+                        //parker.findSpot(sbd, vd);
+                        speed = 1;
+                    }
                     laneFollowing();
                 }
                 break;
