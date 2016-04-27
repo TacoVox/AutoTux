@@ -16,12 +16,16 @@
 
 systime_t measurementStart;
 
+// TODO: Consider moving this to the config file!
+static void hardwareWEIncrTicks(EXTDriver *extp, expchannel_t channel);
 //--
 //	Thread Definitions
 //--
 
-static THD_WORKING_AREA(wheelEncoderThreadWorkingArea, 60); // Stack size in bytes
-static THD_FUNCTION(wheelEncoderThread, arg);
+// TODO: Remove all thread initializations after verifying interrupt routine works. 
+
+/*static THD_WORKING_AREA(wheelEncoderThreadWorkingArea, 60); // Stack size in bytes
+static THD_FUNCTION(wheelEncoderThread, arg);*/
 
 
 /**
@@ -55,8 +59,7 @@ int cmPerSecond;
 systime_t startTime;
 systime_t timeNow;
 
-
-
+static const EXTConfig extcfg;
 
 //-----------------------------------------------------------------------------
 // "Public" interface
@@ -66,28 +69,33 @@ systime_t timeNow;
 /**
  * Sets up the pin and the thread
  */
+
+// TODO: Refactor this function
+
 void hardwareSetupWE(void) {
 	palSetPadMode(WE_PIN_GROUP, WE_PIN_NUMBER, PAL_MODE_INPUT_PULLUP);
-    //Set up the thread here
+	extStart(&EXTD1, &extcfg); //!< Set up interrupt
+	startTime = chVTGetSystemTime();
+    /*//Set up the thread here
     (void)chThdCreateStatic(wheelEncoderThreadWorkingArea, sizeof(wheelEncoderThreadWorkingArea),
-						  NORMALPRIO, wheelEncoderThread, NULL);
+						  NORMALPRIO, wheelEncoderThread, NULL);*/
 }
 
-void hardwareIterationWE(void) {
+// TODO: Remove this after verifying interrupt routine works
+
+/*void hardwareIterationWE(void) {
 	// NOTE: For now, the calculation won't calculate/affect the speed around systime's reset
 	// (every time it's close to overflow)
 	// Try measuring every fifth iteration for now
 
-	systime_t startTime = chVTGetSystemTime();
+
 
 	while(true){
 		if (previousEncoderState == FALSE && palReadPad(WE_PIN_GROUP, WE_PIN_NUMBER)) {
 	        previousEncoderState = TRUE;
-	        ticks++;
-			distanceTicks++;
 	    } else if (previousEncoderState == TRUE && palReadPad(WE_PIN_GROUP, WE_PIN_NUMBER) == FALSE) {
 	        previousEncoderState = FALSE;
-	    }
+	    } // Do we need this guy now?
 		timeNow = chVTGetSystemTime();
 	    if (ST2MS(timeNow) > ST2MS(startTime) + 1000) {
 	        // Do calculations here
@@ -101,15 +109,38 @@ void hardwareIterationWE(void) {
 	        ticks = 0;
 	        startTime = chVTGetSystemTime();
 	    }
-
 		chThdSleepMilliseconds(1);
 	}
+
+}*/
+
+static void hardwareWEIncrTicks(EXTDriver *extp, expchannel_t channel) {
+	(void)extp;
+  	(void)channel;
+
+	chSysLockFromISR();
+	distanceTicks++;
+	ticks++;
+	timeNow = chVTGetSystemTime();
+	if (ST2MS(timeNow) > ST2MS(startTime) + 1000) {
+		// Do calculations here
+		// numberOfTicksInMeters / timeElapsed
+		systime_t timeDelta = timeNow - startTime;
+		double seconds = ST2MS(timeDelta) / (double)1000;
+		double centimeters = ((double)ticks / WE_TICKS_PER_METER) * 100;
+		cmPerSecond = (int)(centimeters / seconds);
+
+		// Reset tick counter
+		ticks = 0;
+		startTime = chVTGetSystemTime();
+	}
+	chSysUnlockFromISR();
 }
 
-static THD_FUNCTION(wheelEncoderThread, arg) {
+/*static THD_FUNCTION(wheelEncoderThread, arg) {
 	(void) arg;
 	hardwareIterationWE();
-}
+}*/
 
 /*
  * Getter for the values. Specify a US sensor.
@@ -127,6 +158,36 @@ int hardwareGetValuesWEDistance(void) {
 	return distanceTraveled;
 }
 
+//-----------------------------------------------------------------------------
+// Thread Interrupt Config
+//-----------------------------------------------------------------------------
+static const EXTConfig extcfg = {
+  {
+    {EXT_CH_MODE_DISABLED, NULL},
+    {EXT_CH_MODE_DISABLED, NULL},
+    {EXT_CH_MODE_RISING_EDGE | EXT_CH_MODE_AUTOSTART | EXT_MODE_GPIOA, hardwareWEIncrTicks},
+    {EXT_CH_MODE_DISABLED, NULL},
+    {EXT_CH_MODE_DISABLED, NULL},
+    {EXT_CH_MODE_DISABLED, NULL},
+    {EXT_CH_MODE_DISABLED, NULL},
+    {EXT_CH_MODE_DISABLED, NULL},
+    {EXT_CH_MODE_DISABLED, NULL},
+    {EXT_CH_MODE_DISABLED, NULL},
+    {EXT_CH_MODE_DISABLED, NULL},
+    {EXT_CH_MODE_DISABLED, NULL},
+    {EXT_CH_MODE_DISABLED, NULL},
+    {EXT_CH_MODE_DISABLED, NULL},
+    {EXT_CH_MODE_DISABLED, NULL},
+    {EXT_CH_MODE_DISABLED, NULL},
+    {EXT_CH_MODE_DISABLED, NULL},
+    {EXT_CH_MODE_DISABLED, NULL},
+    {EXT_CH_MODE_DISABLED, NULL},
+    {EXT_CH_MODE_DISABLED, NULL},
+    {EXT_CH_MODE_DISABLED, NULL},
+    {EXT_CH_MODE_DISABLED, NULL},
+    {EXT_CH_MODE_DISABLED, NULL}
+  }
+};
 //-----------------------------------------------------------------------------
 // "Private" implementation
 //-----------------------------------------------------------------------------

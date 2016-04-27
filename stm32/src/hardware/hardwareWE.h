@@ -11,7 +11,7 @@
 #include "../autotuxconfig.h"
 
 /*
- * Sets up the US sensor pins etc.
+ * Sets up the WE sensor pins etc.
  */
 void hardwareSetupWE(void);
 
@@ -19,10 +19,11 @@ void hardwareIterationWE(void);
 
 
 /*
- * Getter for the values. Specify a US sensor.
+ * Getter for the values. Specify a WE sensor.
  */
 
 //int hardwareGetValuesWE(void);
+
 
 int hardwareGetValuesWESpeed(void);
 int hardwareGetValuesWEDistance(void);
