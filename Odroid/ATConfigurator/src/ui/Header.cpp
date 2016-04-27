@@ -15,10 +15,7 @@ ui::Header::Header(int x, int y) : xsize(x), ysize(y),
     wbkgd(_header, COLOR_PAIR(1));
     int startpos = (xsize - (int)title.size()) / 2;
     mvwaddstr(_header, 0, startpos, title.c_str());
-}
-
-WINDOW *ui::Header::getHeader(void) {
-    return _header;
+    wrefresh(_header);
 }
 
 
