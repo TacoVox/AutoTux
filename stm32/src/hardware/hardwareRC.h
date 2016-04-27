@@ -11,12 +11,12 @@
 /*
  * Sets up the pins etc.
  */
-void hardwareSetupRC(void);
+void hardwareRCSetup(void);
 
 /*
  * Getter for the values. Specify an RC channel.
  */
-icucnt_t hardwareGetValuesRC(RC_CHANNEL);
+icucnt_t hardwareRCGetValues(RC_CHANNEL);
 
 
 #endif /* HARDWARERC_H_ */

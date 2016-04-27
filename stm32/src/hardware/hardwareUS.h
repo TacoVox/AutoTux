@@ -10,31 +10,31 @@
 /*
  * Sets up the US sensor pins etc.
  */
-void hardwareSetupUS(void);
+void hardwareUSSetup(void);
 
 /*
  * @brief Call this each time an US read should be performed.
  *
  * Starts the ranging process. 65 ms later, the range can be read.
  */
-void hardwareIterationUSStart(void);
+void hardwareUSIterationStart(void);
 
 /*
  * @brief Fetches the values from the US sensors.
  *
  * Should be preceeded by a corresponding start call that starts the ranging.
  */
-void hardwareIterationUSEnd(void);
+void hardwareUSIterationEnd(void);
 
 /*
  * Getter for the values. Specify a US sensor.
  */
-int hardwareGetValuesUS(US_SENSOR);
+int hardwareUSGetValues(US_SENSOR);
 
 /*
  * Getter for the light sensor reading
  */
-unsigned char hardwareGetValuesUSLight(void);
+unsigned char hardwareUSGetLightValue(void);
 
 
 #endif /* HARDWAREUS_H_ */

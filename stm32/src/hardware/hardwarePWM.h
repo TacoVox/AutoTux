@@ -11,17 +11,17 @@
 /*
  * Sets up the PWM pins etc.
  */
-void hardwareSetupPWM(void);
+void hardwarePWMSetup(void);
 
 /*
  * Setter for the values. Specify an output channel ID.
  */
-void hardwareSetValuesPWM(PWM_OUTPUT_ID, int value);
+void hardwarePWMSetValues(PWM_OUTPUT_ID, int value);
 
 /*
  * Setter for the values, pulse widths directly from RC transmitter.
  */
-void hardwareSetValuesPWM_RC(icucnt_t throttle, icucnt_t steering);
+void hardwarePWMSetValuesRC(icucnt_t throttle, icucnt_t steering);
 
 
 #endif /* HARDWAREPWM_H_ */

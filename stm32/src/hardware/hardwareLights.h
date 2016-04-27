@@ -30,17 +30,17 @@
  */
 #define LIGHT_BIT_FLASH_RIGHT (1 << 3)
 
+
 /*
  * Sets up the pin and color buffer. Initializes head and tail lights.
  */
-void hardwareSetupLights(void);
-
+void hardwareLightsSetup(void);
 
 /**
  * Determines which lights should be on and off at this point, and forwards to hardware
  * when needed.
  */
-void hardwareIterationLights(unsigned char lightByte, bool rcMode, bool rcBrakeLight);
+void hardwareLightsIteration(unsigned char lightByte, bool rcMode, bool rcBrakeLight);
 
 
 #endif /* HARDWARELIGHTS_H_ */

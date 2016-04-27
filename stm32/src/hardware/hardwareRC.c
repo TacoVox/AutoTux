@@ -54,7 +54,7 @@ static icucnt_t pw[RC_CHANNELS];
 /*
  * Sets up the pins etc.
  */
-void hardwareSetupRC() {
+void hardwareRCSetup() {
 	// Throttle
 	palSetPadMode(RC_PIN_GROUPS[0], RC_PIN_NUMBERS[0], PAL_MODE_ALTERNATE(2));
 	icuStart(RC_TIMER_THROTTLE, &icuConfigThrottle);
@@ -71,7 +71,7 @@ void hardwareSetupRC() {
 /*
  * Getter for the values. Specify an RC channel.
  */
-icucnt_t hardwareGetValuesRC(RC_CHANNEL channel) {
+icucnt_t hardwareRCGetValues(RC_CHANNEL channel) {
 	return pw[channel];
 }
 

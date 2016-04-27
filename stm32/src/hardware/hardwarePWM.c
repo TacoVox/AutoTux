@@ -39,7 +39,7 @@ static PWMConfig pwmcfg = {
 /*
  * Sets up the pins etc.
  */
-void hardwareSetupPWM(void) {
+void hardwarePWMSetup(void) {
 	palSetPadMode(PWM_PIN_GROUPS[0], PWM_PIN_NUMBERS[0], PAL_MODE_ALTERNATE(2));
 	palSetPadMode(PWM_PIN_GROUPS[1], PWM_PIN_NUMBERS[1], PAL_MODE_ALTERNATE(2));
 	pwmStart(PWM_TIMER, &pwmcfg);
@@ -51,7 +51,7 @@ void hardwareSetupPWM(void) {
 /*
  * Setter for the values. Specify an output channel ID.
  */
-void hardwareSetValuesPWM(PWM_OUTPUT_ID pwm_id, int value) {
+void hardwarePWMSetValues(PWM_OUTPUT_ID pwm_id, int value) {
 	if (pwm_id == PWM_OUTPUT_SERVO) {
 		// Map angle linearly to pulsewidth. Different mappings on either side,
 		// based on the pulsewidths we perceived as producing the max steering
@@ -79,7 +79,7 @@ void hardwareSetValuesPWM(PWM_OUTPUT_ID pwm_id, int value) {
 /*
  * Setter for the values, pulse widths directly from RC transmitter.
  */
-void hardwareSetValuesPWM_RC(icucnt_t throttle, icucnt_t steering) {
+void hardwarePWMSetValuesRC(icucnt_t throttle, icucnt_t steering) {
 	pwmEnableChannel(&PWMD5, 0, throttle);
 	pwmEnableChannel(&PWMD5, 1, steering);
 }

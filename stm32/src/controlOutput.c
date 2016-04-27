@@ -54,8 +54,8 @@ static bool controlValuesAreNew = false;
  */
 void controlOutputSetup(void) {
 	// TODO: also initialize RC here later?
-	hardwareSetupPWM();
-	hardwareSetupLights();
+	hardwarePWMSetup();
+	hardwareLightsSetup();
 
 	//hardwareIterationLights(0, false, false);
 }
@@ -83,11 +83,11 @@ void controlOutputIteration() {
 
 	if (!rcMode) {
 		// RC mode not activated - check only for RC transmitter brake
-		if (hardwareGetValuesRC(THROTTLE) >= RC_THROTTLE_ON_TRESHOLD &&
-				hardwareGetValuesRC(THROTTLE) <= RC_THROTTLE_BRAKE_TRESHOLD) {
+		if (hardwareRCGetValues(THROTTLE) >= RC_THROTTLE_ON_TRESHOLD &&
+				hardwareRCGetValues(THROTTLE) <= RC_THROTTLE_BRAKE_TRESHOLD) {
 
 			// RC transmitter brake - stop the car
-			hardwareSetValuesPWM(PWM_OUTPUT_ESC, SPEED_STOP);
+			hardwarePWMSetValues(PWM_OUTPUT_ESC, SPEED_STOP);
 			rcBrake = true;
 
 		} else {
@@ -95,10 +95,10 @@ void controlOutputIteration() {
 			if (controlValuesAreNew) {
 				// Drive according to controlData
 				// Speed controlled by int corresponding to SPEED enum in config
-				hardwareSetValuesPWM(PWM_OUTPUT_ESC, controlData[CONTROL_BYTE_SPEED]);
+				hardwarePWMSetValues(PWM_OUTPUT_ESC, controlData[CONTROL_BYTE_SPEED]);
 
 				// Wheel angle: 90 degress +- ~30 degrees.
-				hardwareSetValuesPWM(PWM_OUTPUT_SERVO, controlData[CONTROL_BYTE_ANGLE]);
+				hardwarePWMSetValues(PWM_OUTPUT_SERVO, controlData[CONTROL_BYTE_ANGLE]);
 
 				controlValuesAreNew = false;
 				iterationsNoNewValues = 0;
@@ -115,7 +115,7 @@ void controlOutputIteration() {
 	}
 
 	// Update lights
-	hardwareIterationLights(LIGHT_BIT_FLASH_LEFT, rcMode, rcBrake);
+	hardwareLightsIteration(LIGHT_BIT_FLASH_LEFT, rcMode, rcBrake);
 }
 
 
@@ -129,8 +129,8 @@ void controlOutputIteration() {
  */
 static void controlOutputStopCenter(void) {
 	if (!handleRCMode()) {
-		hardwareSetValuesPWM(PWM_OUTPUT_ESC, SPEED_STOP);
-		hardwareSetValuesPWM(PWM_OUTPUT_SERVO, WHEELS_CENTERED_ANGLE);
+		hardwarePWMSetValues(PWM_OUTPUT_ESC, SPEED_STOP);
+		hardwarePWMSetValues(PWM_OUTPUT_SERVO, WHEELS_CENTERED_ANGLE);
 	}
 
 	// Regardless, reset controlData to corresponding values.
@@ -143,11 +143,11 @@ static void controlOutputStopCenter(void) {
  * Returns false if RC mode off.
  */
 static bool handleRCMode(void) {
-	if (hardwareGetValuesRC(THROTTLE) > RC_THROTTLE_ON_TRESHOLD) {
+	if (hardwareRCGetValues(THROTTLE) > RC_THROTTLE_ON_TRESHOLD) {
 		if (rcModeCheck()) {
 			// Forward RC signal to hardware
 			// But first attenuate speed
-			int esc_pw = hardwareGetValuesRC(THROTTLE);
+			int esc_pw = hardwareRCGetValues(THROTTLE);
 			if (esc_pw > SPEED_PULSEWIDTHS[SPEED_STOP]) {
 				// Output a fifth of the input
 				esc_pw = SPEED_PULSEWIDTHS[SPEED_STOP] +
@@ -158,7 +158,7 @@ static bool handleRCMode(void) {
 						((SPEED_PULSEWIDTHS[SPEED_STOP] - esc_pw) * RC_BACKWARD_MULTIPLIER);
 			}
 
-			hardwareSetValuesPWM_RC(esc_pw, hardwareGetValuesRC(STEERING));
+			hardwarePWMSetValuesRC(esc_pw, hardwareRCGetValues(STEERING));
 			return true;
 		}
 	}
@@ -175,7 +175,7 @@ static bool rcModeCheck(void) {
 	static bool rcMode = false;
 	static int itWindowToCenterToSwitch = 0;
 	static bool ledState = false; // Led state for blinking
-	icucnt_t steeringPW = hardwareGetValuesRC(STEERING);
+	icucnt_t steeringPW = hardwareRCGetValues(STEERING);
 
 	// Restore LED state - will be changed only if blinking occurs below
 	if (rcMode) palSetPad(GPIOD, GPIOD_LED6);

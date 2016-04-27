@@ -61,7 +61,7 @@ static bool flashState;
 /*
  * Sets up the pin and color buffer. Initializes head and tail lights.
  */
-void hardwareSetupLights(void) {
+void hardwareLightsSetup(void) {
 	neopixelInit(&cfg, &colorBuffer);
 
 	// Headlights
@@ -79,7 +79,7 @@ void hardwareSetupLights(void) {
  * Determines which lights should be on and off at this point, and forwards to hardware
  * when needed.
  */
-void hardwareIterationLights(unsigned char lightByte, bool rcMode, bool rcBrakeLight) {
+void hardwareLightsIteration(unsigned char lightByte, bool rcMode, bool rcBrakeLight) {
 	static uint8_t flashStateCounter = 0;
 
 	// First process inputs, refine into bools for which lights are on and off

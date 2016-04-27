@@ -73,7 +73,7 @@ static int usCmCircBuffer[US_SENSORS][US_CIRCULAR_BUFFER_LENGTH];
 /*
  * Sets up the US sensor pins etc.
  */
-void hardwareSetupUS() {
+void hardwareUSSetup() {
     palSetPadMode(US_PIN_GROUPS[0], US_PIN_NUMBERS[0],
     		PAL_MODE_ALTERNATE(4) | PAL_STM32_OTYPE_OPENDRAIN);
     palSetPadMode(US_PIN_GROUPS[1], US_PIN_NUMBERS[1],
@@ -103,7 +103,7 @@ void hardwareSetupUS() {
  *
  * Starts the ranging process. 65 ms later, the range can be read.
  */
-void hardwareIterationUSStart() {
+void hardwareUSIterationStart() {
 
 		systime_t timeout = MS2ST(10);
 
@@ -127,7 +127,7 @@ void hardwareIterationUSStart() {
  *
  * Should be preceeded by a corresponding start call that starts the ranging.
  */
-void hardwareIterationUSEnd() {
+void hardwareUSIterationEnd() {
 	msg_t status = MSG_OK;
 	systime_t timeout = MS2ST(10);
 	static int zero_occurences = 0;
@@ -177,14 +177,14 @@ void hardwareIterationUSEnd() {
 /*
  * Getter for the values. Specify a US sensor.
  */
-int hardwareGetValuesUS(US_SENSOR sensor) {
+int hardwareUSGetValues(US_SENSOR sensor) {
 	return (usCm[sensor] < US_VALUE_CAP) ? usCm[sensor] : US_VALUE_CAP;
 }
 
 /*
  * Getter for the light sensor reading
  */
-unsigned char hardwareGetValuesUSLight(void) {
+unsigned char hardwareUSGetLightValue(void) {
 	return lightSensorReading;
 }
 

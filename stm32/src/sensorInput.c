@@ -38,7 +38,7 @@
 void sensorInputSetup (void) {
 	// Initialize sensors
 	hardwareIRSetup();
-	hardwareSetupUS();
+	hardwareUSSetup();
 	hardwareSetupWE();
 
 	#ifdef DEBUG
@@ -51,14 +51,14 @@ void sensorInputSetup (void) {
  */
 void sensorInputIteration(void) {
 	// Start ranging on US sensors
-	hardwareIterationUSStart();
+	hardwareUSIterationStart();
 
 	// Read IR sensor values
 	hardwareIRIteration();
 
 	// Make sure to wait a while, then fetch the ranging values from US sensors
 	chThdSleepMilliseconds(70);
-	hardwareIterationUSEnd();
+	hardwareUSIterationEnd();
 }
 
 /**
@@ -70,10 +70,10 @@ void sensorInputIteration(void) {
 void sensorInputGetData(unsigned char* buffer) {
 	// Normal packet output. Allow only values up to 255 to be sure not
 	// to get unexpectedly low values caused by conversion/overflow
-	buffer[0] = hardwareGetValuesUS(US_FRONT) < 255 ?
-		(unsigned char)hardwareGetValuesUS(US_FRONT) : 255;
-	buffer[1] = hardwareGetValuesUS(US_SIDE) < 255 ?
-		(unsigned char)hardwareGetValuesUS(US_SIDE) : 255;
+	buffer[0] = hardwareUSGetValues(US_FRONT) < 255 ?
+		(unsigned char)hardwareUSGetValues(US_FRONT) : 255;
+	buffer[1] = hardwareUSGetValues(US_SIDE) < 255 ?
+		(unsigned char)hardwareUSGetValues(US_SIDE) : 255;
 	buffer[2] = hardwareIRGetValues(IR_SIDE_FRONT) < 255 ?
 		(unsigned char)hardwareIRGetValues(IR_SIDE_FRONT) : 255;
 	buffer[3] = hardwareIRGetValues(IR_SIDE_REAR) < 255 ?
@@ -90,7 +90,7 @@ void sensorInputGetData(unsigned char* buffer) {
 	buffer[9] = hardwareGetValuesWEDistance() & 0xFF;
 
 	// Light sensor
-	buffer[10] = hardwareGetValuesUSLight();
+	buffer[10] = hardwareUSGetLightValue();
 }
 
 /**
@@ -106,11 +106,11 @@ void sensorInputDebugOutput(BaseSequentialStream* SDU) {
 	#endif
 
 	chprintf(SDU, "WHEEL: %4i ", hardwareGetValuesWESpeed());
-	chprintf(SDU, "US FRONT: %3i \r\n", hardwareGetValuesUS(US_FRONT));
-	chprintf(SDU, "US SIDE: %3i ", hardwareGetValuesUS(US_SIDE));
+	chprintf(SDU, "US FRONT: %3i \r\n", hardwareUSGetValues(US_FRONT));
+	chprintf(SDU, "US SIDE: %3i ", hardwareUSGetValues(US_SIDE));
 	chprintf(SDU, "SIDE_FRONT: %3i ", hardwareIRGetValues(IR_SIDE_FRONT));
 	chprintf(SDU, "SIDE_REAR: %3i ",  hardwareIRGetValues(IR_SIDE_REAR));
 	chprintf(SDU, "REAR: %2i ", hardwareIRGetValues(IR_REAR));
 	chprintf(SDU, "DIST: %4i ", hardwareGetValuesWEDistance());
-	chprintf(SDU, "LIGHT: %3i ", hardwareGetValuesUSLight());
+	chprintf(SDU, "LIGHT: %3i ", hardwareUSGetLightValue());
 }
