@@ -181,7 +181,7 @@ message automotive.vehicle.WheelSpeed [id = 75] {
 
 message automotive.vehicle.LightSystem [id = 76] {
     uint8 headlights [id = 1];
-    uint8 brakelights [id = 2];
+    bool reverseLight [id = 2];
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -344,5 +344,8 @@ message autotux.config.LaneFollower [id = 300] {
 
 message autotux.DecisionMaker [id = 301 ] {
     uint8 state [id = 1];
-    bool leftlane [id = 2];
+}
+
+message autotux.Overtaking [id = 302 ] {
+    bool leftlane [id = 1];
 }
