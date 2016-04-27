@@ -10,7 +10,6 @@
 #include <parker/Parker.h>
 #include "opendavinci/odcore/data/Container.h"
 
-#include "opendavinci/odcore/base/LIFOQueue.h"
 #include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
 #include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 
@@ -37,19 +36,21 @@ namespace decisionmaker{
 
         odcore::data::Container containerVehicleData;
         odcore::data::Container containerSensorBoardData;
-
+        odcore::data::Container containerDecisionMakerMSG;
         odcore::data::Container laneRecommendation;
 
         double speed;
         bool isStopLine;
+        int stopCounter;
+        bool isLeftLane;
+
+        const bool NOTLEFTLANE = false;
+        const bool LEFTLANE = true;
 
         double getAngle();
-        bool isInLeftLane();
         bool isDataQuality();
         double getDistanceToLine();
         void laneFollowing();
-
-        int stopCounter;
     };
 
 } //DecisionMaker

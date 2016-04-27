@@ -23,14 +23,20 @@ Parker::Parker() :
         isSpot(false),
         isParked(false),
         isAccurate(0),
-        controlTemp(){}
+        controlTemp(),
+        objInFront(false){}
 
 Parker::~Parker(){}
 
 /**
  * Finds a parking spot where the car fits
  */
-void Parker::findSpot(SensorBoardData sbd, VehicleData vd) {
+void Parker::findSpot(SensorBoardData sbd, VehicleData vd, VehicleControl dmVehicleControl) {
+
+    if(dmVehicleControl.getSteeringWheelAngle() >  0.34 || dmVehicleControl.getSteeringWheelAngle() < -0.34){
+        state = FINDOBJECT;
+    }
+
     switch (state) {
         case FINDOBJECT: {
             isSpot = false;
@@ -102,37 +108,76 @@ VehicleControl Parker::parallelPark(SensorBoardData sbd, VehicleData vd){
     return vc;
 }
 
-
-
 VehicleControl Parker::midOfSpot(SensorBoardData sbd) {
-    cout << "Get mid of spot" << endl;
-    cout << "Infrared: " << sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) << "Ultrasonic: " << sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) << endl;
-    if((sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) > 0 && sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) < 25)
-            && (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > 0 && sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) < 25)) {
+    if(objInFront) {
+        cout << "Get mid of spot" << endl;
+        cout << "Infrared: " << sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) << "Ultrasonic: " <<
+        sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) << endl;
+        inBetweenObjects(sbd);
+    }
+        // If there isn't any vehicle infront of the car
+    else {
+        objectBehind(sbd);
+    }
+    return controlTemp;
+}
+
+void Parker::objectBehind(SensorBoardData sbd) {
+    if ((sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > IRSENSOR_DISTANCE_MIN &&
+         sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) < IRSENSOR_DISTANCE_MAX)) {
         isAccurate++;
     }
     else
         isAccurate = 0;
 
-    if(isAccurate == FREQUENCY) {
-        if((int) sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) ==
-            (int) sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK)) {
+    if (isAccurate == FREQUENCY) {
+        if ((int) DISTANCE_FROM_BACK_OBJECT * SENSOR_CONVERSION ==
+            (int) sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) * SENSOR_CONVERSION) {
             cout << "Now parked" << endl;
             controlTemp.setSpeed(0);
             isParked = true;
         }
-        else if ((int) sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) >
-                 (int) sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK)) {
+        else if((int) DISTANCE_FROM_BACK_OBJECT * SENSOR_CONVERSION >
+                (int)sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) * SENSOR_CONVERSION ){
+            isAccurate = 0;
+            controlTemp.setSpeed(1);
+        }
+        else if((int) DISTANCE_FROM_BACK_OBJECT * SENSOR_CONVERSION <
+                (int)sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) * SENSOR_CONVERSION) {
+            isAccurate = 0;
+            controlTemp.setSpeed(-1);
+        }
+    }
+}
+
+void Parker::inBetweenObjects(SensorBoardData sbd) {
+    if ((sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) > ULTRASENSOR_DISTANCE_MIN &&
+         sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) < ULTRASENSOR_DISTANCE_MAX)
+        && (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > IRSENSOR_DISTANCE_MIN &&
+            sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) < IRSENSOR_DISTANCE_MAX)) {
+        isAccurate++;
+    }
+    else
+        isAccurate = 0;
+
+    if (isAccurate == FREQUENCY) {
+        if ((int) sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) * SENSOR_CONVERSION ==
+            (int) sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) * SENSOR_CONVERSION) {
+            cout << "Now parked" << endl;
+            controlTemp.setSpeed(0);
+            isParked = true;
+        }
+        else if ((int) sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) * SENSOR_CONVERSION >
+                 (int) sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) * SENSOR_CONVERSION) {
             isAccurate = 0;
             controlTemp.setSpeed(0.3);
         }
-        else if ((int) sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) <
-                 (int) sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK)) {
+        else if ((int) sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) * SENSOR_CONVERSION <
+                 (int) sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) * SENSOR_CONVERSION) {
             isAccurate = 0;
             controlTemp.setSpeed(-0.3);
         }
     }
-    return controlTemp;
 }
 
 /**
@@ -249,26 +294,36 @@ void Parker::enoughSpace(){
  * Finds end of the gap
  */
 void Parker::findGapEnd(SensorBoardData sbd, VehicleData vd){
-    if((sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT)) > 0 &&
-            (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < 20)) {
-        gapEnd = vd.getAbsTraveledPath();
-        isAccurate++;
-    }
-    else
+    if(vd.getAbsTraveledPath() > gapStart + ENOUGH_SPACE_DISTANCE){
         isAccurate = 0;
-    //To check if the readings are Accurate and have no noise
-    if(isAccurate == FREQUENCY){
-        cout << "*********END OF GAP IS DETECTED****************" << endl;
-        isAccurate = 0;
+        objInFront = true;
         state = ENOUGHSPACE;
+        parkstate = PHASE1;
+    }
+
+    else {
+        if ((sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT)) > IRSENSOR_DISTANCE_MIN &&
+            (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < IRSENSOR_DISTANCE_MAX)) {
+            gapEnd = vd.getAbsTraveledPath();
+            isAccurate++;
+        }
+        else
+            isAccurate = 0;
+        //To check if the readings are Accurate and have no noise
+        if (isAccurate == FREQUENCY) {
+            cout << "*********END OF GAP IS DETECTED****************" << endl;
+            isAccurate = 0;
+            objInFront = true;
+            state = ENOUGHSPACE;
+        }
     }
 }
 /**
  * Finds the start of the gap
  */
 void Parker::findGapStart(SensorBoardData sbd, VehicleData vd) {
-    if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < 0 ||
-            sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 20){
+    if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < IRSENSOR_DISTANCE_MIN ||
+            sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > IRSENSOR_DISTANCE_MAX){
         gapStart = vd.getAbsTraveledPath();
         isAccurate++;
     }
@@ -285,8 +340,8 @@ void Parker::findGapStart(SensorBoardData sbd, VehicleData vd) {
  * Finds the object
  */
 void Parker::findObject(SensorBoardData sbd) {
-    if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > 0 &&
-            sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < 20){
+    if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > IRSENSOR_DISTANCE_MIN &&
+            sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < IRSENSOR_DISTANCE_MAX){
         isAccurate++;
     }
     else
@@ -316,32 +371,32 @@ bool Parker::getIsParked() {
  */
 
 bool Parker::isNotSafe(SensorBoardData sbd){
-    if((sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT) > SENSOR_MIN) &&
-       (sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT) < SENSOR_MAX)){
+    if((sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT) > SENSOR_SAFETY_MIN) &&
+       (sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT) < SENSOR_SAFETY_MAX)){
         cout << "ULTRA_SONIC_FRONT_RIGHT" << endl;
         cout << "SENSOR: " << sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK);
         return true;
     }
-    if((sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) > SENSOR_MIN) &&
-       (sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) < SENSOR_MAX)){
+    if((sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) > SENSOR_SAFETY_MIN) &&
+       (sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) < SENSOR_SAFETY_MAX)){
         cout << "ULTRASONIC_FRONT_FORWARD" << endl;
         cout << "SENSOR: " << sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD);
         return true;
     }
-    if((sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > SENSOR_MIN) &&
-       (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) < SENSOR_MAX)){
+    if((sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > SENSOR_SAFETY_MIN) &&
+       (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) < SENSOR_SAFETY_MAX)){
         cout << "INFRARED_REAR_BACK" << endl;
         cout << "SENSOR: " << sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK);
         return true;
     }
-    if((sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > SENSOR_MIN) &&
-       (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < SENSOR_MAX)){
+    if((sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > SENSOR_SAFETY_MIN) &&
+       (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < SENSOR_SAFETY_MAX)){
         cout << "INFRARED_REAR_RIGHT" << endl;
         cout << "SENSOR: " << sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT);
         return true;
     }
-    if((sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) > SENSOR_MIN) &&
-       (sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) < SENSOR_MAX)){
+    if((sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) > SENSOR_SAFETY_MIN) &&
+       (sbd.getValueForKey_MapOfDistances(INFRARED_FRONT_RIGHT) < SENSOR_SAFETY_MAX)){
         cout << "INFRARED_FRONT_RIGHT" << endl;
         cout << "SENSOR: " << sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT);
         return true;

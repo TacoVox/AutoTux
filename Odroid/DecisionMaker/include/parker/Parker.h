@@ -26,8 +26,18 @@ namespace parker {
         const double ADJUST_IN_SPOT_FORWARD = 0.10;
         const double ADJUST_IN_SPOT_BACK = 0.10;
 
-        const double SENSOR_MIN = 0.03;
-        const double SENSOR_MAX = 0.04;
+        const double SENSOR_SAFETY_MIN = 0.03;
+        const double SENSOR_SAFETY_MAX = 0.04;
+
+        const double IRSENSOR_DISTANCE_MIN = 0.02;
+        const double IRSENSOR_DISTANCE_MAX = 0.23;
+
+        const double ULTRASENSOR_DISTANCE_MIN = 0.02;
+        const double ULTRASENSOR_DISTANCE_MAX = 90;
+        const double ENOUGH_SPACE_DISTANCE = 0.85;
+
+        const int SENSOR_CONVERSION = 100;
+        const double DISTANCE_FROM_BACK_OBJECT = 0.10;
 
         //-----------------------------------------
 
@@ -40,8 +50,15 @@ namespace parker {
 //        const double ADJUST_IN_SPOT_FORWARD = 1.5;
 //        const double ADJUST_IN_SPOT_BACK = 1;
 //
-//        const double SENSOR_MIN = 0.2;
-//        const double SENSOR_MAX = 0.5;
+//        const double SENSOR_SAFETY_MIN = 0.2;
+//        const double SENSOR_SAFETY_MAX = 0.5;
+//        const double IRSENSOR_DISTANCE_MIN = 0;
+//        const double IRSENSOR DISTANCE_MAX = 25;
+//        const double ULTRSENSOR_DISTANCE_MIN = 0;
+//        const double ULTRASENSOR_DISTANCE_MAX = 40;
+//        const double ENOUGH_SPACE_DISTANCE = 7;
+//        const int SENSOR_CONVERSION = 1;
+//        const double DISTANCE_FROM_BACK_OBJECT = 2;
         //----------------------------------------
 
 
@@ -58,6 +75,7 @@ namespace parker {
         bool isParked;
         int isAccurate;
         automotive::VehicleControl controlTemp;
+        bool objInFront;
 
         const int FREQUENCY = 5;
 
@@ -80,11 +98,13 @@ namespace parker {
         automotive::VehicleControl midOfSpot(automotive::miniature::SensorBoardData);
         bool isNotSafe(automotive::miniature::SensorBoardData);
         automotive::VehicleControl goBackToLane(automotive::VehicleData);
+        void inBetweenObjects(automotive::miniature::SensorBoardData);
+        void objectBehind(automotive::miniature::SensorBoardData);
 
     public:
         Parker();
         virtual ~Parker();
-        void findSpot(automotive::miniature::SensorBoardData, automotive::VehicleData);
+        void findSpot(automotive::miniature::SensorBoardData, automotive::VehicleData, automotive::VehicleControl);
         bool getFoundSpot();
         bool getIsParked();
 

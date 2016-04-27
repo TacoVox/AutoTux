@@ -15,25 +15,25 @@ namespace  overtaker{
     class Overtaker {
     private:
         // SIMULATOR VALUES
-        const double APPROACH_TRIGGER = 12.0;
-        const double OVT_TRIGGER = 7.5;
-        const double LEFT_SWITCH_DIST = 3.8;
-        const double LEFT_SWITCH_LT_DIST = 4.4;
-        const double LEFT_SWITCH_RT_DIST = 2.8;
-        const double ADJUST_L_S_DIST = 0.0;
-        const double ADJUST_L_S_LT_DIST = 0.0;
-        const double ADJUST_L_S_RT_DIST = 2.0;
-        const double RIGHT_SWITCH_DIST = 3.0;
-        const double RIGHT_SWITCH_LT_DIST = 2.6;
-        const double RIGHT_SWITCH_RT_DIST = 4.0;
-        const double ADJUST_R_S_DIST = 0.0;
-        const double ADJUST_R_S_LT_DIST = 0.0;
-        const double ADJUST_R_S_RT_DIST = 0.0;
+//        const double APPROACH_TRIGGER = 12.0;
+//        const double OVT_TRIGGER = 7.5;
+//        const double LEFT_SWITCH_DIST = 3.8;
+//        const double LEFT_SWITCH_LT_DIST = 4.4;
+//        const double LEFT_SWITCH_RT_DIST = 2.8;
+//        const double ADJUST_L_S_DIST = 0.0;
+//        const double ADJUST_L_S_LT_DIST = 0.0;
+//        const double ADJUST_L_S_RT_DIST = 2.0;
+//        const double RIGHT_SWITCH_DIST = 3.0;
+//        const double RIGHT_SWITCH_LT_DIST = 2.6;
+//        const double RIGHT_SWITCH_RT_DIST = 4.0;
+//        const double ADJUST_R_S_DIST = 0.0;
+//        const double ADJUST_R_S_LT_DIST = 0.0;
+//        const double ADJUST_R_S_RT_DIST = 0.0;
 
-        /* CAR VALUES
+        //CAR VALUES
         const double APPROACH_TRIGGER = 12.0;
-        const double OVT_TRIGGER = 7.5;
-        const double LEFT_SWITCH_DIST = 3.8;
+        const double OVT_TRIGGER = 0.30;
+        const double LEFT_SWITCH_DIST = 0.10;
         const double LEFT_SWITCH_LT_DIST = 4.4;
         const double LEFT_SWITCH_RT_DIST = 2.8;
         const double ADJUST_L_S_DIST = 0.0;
@@ -45,7 +45,6 @@ namespace  overtaker{
         const double ADJUST_R_S_DIST = 0.0;
         const double ADJUST_R_S_LT_DIST = 0.0;
         const double ADJUST_R_S_RT_DIST = 0.0;
-        */
 
     public:
         Overtaker();
@@ -53,6 +52,7 @@ namespace  overtaker{
         void obstacleDetection(automotive::miniature::SensorBoardData, automotive::VehicleData, automotive::VehicleControl);
 
         bool getIsOverriding();
+        bool isLeftLane();
         VehicleControl getOvtControl();
 
     private:
@@ -64,6 +64,7 @@ namespace  overtaker{
 
         enum STATE state;
         double enterSwitchAngle;
+        bool leftLane;
 
         const double ULTRASONIC_FRONT_RIGHT = 4;
         const double ULTRASONIC_FRONT_FORWARD = 3;
