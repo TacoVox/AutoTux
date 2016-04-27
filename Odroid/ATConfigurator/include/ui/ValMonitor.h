@@ -5,10 +5,18 @@
 #ifndef ATCONFIGURATOR_VALMONITOR_H
 #define ATCONFIGURATOR_VALMONITOR_H
 
+#include <ncurses.h>
 
-class ValMonitor {
-
-};
-
+namespace ui {
+    class ValMonitor {
+    public:
+        ValMonitor(void);
+        ValMonitor(int, int);
+    private:
+        int xsize;
+        int ysize;
+        WINDOW* _valmonitor;
+    };
+}
 
 #endif //ATCONFIGURATOR_VALMONITOR_H

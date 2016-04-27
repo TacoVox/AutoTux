@@ -9,8 +9,10 @@ using namespace std;
 int main() {
     shared_ptr<ui::MainUI> mainUI = (shared_ptr<ui::MainUI>) new ui::MainUI();
     mainUI->showMainUI();
-    thread uithread(&ui::MainUI::inputLoop, mainUI);
+    thread uithread(&ui::MainUI::mainLoop, mainUI);
+    thread inthread(&ui::MainUI::inputLoop, mainUI);
     uithread.join();
+    inthread.join();
 
     return 0;
 }
