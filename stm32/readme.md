@@ -15,7 +15,7 @@ The STM32 code for the AutoTux project.
   - Have separators for different sections of the file
   - Use javadoc style short descriptions of variables and functions. If you have more than one line, write a short description on the first line tagged with @breif. Then have an ampty line and after that the more detailed description.
   - Don't put comments above prototypes for static functions.
-  - Avoid inline comments on variables but if you are going to use them, use the format "//!< comment".
+  - Avoid inline comments on variables but if you are going to use them, use the format "//!< comment". This only applies to variables and macros outside functions that are relevant to Doxygen.
 
 ## How to build and flash
 - Compiler: gcc-arm-eabi-none should be available in your favourite packet manager
