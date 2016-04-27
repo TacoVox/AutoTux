@@ -15,7 +15,7 @@
  */
 void hardwareSetupWE(void);
 
-void hardwareIterationWE(void);
+//void hardwareIterationWE(void);
 
 
 /*
