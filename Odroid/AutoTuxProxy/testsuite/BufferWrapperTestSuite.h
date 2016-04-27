@@ -100,7 +100,7 @@ public:
         ret_vec.push_back('0');       // dis3
         ret_vec.push_back('0');       // dis4
         ret_vec.push_back('0');       // light
-        TS_ASSERT_EQUALS((unsigned char) 48, bw.checksum(ret_vec));
+        TS_ASSERT_EQUALS((unsigned char) 48, bw.checksum(&ret_vec));
 
         // clear after first test
         ret_vec.clear();
@@ -116,7 +116,7 @@ public:
         ret_vec.push_back('0');       // dis3
         ret_vec.push_back('0');       // dis4
         ret_vec.push_back('0');       // light
-        TS_ASSERT_EQUALS((unsigned char) 54, bw.checksum(ret_vec));
+        TS_ASSERT_EQUALS((unsigned char) 54, bw.checksum(&ret_vec));
     }
 
     void testAppendReceiveBufferValid(void) {
