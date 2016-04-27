@@ -16,7 +16,7 @@ namespace parker {
     class Parker {
 
     private:
-        /*
+
         //REAL CAR
         const double SPOT_SIZE = 0.70;
         const double ADJUST_BEFORE_PARKING = 0.20;
@@ -26,23 +26,38 @@ namespace parker {
         const double ADJUST_IN_SPOT_FORWARD = 0.10;
         const double ADJUST_IN_SPOT_BACK = 0.10;
 
-        const double SENSOR_MIN = 0.03
-        const double SENSOR_MAX = 0.04
-        */
-        //-----------------------------------------
-        //SIMULATION
-        const double SPOT_SIZE = 7;
-        const double ADJUST_BEFORE_PARKING = 2.2;
-        const double BACK_AROUND_CORNER = 5;
-        const double BACKING_STRAIGHT = 2;
-        const double BACKING_LEFT = 2.5;
-        const double ADJUST_IN_SPOT_FORWARD = 1.5;
-        const double ADJUST_IN_SPOT_BACK = 1;
+        const double SENSOR_MIN = 0.03;
+        const double SENSOR_MAX = 0.04;
 
-        const double SENSOR_MIN = 0.2;
-        const double SENSOR_MAX = 0.5;
+        //-----------------------------------------
+
+        //SIMULATION
+//        const double SPOT_SIZE = 7;
+//        const double ADJUST_BEFORE_PARKING = 2;
+//        const double BACK_AROUND_CORNER = 5;
+//        const double BACKING_STRAIGHT = 2;
+//        const double BACKING_LEFT = 2.5;
+//        const double ADJUST_IN_SPOT_FORWARD = 1.5;
+//        const double ADJUST_IN_SPOT_BACK = 1;
+//
+//        const double SENSOR_MIN = 0.2;
+//        const double SENSOR_MAX = 0.5;
         //----------------------------------------
 
+
+        enum STATE {FINDOBJECT, FINDGAPSTART, FINDGAPEND, ENOUGHSPACE};
+        enum PARKSTATE {PHASE0,PHASE1, PHASE2, PHASE3, PHASE4, PHASE5, PHASE6, SAFETYSTOP};
+        PARKSTATE parkstate;
+        STATE state;
+
+        double carPosition;
+        automotive::VehicleControl vc;
+        double gapStart;
+        double gapEnd;
+        bool isSpot;
+        bool isParked;
+        int isAccurate;
+        automotive::VehicleControl controlTemp;
 
         const int FREQUENCY = 5;
 
@@ -51,10 +66,6 @@ namespace parker {
         const double INFRARED_FRONT_RIGHT = 0;
         const double INFRARED_REAR_RIGHT = 2;
         const double INFRARED_REAR_BACK = 1;
-
-        double carPosition;
-
-        automotive::VehicleControl vc;
 
         void findObject(automotive::miniature::SensorBoardData);
         void findGapStart(automotive::miniature::SensorBoardData, automotive::VehicleData);
