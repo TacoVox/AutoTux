@@ -4,8 +4,8 @@
  */
 
 
-#ifndef BUFFERWRAPPERTESTSUITE1_H
-#define BUFFERWRAPPERTESTSUITE1_H
+#ifndef BUFFERWRAPPERTESTSUITE_H
+#define BUFFERWRAPPERTESTSUITE_H
 
 #include <cxxtest/TestSuite.h>
 #include <iostream>
@@ -198,6 +198,6 @@ private:
 
 };
 
-#endif	// BUFFERWRAPPERTESTSUITE1_H
+#endif	// BUFFERWRAPPERTESTSUITE_H
 
 
