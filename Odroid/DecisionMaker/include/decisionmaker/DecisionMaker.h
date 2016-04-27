@@ -25,7 +25,7 @@ namespace decisionmaker{
         DecisionMaker(const int32_t &argc, char **argv);
         virtual ~DecisionMaker();
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
-        virtual void nextContainer(odcore::data::Container &c);
+        //virtual void nextContainer(odcore::data::Container &c);
 
     private:
         overtaker::Overtaker ovt;
@@ -33,12 +33,21 @@ namespace decisionmaker{
 
         virtual void setUp();
         virtual void tearDown();
+
         odcore::data::Container containerVehicleData;
         odcore::data::Container containerSensorBoardData;
-
+        odcore::data::Container containerDecisionMakerMSG;
         odcore::data::Container laneRecommendation;
+
+        double speed;
+        bool isStopLine;
+        int stopCounter;
+        bool isLeftLane;
+
+        const bool NOTLEFTLANE = false;
+        const bool LEFTLANE = true;
+
         double getAngle();
-        bool isInLeftLane();
         bool isDataQuality();
         double getDistanceToLine();
         void laneFollowing();

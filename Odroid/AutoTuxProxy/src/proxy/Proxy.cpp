@@ -4,12 +4,9 @@
 #include <containerfactory/SBDContainer.h>
 #include <containerfactory/VDContainer.h>
 #include <opendavinci/odcore/base/LIFOQueue.h>
-#include <opendavinci/odcore/data/TimeStamp.h>
 #include <opendavinci/odcore/base/KeyValueConfiguration.h>
 #include <automotivedata/generated/automotive/VehicleControl.h>
-
 #include "proxy/Proxy.h"
-#include "camera/Camera.h"
 #include "camera/OpenCVCamera.h"
 
 #define MATH_PI  3.1415926535897
@@ -25,12 +22,17 @@ namespace proxy {
     using namespace proxy::camera;
 
     Proxy::Proxy(int32_t &argc, char **argv) :
-            TimeTriggeredConferenceClientModule(argc, argv, "Proxy") { }
+            TimeTriggeredConferenceClientModule(argc, argv, "Proxy"),
+            interrupted{false},
+            bufferWrapper{},
+            m_recorder{},
+            m_camera{}
+    { }
 
     Proxy::Proxy(int32_t &argc, char **argv, shared_ptr<serial::BufferWrapper> bw) :
             TimeTriggeredConferenceClientModule(argc, argv, "Proxy"),
-            bufferWrapper{bw},
             interrupted{false},
+            bufferWrapper{bw},
             m_recorder{},
             m_camera{}
     { }
@@ -101,22 +103,17 @@ namespace proxy {
         while (getModuleStateAndWaitForRemainingTimeInTimeslice() == dmcp::ModuleStateMessage::RUNNING && !interrupted) {
             // ========= READ =================================
             // call buffer wrapper to get vector
-            cout << "reading from the read buffer" << endl;
             vector<unsigned char> v = bufferWrapper->readReceiveBuffer();
 
             //If there is something to send --> send it
-            if (v.size() >= 5) {
+            if (v.size() == 11) {
                 getConference().send(*SBDContainer::instance()->
                         genSBDContainer(v));
-            }
-            if (v.size() == 7) {
                 getConference().send(*VDContainer::instance()->
                         genVDContainer(v));
             }
 
-            cout << "Will append to SendBuffer" << endl;
             bufferWrapper->appendSendBuffer(cdContToVec(getKeyValueDataStore().get(VehicleControl::ID())));
-            cout << "Appended received data to send buffer" << endl;
 
             // Camera things
             if(m_camera.get() != NULL) {
@@ -125,7 +122,6 @@ namespace proxy {
                 distribute(c);
             }
         }
-        cout << "Done with the PacketBroadCaster body" << endl;
 
         return dmcp::ModuleExitCodeMessage::OKAY;
     }
@@ -136,12 +132,14 @@ namespace proxy {
 
         //Angle conversion
         int degrees = (int)(vehicleControl.getSteeringWheelAngle() * 180 / MATH_PI);
-        unsigned char angle = degrees + 90;
+        unsigned char angle = (unsigned char)(degrees + 90);
 
         // Speed conversion
         double delta = 0.0001;
         unsigned char speed = 1; // Assume stopped
-        if (vehicleControl.getSpeed() > 0 + delta) {
+        if (vehicleControl.getSpeed() > 1 + delta) {
+            speed = 3;
+        } else if (vehicleControl.getSpeed() > 0 + delta) {
             speed = 2; // Forward
         } else if (vehicleControl.getSpeed() < 0 - delta) {
             speed = 0; // backward
@@ -160,7 +158,7 @@ namespace proxy {
         unsigned char cs = 0;
 
         for (auto it = v.begin(); it < v.end(); it++)
-            cs ^= *it;
+            cs = (unsigned char)(cs ^ *it);
 
         return cs;
     }

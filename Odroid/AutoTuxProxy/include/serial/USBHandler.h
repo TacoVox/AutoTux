@@ -1,3 +1,12 @@
+/*!
+ * USBHandler header. Declares the functions and member variables.
+ *
+ * @author Ivo
+ */
+
+
+#ifndef USBHANDLER_H
+#define USBHANDLER_H
 
 #include "serial/BufferWrapper.h"
 #include "serial/USBConnector.h"
@@ -6,7 +15,9 @@ namespace usb_handler {
     class USBHandler
     {
     public:
+        /*! constructor */
         USBHandler(std::shared_ptr<usb_connector::USBConnector>);
+        /*! destructor */
         ~USBHandler();
         void run();
         void stop();
@@ -20,3 +31,5 @@ namespace usb_handler {
 
     };
 } // namespace usb_handler
+
+#endif	// USBHANDLER_H

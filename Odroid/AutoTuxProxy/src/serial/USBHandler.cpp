@@ -12,7 +12,8 @@ usb_handler::USBHandler::USBHandler(std::shared_ptr<usb_connector::USBConnector>
     running{true},
     uc{c}
 {
-
+    cout << "creating usb handler... ";
+    cout << "[OK]" << endl;
 }
 
 
@@ -82,7 +83,8 @@ bool usb_handler::USBHandler::is_reconnect(int error_code)
     case LIBUSB_ERROR_NOT_SUPPORTED:
     case LIBUSB_ERROR_OTHER:
         return true;
-        //break;
+    default:
+        return false;
     }
     return false;
 }

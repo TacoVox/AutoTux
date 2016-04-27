@@ -4,7 +4,6 @@
 
 #include <iostream>
 
-
 #include "decisionmaker/DecisionMaker.h"
 #include "overtaker/Overtaker.h"
 
@@ -23,11 +22,6 @@ using namespace overtaker;
 
 enum STATE {DRIVING, PARKING};
 
-// takes the values of the argument passed to the constructor
-int32_t ptrargc;
-char** ptrargv;
-
-// Shared pointer to Container
 VehicleControl vehicleControl;
 
 /**
@@ -35,9 +29,8 @@ VehicleControl vehicleControl;
  */
 DecisionMaker::DecisionMaker(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "DecisionMaker"),
-        laneRecommendation() , ovt(), parker(){
-    ptrargc = argc;
-    ptrargv = argv;
+        ovt(), parker(), containerVehicleData(), containerSensorBoardData(), containerDecisionMakerMSG(), laneRecommendation(),
+        speed(), isStopLine(false), stopCounter(0), isLeftLane(false){
 }
 
 DecisionMaker::~DecisionMaker() {}
@@ -52,6 +45,34 @@ void DecisionMaker::tearDown(){
  * Sets wheelangledata to the LaneRecommandation
 */
 void DecisionMaker::laneFollowing() {
+
+    if(stopCounter > 0) {
+
+        if(stopCounter == 60) {
+            cout << "WAKING UP" << endl;
+            stopCounter = 0;
+            isStopLine = false;
+        }
+
+        else {
+            cout << "SLEEPING..." << endl;
+            stopCounter++;
+            isStopLine = true;
+        }
+    }
+
+    else if(getDistanceToLine() == -1){
+    }
+
+    else if(getDistanceToLine() < 50) {
+        speed = 0;
+        stopCounter = 1;
+    }
+
+    else if(getDistanceToLine() < 150) {
+        speed = 1;
+    }
+    vehicleControl.setSpeed(speed);
     vehicleControl.setSteeringWheelAngle(getAngle());
 }
 
@@ -59,21 +80,13 @@ void DecisionMaker::laneFollowing() {
  * Gets the angle given by LaneRecommandation
  */
 double DecisionMaker::getAngle() {
-    return laneRecommendation.getData<LaneRecommendation>().getAngle();
-}
-/**
- * Gets a bool if the car is in leftlane
- * @TODO This isn't working yet
- */
-bool DecisionMaker::isInLeftLane() {
-    return laneRecommendation.getData<LaneRecommendation>().getLeft_lane();
-
+    return laneRecommendation.getData<LaneRecommendationMSG>().getAngle();
 }
 /**
  * True if Data sent by the LaneRecommendation are considered reliable.
  */
 bool DecisionMaker::isDataQuality(){
-    return laneRecommendation.getData<LaneRecommendation>().getQuality();
+    return laneRecommendation.getData<LaneRecommendationMSG>().getQuality();
 
 }
 /**
@@ -81,45 +94,61 @@ bool DecisionMaker::isDataQuality(){
  * @TODO is not found yet
  */
 double DecisionMaker::getDistanceToLine() {
-    return laneRecommendation.getData<LaneRecommendation>().getDistance_to_line();
+    return laneRecommendation.getData<LaneRecommendationMSG>().getDistance_to_line();
 
 }
 
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() {
 
     // Set initial state of the car
-    STATE state = DRIVING;
+    STATE state = PARKING;
 
     VehicleData vd;
     SensorBoardData sbd;
+    DecisionMakerMSG dmMSG;
+    OvertakingMSG ovtMSG;
 
     // Set initial speed
-    vehicleControl.setSpeed(2);
+    vehicleControl.setSpeed(2.0);
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
+        // 1. Update sensor board data values
+        containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
+        sbd = containerSensorBoardData.getData<SensorBoardData>();
 
-        // 1. Update vehicle data values
+        // 2. Update vehicle data values
+        containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
         vd = containerVehicleData.getData<VehicleData>();
 
-        // 2. Update sensor board data values
-        sbd = containerSensorBoardData.getData<SensorBoardData>();
+        laneRecommendation = getKeyValueDataStore().get(autotux::LaneRecommendationMSG::ID());
+
+        containerDecisionMakerMSG = getKeyValueDataStore().get(autotux::DecisionMakerMSG::ID());
+        dmMSG = containerDecisionMakerMSG.getData<DecisionMakerMSG>();
+
+        //state = dmMSG.getState();
+
+        //cout << "SensorValues: " <<  sbd.getValueForKey_MapOfDistances(2) << endl;
+        cout << "Distance: " << vd.getAbsTraveledPath() << endl;
+        if(!ovt.isLeftLane()){
+            ovtMSG.setLeftlane(NOTLEFTLANE);
+        }
+        else
+            ovtMSG.setLeftlane(LEFTLANE);
 
         switch (state){
             case DRIVING:{
+                ovt.obstacleDetection(sbd, vd, vehicleControl);
 
-                // Update overtaker state info...
-                /*ovt.obstacleDetection(sbd, vd);
-
-                // If overtaker is overriding control values...
+                    // If overtaker is overriding control values...
                 if(ovt.getIsOverriding()) {
-                    cout << "Overtaker is OVERRIDING" << endl;
+                    //cout << "DM: OVERTAKER is OVERRIDING" << endl;
                     vehicleControl = ovt.getOvtControl();
                 }
-                //... else follow lane-follower instructions...
+                    //... else follow lane-follower instructions...
                 else{
-                    cout <<"Overtaker NOT overriding" << endl;*/
+                    //cout <<"DM: LANE FOLLOWER Instructions" << endl;
                     laneFollowing();
-                //}
+                }
 
                 break;
             }
@@ -135,34 +164,21 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                     }
                 }
                 else{
-                    parker.findSpot(sbd, vd);
-                    vehicleControl.setSpeed(1);
+                    if(!isStopLine) {
+                        parker.findSpot(sbd, vd, vehicleControl);
+                        speed = 1;
+                    }
                     laneFollowing();
                 }
                 break;
             }
         }
-	cout << "Steering: " << vehicleControl.getSteeringWheelAngle() << endl;
         // Pack and send control values
         Container control(vehicleControl);
+        Container lane(ovtMSG);
         getConference().send(control);
+        getConference().send(lane);
     }
 
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
 }
-
-/**
- * This method is a data listener that listens to the broadcast made by odsupercomponent for LaneRecommendation
-*/
-void decisionmaker::DecisionMaker::nextContainer(odcore::data::Container &c) {
-
-    if(c.getDataType() == LaneRecommendation::ID()){
-        laneRecommendation = c; //Pointer to which the PacketBroadcaster sends for data.
-    }else if(c.getDataType() == SensorBoardData::ID()){
-        containerSensorBoardData = c;
-    }else if(c.getDataType() == VehicleData::ID()){
-        containerVehicleData = c;
-    }
-
-}
-

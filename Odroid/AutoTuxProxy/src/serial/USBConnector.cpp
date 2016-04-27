@@ -1,3 +1,9 @@
+/*!
+ * Implementation of the USBConnector.h. Responsible for reading and
+ * writing from/to the usb serial connection.
+ *
+ * @author Ivo
+ */
 
 #include <iostream>
 #include <thread>
@@ -7,15 +13,18 @@
 using namespace std;
 
 
-/* constructor */
-usb_connector::USBConnector::USBConnector()
+/*! constructor */
+usb_connector::USBConnector::USBConnector() :
+    bw{},
+    ctx{},
+    usb_dev{}
 {
-    cout << "creating a usb connector object... ";
+    cout << "creating usb connector... ";
     cout << "[OK]" << endl;
 }
 
 
-/* copy constructor */
+/*! copy constructor */
 usb_connector::USBConnector::USBConnector(const usb_connector::USBConnector &usb) :
     bw{usb.bw},
     ctx{usb.ctx},
@@ -23,15 +32,18 @@ usb_connector::USBConnector::USBConnector(const usb_connector::USBConnector &usb
 {}
 
 
-/* copy constructor */
+/*! copy constructor */
 usb_connector::USBConnector &
 usb_connector::USBConnector::operator=(const usb_connector::USBConnector &usb)
 {
+    bw = usb.bw;
+    ctx = usb.ctx;
+    usb_dev = usb.usb_dev;
     return *this;
 }
 
 
-/* destructor */
+/*! destructor */
 usb_connector::USBConnector::~USBConnector()
 {
     cout << "destroying usb connector... ";
@@ -45,12 +57,14 @@ usb_connector::USBConnector::~USBConnector()
 }
 
 
+/*! sets the buffer wrapper for this connector */
 void usb_connector::USBConnector::set_buffer_wrapper(std::shared_ptr<serial::BufferWrapper> p)
 {
     bw = p;
 }
 
-/* initializes libusb */
+
+/*! initializes libusb */
 bool usb_connector::USBConnector::init_libusb(void)
 {
     cout << "initializing libusb... ";
@@ -64,7 +78,7 @@ bool usb_connector::USBConnector::init_libusb(void)
 }
 
 
-/* gets a list of the devices and opens the one we need */
+/*! gets a list of the devices and opens the one we need */
 bool usb_connector::USBConnector::open_device(void)
 {
     // to return
@@ -108,7 +122,7 @@ bool usb_connector::USBConnector::open_device(void)
 }
 
 
-/* claims the interface of the USB for I/O operations */
+/*! claims the interface of the USB for I/O operations */
 bool usb_connector::USBConnector::claim_interface(void)
 {
     // to return
@@ -140,7 +154,7 @@ bool usb_connector::USBConnector::claim_interface(void)
 }
 
 
-/* connects and opens stream to usb */
+/*! connects to usb */
 bool usb_connector::USBConnector::connect(void)
 {
     cout << "usb connecting..." << endl;
@@ -161,10 +175,9 @@ bool usb_connector::USBConnector::connect(void)
 }
 
 
-/* reads from the usb stream */
+/*! reads from the usb stream */
 int usb_connector::USBConnector::read(void)
 {
-    cout << "reading from usb stream..." << endl; 
     // allocate memory for use when reading from the usb
     unsigned char *data = new unsigned char[READ_LEN];
     // read from the usb device
@@ -172,8 +185,7 @@ int usb_connector::USBConnector::read(void)
     int res = libusb_bulk_transfer(usb_dev, USB_ENDPOINT_IN,
                                    data, READ_LEN, &transferred, 20);
     if (res == 0) {
-        cout << "READ successful" << endl;
-        cout << "bytes received: " << transferred << endl;
+        cout << "bytes read: " << transferred << endl;
         // the vector holding the data from the read
         vector<unsigned char> vec(data, data + transferred);
         // append to the receive buffer
@@ -185,13 +197,13 @@ int usb_connector::USBConnector::read(void)
 }
 
 
-/* writes to the usb stream */
+/*! writes to the usb stream */
 int usb_connector::USBConnector::write(void)
 {
     // get data from the buffer
     vector<unsigned char> vec = bw->readSendBuffer();
     // get data to send from the send buffer
-    int len = vec.size();
+    long unsigned int len = vec.size();
     // check for length, if 0 return
     if (len == 0) return EMPTY_DATA;
     // allocate memory for the data to write, we get a vector
@@ -199,12 +211,10 @@ int usb_connector::USBConnector::write(void)
     unsigned char *data = new unsigned char[len];
     // copy data from vector to array
     copy(vec.begin(), vec.end(), data);
-    cout << "writing to usb stream..." << endl;
     int transferred;
     int res = libusb_bulk_transfer(usb_dev, USB_ENDPOINT_OUT,
-                                   data, len, &transferred, 20);
+                                   data, (unsigned int)len, &transferred, 20);
     if (res == 0) {
-        cout << "WRITE successful" << endl;
         cout << "bytes sent: " << transferred << endl;
     }
     // delete allocated memory
@@ -213,7 +223,7 @@ int usb_connector::USBConnector::write(void)
 }
 
 
-/* disconnects and closes the usb stream*/
+/*! disconnects and closes the usb stream */
 void usb_connector::USBConnector::disconnect(void)
 {
     cout << "disconnecting from usb stream... ";

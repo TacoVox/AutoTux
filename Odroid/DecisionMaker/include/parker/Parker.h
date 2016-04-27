@@ -5,6 +5,8 @@
 #ifndef DECISIONMAKER_PARKER_H
 #define DECISIONMAKER_PARKER_H
 
+
+
 #include "opendavinci/odcore/data/Container.h"
 #include "automotivedata/GeneratedHeaders_AutomotiveData.h"
 
@@ -15,102 +17,98 @@ namespace parker {
 
     private:
 
-        const double INFRARED_REAR_RIGHT = 2;
-        const double INFRARED_REAR_BACK = 1;
+        //REAL CAR
+        const double SPOT_SIZE = 0.70;
+        const double ADJUST_BEFORE_PARKING = 0.20;
+        const double BACK_AROUND_CORNER = 0.45;
+        const double BACKING_STRAIGHT = 0.13;
+        const double BACKING_LEFT = 0.45;
+        const double ADJUST_IN_SPOT_FORWARD = 0.10;
+        const double ADJUST_IN_SPOT_BACK = 0.10;
+
+        const double SENSOR_SAFETY_MIN = 0.03;
+        const double SENSOR_SAFETY_MAX = 0.04;
+
+        const double IRSENSOR_DISTANCE_MIN = 0.02;
+        const double IRSENSOR_DISTANCE_MAX = 0.23;
+
+        const double ULTRASENSOR_DISTANCE_MIN = 0.02;
+        const double ULTRASENSOR_DISTANCE_MAX = 90;
+        const double ENOUGH_SPACE_DISTANCE = 0.85;
+
+        const int SENSOR_CONVERSION = 100;
+        const double DISTANCE_FROM_BACK_OBJECT = 0.10;
+
+        //-----------------------------------------
+
+        //SIMULATION
+//        const double SPOT_SIZE = 7;
+//        const double ADJUST_BEFORE_PARKING = 2;
+//        const double BACK_AROUND_CORNER = 5;
+//        const double BACKING_STRAIGHT = 2;
+//        const double BACKING_LEFT = 2.5;
+//        const double ADJUST_IN_SPOT_FORWARD = 1.5;
+//        const double ADJUST_IN_SPOT_BACK = 1;
+//
+//        const double SENSOR_SAFETY_MIN = 0.2;
+//        const double SENSOR_SAFETY_MAX = 0.5;
+//        const double IRSENSOR_DISTANCE_MIN = 0;
+//        const double IRSENSOR DISTANCE_MAX = 25;
+//        const double ULTRSENSOR_DISTANCE_MIN = 0;
+//        const double ULTRASENSOR_DISTANCE_MAX = 40;
+//        const double ENOUGH_SPACE_DISTANCE = 7;
+//        const int SENSOR_CONVERSION = 1;
+//        const double DISTANCE_FROM_BACK_OBJECT = 2;
+        //----------------------------------------
+
+
+        enum STATE {FINDOBJECT, FINDGAPSTART, FINDGAPEND, ENOUGHSPACE};
+        enum PARKSTATE {PHASE0,PHASE1, PHASE2, PHASE3, PHASE4, PHASE5, PHASE6, SAFETYSTOP};
+        PARKSTATE parkstate;
+        STATE state;
 
         double carPosition;
-
         automotive::VehicleControl vc;
+        double gapStart;
+        double gapEnd;
+        bool isSpot;
+        bool isParked;
+        int isAccurate;
+        automotive::VehicleControl controlTemp;
+        bool objInFront;
+
+        const int FREQUENCY = 5;
+
+        const double ULTRASONIC_FRONT_FORWARD = 3;
+        const double ULTRASONIC_FRONT_RIGHT = 4;
+        const double INFRARED_FRONT_RIGHT = 0;
+        const double INFRARED_REAR_RIGHT = 2;
+        const double INFRARED_REAR_BACK = 1;
 
         void findObject(automotive::miniature::SensorBoardData);
         void findGapStart(automotive::miniature::SensorBoardData, automotive::VehicleData);
         void findGapEnd(automotive::miniature::SensorBoardData, automotive::VehicleData);
         void enoughSpace();
-        automotive::VehicleControl adjustBeforeParking(automotive::VehicleData, int);
-        automotive::VehicleControl backAroundCorner(automotive::VehicleData, int);
-        automotive::VehicleControl backingStraight(automotive::VehicleData, int);
-        automotive::VehicleControl backingLeft(automotive::VehicleData, int);
-        automotive::VehicleControl adjustInSpotForward(automotive::VehicleData, int);
-        automotive::VehicleControl adjustInSpotBack(automotive::VehicleData, int);
-
+        automotive::VehicleControl adjustBeforeParking(automotive::VehicleData, double);
+        automotive::VehicleControl backAroundCorner(automotive::VehicleData, double);
+        automotive::VehicleControl backingStraight(automotive::VehicleData, double);
+        automotive::VehicleControl backingLeft(automotive::VehicleData, double);
+        automotive::VehicleControl adjustInSpotForward(automotive::VehicleData, double);
+        automotive::VehicleControl adjustInSpotBack(automotive::VehicleData, double);
+        automotive::VehicleControl midOfSpot(automotive::miniature::SensorBoardData);
         bool isNotSafe(automotive::miniature::SensorBoardData);
         automotive::VehicleControl goBackToLane(automotive::VehicleData);
+        void inBetweenObjects(automotive::miniature::SensorBoardData);
+        void objectBehind(automotive::miniature::SensorBoardData);
 
     public:
         Parker();
-
-        void findSpot(automotive::miniature::SensorBoardData, automotive::VehicleData);
+        virtual ~Parker();
+        void findSpot(automotive::miniature::SensorBoardData, automotive::VehicleData, automotive::VehicleControl);
         bool getFoundSpot();
         bool getIsParked();
 
         automotive::VehicleControl parallelPark(automotive::miniature::SensorBoardData, automotive::VehicleData);
     };
 }
-
-
-/*
-#include <opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h>
-#include "automotivedata/GeneratedHeaders_AutomotiveData.h"
-#include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
-#include "opendavinci/odcore/data/Container.h"
-
-namespace parker{
-    using namespace std;
-
-    class Parker : public odcore::base::module::TimeTriggeredConferenceClientModule{
-    private:
-        Parker(const Parker &/*obj*///);
-  //      Parker &operator=(const Parker &/*obj*/);
-/*
-        std::shared_ptr<bool> parking;
-        std::shared_ptr<odcore::data::Container> parkingControler;
-
-        bool findParkingSpot(automotive::miniature::SensorBoardData, automotive::VehicleData);
-        void findGapStart(automotive::miniature::SensorBoardData, automotive::VehicleData);
-        void findGapEnd(automotive::miniature::SensorBoardData, automotive::VehicleData);
-        void findObject(automotive::miniature::SensorBoardData);
-        void enoughSpace();
-        void adjustCar(double);
-        void parallelPark();
-        void backAroundObj();
-        void backingStraight();
-        void backingLeft();
-        void adjustInSpotForward();
-        void adjustInSpotBack();
-        void goBackToLane();
-        bool isSafe(automotive::miniature::SensorBoardData);
-
-        const double INFRARED_REAR_RIGHT = 2;
-        const double INFRARED_REAR_BACK = 1;
-        enum STATE {FINDOBJECT, FINDGAPSTART, FINDGAPEND, ENOUGHSPACE, ADJUST, PARK, SAFETYSTOP};
-        enum PARKSTATE {PHASE1, PHASE2, PHASE3, PHASE4, PHASE5};
-        STATE state;
-        PARKSTATE parkstate;
-        bool foundSpot;
-
-        double gapStart;
-        double gapEnd;
-        double absTraveled;
-        double parkPosition;
-
-        automotive::VehicleControl vc;
-
-
-
-    public:
-        Parker(const int32_t &argc, char **argv);
-
-        virtual ~Parker();
-
-        odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
-        bool getFoundSpot();
-        void setParking(std::shared_ptr<bool>);
-        void setParkingControler(std::shared_ptr<odcore::data::Container>);
-
-    private:
-        virtual void setUp();
-        virtual void tearDown();
-    };
-} //parker
-*/
 #endif //DECISIONMAKER_PARKER_H
