@@ -35,15 +35,21 @@ namespace lane {
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) :
                 TimeTriggeredConferenceClientModule(argc, argv, "LaneDetector"),
-                m_hasAttachedToSharedImageMemory(false),
                 m_sharedImageMemory(),
-                m_image(),
-                m_previousTime(),
+                m_hasAttachedToSharedImageMemory(false),
                 m_debug(false),
+                m_image(),
                 m_vehicleControl(),
                 laneRecommendation(),
+                m_previousTime(),
                 m_eSum(0),
-                m_eOld(0) {}
+                m_eOld(0),
+                distance(),
+                control_scanline(),
+                stop_scanline(),
+                P_GAIN(),
+                I_GAIN(),
+                D_GAIN() {}
 
         LaneFollower::~LaneFollower() { }
 
@@ -61,8 +67,8 @@ namespace lane {
                 stop_scanline = 250;
 
                 P_GAIN = SIMGAIN;
-                E_GAIN = 0;
                 I_GAIN = 0;
+                D_GAIN = 0;
             }
 
             else {
@@ -71,8 +77,8 @@ namespace lane {
                 stop_scanline = 350;
 
                 P_GAIN = CARGAIN;
-                E_GAIN = 0;
                 I_GAIN = 0;
+                D_GAIN = 0;
             }
         }
 
@@ -137,17 +143,11 @@ namespace lane {
         // Do magic to the image around here.
         void LaneFollower::processImage() {
 
-            // TODO: New datatype
-            laneRecommendation.setLeft_lane(false);
-            inLeftLane = false;
-
-            double e = 0;
-
             // Copy the image to a matrix (this is the one we use for detection)
             Mat m_image_grey = m_image.clone();
 
             // Make the new image grayscale
-            cvtColor(m_image, m_image_grey, COLOR_BGR2GRAY);
+            cvtColor(m_image_grey, m_image_grey, COLOR_BGR2GRAY);
 
             // Make the image binary, threshold set to 180 at the moment
             threshold(m_image_grey, m_image_grey, 180, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
@@ -160,6 +160,13 @@ namespace lane {
             for(size_t idx = 0; idx < contours.size(); idx++) {
                 drawContours(m_image, contours, (int)idx, Scalar(0,0,255));
             }
+        }
+
+        double LaneFollower::laneDetection() {
+
+            bool inLeftLane = false;
+
+            double e = 0;
 
             // Lane detection loop
             for(int32_t y = m_image.rows - 8; y > m_image.rows * .5; y -= 10) {
@@ -191,7 +198,7 @@ namespace lane {
                     }
                 }
 
-                middle.x = (m_image.cols/2.0);
+                middle.x = (m_image.cols/2);
                 middle.y = control_scanline;
 
                 // Find first red pixel in front (stopline)
@@ -218,7 +225,7 @@ namespace lane {
                         }
                     }
 
-                    // Left lane logic (prefer left line following)
+                        // Left lane logic (prefer left line following)
                     else {
                         if (left.x > 0) {
                             e = (distance - (m_image.cols / 2.0 - left.x)) / distance;
@@ -231,35 +238,38 @@ namespace lane {
                 }
 
                 // Draw debug lines
-                if (m_debug) {
-
-                    // Draw line from control line to stop line if there is one
-                    if(middle.y < control_scanline) {
-                        line(m_image, Point(middle.x, control_scanline), middle, Scalar(128, 0, 0));
-                    }
-
-                    // Draw lines from middle to the discovered left pixels
-                    if (left.x > 0) {
-                        line(m_image, Point(m_image.cols / 2, y), left, Scalar(0, 255, 0));
-                        stringstream sstr;
-                        sstr << (m_image.cols / 2 - left.x);
-                        putText(m_image, sstr.str().c_str(), Point(m_image.cols / 2 - 100, y - 2), FONT_HERSHEY_PLAIN,
-                                0.5, CV_RGB(0, 255, 0));
-                    }
-
-                    // Draw lines from middle to the discovered right pixels
-                    if (right.x > 0) {
-                        line(m_image, Point(m_image.cols / 2, y), right, Scalar(0, 128, 128));
-                        stringstream sstr;
-                        sstr << (right.x - m_image.cols / 2);
-                        putText(m_image, sstr.str().c_str(), Point(m_image.cols / 2 + 100, y - 2), FONT_HERSHEY_PLAIN,
-                                0.5, CV_RGB(255, 0, 0));
-                    }
-                }
+//                if (m_debug) {
+//                    // Draw line from control line to stop line if there is one
+//                    if(middle.y < control_scanline) {
+//                        line(m_image, Point(middle.x, control_scanline), middle, Scalar(128, 0, 0));
+//                    }
+//
+//                    // Draw lines from middle to the discovered left pixels
+//                    if (left.x > 0) {
+//                        line(m_image, Point(m_image.cols / 2, y), left, Scalar(0, 255, 0));
+//                        stringstream sstr;
+//                        sstr << (m_image.cols / 2 - left.x);
+//                        putText(m_image, sstr.str().c_str(), Point(m_image.cols / 2 - 100, y - 2), FONT_HERSHEY_PLAIN,
+//                                0.5, CV_RGB(0, 255, 0));
+//                    }
+//
+//                    // Draw lines from middle to the discovered right pixels
+//                    if (right.x > 0) {
+//                        line(m_image, Point(m_image.cols / 2, y), right, Scalar(0, 128, 128));
+//                        stringstream sstr;
+//                        sstr << (right.x - m_image.cols / 2);
+//                        putText(m_image, sstr.str().c_str(), Point(m_image.cols / 2 + 100, y - 2), FONT_HERSHEY_PLAIN,
+//                                0.5, CV_RGB(255, 0, 0));
+//                    }
+//                }
             }
 
+            return e;
+        }
+
+        void LaneFollower::laneFollowing(double e) {
             TimeStamp currentTime;
-            double timeStep = (currentTime.toMicroseconds() - m_previousTime.toMicroseconds()) / (1000.0 * 1000.0);
+            double timeStep = (double)(currentTime.toMicroseconds() - m_previousTime.toMicroseconds()) / (1000.0 * 1000.0);
             m_previousTime = currentTime;
 
             if(fabs(e) < 1e-2) {
@@ -271,7 +281,7 @@ namespace lane {
 
             const double p = P_GAIN * e;
             const double i = I_GAIN * timeStep * m_eSum;
-            const double d = E_GAIN * (e - m_eOld)/timeStep;
+            const double d = D_GAIN * (e - m_eOld)/timeStep;
 
             m_eOld = e;
 
@@ -295,7 +305,7 @@ namespace lane {
             if (desiredSteering < -0.5) desiredSteering = -0.5;
 
             if(laneRecommendation.getDistance_to_line() < 5 ||
-                    laneRecommendation.getDistance_to_line() > 150)
+               laneRecommendation.getDistance_to_line() > 150)
                 laneRecommendation.setDistance_to_line(-1);
 
             //cout << "DS: " << desiredSteering << endl;
@@ -333,6 +343,8 @@ namespace lane {
 
                 if (has_next_frame) {
                     processImage();
+                    double detec = laneDetection();
+                    laneFollowing(detec);
                 }
 
                 Container outContainer(laneRecommendation);
