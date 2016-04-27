@@ -123,6 +123,7 @@ static void hardwareWEIncrTicks(EXTDriver *extp, expchannel_t channel) {
 
 	distanceTicks++;
 	ticks++;
+	chSysUnlockFromISR(); /*!< Ends Kernel Lock Mode */
 	timeNow = chVTGetSystemTime();
 
 	// Calculation starts here once elapsed time has exceeded 1s
@@ -140,7 +141,6 @@ static void hardwareWEIncrTicks(EXTDriver *extp, expchannel_t channel) {
 		ticks = 0;
 		startTime = chVTGetSystemTime();
 	}
-	chSysUnlockFromISR(); /*!< Ends Kernel Lock Mode */
 }
 
 // TODO: Delete me after verifying interrupt routine works
