@@ -7,6 +7,7 @@
 
 #include "ui/ATCWindow.h"
 #include <ncurses.h>
+#include <string>
 
 namespace ui {
     class ValMonitor : public ATCWindow {
@@ -18,6 +19,8 @@ namespace ui {
         int xsize;
         int ysize;
         WINDOW* _valmonitor;
+        void printVals(void);
+        std::string dtostr(double);
     };
 }
 
