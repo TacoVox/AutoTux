@@ -63,11 +63,9 @@ namespace proxy {
             if(isValid()) {
                 if(captureFrame()) {
                     if(m_sharedMemory.get() && m_sharedMemory->isValid()) {
-			cout << "locking...";
                         m_sharedMemory->lock();
                         copyImageTo((char*) m_sharedMemory->getSharedMemory(), m_size);
                         m_sharedMemory->unlock();
-			cout << " unlocked." << endl;
                     }
                 }
             }
