@@ -148,10 +148,10 @@ namespace proxy {
             speed = 0; // backward
         }
 
-        unsigned char lights = (unsigned char)(vehicleControl.getFlashingLightsRight() << 3);
-        lights = lights | (unsigned char)(vehicleControl.getFlashingLightsLeft() << 2);
+        unsigned char lights = (unsigned char)vehicleControl.getBrakeLights();
         lights = lights | (unsigned char)(lightSystem.getReverseLight() << 1);
-        lights = lights | (unsigned char)vehicleControl.getBrakeLights();
+        lights = lights | (unsigned char)(vehicleControl.getFlashingLightsLeft() << 2);
+        lights = lights | (unsigned char)(vehicleControl.getFlashingLightsRight() << 3);
 
         //Generate the checksum for the control values
         unsigned char chsum = checksum({speed, angle, lights});
