@@ -1,22 +1,31 @@
+/*!
+ * Implementation of the USBHandler.h. Responsible for managing the thread
+ * to read and write to/from the usb.
+ *
+ * @author Ivo
+ */
 
-#include "serial/USBHandler.h"
+
 #include <thread>
 #include <chrono>
 #include <iostream>
 #include <cstring>
+#include "serial/USBHandler.h"
 
 using namespace std;
 
 
-usb_handler::USBHandler::USBHandler(std::shared_ptr<usb_connector::USBConnector> c) :
+/*! constructor */
+usb_handler::USBHandler::USBHandler(std::shared_ptr<usb_connector::USBConnector> ptr) :
     running{true},
-    uc{c}
+    uc{ptr}
 {
     cout << "creating usb handler... ";
     cout << "[OK]" << endl;
 }
 
 
+/*! destructor */
 usb_handler::USBHandler::~USBHandler()
 {
     cout << "destroying usb handler... ";
@@ -25,6 +34,7 @@ usb_handler::USBHandler::~USBHandler()
 }
 
 
+/*! run function for the thread */
 void usb_handler::USBHandler::run()
 {
     // connect and set the buffer wrapper
@@ -35,32 +45,40 @@ void usb_handler::USBHandler::run()
         // read from usb
         int res1 = uc->read();
         cout << "result from read: " << res1 << endl;
+        // if not successful read, check if we
+        // need to reconnect
         if (res1 != 0) {
             if (is_reconnect(res1)) reconnect();
         }
         // write it to usb
         int res2 = uc->write();
         cout << "result from write: " << res2 << endl;
+        // if not successful write, check if we
+        // need to reconnect
         if (res2 != 0) {
             if (is_reconnect(res2)) reconnect();
         }
+        // sleep for 67, approximation to keep the frequency (30)
         this_thread::sleep_for(chrono::milliseconds(67));
     }
 }
 
 
+/*! stops the handler, sets the loop control variable to false */
 void usb_handler::USBHandler::stop()
 {
     running = false;
 }
 
 
-void usb_handler::USBHandler::set_usb_connector(std::shared_ptr<usb_connector::USBConnector> c)
+/*! sets the usb connector for this handler */
+void usb_handler::USBHandler::set_usb_connector(std::shared_ptr<usb_connector::USBConnector> ptr)
 {
-    uc = c;
+    uc = ptr;
 }
 
 
+/*! reconnects the usb */
 void usb_handler::USBHandler::reconnect()
 {
     cout << "reconnecting..." << endl; 
@@ -72,6 +90,7 @@ void usb_handler::USBHandler::reconnect()
 }
 
 
+/*! returns true if reconnection needed, false otherwise*/
 bool usb_handler::USBHandler::is_reconnect(int error_code)
 {
     switch (error_code) {
@@ -86,5 +105,4 @@ bool usb_handler::USBHandler::is_reconnect(int error_code)
     default:
         return false;
     }
-    return false;
 }

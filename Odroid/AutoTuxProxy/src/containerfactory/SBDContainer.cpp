@@ -1,7 +1,7 @@
-//
-// Created by Jonas Kahler on 4/4/16.
-//
-
+/*
+ * Class for creating SensorBoardData Objects and wrapping them into a
+ * container.
+ */
 #include "containerfactory/SBDContainer.h"
 #include <automotivedata/generated/automotive/miniature/SensorBoardData.h>
 
@@ -11,18 +11,20 @@ using namespace automotive::miniature;
 
 containerfactory::SBDContainer* containerfactory::SBDContainer::_instance = 0;
 
-//Private Constructors & Destructor so that just one element can exist
+//Private Constructors & Destructor so that just one element can exist.
+//And this very one should be created by the class itself.
 containerfactory::SBDContainer::SBDContainer() {}
 containerfactory::SBDContainer::SBDContainer(const SBDContainer &) {}
 containerfactory::SBDContainer::~SBDContainer() {}
 
-//Returns singelton of that class
+//Returns an instance of that (singelton)class
 containerfactory::SBDContainer* containerfactory::SBDContainer::instance(void) {
     if (!_instance)
         _instance = new containerfactory::SBDContainer();
     return _instance;
 }
 
+//Method for creating a the very Object and returning a (shared) pointer to it.
 shared_ptr<Container> containerfactory::SBDContainer::genSBDContainer(vector<unsigned char> values) {
     //Create a map for all the sensor data
     map<uint32_t, double> sensordata;
