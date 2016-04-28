@@ -4,7 +4,7 @@
 #define SIMGAIN 2.6;
 #define SIMDISTANCE 280;
 
-#define CARGAIN 1.7;
+#define CARGAIN 0.8;
 #define CARDISTANCE 220;
 
 #include <memory>
@@ -70,6 +70,8 @@ namespace lane {
 
             automotive::VehicleControl m_vehicleControl;
             autotux::LaneRecommendationMSG laneRecommendation;
+            autotux::OvertakingMSG overtaking;
+            autotux::config::LaneFollowerMSG config;
 
             odcore::data::TimeStamp m_previousTime;
             double m_eSum;
