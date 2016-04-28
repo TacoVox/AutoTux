@@ -132,29 +132,26 @@ namespace lane {
             return returnValue;
         }
 
-//        void LaneFollower::getLaneRecommendation(odcore::data::Container &c) {
-//
-//            // TODO: New datatype
-//            if(c.getDataType() == LaneRecommendation::ID()) {
-//
-//                // TODO: New datatype
-//                laneRecommendation = c.getData<LaneRecommendation>();
-//            }
-//        }
-
         // Do magic to the image around here.
         void LaneFollower::processImage() {
 
             // Copy the image to a matrix (this is the one we use for detection)
             Mat m_image_grey = m_image.clone();
 
-            // Make the new image grayscale
+            // Make the new image gray scale
             cvtColor(m_image_grey, m_image_grey, COLOR_BGR2GRAY);
 
             // Make the image binary, threshold set to 180 at the moment
+            // Threshold 165 for light ~246, 140 for ~202, 60 for ~30
+            //
+            // Command line options:
+            // v4l2-ctl -d /dev/CAMERAID -c exposure_auto=1
+            // v4l2-ctl -d /dev/CAMERAID -c exposure_absolute=50
+            //
+            // TODO Check for possibilites to stop auto-focusing and lock focus on a resonable distance
             threshold(m_image_grey, m_image_grey, 140, 255, CV_THRESH_BINARY);
 
-	    //imwrite("grey.jpg", m_image_grey);
+            //imwrite("grey.jpg", m_image_grey);
 
             // Find contours on the image
             vector<vector<Point>> contours;
@@ -333,7 +330,7 @@ namespace lane {
                 }
             }
 
-            // Limit max steering anlge based on car limits
+            // Limit max steering angle based on car limits
             if (desiredSteering > 0.5) desiredSteering = 0.5;
             if (desiredSteering < -0.5) desiredSteering = -0.5;
 
@@ -366,15 +363,6 @@ namespace lane {
                 Container overtaking_container = getKeyValueDataStore().get(OvertakingMSG::ID());
                 overtaking = overtaking_container.getData<OvertakingMSG>();
 
-                // TODO: New datatype
-                //Container laneContainer = getKeyValueDataStore().get(LaneRecommendation::ID());
-
-                // TODO: New datatype
-//                if(laneContainer.getDataType() == LaneRecommendation::ID()) {
-//
-//                    // TODO: New datatype
-//                    getLaneRecommendation(laneContainer);
-//                }
 
                 if (image_container.getDataType() == odcore::data::image::SharedImage::ID()) {
                     has_next_frame = readSharedImage(image_container);
