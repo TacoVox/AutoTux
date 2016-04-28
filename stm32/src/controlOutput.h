@@ -20,7 +20,7 @@
 /**
  * Use these to easily access the correct byte in the control byte array.
  */
-typedef enum {CONTROL_BYTE_SPEED, CONTROL_BYTE_ANGLE} CONTROL_BYTES;
+typedef enum {CONTROL_BYTE_SPEED, CONTROL_BYTE_ANGLE, CONTROL_BYTE_LIGHTS} CONTROL_BYTES;
 
 
 /**

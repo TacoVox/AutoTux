@@ -97,8 +97,8 @@ void sensorInputDebugOutput(BaseSequentialStream* SDU) {
 	chprintf(SDU, "\033[");
 
 	#ifdef DEBUG
-	chprintf(SDU, "FTHROTTLE: %4i ", hardwareGetValuesRC(THROTTLE));
-	chprintf(SDU, "STEERING: %4i ", hardwareGetValuesRC(STEERING));
+	chprintf(SDU, "FTHROTTLE: %4i ", hardwareRCGetValues(THROTTLE));
+	chprintf(SDU, "STEERING: %4i ", hardwareRCGetValues(STEERING));
 	#endif
 
 	chprintf(SDU, "WHEEL: %4i ", hardwareGetValuesWESpeed());

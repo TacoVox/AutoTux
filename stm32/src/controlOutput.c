@@ -79,6 +79,7 @@ void controlOutputSetData(unsigned char* newControlData) {
  */
 void controlOutputIteration() {
 	static int iterationsNoNewValues = 0;
+	unsigned char lightByte = 0;
 	bool rcBrake = false;
 	bool rcMode = handleRCMode();
 
@@ -101,6 +102,7 @@ void controlOutputIteration() {
 				// Wheel angle: 90 degress +- ~30 degrees.
 				hardwarePWMSetValues(PWM_OUTPUT_SERVO, controlData[CONTROL_BYTE_ANGLE]);
 
+				lightByte = controlData[CONTROL_BYTE_LIGHTS];
 				controlValuesAreNew = false;
 				iterationsNoNewValues = 0;
 			} else {
@@ -116,7 +118,7 @@ void controlOutputIteration() {
 	}
 
 	// Update lights
-	//hardwareLightsIteration(LIGHT_BIT_FLASH_LEFT, rcMode, rcBrake);
+	//hardwareLightsIteration(lightByte, rcMode, rcBrake);
 }
 
 
