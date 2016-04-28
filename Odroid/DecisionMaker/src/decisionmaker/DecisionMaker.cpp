@@ -104,6 +104,8 @@ double DecisionMaker::getDistanceToLine() {
 }
 
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() {
+    LIFOQueue lifoQueue;
+    addDataStoreFor(lifoQueue);
 
     // Set initial state of the car
     STATE state = PARKING;
@@ -119,8 +121,6 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
     vehicleControl.setSpeed(2.0);
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
-        LIFOQueue lifoQueue;
-        addDataStoreFor(lifoQueue);
 
         // 1. Update sensor board data values
         containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
