@@ -1,6 +1,8 @@
 #ifndef SERIALHANDLER_H
 #define SERIALHANDLER_H
 
+#define MATH_PI  3.1415926535897
+
 #include <cstdint>
 #include <memory>
 #include <opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h>
@@ -24,7 +26,7 @@ namespace proxy {
         virtual void tearDown();
         void reconnect();
         void distribute(odcore::data::Container c);
-        vector<unsigned char> cdContToVec(odcore::data::Container);
+        vector<unsigned char> contToVec(odcore::data::Container, odcore::data::Container);
         unsigned char checksum(std::vector<unsigned char>);
         //Private fields
         bool interrupted;
