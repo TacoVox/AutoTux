@@ -31,7 +31,7 @@ namespace lane {
         using namespace odtools::player;
 
         // SET TO TRUE WHEN USING THE SIMULATOR
-        const bool SIMMODE = false;
+        const bool SIMMODE = true;
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) :
                 TimeTriggeredConferenceClientModule(argc, argv, "LaneDetector"),
@@ -173,8 +173,8 @@ namespace lane {
             // Lane detection loop
             for(int32_t y = m_image.rows - 8; y > m_image.rows * .5; y -= 10) {
                 // Find red pixels
-                Vec3b pixelLeft, pixelRight, pixelFront;
-                Point left, right, middle;
+                Vec3b pixelLeft, pixelRight;
+                Point left, right;
 
                 left.y = y;
                 left.x = -1;
@@ -196,19 +196,6 @@ namespace lane {
                     pixelRight = m_image.at<Vec3b>(Point(x, y));
                     if (pixelRight.val[2] == 255) {
                         right.x = x;
-                        break;
-                    }
-                }
-
-                middle.x = (m_image.cols/2);
-                middle.y = control_scanline;
-
-                // Find first red pixel in front (stopline)
-                for(int i = control_scanline; i > stop_scanline; i--) {
-                    pixelFront = m_image.at<Vec3b>(Point(middle.x, i));
-                    if(pixelFront.val[2] == 255) {
-                        middle.y = i;
-                        laneRecommendation.setDistance_to_line(control_scanline - middle.y);
                         break;
                     }
                 }
@@ -240,30 +227,73 @@ namespace lane {
                 }
 
                 // Draw debug lines
-//                if (m_debug) {
-//                    // Draw line from control line to stop line if there is one
-//                    if(middle.y < control_scanline) {
-//                        line(m_image, Point(middle.x, control_scanline), middle, Scalar(128, 0, 0));
-//                    }
-//
-//                    // Draw lines from middle to the discovered left pixels
-//                    if (left.x > 0) {
-//                        line(m_image, Point(m_image.cols / 2, y), left, Scalar(0, 255, 0));
-//                        stringstream sstr;
-//                        sstr << (m_image.cols / 2 - left.x);
-//                        putText(m_image, sstr.str().c_str(), Point(m_image.cols / 2 - 100, y - 2), FONT_HERSHEY_PLAIN,
-//                                0.5, CV_RGB(0, 255, 0));
-//                    }
-//
-//                    // Draw lines from middle to the discovered right pixels
-//                    if (right.x > 0) {
-//                        line(m_image, Point(m_image.cols / 2, y), right, Scalar(0, 128, 128));
-//                        stringstream sstr;
-//                        sstr << (right.x - m_image.cols / 2);
-//                        putText(m_image, sstr.str().c_str(), Point(m_image.cols / 2 + 100, y - 2), FONT_HERSHEY_PLAIN,
-//                                0.5, CV_RGB(255, 0, 0));
-//                    }
-//                }
+                if (m_debug) {
+
+                    // Draw lines from middle to the discovered left pixels
+                    if (left.x > 0) {
+                        line(m_image, Point(m_image.cols / 2, y), left, Scalar(0, 255, 0));
+                        stringstream sstr;
+                        sstr << (m_image.cols / 2 - left.x);
+                        putText(m_image, sstr.str().c_str(), Point(m_image.cols / 2 - 100, y - 2), FONT_HERSHEY_PLAIN,
+                                0.5, CV_RGB(0, 255, 0));
+                    }
+
+                    // Draw lines from middle to the discovered right pixels
+                    if (right.x > 0) {
+                        line(m_image, Point(m_image.cols / 2, y), right, Scalar(0, 128, 128));
+                        stringstream sstr;
+                        sstr << (right.x - m_image.cols / 2);
+                        putText(m_image, sstr.str().c_str(), Point(m_image.cols / 2 + 100, y - 2), FONT_HERSHEY_PLAIN,
+                                0.5, CV_RGB(255, 0, 0));
+                    }
+                }
+            }
+
+            Vec3b pixelFrontLeft, pixelFrontRight;
+            Point stop_left, stop_right;
+
+            int left_dist = 0;
+
+            stop_left.x = (m_image.cols/2) - 50;
+            stop_left.y = control_scanline;
+
+            // Find first red pixel in front (stopline)
+            for(int i = control_scanline; i > stop_scanline; i--) {
+                pixelFrontLeft = m_image.at<Vec3b>(Point(stop_left.x, i));
+                if(pixelFrontLeft.val[2] == 255) {
+                    stop_left.y = i;
+                    left_dist = control_scanline - stop_left.y;
+                    break;
+                }
+            }
+
+            int right_dist = 0;
+
+            stop_right.x = (m_image.cols/2) + 50;
+            stop_right.y = control_scanline;
+
+            // Find first red pixel in front (stopline)
+            for(int i = control_scanline; i > stop_scanline; i--) {
+                pixelFrontRight = m_image.at<Vec3b>(Point(stop_right.x, i));
+                if(pixelFrontRight.val[2] == 255) {
+                    stop_right.y = i;
+                    right_dist = control_scanline - stop_right.y;
+                    break;
+                }
+            }
+
+            if(m_debug) {
+                if(stop_left.y < control_scanline) {
+                    line(m_image, Point(stop_left.x, control_scanline), stop_left, Scalar(128, 0, 0));
+                }
+
+                if(stop_right.y < control_scanline) {
+                    line(m_image, Point(stop_right.x, control_scanline), stop_right, Scalar(128, 0, 0));
+                }
+            }
+
+            if((left_dist - right_dist > -5) && (left_dist - right_dist < 5)) {
+                laneRecommendation.setDistance_to_line(left_dist);
             }
 
             return e;
@@ -351,8 +381,8 @@ namespace lane {
 
                 if (has_next_frame) {
                     processImage();
-                    double detec = laneDetection();
-                    laneFollowing(detec);
+                    double detection = laneDetection();
+                    laneFollowing(detection);
                 }
 
                 Container outContainer(laneRecommendation);

@@ -48,7 +48,7 @@ void DecisionMaker::laneFollowing() {
 
     if(stopCounter > 0) {
 
-        if(stopCounter == 60) {
+        if(stopCounter == 200) {
             cout << "WAKING UP" << endl;
             stopCounter = 0;
             isStopLine = false;
@@ -57,21 +57,23 @@ void DecisionMaker::laneFollowing() {
         else {
             cout << "SLEEPING..." << endl;
             stopCounter++;
-            isStopLine = true;
         }
     }
 
-    else if(getDistanceToLine() == -1){
-    }
-
-    else if(getDistanceToLine() < 50) {
+    else if(getDistanceToLine() < 50 && getDistanceToLine() != -1) {
+        cout << "STOPPING!" << endl;
         speed = 0;
         stopCounter = 1;
+        isStopLine = true;
     }
 
-    else if(getDistanceToLine() < 150) {
+    else if(getDistanceToLine() < 150 && getDistanceToLine() != -1) {
+        cout << "Slowing down..." << endl;
         speed = 1;
     }
+
+    cout << "Distance to line: " << getDistanceToLine() << endl;
+
     vehicleControl.setSpeed(speed);
     vehicleControl.setSteeringWheelAngle(getAngle());
 }
@@ -166,7 +168,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                 else{
                     if(!isStopLine) {
                         parker.findSpot(sbd, vd, vehicleControl);
-                        speed = 1;
+                        speed = 2;
                     }
                     laneFollowing();
                 }
