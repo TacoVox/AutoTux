@@ -29,6 +29,7 @@ std::shared_ptr<Container> containerfactory::VDContainer::genVDContainer(
     //Create a VehicleData object and convert from cm/s -> m/s
     VehicleData vehicleData;
     vehicleData.setSpeed((double)(v.at(5) / 100));
+    cout << "SPEEEEEED: " << (v.at(5) / 100) << endl;
 
     //Calculate the absolute travelled path.
     //Because we send them over 4 unsigned chars we have to put them into a

@@ -6,10 +6,9 @@
 #include <opendavinci/odcore/base/LIFOQueue.h>
 #include <opendavinci/odcore/base/KeyValueConfiguration.h>
 #include <automotivedata/generated/automotive/VehicleControl.h>
+#include <automotivedata/generated/automotive/vehicle/LightSystem.h>
 #include "proxy/Proxy.h"
 #include "camera/OpenCVCamera.h"
-
-#define MATH_PI  3.1415926535897
 
 namespace proxy {
     using namespace std;
@@ -19,6 +18,7 @@ namespace proxy {
 
     using namespace containerfactory;
     using namespace automotive;
+    using namespace automotive::vehicle;
     using namespace proxy::camera;
 
     Proxy::Proxy(int32_t &argc, char **argv) :
@@ -113,7 +113,9 @@ namespace proxy {
                         genVDContainer(v));
             }
 
-            bufferWrapper->appendSendBuffer(cdContToVec(getKeyValueDataStore().get(VehicleControl::ID())));
+            Container vcc = getKeyValueDataStore().get(VehicleControl::ID());
+            Container lsc = getKeyValueDataStore().get(LightSystem::ID());
+            bufferWrapper->appendSendBuffer(contToVec(vcc, lsc));
 
             // Camera things
             if(m_camera.get() != NULL) {
@@ -126,9 +128,10 @@ namespace proxy {
         return dmcp::ModuleExitCodeMessage::OKAY;
     }
 
-    vector<unsigned char> Proxy::cdContToVec(Container container) {
+    vector<unsigned char> Proxy::contToVec(Container vcc, Container lsc) {
 
-        VehicleControl vehicleControl = container.getData<VehicleControl>();
+        VehicleControl vehicleControl = vcc.getData<VehicleControl>();
+        LightSystem lightSystem = lsc.getData<LightSystem>();
 
         //Angle conversion
         int degrees = (int)(vehicleControl.getSteeringWheelAngle() * 180 / MATH_PI);
@@ -145,13 +148,18 @@ namespace proxy {
             speed = 0; // backward
         }
 
+        unsigned char lights = vehicleControl.getFlashingLightsRight() << 3;
+        lights = lights | vehicleControl.getFlashingLightsLeft() << 2;
+        lights = lights | lightSystem.getReverseLight() << 1;
+        lights = lights | vehicleControl.getBrakeLights();
+
         //Generate the checksum for the control values
-        unsigned char chsum = checksum({speed, angle});
+        unsigned char chsum = checksum({speed, angle, lights});
 
         //Some fancy debug output
         cout << "Speed: " << speed << " Angle: " << angle << endl;
 
-        return {'3', ':', speed, angle, chsum, ','};
+        return {'4', ':', speed, angle, lights, chsum, ','};
     }
 
     unsigned char Proxy::checksum(vector<unsigned char> v) {
