@@ -152,7 +152,9 @@ namespace lane {
             cvtColor(m_image_grey, m_image_grey, COLOR_BGR2GRAY);
 
             // Make the image binary, threshold set to 180 at the moment
-            threshold(m_image_grey, m_image_grey, 180, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+            threshold(m_image_grey, m_image_grey, 140, 255, CV_THRESH_BINARY);
+
+	    //imwrite("grey.jpg", m_image_grey);
 
             // Find contours on the image
             vector<vector<Point>> contours;
@@ -202,7 +204,6 @@ namespace lane {
 
                 // If the loop is currently checking at the height of our set control line
                 if(y == control_scanline) {
-
                     // Right lane logic (prefer right line following)
                     if (!inLeftLane) {
                         if (right.x > 0) {
