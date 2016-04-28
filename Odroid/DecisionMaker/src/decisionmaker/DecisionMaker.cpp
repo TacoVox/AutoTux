@@ -50,14 +50,14 @@ void DecisionMaker::laneFollowing() {
     if(stopCounter > 0) {
 
         if(stopCounter == 90) {
-            cout << "WAKING UP" << endl;
+            //cout << "WAKING UP" << endl;
             stopCounter = 0;
             isStopLine = false;
             vehicleControl.setBrakeLights(false);
         }
 
         else {
-            cout << "SLEEPING..." << endl;
+            //cout << "SLEEPING..." << endl;
             stopCounter++;
         }
     }
@@ -75,7 +75,7 @@ void DecisionMaker::laneFollowing() {
         speed = 1;
     }
 
-    cout << "Distance to line: " << getDistanceToLine() << endl;
+    //cout << "Distance to line: " << getDistanceToLine() << endl;
 
     vehicleControl.setSpeed(speed);
     vehicleControl.setSteeringWheelAngle(getAngle());
@@ -137,8 +137,16 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
 
         //state = dmMSG.getState();
 
-        cout << "SensorValues: " <<  sbd.getValueForKey_MapOfDistances(2) << endl;
-        cout << "Distance: " << vd.getAbsTraveledPath() << endl;
+        cout << "SensorValues BACK RIGHT: " <<  sbd.getValueForKey_MapOfDistances(2) << endl;
+        //cout << "Distance: " << vd.getAbsTraveledPath() << endl;
+
+	double frontUsSensor = sbd.getValueForKey_MapOfDistances(4);
+   // 	cout << "DecisionMaker US Sensor: " << frontUsSensor << endl;
+	cout << "SensorValues FROM 5: " <<  sbd.getValueForKey_MapOfDistances(5) << endl;
+	cout << "SensorValues FRONT RIGHT: " <<  sbd.getValueForKey_MapOfDistances(6) << endl;
+	cout << "SensorValues FRONT RIGHT: " <<  sbd.getValueForKey_MapOfDistances(0) << endl;
+	cout << "SensorValues Back: " <<  sbd.getValueForKey_MapOfDistances(1) << endl;
+
         if(!ovt.isLeftLane()){
             ovtMSG.setLeftlane(NOTLEFTLANE);
         }
@@ -172,6 +180,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                         lightSystem.setReverseLight(false);
 
                     if(!parker.getIsParked()) {
+			cout << "HELLO I WILL PARK NOW!" << endl;
                         vehicleControl = parker.parallelPark(sbd, vd);
                     }
                     else {
@@ -182,7 +191,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                 else{
                     if(!isStopLine) {
                         parker.findSpot(sbd, vd, vehicleControl);
-                        speed = 2;
+                        speed = 1;
                     }
                     laneFollowing();
                 }

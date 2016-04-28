@@ -240,9 +240,9 @@ void Overtaker::adjustLeftSwitch(VehicleData vehicleData, const double trvStart,
 bool Overtaker::isParallelToObstacle(SensorBoardData sensorData) {
 
     // Check if right-side sensors detect obstacle
-    bool us_fr = isObstacleDetected(sensorData, ULTRASONIC_FRONT_RIGHT, 8.0);
-    bool ir_fr = isObstacleDetected(sensorData, INFRARED_FRONT_RIGHT, 7.0);
-    bool ir_rr = isObstacleDetected(sensorData, INFRARED_REAR_RIGHT, 7.0);
+    bool us_fr = isObstacleDetected(sensorData, ULTRASONIC_FRONT_RIGHT, US_SENSOR_RANGE);
+    bool ir_fr = isObstacleDetected(sensorData, INFRARED_FRONT_RIGHT, IR_SENSOR_RANGE);
+    bool ir_rr = isObstacleDetected(sensorData, INFRARED_REAR_RIGHT, IR_SENSOR_RANGE);
 
     // If US_front-right detects a gap while right-side infrared detect the obstacle...
     if(!us_fr && ir_fr && ir_rr){
@@ -309,9 +309,9 @@ void Overtaker::adjustRightSwitch(VehicleData vehicleData, const double trvStart
 bool Overtaker::isRightLaneClear(SensorBoardData sensorData){
 
     // Check if right-side sensors detect obstacle
-    bool us_fr = isObstacleDetected(sensorData, ULTRASONIC_FRONT_RIGHT, 8.0);
-    bool ir_fr = isObstacleDetected(sensorData, INFRARED_FRONT_RIGHT, 7.0);
-    bool ir_rr = isObstacleDetected(sensorData, INFRARED_REAR_RIGHT, 7.0);
+    bool us_fr = isObstacleDetected(sensorData, ULTRASONIC_FRONT_RIGHT, US_SENSOR_RANGE);
+    bool ir_fr = isObstacleDetected(sensorData, INFRARED_FRONT_RIGHT, IR_SENSOR_RANGE);
+    bool ir_rr = isObstacleDetected(sensorData, INFRARED_REAR_RIGHT, IR_SENSOR_RANGE);
 
     if(!us_fr && !ir_fr && !ir_rr){
         return true;

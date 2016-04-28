@@ -35,7 +35,8 @@ Parker::~Parker(){}
  * Finds a parking spot where the car fits
  */
 void Parker::findSpot(SensorBoardData sbd, VehicleData vd, VehicleControl dmVehicleControl) {
-
+	cout << "Infrared: " << sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) << "Ultrasonic: " <<
+        sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) << endl;
     //Check if the car has been turning for a time which means it has been in a curve, then start to find a object again
     if(dmVehicleControl.getSteeringWheelAngle() >  0.5 || dmVehicleControl.getSteeringWheelAngle() < -0.5){
         turningCounter++;
@@ -397,7 +398,8 @@ void Parker::findObject(SensorBoardData sbd) {
 /**
  * If a spot has been found or not
  */
-bool Parker::getFoundSpot(){
+bool Parker::getFoundSpot() {
+    cout << isSpot << endl;
     return isSpot;
 }
 /**

@@ -19,7 +19,7 @@ namespace parker {
     private:
 
         //REAL CAR
-        const double SPOT_SIZE = 0.7;
+        const double SPOT_SIZE = 0.70;
         const double ADJUST_BEFORE_PARKING = 0.03;
         const double BACK_AROUND_CORNER = 0.50;
         const double BACKING_STRAIGHT = 0.04;
