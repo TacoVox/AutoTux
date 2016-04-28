@@ -12,13 +12,12 @@ namespace od {
     class ConferenceData {
     public:
         static ConferenceData* instance(void);
-        double getSpeed() const { return speed; }
-        void setSpeed(double speed) { ConferenceData::speed = speed; }
+        double getSpeed(void);
+        void setSpeed(double);
     private:
         ConferenceData();
         ConferenceData(const ConferenceData&);
         ~ConferenceData();
-    private:
         double speed;
         static ConferenceData* _instance;
     };
