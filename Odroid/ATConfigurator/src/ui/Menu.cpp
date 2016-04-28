@@ -4,23 +4,37 @@
 
 #include "ui/Menu.h"
 
-ui::Menu::Menu(void) : xsize(80), ysize(20),
-                       _menu(newwin(ysize - 2, 15, 1, 0)),
-                       items({"Cockpit", "Camera Setup", "Camera View",
-                              "Quit"}),
-                       curritem(0) { }
+#include "ui/ValMonitor.h"
+
+ui::Menu::Menu(void) { Menu(80, 20); }
 
 ui::Menu::Menu(int x, int y) : xsize(x), ysize(y),
                                _menu(newwin(ysize - 2, 15, 1, 0)),
                                items({"Cockpit", "Camera Setup",
                                      "Camera View", "Quit"}),
                                curritem(0) {
+    windows.push_back((std::unique_ptr<ATCWindow>)new ValMonitor(xsize, ysize));
     wborder(_menu, ' ', ACS_VLINE, ' ', ' ', ' ', ACS_VLINE, ' ', ACS_VLINE);
 }
 
 void ui::Menu::refresh(void) {
     genMenu();
+    windows.at(0)->refresh();
     wrefresh(_menu);
+}
+
+void ui::Menu::selDown(void) {
+    if(curritem + 1 == (int)items.size())
+        curritem = 0;
+    else
+        curritem++;
+}
+
+void ui::Menu::selUp(void) {
+    if(curritem == 0)
+        curritem = (int)items.size() - 1;
+    else
+        curritem--;
 }
 
 void ui::Menu::genMenu(void) {
@@ -38,16 +52,3 @@ void ui::Menu::genMenu(void) {
     }
 }
 
-void ui::Menu::selDown(void) {
-    if(curritem != (int)items.size())
-        curritem++;
-    else
-        curritem = 0;
-}
-
-void ui::Menu::selUp(void) {
-    if(curritem != 0)
-        curritem--;
-    else
-        curritem = (int)items.size();
-}

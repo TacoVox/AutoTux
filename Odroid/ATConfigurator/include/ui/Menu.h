@@ -5,9 +5,11 @@
 #ifndef ATCONFIGURATOR_MENU_H
 #define ATCONFIGURATOR_MENU_H
 
+#include "ui/ATCWindow.h"
 #include <ncurses.h>
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace ui {
     class Menu {
@@ -15,7 +17,6 @@ namespace ui {
         Menu(void);
         Menu(int, int);
         void refresh(void);
-        void genMenu(void);
         void selDown(void);
         void selUp(void);
     private:
@@ -23,7 +24,9 @@ namespace ui {
         int ysize;
         WINDOW* _menu;
         std::vector<std::string> items;
+        std::vector<std::unique_ptr<ui::ATCWindow>> windows;
         int curritem;
+        void genMenu(void);
     };
 }
 

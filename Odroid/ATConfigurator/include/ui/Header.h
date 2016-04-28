@@ -12,7 +12,6 @@ namespace ui {
     public:
         Header(void);
         Header(int, int);
-        WINDOW* getHeader(void);
     private:
         int xsize;
         int ysize;

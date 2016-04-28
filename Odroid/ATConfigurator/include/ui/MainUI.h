@@ -10,22 +10,26 @@
 #include <memory>
 #include "ui/Header.h"
 #include "ui/Footer.h"
+#include "ui/Menu.h"
 
 namespace ui {
     class MainUI {
     public:
         MainUI(void);
-        void showMainUI(void);
+        void mainLoop(void);
         void inputLoop(void);
         void quit(void);
     private:
+        short int mode;
         WINDOW* _window;
         int xsize;
         int ysize;
         bool interrupted;
+        int keyPressed;
         Header header;
         Footer footer;
-        void init(void);
+        Menu menu;
+        void handleKeys(void);
     };
 }
 

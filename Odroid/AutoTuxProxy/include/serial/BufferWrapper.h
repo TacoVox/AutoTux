@@ -15,8 +15,8 @@
 
 // packet values positions
 #define SBDPKTSIZE      16
-#define STR_DEL_POS     1
-#define MID_DEL_POS     2
+#define DEL_TWO_POS     1
+#define DEL_DBCOLON_POS 2
 #define US1_POS         3
 #define US2_POS         4
 #define IR1_POS         5
@@ -29,17 +29,17 @@
 #define DIS_POS_4       12
 #define LIGHT_SEN       13
 #define CHK_SUM         14
-#define END_DEL_POS     15
+#define DEL_COMMA_POS   15
 
 // packet delimiters
 // '1'
-#define STR_DEL_ONE     0x31
+#define DEL_ONE         0x31
 // '2'
-#define STR_DEL_TWO     0x32
+#define DEL_TWO         0x32
 // ':'
-#define MID_DEL         0x3A
+#define DEL_DBCOLON     0x3A
 // ','
-#define END_DEL         0x2C
+#define DEL_COMMA       0x2C
 
 namespace serial
 {
@@ -58,9 +58,8 @@ namespace serial
         void appendSendBuffer(std::vector<unsigned char>);
         /*! returns a valid packet to write to the serial */
         std::vector<unsigned char> readSendBuffer(void);
-    private:
         /*! returns the checksum for a valid packet */
-        unsigned char checksum(std::vector<unsigned char>);
+        unsigned char checksum(const std::vector<unsigned char> *);
     private:
         /*! the receive buffer */
         std::deque<std::vector<unsigned char>> buffer_in;
