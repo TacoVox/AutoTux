@@ -41,6 +41,8 @@ namespace lane {
                 m_image(),
                 m_vehicleControl(),
                 laneRecommendation(),
+                overtaking(),
+                config(),
                 m_previousTime(),
                 m_eSum(0),
                 m_eOld(0),
@@ -164,7 +166,7 @@ namespace lane {
 
         double LaneFollower::laneDetection() {
 
-            bool inLeftLane = false;
+            bool inLeftLane = overtaking.getLeftlane();
 
             double e = 0;
 
@@ -325,7 +327,13 @@ namespace lane {
                    odcore::data::dmcp::ModuleStateMessage::RUNNING) {
                 bool has_next_frame = false;
 
-                Container imageContainer = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
+                Container image_container = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
+
+                Container config_container = getKeyValueDataStore().get(config::LaneFollowerMSG::ID());
+                config = config_container.getData<config::LaneFollowerMSG>();
+
+                Container overtaking_container = getKeyValueDataStore().get(OvertakingMSG::ID());
+                overtaking = overtaking_container.getData<OvertakingMSG>();
 
                 // TODO: New datatype
                 //Container laneContainer = getKeyValueDataStore().get(LaneRecommendation::ID());
@@ -337,8 +345,8 @@ namespace lane {
 //                    getLaneRecommendation(laneContainer);
 //                }
 
-                if (imageContainer.getDataType() == odcore::data::image::SharedImage::ID()) {
-                    has_next_frame = readSharedImage(imageContainer);
+                if (image_container.getDataType() == odcore::data::image::SharedImage::ID()) {
+                    has_next_frame = readSharedImage(image_container);
                 }
 
                 if (has_next_frame) {
