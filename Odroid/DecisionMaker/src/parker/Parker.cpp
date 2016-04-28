@@ -331,14 +331,15 @@ void Parker::enoughSpace(){
  * Finds end of the gap
  */
 void Parker::findGapEnd(SensorBoardData sbd, VehicleData vd){
-    if(vd.getAbsTraveledPath() > gapStart + ENOUGH_SPACE_DISTANCE){
+        //This is outcommented because it neeeds to be futher tested in simulation because it dosn't work
+    /*if(vd.getAbsTraveledPath() > gapStart + ENOUGH_SPACE_DISTANCE){
         isAccurate = 0;
         objInFront = true;
         state = ENOUGHSPACE;
         parkstate = PHASE1;
     }
 
-    else {
+    else {*/
         //To check if the sensors are in the ranges of where it can find a object
         if ((sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT)) > IRSENSOR_DISTANCE_MIN &&
             (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < IRSENSOR_DISTANCE_MAX)) {
@@ -354,7 +355,7 @@ void Parker::findGapEnd(SensorBoardData sbd, VehicleData vd){
             objInFront = true;
             state = ENOUGHSPACE;
         }
-    }
+    //}
 }
 /**
  * Finds the start of the gap
