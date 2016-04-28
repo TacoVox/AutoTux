@@ -88,12 +88,12 @@
 /**
  * Number of consecutive iterations to steer in the extreme directions to change mode
  */
-#define ITERATIONS_TO_CHANGE_MODE 20
+#define RC_ITERATIONS_TO_CHANGE_MODE 20
 
 /**
  * Number of iterations you have to center to lock in the mode change
  */
-#define ITERATIONS_TO_CENTER 10
+#define RC_ITERATIONS_TO_CENTER 10
 
 /**
  * Steer max right to activate RC mode
@@ -117,35 +117,35 @@
 #define IR_VALUE_CAP 25
 
 /**
- * Used to identify each sensor
+ * Used to identify each IR sensor
  */
 typedef enum {IR_SIDE_FRONT, IR_SIDE_REAR, IR_REAR} IR_SENSOR;
 
 /**
- * Pin config. Group/port + pin number. Now B0, C4, C5.
+ * IR Pin config. Group/port + pin number. Now B0, C4, C5.
  */
-static const ioportid_t ADC_PIN_GROUPS[] = {GPIOB, GPIOC, GPIOC};
-static const ioportmask_t ADC_PIN_NUMBERS[] = {0, 4, 5};
+static const ioportid_t IR_ADC_PIN_GROUPS[] = {GPIOB, GPIOC, GPIOC};
+static const ioportmask_t IR_ADC_PIN_NUMBERS[] = {0, 4, 5};
 
 /**
- * Number of channels of ADC
+ * Number of channels of ADC (IR sensors)
  */
-#define ADC_CHANNELS 3
+#define IR_ADC_CHANNELS 3
 
 /**
- * Samples per channel
+ * Samples per channel (IR sensors)
  */
-#define ADC_SAMPLES 4
+#define IR_ADC_SAMPLES 4
 
 /**
- * Sample channels and rates
+ * Sample channels and rates (IR sensors)
  */
-#define ADC_SAMPLE_RATES ADC_SMPR2_SMP_AN8(ADC_SAMPLE_480) | ADC_SMPR1_SMP_AN14(ADC_SAMPLE_480) | ADC_SMPR1_SMP_AN15(ADC_SAMPLE_480)
+#define IR_ADC_SAMPLE_RATES ADC_SMPR2_SMP_AN8(ADC_SAMPLE_480) | ADC_SMPR1_SMP_AN14(ADC_SAMPLE_480) | ADC_SMPR1_SMP_AN15(ADC_SAMPLE_480)
 
 /**
- * Sequence for reading the ADC channels
+ * Sequence for reading the ADC channels (IR sensors)
  */
-#define ADC_SEQUENCE ADC_SQR3_SQ1_N(ADC_CHANNEL_IN8) | ADC_SQR3_SQ2_N(ADC_CHANNEL_IN14) | ADC_SQR3_SQ3_N(ADC_CHANNEL_IN15)
+#define IR_ADC_SEQUENCE ADC_SQR3_SQ1_N(ADC_CHANNEL_IN8) | ADC_SQR3_SQ2_N(ADC_CHANNEL_IN14) | ADC_SQR3_SQ3_N(ADC_CHANNEL_IN15)
 
 
 //-----------------------------------------------------------------------------
@@ -268,95 +268,95 @@ typedef enum {PWM_OUTPUT_ESC, PWM_OUTPUT_SERVO} PWM_OUTPUT_ID;
 /**
  * Speed step names.
  */
-typedef enum {SPEED_REVERSE, SPEED_STOP, SPEED_FORWARD_LOW, SPEED_FORWARD_CRUISE} SPEED;
+typedef enum {SPEED_REVERSE, SPEED_STOP, SPEED_FORWARD_LOW, SPEED_FORWARD_CRUISE} CTRL_OUT_SPEED;
 
 /**
  * Amount of speed steps.
  */
-#define SPEED_STEPS 4
+#define CTRL_OUT_SPEED_STEPS 4
 
 /**
  * Pulse widths for each speed step.
  */
-static const int SPEED_PULSEWIDTHS[SPEED_STEPS] = {1108, 1350, 1425, 1440};
+static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1108, 1350, 1425, 1440};
 
 /**
  * Pulse width values for wheels centered and their extreme positions.
  */
-#define WHEELS_CENTERED_PW 1590
-#define WHEELS_MAXLEFT_PW 1220
-#define WHEELS_MAXRIGHT_PW 1980
+#define CTRL_OUT_WHEELS_CENTERED_PW 1590
+#define CTRL_OUT_WHEELS_MAXLEFT_PW 1220
+#define CTRL_OUT_WHEELS_MAXRIGHT_PW 1980
 
 /**
  * @brief Angles for wheels centered and their extreme positions.
  *
  * (We treat 90 degrees as wheels centered.)
  */
-#define WHEELS_MAXLEFT_ANGLE 60
-#define WHEELS_CENTERED_ANGLE 90
-#define WHEELS_MAXRIGHT_ANGLE 120
+#define CTRL_OUT_WHEELS_MAXLEFT_ANGLE 60
+#define CTRL_OUT_WHEELS_CENTERED_ANGLE 90
+#define CTRL_OUT_WHEELS_MAXRIGHT_ANGLE 120
 
 
 //-----------------------------------------------------------------------------
-// LED config
+// Lights config
 //-----------------------------------------------------------------------------
 
 
 /**
  * LED pin. Currently A6.
  */
-#define LED_PORT GPIOA
-#define LED_PIN 6
+#define LIGHT_LED_PORT GPIOA
+#define LIGHT_LED_PIN 6
 
 /**
  * Head light configuration.
  */
-#define HEADLIGHT_LEDS LED(1) | LED(2) | LED(5) | LED(6)
-#define HEADLIGHT_R 30
-#define HEADLIGHT_G 30
-#define HEADLIGHT_B 30
+#define LIGHT_HEADLIGHT_LEDS LED(1) | LED(2) | LED(5) | LED(6)
+#define LIGHT_HEADLIGHT_R 30
+#define LIGHT_HEADLIGHT_G 30
+#define LIGHT_HEADLIGHT_B 30
 
 /**
  * Tail light configuration.
  */
-#define TAILLIGHT_LEDS LED(9) | LED(14)
-#define TAILLIGHT_R 40
-#define TAILLIGHT_G 0
-#define TAILLIGHT_B 0
+#define LIGHT_TAILLIGHT_LEDS LED(9) | LED(14)
+#define LIGHT_TAILLIGHT_R 40
+#define LIGHT_TAILLIGHT_G 0
+#define LIGHT_TAILLIGHT_B 0
 
 /**
  * Flash light configuration.
  */
-#define ITERATIONS_PER_FLASH_STATE 4
-#define FLASHLEFT_LEDS LED(7) | LED(8)
-#define FLASHRIGHT_LEDS LED(0) | LED(15)
-#define FLASH_R 230
-#define FLASH_G 130
-#define FLASH_B 0
+#define LIGHT_ITERATIONS_PER_FLASH_STATE 4
+#define LIGHT_FLASHLEFT_LEDS LED(7) | LED(8)
+#define LIGHT_FLASHRIGHT_LEDS LED(0) | LED(15)
+#define LIGHT_FLASH_R 230
+#define LIGHT_FLASH_G 110
+#define LIGHT_FLASH_B 0
 
 /**
- * Reverse light configuration.
+ * Reverwse light configuration.
  */
-#define REVERSE_LEDS LED(11)
-#define REVERSE_R 30
-#define REVERSE_G 30
-#define REVERSE_B 30
+#define LIGHT_REVERSE_LEDS LED(11)
+#define LIGHT_REVERSE_R 30
+#define LIGHT_REVERSE_G 30
+#define LIGHT_REVERSE_B 30
 
 /**
  * Brake light configuration.
  */
-#define BRAKE_LEDS LED(10) | LED(13)
-#define BRAKE_R 255
-#define BRAKE_G 0
-#define BRAKE_B 0
+#define LIGHT_BRAKE_LEDS LED(10) | LED(13)
+#define LIGHT_BRAKE_R 255
+#define LIGHT_BRAKE_G 0
+#define LIGHT_BRAKE_B 0
 
 /**
  * RC light configuration.
  */
-#define RCLIGHT_LEDS LED(3) | LED(4) | LED(12)
-#define RCLIGHT_R 0
-#define RCLIGHT_G 0
-#define RCLIGHT_B 150
+#define LIGHT_RCLIGHT_LEDS LED(3) | LED(4) | LED(12)
+#define LIGHT_RCLIGHT_R 0
+#define LIGHT_RCLIGHT_G 0
+#define LIGHT_RCLIGHT_B 150
 
 
 #endif /* AUTOTUXCONFIG_H_ */

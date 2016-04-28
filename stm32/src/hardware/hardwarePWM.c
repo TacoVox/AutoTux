@@ -43,8 +43,8 @@ void hardwarePWMSetup(void) {
 	palSetPadMode(PWM_PIN_GROUPS[0], PWM_PIN_NUMBERS[0], PAL_MODE_ALTERNATE(2));
 	palSetPadMode(PWM_PIN_GROUPS[1], PWM_PIN_NUMBERS[1], PAL_MODE_ALTERNATE(2));
 	pwmStart(PWM_TIMER, &pwmcfg);
-	pwmEnableChannel(&PWMD5, 0, SPEED_PULSEWIDTHS[SPEED_STOP]);
-	pwmEnableChannel(&PWMD5, 1, WHEELS_CENTERED_PW);
+	pwmEnableChannel(&PWMD5, 0, CTRL_OUT_SPEED_PULSEWIDTHS[SPEED_STOP]);
+	pwmEnableChannel(&PWMD5, 1, CTRL_OUT_WHEELS_CENTERED_PW);
 }
 
 
@@ -57,20 +57,20 @@ void hardwarePWMSetValues(PWM_OUTPUT_ID pwm_id, int value) {
 		// based on the pulsewidths we perceived as producing the max steering
 		// angles.
 		if (value < 90) {
-			pwmEnableChannel(&PWMD5, 1, map(value, WHEELS_MAXLEFT_ANGLE,
-					WHEELS_CENTERED_ANGLE, WHEELS_MAXLEFT_PW, WHEELS_CENTERED_PW));
+			pwmEnableChannel(&PWMD5, 1, map(value, CTRL_OUT_WHEELS_MAXLEFT_ANGLE,
+					CTRL_OUT_WHEELS_CENTERED_ANGLE, CTRL_OUT_WHEELS_MAXLEFT_PW, CTRL_OUT_WHEELS_CENTERED_PW));
 		} else if (value > 90) {
-			pwmEnableChannel(&PWMD5, 1, map(value, WHEELS_CENTERED_ANGLE,
-					WHEELS_MAXRIGHT_ANGLE, WHEELS_CENTERED_PW, WHEELS_MAXRIGHT_PW));
+			pwmEnableChannel(&PWMD5, 1, map(value, CTRL_OUT_WHEELS_CENTERED_ANGLE,
+					CTRL_OUT_WHEELS_MAXRIGHT_ANGLE, CTRL_OUT_WHEELS_CENTERED_PW, CTRL_OUT_WHEELS_MAXRIGHT_PW));
 		} else {
 			// Center
-			pwmEnableChannel(&PWMD5, 1, WHEELS_CENTERED_PW);
+			pwmEnableChannel(&PWMD5, 1, CTRL_OUT_WHEELS_CENTERED_PW);
 		}
 	} else if (pwm_id == PWM_OUTPUT_ESC) {
 		// Set ESC pw to what is stored at SPEED_PULSEWIDTHS[value] provided that
 		// "value" is in the valid range of speed steps
-		if (value >= 0 && value <= SPEED_STEPS - 1) {
-			pwmEnableChannel(&PWMD5, 0, SPEED_PULSEWIDTHS[value]);
+		if (value >= 0 && value <= CTRL_OUT_SPEED_STEPS - 1) {
+			pwmEnableChannel(&PWMD5, 0, CTRL_OUT_SPEED_PULSEWIDTHS[value]);
 		}
 	}
 }

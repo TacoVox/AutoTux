@@ -133,12 +133,12 @@ void controlOutputIteration() {
 static void controlOutputStopCenter(void) {
 	if (!handleRCMode()) {
 		hardwarePWMSetValues(PWM_OUTPUT_ESC, SPEED_STOP);
-		hardwarePWMSetValues(PWM_OUTPUT_SERVO, WHEELS_CENTERED_ANGLE);
+		hardwarePWMSetValues(PWM_OUTPUT_SERVO, CTRL_OUT_WHEELS_CENTERED_ANGLE);
 	}
 
 	// Regardless, reset controlData to corresponding values.
 	controlData[CONTROL_BYTE_SPEED] = SPEED_STOP;
-	controlData[CONTROL_BYTE_ANGLE] = WHEELS_CENTERED_ANGLE;
+	controlData[CONTROL_BYTE_ANGLE] = CTRL_OUT_WHEELS_CENTERED_ANGLE;
 }
 
 /**
@@ -151,14 +151,14 @@ static bool handleRCMode(void) {
 			// Forward RC signal to hardware
 			// But first attenuate speed
 			int esc_pw = hardwareRCGetValues(THROTTLE);
-			if (esc_pw > SPEED_PULSEWIDTHS[SPEED_STOP]) {
+			if (esc_pw > CTRL_OUT_SPEED_PULSEWIDTHS[SPEED_STOP]) {
 				// Output a fifth of the input
-				esc_pw = SPEED_PULSEWIDTHS[SPEED_STOP] +
-						((esc_pw - SPEED_PULSEWIDTHS[SPEED_STOP]) * RC_FORWARD_MULTIPLIER);
-			} else if (esc_pw < SPEED_PULSEWIDTHS[SPEED_STOP]) {
+				esc_pw = CTRL_OUT_SPEED_PULSEWIDTHS[SPEED_STOP] +
+						((esc_pw - CTRL_OUT_SPEED_PULSEWIDTHS[SPEED_STOP]) * RC_FORWARD_MULTIPLIER);
+			} else if (esc_pw < CTRL_OUT_SPEED_PULSEWIDTHS[SPEED_STOP]) {
 				// Attenuate backwards values by multiplying with 0.8
-				esc_pw = SPEED_PULSEWIDTHS[SPEED_STOP] -
-						((SPEED_PULSEWIDTHS[SPEED_STOP] - esc_pw) * RC_BACKWARD_MULTIPLIER);
+				esc_pw = CTRL_OUT_SPEED_PULSEWIDTHS[SPEED_STOP] -
+						((CTRL_OUT_SPEED_PULSEWIDTHS[SPEED_STOP] - esc_pw) * RC_BACKWARD_MULTIPLIER);
 			}
 
 			hardwarePWMSetValuesRC(esc_pw, hardwareRCGetValues(STEERING));
@@ -190,20 +190,20 @@ static bool rcModeCheck(void) {
 		// Only check for activation of RC mode if not already active
 		if (!rcMode && steeringPW > RC_STEERING_ACTIVATION_TRESHOLD) {
 			// Increase counter if we're on the way towards activation
-			if (itAboveActivationTreshold < ITERATIONS_TO_CHANGE_MODE) {
+			if (itAboveActivationTreshold < RC_ITERATIONS_TO_CHANGE_MODE) {
 				itAboveActivationTreshold++;
 			} else {
 				// Already enough iterations. Step 1 complete
 				//rcMode = true;
-				itWindowToCenterToSwitch = ITERATIONS_TO_CENTER;
+				itWindowToCenterToSwitch = RC_ITERATIONS_TO_CENTER;
 			}
 		} else if (rcMode && steeringPW < RC_STEERING_DEACTIVATION_TRESHOLD) {
 			// Increase counter if we're on the way towards deactivation
-			if (rcMode && itBelowDeactivationTreshold < ITERATIONS_TO_CHANGE_MODE) {
+			if (rcMode && itBelowDeactivationTreshold < RC_ITERATIONS_TO_CHANGE_MODE) {
 				itBelowDeactivationTreshold++;
 			} else {
 				// Already enough iterations. Step 1 complete
-				itWindowToCenterToSwitch  = ITERATIONS_TO_CENTER;
+				itWindowToCenterToSwitch  = RC_ITERATIONS_TO_CENTER;
 			}
 		}
 
@@ -223,7 +223,7 @@ static bool rcModeCheck(void) {
 
 		// Step 2 - executes if steering centered after step 1 complete
 		if (itWindowToCenterToSwitch > 0 && steeringPW >
-				WHEELS_CENTERED_PW - 50 && steeringPW < WHEELS_CENTERED_PW + 50) {
+				CTRL_OUT_WHEELS_CENTERED_PW - 50 && steeringPW < CTRL_OUT_WHEELS_CENTERED_PW + 50) {
 			// Toggle RC mode and close iteration window
 			rcMode = !rcMode;
 			itWindowToCenterToSwitch = 0;
