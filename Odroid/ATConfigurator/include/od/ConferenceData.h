@@ -11,12 +11,16 @@
 namespace od {
     class ConferenceData {
     public:
-        static std::unique_ptr<ConferenceData> instance(void);
+        static ConferenceData* instance(void);
+        double getSpeed() const { return speed; }
+        void setSpeed(double speed) { ConferenceData::speed = speed; }
     private:
         ConferenceData();
         ConferenceData(const ConferenceData&);
         ~ConferenceData();
-        static std::unique_ptr<ConferenceData> _instance;
+    private:
+        double speed;
+        static ConferenceData* _instance;
     };
 }
 
