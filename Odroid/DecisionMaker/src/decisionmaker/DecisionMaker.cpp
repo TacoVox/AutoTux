@@ -14,8 +14,9 @@ using namespace odcore::base::module;
 using namespace odcore::data;               // Container
 using namespace automotive;                 // Vehicle Control & Vehicle Data
 using namespace automotive::miniature;      // Sensor Board Data
+using namespace automotive::vehicle;        // For reversing light
 
-using namespace autotux;
+using namespace autotux;                    // For own data structures
 
 using namespace decisionmaker;
 using namespace overtaker;
@@ -30,7 +31,7 @@ VehicleControl vehicleControl;
 DecisionMaker::DecisionMaker(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "DecisionMaker"),
         ovt(), parker(), containerVehicleData(), containerSensorBoardData(), containerDecisionMakerMSG(), laneRecommendation(),
-        speed(), isStopLine(false), stopCounter(0), isLeftLane(false){
+        speed(), isStopLine(false), stopCounter(0){
 }
 
 DecisionMaker::~DecisionMaker() {}
@@ -48,30 +49,34 @@ void DecisionMaker::laneFollowing() {
 
     if(stopCounter > 0) {
 
-        if(stopCounter == 60) {
+        if(stopCounter == 90) {
             cout << "WAKING UP" << endl;
             stopCounter = 0;
             isStopLine = false;
+            vehicleControl.setBrakeLights(false);
         }
 
         else {
             cout << "SLEEPING..." << endl;
             stopCounter++;
-            isStopLine = true;
         }
     }
-
-    else if(getDistanceToLine() == -1){
-    }
-
-    else if(getDistanceToLine() < 50) {
+    else if(getDistanceToLine() < 50 && getDistanceToLine() != -1) {
+        cout << "STOPPING!" << endl;
+        vehicleControl.setBrakeLights(true);
         speed = 0;
         stopCounter = 1;
+        isStopLine = true;
     }
 
-    else if(getDistanceToLine() < 150) {
+    else if(getDistanceToLine() < 150 && getDistanceToLine() != -1) {
+        cout << "Slowing down..." << endl;
+        vehicleControl.setBrakeLights(false);
         speed = 1;
     }
+
+    cout << "Distance to line: " << getDistanceToLine() << endl;
+
     vehicleControl.setSpeed(speed);
     vehicleControl.setSteeringWheelAngle(getAngle());
 }
@@ -99,6 +104,8 @@ double DecisionMaker::getDistanceToLine() {
 }
 
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() {
+    LIFOQueue lifoQueue;
+    addDataStoreFor(lifoQueue);
 
     // Set initial state of the car
     STATE state = PARKING;
@@ -107,11 +114,14 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
     SensorBoardData sbd;
     DecisionMakerMSG dmMSG;
     OvertakingMSG ovtMSG;
+    LightSystem lightSystem;
+
 
     // Set initial speed
     vehicleControl.setSpeed(2.0);
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
+
         // 1. Update sensor board data values
         containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
         sbd = containerSensorBoardData.getData<SensorBoardData>();
@@ -127,7 +137,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
 
         //state = dmMSG.getState();
 
-        //cout << "SensorValues: " <<  sbd.getValueForKey_MapOfDistances(2) << endl;
+        cout << "SensorValues: " <<  sbd.getValueForKey_MapOfDistances(2) << endl;
         cout << "Distance: " << vd.getAbsTraveledPath() << endl;
         if(!ovt.isLeftLane()){
             ovtMSG.setLeftlane(NOTLEFTLANE);
@@ -155,6 +165,12 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
             case PARKING:{
 
                 if(parker.getFoundSpot()){
+                    if(parker.isReversing()){
+                        lightSystem.setReverseLight(true);
+                    }
+                    else
+                        lightSystem.setReverseLight(false);
+
                     if(!parker.getIsParked()) {
                         vehicleControl = parker.parallelPark(sbd, vd);
                     }
@@ -166,18 +182,20 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                 else{
                     if(!isStopLine) {
                         parker.findSpot(sbd, vd, vehicleControl);
-                        speed = 1;
+                        speed = 2;
                     }
                     laneFollowing();
                 }
                 break;
             }
         }
-        // Pack and send control values
+        // Pack and send containers
         Container control(vehicleControl);
         Container lane(ovtMSG);
+        Container lights(lightSystem);
         getConference().send(control);
         getConference().send(lane);
+        getConference().send(lights);
     }
 
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;

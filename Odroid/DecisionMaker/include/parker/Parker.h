@@ -9,6 +9,7 @@
 
 #include "opendavinci/odcore/data/Container.h"
 #include "automotivedata/GeneratedHeaders_AutomotiveData.h"
+#include "opendavinci/odcore/base/LIFOQueue.h"
 
 namespace parker {
     using namespace std;
@@ -76,6 +77,9 @@ namespace parker {
         int isAccurate;
         automotive::VehicleControl controlTemp;
         bool objInFront;
+        int turningCounter;
+        bool reversing;
+        odcore::base::LIFOQueue lifoQueue;
 
         const int FREQUENCY = 5;
 
@@ -107,6 +111,7 @@ namespace parker {
         void findSpot(automotive::miniature::SensorBoardData, automotive::VehicleData, automotive::VehicleControl);
         bool getFoundSpot();
         bool getIsParked();
+        bool isReversing();
 
         automotive::VehicleControl parallelPark(automotive::miniature::SensorBoardData, automotive::VehicleData);
     };
