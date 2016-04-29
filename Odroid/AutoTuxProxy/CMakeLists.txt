@@ -45,16 +45,25 @@ INCLUDE_DIRECTORIES(include)
 
 SET(LIBRARIES ${OPENDAVINCI_LIBRARIES} ${AUTOMOTIVEDATA_LIBRARIES} ${OpenCV_LIBS} ${LIBUSB_LIBRARIES} usb-1.0)
 
-FILE(GLOB_RECURSE thisproject-sources "${CMAKE_CURRENT_SOURCE_DIR}/src/*/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/*/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/testsuite/*.h")
+FILE(GLOB_RECURSE thisproject-sources "${CMAKE_CURRENT_SOURCE_DIR}/src/*/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/*/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/testsuite/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/testsuite/*.cpp")
 ADD_LIBRARY(${PROJECT_NAME}lib-static STATIC ${thisproject-sources})
 ADD_EXECUTABLE(${PROJECT_NAME} "${CMAKE_CURRENT_SOURCE_DIR}/apps/${PROJECT_NAME}.cpp")
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_NAME}lib-static ${LIBRARIES})
 
+
+# GTest
+find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIRS})
+
+# Link runTests with what we want to test and the GTest and pthread library
+add_executable(runTests "${CMAKE_CURRENT_SOURCE_DIR}/testsuite/BufferWrapperTest.cpp")
+target_link_libraries(runTests ${PROJECT_NAME}lib-static ${LIBRARIES} ${GTEST_LIBRARIES} pthread)
+
 # find CxxTest
-find_package(CxxTest REQUIRED)
-if (CXXTEST_FOUND)
-    include_directories(${CXXTEST_INCLUDE_DIR})
-    enable_testing()
-    CXXTEST_ADD_TEST(BufferWrapperTest BufferWrapperTest.cpp "${CMAKE_CURRENT_SOURCE_DIR}/testsuite/BufferWrapperTestSuite.h")
-    target_link_libraries(BufferWrapperTest ${PROJECT_NAME}lib-static ${LIBRARIES})
-endif()
+#find_package(CxxTest REQUIRED)
+#if (CXXTEST_FOUND)
+#    include_directories(${CXXTEST_INCLUDE_DIR})
+#    enable_testing()
+#    CXXTEST_ADD_TEST(BufferWrapperTest BufferWrapperTest.cpp "${CMAKE_CURRENT_SOURCE_DIR}/testsuite/BufferWrapperTestSuite.h")
+#    target_link_libraries(BufferWrapperTest ${PROJECT_NAME}lib-static ${LIBRARIES})
+#endif()
