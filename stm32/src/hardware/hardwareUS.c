@@ -166,7 +166,8 @@ void hardwareUSIterationEnd() {
 	// Also check the light sensor reading on US_FRONT!
 	transferBuffer[0] = LIGHT_REG;
 	status = i2cMasterTransmitTimeout(US_I2C_DRIVER, US_ADDRESS[US_FRONT], transferBuffer, 1, receiveBuffer, 1, timeout);
-	if (status == MSG_OK) {
+	if (status == MSG_OK && receiveBuffer[0] != 0) {
+		// Only write non-zero values.
 		lightSensorReading = receiveBuffer[0];
 	}
 

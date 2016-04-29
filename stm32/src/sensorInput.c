@@ -86,7 +86,8 @@ void sensorInputGetData(unsigned char* buffer) {
 	buffer[9] = hardwareGetValuesWEDistance() & 0xFF;
 
 	// Light sensor
-	buffer[10] = hardwareUSGetLightValue();
+	buffer[10] = hardwareUSGetLightValue() < 255 ?
+			(unsigned char)hardwareUSGetLightValue() : 255;
 }
 
 /**
