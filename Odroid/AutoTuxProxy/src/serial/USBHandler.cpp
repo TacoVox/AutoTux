@@ -41,6 +41,7 @@ void usb_handler::USBHandler::run()
     while (uc->connect() == false)
         ;
 
+
     // main loop
     while (running) {
         // read from usb
