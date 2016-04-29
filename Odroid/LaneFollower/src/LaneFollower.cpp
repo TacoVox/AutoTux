@@ -1,5 +1,6 @@
 #include <iostream>
 #include <memory>
+#include <math.h>
 
 #include <opendavinci/odcore/base/KeyValueConfiguration.h>
 #include <opendavinci/odcore/base/Lock.h>
@@ -43,6 +44,7 @@ namespace lane {
                 laneRecommendation(),
                 overtaking(),
                 config(),
+                sensorBoardData(),
                 m_previousTime(),
                 m_eSum(0),
                 m_eOld(0),
@@ -132,8 +134,17 @@ namespace lane {
             return returnValue;
         }
 
+        uint8_t LaneFollower::getThreshold(double lightValue) {
+            if(lightValue < 30.0)
+                lightValue = 30.0;
+
+            double returnVal = log10(lightValue) * 58.0 + lightValue * 0.16 - 30.0 + (pow((lightValue - 80.0) * 0.1, 3.0)) * 0.0034;
+
+            return (uint8_t)returnVal;
+        }
+
         // Do magic to the image around here.
-        void LaneFollower::processImage() {
+        void LaneFollower::processImage(uint8_t threshold) {
 
             // Copy the image to a matrix (this is the one we use for detection)
             Mat m_image_grey = m_image.clone();
@@ -149,7 +160,7 @@ namespace lane {
             // v4l2-ctl -d /dev/CAMERAID -c exposure_absolute=50
             //
             // TODO Check for possibilites to stop auto-focusing and lock focus on a resonable distance
-            threshold(m_image_grey, m_image_grey, 140, 255, CV_THRESH_BINARY);
+            cv::threshold(m_image_grey, m_image_grey, threshold, 255, CV_THRESH_BINARY);
 
             //imwrite("grey.jpg", m_image_grey);
 
@@ -355,12 +366,12 @@ namespace lane {
                    odcore::data::dmcp::ModuleStateMessage::RUNNING) {
                 bool has_next_frame = false;
 
+                Container sbd_container = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
                 Container image_container = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
-
                 Container config_container = getKeyValueDataStore().get(config::LaneFollowerMSG::ID());
-                config = config_container.getData<config::LaneFollowerMSG>();
-
                 Container overtaking_container = getKeyValueDataStore().get(OvertakingMSG::ID());
+
+                config = config_container.getData<config::LaneFollowerMSG>();
                 overtaking = overtaking_container.getData<OvertakingMSG>();
 
 
@@ -369,7 +380,9 @@ namespace lane {
                 }
 
                 if (has_next_frame) {
-                    processImage();
+                    sensorBoardData = sbd_container.getData<automotive::miniature::SensorBoardData>();
+
+                    processImage(getThreshold(sensorBoardData.getValueForKey_MapOfDistances(5)));
                     double detection = laneDetection();
                     laneFollowing(detection);
                 }
