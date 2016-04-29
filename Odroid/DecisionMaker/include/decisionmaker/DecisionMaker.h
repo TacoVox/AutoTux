@@ -42,7 +42,6 @@ namespace decisionmaker{
         double speed;
         bool isStopLine;
         int stopCounter;
-        bool isLeftLane;
 
         const bool NOTLEFTLANE = false;
         const bool LEFTLANE = true;
