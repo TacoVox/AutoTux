@@ -35,7 +35,7 @@ namespace lane {
         const bool SIMMODE = true;
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) :
-                TimeTriggeredConferenceClientModule(argc, argv, "LaneDetector"),
+                TimeTriggeredConferenceClientModule(argc, argv, "LaneFollower"),
                 m_sharedImageMemory(),
                 m_hasAttachedToSharedImageMemory(false),
                 m_debug(false),
@@ -144,7 +144,7 @@ namespace lane {
         }
 
         // Do magic to the image around here.
-        void LaneFollower::processImage(uint8_t threshold) {
+        void LaneFollower::processImage() {
 
             // Copy the image to a matrix (this is the one we use for detection)
             Mat m_image_grey = m_image.clone();
@@ -152,17 +152,30 @@ namespace lane {
             // Make the new image gray scale
             cvtColor(m_image_grey, m_image_grey, COLOR_BGR2GRAY);
 
-            // Make the image binary, threshold set to 180 at the moment
-            // Threshold 165 for light ~246, 140 for ~202, 60 for ~30
-            //
-            // Command line options:
-            // v4l2-ctl -d /dev/CAMERAID -c exposure_auto=1
-            // v4l2-ctl -d /dev/CAMERAID -c exposure_absolute=50
-            //
-            // TODO Check for possibilites to stop auto-focusing and lock focus on a resonable distance
-            cv::threshold(m_image_grey, m_image_grey, threshold, 255, CV_THRESH_BINARY);
+            Canny(m_image_grey, m_image_grey, 200, 200, 3);
 
-            //imwrite("grey.jpg", m_image_grey);
+            /**
+             * TODO Look into HoughLines to find edges.
+             * Example below.
+             */
+
+            /*vector<Vec2f> contours;
+            HoughLines(m_image_grey, contours, 1, CV_PI/180, 100, 0, 1);
+
+            for(size_t i = 0; i < contours.size(); i++) {
+                float rho = contours[i][0], theta = contours[i][1];
+                Point pt1, pt2;
+                double a = cos(theta), b = sin(theta);
+                double x0 = a*rho, y0 = b*rho;
+                pt1.x = cvRound(x0 + 1000*(-b));
+                pt1.y = cvRound(y0 + 1000*(a));
+                pt2.x = cvRound(x0 - 1000*(-b));
+                pt2.y = cvRound(y0 - 1000*(a));
+                line(m_image, pt1, pt2, Scalar(0,0,255), 3, CV_AA);
+            }*/
+
+            imshow("Image", m_image_grey);
+            waitKey(10);
 
             // Find contours on the image
             vector<vector<Point>> contours;
@@ -216,20 +229,14 @@ namespace lane {
                     if (!inLeftLane) {
                         if (right.x > 0) {
                             e = ((right.x - m_image.cols / 2.0) - distance) / distance;
-                        }
-
-                        else if (left.x > 0) {
+                        } else if (left.x > 0) {
                             e = (distance - (m_image.cols / 2.0 - left.x)) / distance;
                         }
-                    }
-
+                    } else {
                         // Left lane logic (prefer left line following)
-                    else {
                         if (left.x > 0) {
                             e = (distance - (m_image.cols / 2.0 - left.x)) / distance;
-                        }
-
-                        else if (right.x > 0) {
+                        } else if (right.x > 0) {
                             e = ((right.x - m_image.cols / 2.0) - distance) / distance;
                         }
                     }
@@ -349,9 +356,7 @@ namespace lane {
                laneRecommendation.getDistance_to_line() > 150)
                 laneRecommendation.setDistance_to_line(-1);
 
-            //cout << "DS: " << desiredSteering << endl;
-
-            cout << "STOPLINE: " << laneRecommendation.getDistance_to_line() << endl;
+            //cout << "STOPLINE: " << laneRecommendation.getDistance_to_line() << endl;
 
             laneRecommendation.setAngle(desiredSteering);
         }
@@ -359,14 +364,16 @@ namespace lane {
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode LaneFollower::body() {
             // Get configuration
             KeyValueConfiguration kv = getKeyValueConfiguration();
-            m_debug = kv.getValue<int32_t>("lanedetector.debug") == 1;
+            m_debug = kv.getValue<int32_t>("lanefollower.debug") == 1;
 
             // ?
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() ==
                    odcore::data::dmcp::ModuleStateMessage::RUNNING) {
                 bool has_next_frame = false;
 
-                Container sbd_container = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
+                // For future reference if we decide on using light sensor data
+                //Container sbd_container = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
+
                 Container image_container = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
                 Container config_container = getKeyValueDataStore().get(config::LaneFollowerMSG::ID());
                 Container overtaking_container = getKeyValueDataStore().get(OvertakingMSG::ID());
@@ -380,9 +387,10 @@ namespace lane {
                 }
 
                 if (has_next_frame) {
-                    sensorBoardData = sbd_container.getData<automotive::miniature::SensorBoardData>();
+                    // For future reference if we decide on using light sensor data
+                    //sensorBoardData = sbd_container.getData<automotive::miniature::SensorBoardData>();
 
-                    processImage(getThreshold(sensorBoardData.getValueForKey_MapOfDistances(5)));
+                    processImage();
                     double detection = laneDetection();
                     laneFollowing(detection);
                 }
