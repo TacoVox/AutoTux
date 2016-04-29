@@ -1,5 +1,6 @@
 #include <iostream>
 #include <memory>
+#include <math.h>
 
 #include <opendavinci/odcore/base/KeyValueConfiguration.h>
 #include <opendavinci/odcore/base/Lock.h>
@@ -43,6 +44,7 @@ namespace lane {
                 laneRecommendation(),
                 overtaking(),
                 config(),
+                sensorBoardData(),
                 m_previousTime(),
                 m_eSum(0),
                 m_eOld(0),
@@ -132,29 +134,35 @@ namespace lane {
             return returnValue;
         }
 
-//        void LaneFollower::getLaneRecommendation(odcore::data::Container &c) {
-//
-//            // TODO: New datatype
-//            if(c.getDataType() == LaneRecommendation::ID()) {
-//
-//                // TODO: New datatype
-//                laneRecommendation = c.getData<LaneRecommendation>();
-//            }
-//        }
+        uint8_t LaneFollower::getThreshold(double lightValue) {
+            if(lightValue < 30.0)
+                lightValue = 30.0;
+
+            double returnVal = log10(lightValue) * 58.0 + lightValue * 0.16 - 30.0 + (pow((lightValue - 80.0) * 0.1, 3.0)) * 0.0034;
+
+            return (uint8_t)returnVal;
+        }
 
         // Do magic to the image around here.
-        void LaneFollower::processImage() {
+        void LaneFollower::processImage(uint8_t threshold) {
 
             // Copy the image to a matrix (this is the one we use for detection)
             Mat m_image_grey = m_image.clone();
 
-            // Make the new image grayscale
+            // Make the new image gray scale
             cvtColor(m_image_grey, m_image_grey, COLOR_BGR2GRAY);
 
             // Make the image binary, threshold set to 180 at the moment
-            threshold(m_image_grey, m_image_grey, 140, 255, CV_THRESH_BINARY);
+            // Threshold 165 for light ~246, 140 for ~202, 60 for ~30
+            //
+            // Command line options:
+            // v4l2-ctl -d /dev/CAMERAID -c exposure_auto=1
+            // v4l2-ctl -d /dev/CAMERAID -c exposure_absolute=50
+            //
+            // TODO Check for possibilites to stop auto-focusing and lock focus on a resonable distance
+            cv::threshold(m_image_grey, m_image_grey, threshold, 255, CV_THRESH_BINARY);
 
-	    //imwrite("grey.jpg", m_image_grey);
+            //imwrite("grey.jpg", m_image_grey);
 
             // Find contours on the image
             vector<vector<Point>> contours;
@@ -333,7 +341,7 @@ namespace lane {
                 }
             }
 
-            // Limit max steering anlge based on car limits
+            // Limit max steering angle based on car limits
             if (desiredSteering > 0.5) desiredSteering = 0.5;
             if (desiredSteering < -0.5) desiredSteering = -0.5;
 
@@ -358,30 +366,23 @@ namespace lane {
                    odcore::data::dmcp::ModuleStateMessage::RUNNING) {
                 bool has_next_frame = false;
 
+                Container sbd_container = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
                 Container image_container = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
-
                 Container config_container = getKeyValueDataStore().get(config::LaneFollowerMSG::ID());
-                config = config_container.getData<config::LaneFollowerMSG>();
-
                 Container overtaking_container = getKeyValueDataStore().get(OvertakingMSG::ID());
+
+                config = config_container.getData<config::LaneFollowerMSG>();
                 overtaking = overtaking_container.getData<OvertakingMSG>();
 
-                // TODO: New datatype
-                //Container laneContainer = getKeyValueDataStore().get(LaneRecommendation::ID());
-
-                // TODO: New datatype
-//                if(laneContainer.getDataType() == LaneRecommendation::ID()) {
-//
-//                    // TODO: New datatype
-//                    getLaneRecommendation(laneContainer);
-//                }
 
                 if (image_container.getDataType() == odcore::data::image::SharedImage::ID()) {
                     has_next_frame = readSharedImage(image_container);
                 }
 
                 if (has_next_frame) {
-                    processImage();
+                    sensorBoardData = sbd_container.getData<automotive::miniature::SensorBoardData>();
+
+                    processImage(getThreshold(sensorBoardData.getValueForKey_MapOfDistances(5)));
                     double detection = laneDetection();
                     laneFollowing(detection);
                 }
