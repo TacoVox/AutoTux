@@ -25,12 +25,15 @@ namespace  overtaker{
 
         //CAR VALUES
         const double OVT_TRIGGER = 0.60;
-        const double LEFT_SWITCH_DIST = 0.30;
+        const double LEFT_SWITCH_DIST = 0.45;
         const double ADJUST_L_S_DIST = 0.0;
         const double RIGHT_SWITCH_DIST = 0.30;
         const double ADJUST_R_S_DIST = 0.0;
-	    const double IR_SENSOR_RANGE = 0.15;
-	    const double US_SENSOR_RANGE = 0.20;
+	    const double IR_SENSOR_RANGE = 0.40;
+	    const double US_SENSOR_RANGE = 0.40;
+
+        // GENERAL VALUES
+        const int NUM_OF_READINGS = 3;
 
     public:
         Overtaker();
@@ -45,12 +48,10 @@ namespace  overtaker{
         VehicleControl ovtControl;
         bool isOverridingControls;
         double traveledPath;
-        enum STATE {FREE_LANE, LEFT_SWITCH, ADJUST_LEFT_SWICH, LEFT_LANE, PARALLEL, RIGHT_SWITCH, ADJUST_RIGHT_SWITCH};
-
+        enum STATE {FREE_LANE, LEFT_SWITCH, ADJUST_LEFT_SWITCH, LEFT_LANE, PARALLEL, RIGHT_SWITCH, ADJUST_RIGHT_SWITCH};
         enum STATE state;
-        double enterSwitchAngle;
         bool leftLane;
-
+        int consecReadings;
         const double ULTRASONIC_FRONT_RIGHT = 4;
         const double ULTRASONIC_FRONT_FORWARD = 3;
         const double INFRARED_FRONT_RIGHT = 0;
