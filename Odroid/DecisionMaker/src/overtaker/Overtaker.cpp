@@ -14,7 +14,7 @@ using namespace overtaker;
  * */
 Overtaker::Overtaker():
     ovtControl(), isOverridingControls(false), traveledPath(0), state(FREE_LANE),
-    enterSwitchAngle(0), leftLane(false){}
+    leftLane(false), consecReadings(0){}
 
 Overtaker::~Overtaker(){}
 
@@ -29,13 +29,20 @@ void Overtaker::obstacleDetection(SensorBoardData sensorData, VehicleData vehicl
 
             // If close to obstacle switch lane to overtake...
             if(isObstacleOnLane(sensorData, OVT_TRIGGER)){
-                cout << "SWITCHING TO LEFT LANE" << endl;
 
-                traveledPath = vehicleData.getAbsTraveledPath();
-                ovtControl.setSpeed(1);
-                isOverridingControls = true;
-                ovtControl.setFlashingLightsLeft(true);
-                state = LEFT_SWITCH;
+                consecReadings++;
+
+                if(consecReadings >= NUM_OF_READINGS){
+
+                    cout << "SWITCHING TO LEFT LANE" << endl;
+
+                    traveledPath = vehicleData.getAbsTraveledPath();
+                    ovtControl.setSpeed(1);
+                    isOverridingControls = true;
+                    ovtControl.setFlashingLightsLeft(true);
+                    state = LEFT_SWITCH;
+                    consecReadings = 0;
+                }
 
             }
             break;
@@ -47,7 +54,7 @@ void Overtaker::obstacleDetection(SensorBoardData sensorData, VehicleData vehicl
             break;
         }
 
-        case ADJUST_LEFT_SWICH:{
+        case ADJUST_LEFT_SWITCH:{
             cout << "Overtaker: ADJUST LEFT SWITCH" << endl;
             adjustLeftSwitch(vehicleData, traveledPath, ADJUST_L_S_DIST);
             break;
@@ -57,7 +64,12 @@ void Overtaker::obstacleDetection(SensorBoardData sensorData, VehicleData vehicl
             cout << "Overtaker: LEFT LANE" << endl;
 
             if(isParallelToObstacle(sensorData)){
-                state = PARALLEL;
+                consecReadings++;
+
+                if(consecReadings >= NUM_OF_READINGS){
+                    state = PARALLEL;
+                    consecReadings = 0;
+                }
             }
 
             break;
@@ -66,12 +78,18 @@ void Overtaker::obstacleDetection(SensorBoardData sensorData, VehicleData vehicl
             cout << "Overtaker: PARALLEL " << endl;
 
             if(isRightLaneClear(sensorData)){
-                cout << "SWITCHING TO RIGHT LANE" << endl;
-                traveledPath = vehicleData.getAbsTraveledPath();
-                ovtControl.setSpeed(1);
-                ovtControl.setFlashingLightsRight(true);
-                isOverridingControls = true;
-                state = RIGHT_SWITCH;
+
+                consecReadings++;
+
+                if(consecReadings >= NUM_OF_READINGS){
+                    cout << "SWITCHING TO RIGHT LANE" << endl;
+                    traveledPath = vehicleData.getAbsTraveledPath();
+                    ovtControl.setSpeed(1);
+                    ovtControl.setFlashingLightsRight(true);
+                    isOverridingControls = true;
+                    state = RIGHT_SWITCH;
+                    consecReadings = 0;
+                }
             }
             break;
         }
@@ -128,7 +146,7 @@ void Overtaker::switchToLeftLane(VehicleData vehicleData, const double trvStart,
         ovtControl.setSpeed(1.0);
         ovtControl.setFlashingLightsLeft(false);
         traveledPath = vehicleData.getAbsTraveledPath();
-        state = ADJUST_LEFT_SWICH;
+        state = ADJUST_LEFT_SWITCH;
 
         return;
     }
