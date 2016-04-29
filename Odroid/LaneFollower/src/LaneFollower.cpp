@@ -1,16 +1,3 @@
-#include <iostream>
-#include <memory>
-#include <math.h>
-
-#include <opendavinci/odcore/base/KeyValueConfiguration.h>
-#include <opendavinci/odcore/base/Lock.h>
-#include <opendavinci/odcore/data/Container.h>
-#include "opendavinci/odcore/io/conference/ContainerConference.h"
-#include <opendavinci/odcore/wrapper/SharedMemoryFactory.h>
-
-#include <opendavinci/GeneratedHeaders_OpenDaVINCI.h>
-#include <automotivedata/GeneratedHeaders_AutomotiveData.h>
-
 #include "LaneFollower.h"
 
 // Used for debugging
@@ -22,6 +9,7 @@ namespace lane {
         using namespace cv;
         using namespace odcore::base;
         using namespace odcore::data;
+        using namespace odcore::data::dmcp;
         using namespace odcore::data::image;
         using namespace odcore::wrapper;
         using namespace autotux;
@@ -32,28 +20,37 @@ namespace lane {
         using namespace odtools::player;
 
         // SET TO TRUE WHEN USING THE SIMULATOR
-        const bool SIMMODE = false;
+        const bool SIMMODE = true;
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) :
                 TimeTriggeredConferenceClientModule(argc, argv, "LaneFollower"),
                 m_sharedImageMemory(),
+                m_sharedProcessedImageMemory(),
+                m_sharedProcessedImage(),
                 m_hasAttachedToSharedImageMemory(false),
                 m_debug(false),
                 m_image(),
                 m_vehicleControl(),
-                laneRecommendation(),
-                overtaking(),
-                config(),
-                sensorBoardData(),
+                m_laneRecommendation(),
+                m_overtaking(),
+                m_config(),
+                m_sensorBoardData(),
                 m_previousTime(),
                 m_eSum(0),
                 m_eOld(0),
-                distance(),
-                control_scanline(),
-                stop_scanline(),
+                m_distance(),
+                m_controlScanline(),
+                m_stopScanline(),
                 P_GAIN(),
                 I_GAIN(),
-                D_GAIN() {}
+                D_GAIN() {
+            m_sharedProcessedImageMemory = SharedMemoryFactory::createSharedMemory("ProcessedImage", 640*480*1);
+            m_sharedProcessedImage.setName("ProcessedImage");
+            m_sharedProcessedImage.setWidth(640);
+            m_sharedProcessedImage.setHeight(480);
+            m_sharedProcessedImage.setBytesPerPixel(1);
+            m_sharedProcessedImage.setSize(640*480);
+        }
 
         LaneFollower::~LaneFollower() { }
 
@@ -66,9 +63,9 @@ namespace lane {
             }
 
             if(SIMMODE) {
-                distance = SIMDISTANCE;
-                control_scanline = 462;
-                stop_scanline = 250;
+                m_distance = SIMDISTANCE;
+                m_controlScanline = 462;
+                m_stopScanline = 250;
 
                 P_GAIN = SIMGAIN;
                 I_GAIN = 0;
@@ -76,9 +73,9 @@ namespace lane {
             }
 
             else {
-                distance = CARDISTANCE;
-                control_scanline = 462;
-                stop_scanline = 350;
+                m_distance = CARDISTANCE;
+                m_controlScanline = 462;
+                m_stopScanline = 350;
 
                 P_GAIN = CARGAIN;
                 I_GAIN = 0;
@@ -98,15 +95,15 @@ namespace lane {
             }
         }
 
-        bool LaneFollower::readSharedImage(odcore::data::Container &c) {
+        bool LaneFollower::readSharedImage(Container &c) {
             bool returnValue = false;
 
-            if (c.getDataType() == odcore::data::image::SharedImage::ID()) {
+            if (c.getDataType() == SharedImage::ID()) {
                 SharedImage si = c.getData<SharedImage>();
 
                 // Have we already attached to the shared memory containing the image?
                 if (!m_hasAttachedToSharedImageMemory) {
-                    m_sharedImageMemory = odcore::wrapper::SharedMemoryFactory::attachToSharedMemory(si.getName());
+                    m_sharedImageMemory = SharedMemoryFactory::attachToSharedMemory(si.getName());
                 }
 
                 // Did we successfully connect?
@@ -154,6 +151,14 @@ namespace lane {
 
             Canny(m_image_grey, m_image_grey, 30, 200, 3);
 
+            imshow("LOL", m_image_grey);
+
+            if(m_sharedProcessedImageMemory.get() && m_sharedProcessedImageMemory->isValid()) {
+                m_sharedProcessedImageMemory->lock();
+                memcpy(m_sharedProcessedImageMemory->getSharedMemory(), m_image_grey.data, 640*480);
+                m_sharedProcessedImageMemory->unlock();
+            }
+
             /**
              * TODO Look into HoughLines to find edges.
              * Example below.
@@ -186,7 +191,7 @@ namespace lane {
 
         double LaneFollower::laneDetection() {
 
-            bool inLeftLane = overtaking.getLeftlane();
+            bool inLeftLane = m_overtaking.getLeftlane();
 
             double e = 0;
 
@@ -221,20 +226,20 @@ namespace lane {
                 }
 
                 // If the loop is currently checking at the height of our set control line
-                if(y == control_scanline) {
+                if(y == m_controlScanline) {
                     // Right lane logic (prefer right line following)
                     if (!inLeftLane) {
                         if (right.x > 0) {
-                            e = ((right.x - m_image.cols / 2.0) - distance) / distance;
+                            e = ((right.x - m_image.cols / 2.0) - m_distance) / m_distance;
                         } else if (left.x > 0) {
-                            e = (distance - (m_image.cols / 2.0 - left.x)) / distance;
+                            e = (m_distance - (m_image.cols / 2.0 - left.x)) / m_distance;
                         }
                     } else {
                         // Left lane logic (prefer left line following)
                         if (left.x > 0) {
-                            e = (distance - (m_image.cols / 2.0 - left.x)) / distance;
+                            e = (m_distance - (m_image.cols / 2.0 - left.x)) / m_distance;
                         } else if (right.x > 0) {
-                            e = ((right.x - m_image.cols / 2.0) - distance) / distance;
+                            e = ((right.x - m_image.cols / 2.0) - m_distance) / m_distance;
                         }
                     }
                 }
@@ -268,14 +273,14 @@ namespace lane {
             int left_dist = 0;
 
             stop_left.x = (m_image.cols/2) - 50;
-            stop_left.y = control_scanline;
+            stop_left.y = m_controlScanline;
 
             // Find first red pixel in front (stopline)
-            for(int i = control_scanline; i > stop_scanline; i--) {
+            for(int i = m_controlScanline; i > m_stopScanline; i--) {
                 pixelFrontLeft = m_image.at<Vec3b>(Point(stop_left.x, i));
                 if(pixelFrontLeft.val[2] == 255) {
                     stop_left.y = i;
-                    left_dist = control_scanline - stop_left.y;
+                    left_dist = m_controlScanline - stop_left.y;
                     break;
                 }
             }
@@ -283,30 +288,30 @@ namespace lane {
             int right_dist = 0;
 
             stop_right.x = (m_image.cols/2) + 50;
-            stop_right.y = control_scanline;
+            stop_right.y = m_controlScanline;
 
             // Find first red pixel in front (stopline)
-            for(int i = control_scanline; i > stop_scanline; i--) {
+            for(int i = m_controlScanline; i > m_stopScanline; i--) {
                 pixelFrontRight = m_image.at<Vec3b>(Point(stop_right.x, i));
                 if(pixelFrontRight.val[2] == 255) {
                     stop_right.y = i;
-                    right_dist = control_scanline - stop_right.y;
+                    right_dist = m_controlScanline - stop_right.y;
                     break;
                 }
             }
 
             if(m_debug) {
-                if(stop_left.y < control_scanline) {
-                    line(m_image, Point(stop_left.x, control_scanline), stop_left, Scalar(128, 0, 0));
+                if(stop_left.y < m_controlScanline) {
+                    line(m_image, Point(stop_left.x, m_controlScanline), stop_left, Scalar(128, 0, 0));
                 }
 
-                if(stop_right.y < control_scanline) {
-                    line(m_image, Point(stop_right.x, control_scanline), stop_right, Scalar(128, 0, 0));
+                if(stop_right.y < m_controlScanline) {
+                    line(m_image, Point(stop_right.x, m_controlScanline), stop_right, Scalar(128, 0, 0));
                 }
             }
 
             if((left_dist - right_dist > -5) && (left_dist - right_dist < 5)) {
-                laneRecommendation.setDistance_to_line(left_dist);
+                m_laneRecommendation.setDistance_to_line(left_dist);
             }
 
             return e;
@@ -349,55 +354,52 @@ namespace lane {
             if (desiredSteering > 0.5) desiredSteering = 0.5;
             if (desiredSteering < -0.5) desiredSteering = -0.5;
 
-            if(laneRecommendation.getDistance_to_line() < 5 ||
-               laneRecommendation.getDistance_to_line() > 150)
-                laneRecommendation.setDistance_to_line(-1);
+            if(m_laneRecommendation.getDistance_to_line() < 5 || m_laneRecommendation.getDistance_to_line() > 150)
+                m_laneRecommendation.setDistance_to_line(-1);
 
-            cout << "STOPLINE: " << laneRecommendation.getDistance_to_line() << endl;
-
-            laneRecommendation.setAngle(desiredSteering);
-            cout << "DS: " << laneRecommendation.getAngle() << endl;
+            m_laneRecommendation.setAngle(desiredSteering);
         }
 
-        odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode LaneFollower::body() {
+        ModuleExitCodeMessage::ModuleExitCode LaneFollower::body() {
             // Get configuration
             KeyValueConfiguration kv = getKeyValueConfiguration();
             m_debug = kv.getValue<int32_t>("lanefollower.debug") == 1;
 
             // ?
-            while (getModuleStateAndWaitForRemainingTimeInTimeslice() ==
-                   odcore::data::dmcp::ModuleStateMessage::RUNNING) {
+            while (getModuleStateAndWaitForRemainingTimeInTimeslice() == ModuleStateMessage::RUNNING) {
                 bool has_next_frame = false;
 
                 // For future reference if we decide on using light sensor data
                 //Container sbd_container = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
 
-                Container image_container = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
+                Container image_container = getKeyValueDataStore().get(SharedImage::ID());
                 Container config_container = getKeyValueDataStore().get(config::LaneFollowerMSG::ID());
                 Container overtaking_container = getKeyValueDataStore().get(OvertakingMSG::ID());
 
-                config = config_container.getData<config::LaneFollowerMSG>();
-                overtaking = overtaking_container.getData<OvertakingMSG>();
+                m_config = config_container.getData<config::LaneFollowerMSG>();
+                m_overtaking = overtaking_container.getData<OvertakingMSG>();
 
 
-                if (image_container.getDataType() == odcore::data::image::SharedImage::ID()) {
+                if (image_container.getDataType() == SharedImage::ID()) {
                     has_next_frame = readSharedImage(image_container);
                 }
 
                 if (has_next_frame) {
                     // For future reference if we decide on using light sensor data
-                    //sensorBoardData = sbd_container.getData<automotive::miniature::SensorBoardData>();
+                    //m_sensorBoardData = sbd_container.getData<automotive::miniature::SensorBoardData>();
 
                     processImage();
                     double detection = laneDetection();
                     laneFollowing(detection);
                 }
 
-                Container outContainer(laneRecommendation);
+                Container outContainer(m_laneRecommendation);
+                Container processedImageContainer(m_sharedProcessedImage);
+                getConference().send(processedImageContainer);
                 getConference().send(outContainer);
             }
 
-            return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
+            return ModuleExitCodeMessage::OKAY;
         }
 
     } // detector

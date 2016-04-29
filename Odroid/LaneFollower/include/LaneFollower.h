@@ -7,16 +7,23 @@
 #define CARGAIN 0.9;
 #define CARDISTANCE 220;
 
+#include <iostream>
 #include <memory>
+#include <math.h>
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opendavinci/odcore/base/KeyValueConfiguration.h>
+#include <opendavinci/odcore/base/Lock.h>
 #include <opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h>
+#include <opendavinci/odcore/data/Container.h>
 #include <opendavinci/odcore/data/TimeStamp.h>
+#include "opendavinci/odcore/io/conference/ContainerConference.h"
+#include <opendavinci/odcore/wrapper/SharedMemoryFactory.h>
 #include <opendavinci/odcore/wrapper/SharedMemory.h>
 
-#include "automotivedata/GeneratedHeaders_AutomotiveData.h"
-#include "opendavinci/GeneratedHeaders_OpenDaVINCI.h"
+#include <opendavinci/GeneratedHeaders_OpenDaVINCI.h>
+#include <automotivedata/GeneratedHeaders_AutomotiveData.h>
 
 namespace lane {
     namespace follower {
@@ -63,24 +70,28 @@ namespace lane {
             bool readSharedImage(odcore::data::Container &c);
 
         private:
-            std::shared_ptr<odcore::wrapper::SharedMemory> m_sharedImageMemory;
+            shared_ptr<odcore::wrapper::SharedMemory> m_sharedImageMemory;
+            shared_ptr<odcore::wrapper::SharedMemory> m_sharedProcessedImageMemory;
+
+            odcore::data::image::SharedImage m_sharedProcessedImage;
+
             bool m_hasAttachedToSharedImageMemory;
             bool m_debug;
             cv::Mat m_image;
 
             automotive::VehicleControl m_vehicleControl;
-            autotux::LaneRecommendationMSG laneRecommendation;
-            autotux::OvertakingMSG overtaking;
-            autotux::config::LaneFollowerMSG config;
-            automotive::miniature::SensorBoardData sensorBoardData;
+            autotux::LaneRecommendationMSG m_laneRecommendation;
+            autotux::OvertakingMSG m_overtaking;
+            autotux::config::LaneFollowerMSG m_config;
+            automotive::miniature::SensorBoardData m_sensorBoardData;
 
             odcore::data::TimeStamp m_previousTime;
             double m_eSum;
             double m_eOld;
 
-            int32_t distance;
-            int32_t control_scanline;
-            int32_t stop_scanline;
+            int32_t m_distance;
+            int32_t m_controlScanline;
+            int32_t m_stopScanline;
 
             // For introduction to algorithm see
             // https://www.youtube.com/watch?v=4Y7zG48uHRo
