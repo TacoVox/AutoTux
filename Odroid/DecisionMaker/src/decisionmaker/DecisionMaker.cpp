@@ -49,30 +49,34 @@ void DecisionMaker::laneFollowing() {
 
     if(stopCounter > 0) {
 
-        if(stopCounter == 60) {
-            cout << "WAKING UP" << endl;
+        if(stopCounter == 90) {
+            //cout << "WAKING UP" << endl;
             stopCounter = 0;
             isStopLine = false;
             vehicleControl.setBrakeLights(false);
         }
 
         else {
-            cout << "SLEEPING..." << endl;
+            //cout << "SLEEPING..." << endl;
             stopCounter++;
-            isStopLine = true;
         }
     }
-
-    else if(getDistanceToLine() < 50 && getDistanceToLine() > -1) {
+    else if(getDistanceToLine() < 50 && getDistanceToLine() != -1) {
+        cout << "STOPPING!" << endl;
         vehicleControl.setBrakeLights(true);
         speed = 0;
         stopCounter = 1;
+        isStopLine = true;
     }
 
-    else if(getDistanceToLine() < 150) {
+    else if(getDistanceToLine() < 150 && getDistanceToLine() != -1) {
+        cout << "Slowing down..." << endl;
         vehicleControl.setBrakeLights(false);
         speed = 1;
     }
+
+    //cout << "Distance to line: " << getDistanceToLine() << endl;
+
     vehicleControl.setSpeed(speed);
     vehicleControl.setSteeringWheelAngle(getAngle());
 }
@@ -100,6 +104,8 @@ double DecisionMaker::getDistanceToLine() {
 }
 
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() {
+    LIFOQueue lifoQueue;
+    addDataStoreFor(lifoQueue);
 
     // Set initial state of the car
     STATE state = PARKING;
@@ -115,8 +121,6 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
     vehicleControl.setSpeed(2.0);
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
-        LIFOQueue lifoQueue;
-        addDataStoreFor(lifoQueue);
 
         // 1. Update sensor board data values
         containerSensorBoardData = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
@@ -133,8 +137,16 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
 
         //state = dmMSG.getState();
 
-        //cout << "SensorValues: " <<  sbd.getValueForKey_MapOfDistances(2) << endl;
-        cout << "Distance: " << vd.getAbsTraveledPath() << endl;
+        cout << "SensorValues BACK RIGHT: " <<  sbd.getValueForKey_MapOfDistances(2) << endl;
+        //cout << "Distance: " << vd.getAbsTraveledPath() << endl;
+
+	double frontUsSensor = sbd.getValueForKey_MapOfDistances(4);
+   // 	cout << "DecisionMaker US Sensor: " << frontUsSensor << endl;
+	cout << "SensorValues FROM 5: " <<  sbd.getValueForKey_MapOfDistances(5) << endl;
+	cout << "SensorValues FRONT RIGHT: " <<  sbd.getValueForKey_MapOfDistances(6) << endl;
+	cout << "SensorValues FRONT RIGHT: " <<  sbd.getValueForKey_MapOfDistances(0) << endl;
+	cout << "SensorValues Back: " <<  sbd.getValueForKey_MapOfDistances(1) << endl;
+
         if(!ovt.isLeftLane()){
             ovtMSG.setLeftlane(NOTLEFTLANE);
         }
@@ -168,6 +180,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                         lightSystem.setReverseLight(false);
 
                     if(!parker.getIsParked()) {
+			cout << "HELLO I WILL PARK NOW!" << endl;
                         vehicleControl = parker.parallelPark(sbd, vd);
                     }
                     else {

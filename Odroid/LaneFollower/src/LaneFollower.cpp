@@ -1,5 +1,6 @@
 #include <iostream>
 #include <memory>
+#include <math.h>
 
 #include <opendavinci/odcore/base/KeyValueConfiguration.h>
 #include <opendavinci/odcore/base/Lock.h>
@@ -43,6 +44,7 @@ namespace lane {
                 laneRecommendation(),
                 overtaking(),
                 config(),
+                sensorBoardData(),
                 m_previousTime(),
                 m_eSum(0),
                 m_eOld(0),
@@ -132,27 +134,35 @@ namespace lane {
             return returnValue;
         }
 
-//        void LaneFollower::getLaneRecommendation(odcore::data::Container &c) {
-//
-//            // TODO: New datatype
-//            if(c.getDataType() == LaneRecommendation::ID()) {
-//
-//                // TODO: New datatype
-//                laneRecommendation = c.getData<LaneRecommendation>();
-//            }
-//        }
+        uint8_t LaneFollower::getThreshold(double lightValue) {
+            if(lightValue < 30.0)
+                lightValue = 30.0;
+
+            double returnVal = log10(lightValue) * 58.0 + lightValue * 0.16 - 30.0 + (pow((lightValue - 80.0) * 0.1, 3.0)) * 0.0034;
+
+            return (uint8_t)returnVal;
+        }
 
         // Do magic to the image around here.
-        void LaneFollower::processImage() {
+        void LaneFollower::processImage(uint8_t threshold) {
 
             // Copy the image to a matrix (this is the one we use for detection)
             Mat m_image_grey = m_image.clone();
 
-            // Make the new image grayscale
+            // Make the new image gray scale
             cvtColor(m_image_grey, m_image_grey, COLOR_BGR2GRAY);
 
             // Make the image binary, threshold set to 180 at the moment
-            threshold(m_image_grey, m_image_grey, 180, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+            // Threshold 165 for light ~246, 140 for ~202, 60 for ~30
+            //
+            // Command line options:
+            // v4l2-ctl -d /dev/CAMERAID -c exposure_auto=1
+            // v4l2-ctl -d /dev/CAMERAID -c exposure_absolute=50
+            //
+            // TODO Check for possibilites to stop auto-focusing and lock focus on a resonable distance
+            cv::threshold(m_image_grey, m_image_grey, threshold, 255, CV_THRESH_BINARY);
+
+            //imwrite("grey.jpg", m_image_grey);
 
             // Find contours on the image
             vector<vector<Point>> contours;
@@ -173,8 +183,8 @@ namespace lane {
             // Lane detection loop
             for(int32_t y = m_image.rows - 8; y > m_image.rows * .5; y -= 10) {
                 // Find red pixels
-                Vec3b pixelLeft, pixelRight, pixelFront;
-                Point left, right, middle;
+                Vec3b pixelLeft, pixelRight;
+                Point left, right;
 
                 left.y = y;
                 left.x = -1;
@@ -200,22 +210,8 @@ namespace lane {
                     }
                 }
 
-                middle.x = (m_image.cols/2);
-                middle.y = control_scanline;
-
-                // Find first red pixel in front (stopline)
-                for(int i = control_scanline; i > stop_scanline; i--) {
-                    pixelFront = m_image.at<Vec3b>(Point(middle.x, i));
-                    if(pixelFront.val[2] == 255) {
-                        middle.y = i;
-                        laneRecommendation.setDistance_to_line(control_scanline - middle.y);
-                        break;
-                    }
-                }
-
                 // If the loop is currently checking at the height of our set control line
                 if(y == control_scanline) {
-
                     // Right lane logic (prefer right line following)
                     if (!inLeftLane) {
                         if (right.x > 0) {
@@ -240,30 +236,73 @@ namespace lane {
                 }
 
                 // Draw debug lines
-//                if (m_debug) {
-//                    // Draw line from control line to stop line if there is one
-//                    if(middle.y < control_scanline) {
-//                        line(m_image, Point(middle.x, control_scanline), middle, Scalar(128, 0, 0));
-//                    }
-//
-//                    // Draw lines from middle to the discovered left pixels
-//                    if (left.x > 0) {
-//                        line(m_image, Point(m_image.cols / 2, y), left, Scalar(0, 255, 0));
-//                        stringstream sstr;
-//                        sstr << (m_image.cols / 2 - left.x);
-//                        putText(m_image, sstr.str().c_str(), Point(m_image.cols / 2 - 100, y - 2), FONT_HERSHEY_PLAIN,
-//                                0.5, CV_RGB(0, 255, 0));
-//                    }
-//
-//                    // Draw lines from middle to the discovered right pixels
-//                    if (right.x > 0) {
-//                        line(m_image, Point(m_image.cols / 2, y), right, Scalar(0, 128, 128));
-//                        stringstream sstr;
-//                        sstr << (right.x - m_image.cols / 2);
-//                        putText(m_image, sstr.str().c_str(), Point(m_image.cols / 2 + 100, y - 2), FONT_HERSHEY_PLAIN,
-//                                0.5, CV_RGB(255, 0, 0));
-//                    }
-//                }
+                if (m_debug) {
+
+                    // Draw lines from middle to the discovered left pixels
+                    if (left.x > 0) {
+                        line(m_image, Point(m_image.cols / 2, y), left, Scalar(0, 255, 0));
+                        stringstream sstr;
+                        sstr << (m_image.cols / 2 - left.x);
+                        putText(m_image, sstr.str().c_str(), Point(m_image.cols / 2 - 100, y - 2), FONT_HERSHEY_PLAIN,
+                                0.5, CV_RGB(0, 255, 0));
+                    }
+
+                    // Draw lines from middle to the discovered right pixels
+                    if (right.x > 0) {
+                        line(m_image, Point(m_image.cols / 2, y), right, Scalar(0, 128, 128));
+                        stringstream sstr;
+                        sstr << (right.x - m_image.cols / 2);
+                        putText(m_image, sstr.str().c_str(), Point(m_image.cols / 2 + 100, y - 2), FONT_HERSHEY_PLAIN,
+                                0.5, CV_RGB(255, 0, 0));
+                    }
+                }
+            }
+
+            Vec3b pixelFrontLeft, pixelFrontRight;
+            Point stop_left, stop_right;
+
+            int left_dist = 0;
+
+            stop_left.x = (m_image.cols/2) - 50;
+            stop_left.y = control_scanline;
+
+            // Find first red pixel in front (stopline)
+            for(int i = control_scanline; i > stop_scanline; i--) {
+                pixelFrontLeft = m_image.at<Vec3b>(Point(stop_left.x, i));
+                if(pixelFrontLeft.val[2] == 255) {
+                    stop_left.y = i;
+                    left_dist = control_scanline - stop_left.y;
+                    break;
+                }
+            }
+
+            int right_dist = 0;
+
+            stop_right.x = (m_image.cols/2) + 50;
+            stop_right.y = control_scanline;
+
+            // Find first red pixel in front (stopline)
+            for(int i = control_scanline; i > stop_scanline; i--) {
+                pixelFrontRight = m_image.at<Vec3b>(Point(stop_right.x, i));
+                if(pixelFrontRight.val[2] == 255) {
+                    stop_right.y = i;
+                    right_dist = control_scanline - stop_right.y;
+                    break;
+                }
+            }
+
+            if(m_debug) {
+                if(stop_left.y < control_scanline) {
+                    line(m_image, Point(stop_left.x, control_scanline), stop_left, Scalar(128, 0, 0));
+                }
+
+                if(stop_right.y < control_scanline) {
+                    line(m_image, Point(stop_right.x, control_scanline), stop_right, Scalar(128, 0, 0));
+                }
+            }
+
+            if((left_dist - right_dist > -5) && (left_dist - right_dist < 5)) {
+                laneRecommendation.setDistance_to_line(left_dist);
             }
 
             return e;
@@ -302,7 +341,7 @@ namespace lane {
                 }
             }
 
-            // Limit max steering anlge based on car limits
+            // Limit max steering angle based on car limits
             if (desiredSteering > 0.5) desiredSteering = 0.5;
             if (desiredSteering < -0.5) desiredSteering = -0.5;
 
@@ -327,32 +366,25 @@ namespace lane {
                    odcore::data::dmcp::ModuleStateMessage::RUNNING) {
                 bool has_next_frame = false;
 
+                Container sbd_container = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
                 Container image_container = getKeyValueDataStore().get(odcore::data::image::SharedImage::ID());
-
                 Container config_container = getKeyValueDataStore().get(config::LaneFollowerMSG::ID());
-                config = config_container.getData<config::LaneFollowerMSG>();
-
                 Container overtaking_container = getKeyValueDataStore().get(OvertakingMSG::ID());
+
+                config = config_container.getData<config::LaneFollowerMSG>();
                 overtaking = overtaking_container.getData<OvertakingMSG>();
 
-                // TODO: New datatype
-                //Container laneContainer = getKeyValueDataStore().get(LaneRecommendation::ID());
-
-                // TODO: New datatype
-//                if(laneContainer.getDataType() == LaneRecommendation::ID()) {
-//
-//                    // TODO: New datatype
-//                    getLaneRecommendation(laneContainer);
-//                }
 
                 if (image_container.getDataType() == odcore::data::image::SharedImage::ID()) {
                     has_next_frame = readSharedImage(image_container);
                 }
 
                 if (has_next_frame) {
-                    processImage();
-                    double detec = laneDetection();
-                    laneFollowing(detec);
+                    sensorBoardData = sbd_container.getData<automotive::miniature::SensorBoardData>();
+
+                    processImage(getThreshold(sensorBoardData.getValueForKey_MapOfDistances(5)));
+                    double detection = laneDetection();
+                    laneFollowing(detection);
                 }
 
                 Container outContainer(laneRecommendation);

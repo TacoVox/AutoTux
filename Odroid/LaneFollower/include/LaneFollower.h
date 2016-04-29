@@ -72,6 +72,7 @@ namespace lane {
             autotux::LaneRecommendationMSG laneRecommendation;
             autotux::OvertakingMSG overtaking;
             autotux::config::LaneFollowerMSG config;
+            automotive::miniature::SensorBoardData sensorBoardData;
 
             odcore::data::TimeStamp m_previousTime;
             double m_eSum;
@@ -100,7 +101,8 @@ namespace lane {
             virtual void setUp();
             virtual void tearDown();
 
-            void processImage();
+            uint8_t getThreshold(double lightValue);
+            void processImage(uint8_t threshold);
             void drawLines();
             double laneDetection();
             void laneFollowing(double e);

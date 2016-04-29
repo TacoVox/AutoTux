@@ -29,22 +29,26 @@ namespace  overtaker{
 //        const double ADJUST_R_S_DIST = 0.0;
 //        const double ADJUST_R_S_LT_DIST = 0.0;
 //        const double ADJUST_R_S_RT_DIST = 0.0;
+//	  const double IR_SENSOR_RANGE = 7.0;
+//	  const double US_SENSOR_RANGE = 8.0
 
         //CAR VALUES
         const double APPROACH_TRIGGER = 12.0;
-        const double OVT_TRIGGER = 0.30;
-        const double LEFT_SWITCH_DIST = 0.10;
-        const double LEFT_SWITCH_LT_DIST = 4.4;
-        const double LEFT_SWITCH_RT_DIST = 2.8;
+        const double OVT_TRIGGER = 0.60;
+        const double LEFT_SWITCH_DIST = 0.30;
+        const double LEFT_SWITCH_LT_DIST = 0.0;
+        const double LEFT_SWITCH_RT_DIST = 0.0;
         const double ADJUST_L_S_DIST = 0.0;
         const double ADJUST_L_S_LT_DIST = 0.0;
-        const double ADJUST_L_S_RT_DIST = 2.0;
-        const double RIGHT_SWITCH_DIST = 3.0;
-        const double RIGHT_SWITCH_LT_DIST = 3.0;
-        const double RIGHT_SWITCH_RT_DIST = 4.0;
+        const double ADJUST_L_S_RT_DIST = 0.0;
+        const double RIGHT_SWITCH_DIST = 0.30;
+        const double RIGHT_SWITCH_LT_DIST = 0.0;
+        const double RIGHT_SWITCH_RT_DIST = 0.0;
         const double ADJUST_R_S_DIST = 0.0;
         const double ADJUST_R_S_LT_DIST = 0.0;
         const double ADJUST_R_S_RT_DIST = 0.0;
+	const double IR_SENSOR_RANGE = 0.15;
+	const double US_SENSOR_RANGE = 0.20;
 
     public:
         Overtaker();

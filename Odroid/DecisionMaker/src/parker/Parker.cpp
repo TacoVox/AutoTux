@@ -35,7 +35,8 @@ Parker::~Parker(){}
  * Finds a parking spot where the car fits
  */
 void Parker::findSpot(SensorBoardData sbd, VehicleData vd, VehicleControl dmVehicleControl) {
-
+	cout << "Infrared: " << sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) << "Ultrasonic: " <<
+        sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) << endl;
     //Check if the car has been turning for a time which means it has been in a curve, then start to find a object again
     if(dmVehicleControl.getSteeringWheelAngle() >  0.5 || dmVehicleControl.getSteeringWheelAngle() < -0.5){
         turningCounter++;
@@ -331,14 +332,15 @@ void Parker::enoughSpace(){
  * Finds end of the gap
  */
 void Parker::findGapEnd(SensorBoardData sbd, VehicleData vd){
-    if(vd.getAbsTraveledPath() > gapStart + ENOUGH_SPACE_DISTANCE){
+        //This is outcommented because it neeeds to be futher tested in simulation because it dosn't work
+    /*if(vd.getAbsTraveledPath() > gapStart + ENOUGH_SPACE_DISTANCE){
         isAccurate = 0;
         objInFront = true;
         state = ENOUGHSPACE;
         parkstate = PHASE1;
     }
 
-    else {
+    else {*/
         //To check if the sensors are in the ranges of where it can find a object
         if ((sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT)) > IRSENSOR_DISTANCE_MIN &&
             (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < IRSENSOR_DISTANCE_MAX)) {
@@ -354,7 +356,7 @@ void Parker::findGapEnd(SensorBoardData sbd, VehicleData vd){
             objInFront = true;
             state = ENOUGHSPACE;
         }
-    }
+    //}
 }
 /**
  * Finds the start of the gap
@@ -396,7 +398,8 @@ void Parker::findObject(SensorBoardData sbd) {
 /**
  * If a spot has been found or not
  */
-bool Parker::getFoundSpot(){
+bool Parker::getFoundSpot() {
+    cout << isSpot << endl;
     return isSpot;
 }
 /**
