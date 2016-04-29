@@ -32,7 +32,7 @@ namespace lane {
         using namespace odtools::player;
 
         // SET TO TRUE WHEN USING THE SIMULATOR
-        const bool SIMMODE = true;
+        const bool SIMMODE = false;
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) :
                 TimeTriggeredConferenceClientModule(argc, argv, "LaneFollower"),
@@ -152,7 +152,9 @@ namespace lane {
             // Make the new image gray scale
             cvtColor(m_image_grey, m_image_grey, COLOR_BGR2GRAY);
 
-            Canny(m_image_grey, m_image_grey, 200, 200, 3);
+            Canny(m_image_grey, m_image_grey, 50, 200, 3);
+
+            imshow("ok", m_image_grey);
 
             /**
              * TODO Look into HoughLines to find edges.
@@ -173,9 +175,6 @@ namespace lane {
                 pt2.y = cvRound(y0 - 1000*(a));
                 line(m_image, pt1, pt2, Scalar(0,0,255), 3, CV_AA);
             }*/
-
-            imshow("Image", m_image_grey);
-            waitKey(10);
 
             // Find contours on the image
             vector<vector<Point>> contours;
