@@ -38,7 +38,8 @@ usb_handler::USBHandler::~USBHandler()
 void usb_handler::USBHandler::run()
 {
     // connect and set the buffer wrapper
-    uc->connect();
+    while (uc->connect() == false)
+        ;
 
     // main loop
     while (running) {
@@ -74,6 +75,7 @@ void usb_handler::USBHandler::stop()
 /*! sets the usb connector for this handler */
 void usb_handler::USBHandler::set_usb_connector(std::shared_ptr<usb_connector::USBConnector> ptr)
 {
+    cout << "setting usb connector to usb handler" << endl;
     uc = ptr;
 }
 

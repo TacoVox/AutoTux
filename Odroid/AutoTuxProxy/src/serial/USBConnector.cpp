@@ -60,6 +60,7 @@ usb_connector::USBConnector::~USBConnector()
 /*! sets the buffer wrapper for this connector */
 void usb_connector::USBConnector::set_buffer_wrapper(std::shared_ptr<serial::BufferWrapper> ptr)
 {
+    cout << "setting buffer wrapper to usb connector" << endl;
     bw = ptr;
 }
 
