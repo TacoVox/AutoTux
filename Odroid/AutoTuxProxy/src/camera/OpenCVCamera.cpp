@@ -55,10 +55,6 @@ namespace proxy {
             bool returnVal = false;
             if((dest != NULL) && (size > 0)) {
                 memcpy(dest, m_mat.data, size);
-
-                // TODO Read debug config.
-                imshow("WindowShowImage", m_mat);
-                waitKey(10);
                 returnVal = true;
             }
             return returnVal;
