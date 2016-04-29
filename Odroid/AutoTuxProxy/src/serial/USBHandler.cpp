@@ -75,6 +75,7 @@ void usb_handler::USBHandler::stop()
 /*! sets the usb connector for this handler */
 void usb_handler::USBHandler::set_usb_connector(std::shared_ptr<usb_connector::USBConnector> ptr)
 {
+    cout << "setting usb connector to usb handler" << endl;
     uc = ptr;
 }
 
