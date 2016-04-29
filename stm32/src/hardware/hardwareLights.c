@@ -25,6 +25,11 @@ static bool checkFlashRightBit(unsigned char lightByte);
 static uint8_t* colorBuffer = 0;
 
 /**
+ * Buffer with all 0s to write when lights are turned off
+ */
+static uint8_t* allLightsOffBuffer = 0;
+
+/**
  * Configuration for the neopixel LED driver
  */
 static neopixelConfig cfg = {
@@ -33,6 +38,11 @@ static neopixelConfig cfg = {
 	16,
 	false
 };
+
+/**
+ * Master light switch
+ */
+static bool lightsOn = true;
 
 /**
  * Whether the corresponding lights are currently on or off.
@@ -62,7 +72,13 @@ static bool flashState;
  * Sets up the pin and color buffer. Initializes head and tail lights.
  */
 void hardwareLightsSetup(void) {
+	palSetPadMode(GPIOC, 7, PAL_MODE_INPUT_PULLUP);
 	neopixelInit(&cfg, &colorBuffer);
+
+	// Create all 0s buffer for when lights are turned off
+	allLightsOffBuffer = chHeapAlloc(NULL, sizeof(unsigned char) * 16 * 3);
+	uint32_t i;
+	for (i = 0; i < 16 * 3; i++) allLightsOffBuffer[i] = 0;
 
 	// Headlights
 	neopixelSetColor(colorBuffer, LIGHT_HEADLIGHT_LEDS, LIGHT_HEADLIGHT_R, LIGHT_HEADLIGHT_G, LIGHT_HEADLIGHT_B);
@@ -96,11 +112,24 @@ void hardwareLightsIteration(unsigned char lightByte, bool rcMode, bool rcBrakeL
 		}
 	}
 
+	// Check master light switch
+	if (lightsOn && palReadPad(GPIOC, 7) == PAL_HIGH) {
+		lightsOn = false;
+		lightsHaveChanged = true;
+	} else if (lightsOn == false && palReadPad(GPIOC, 7) == PAL_LOW) {
+		lightsOn = true;
+		lightsHaveChanged = true;
+	}
+
 	// Rebuild color buffer and write if anything has changed.
 	if (lightsHaveChanged) {
 		updateColorBuffer();
 
-		neopixelWrite(&cfg, colorBuffer);
+		if (lightsOn) {
+			neopixelWrite(&cfg, colorBuffer);
+		} else {
+			neopixelWrite(&cfg, allLightsOffBuffer);
+		}
 		lightsHaveChanged = false;
 	}
 }

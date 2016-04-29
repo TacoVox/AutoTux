@@ -56,7 +56,7 @@ void controlOutputSetup(void) {
 	// TODO: also initialize RC here later?
 	hardwarePWMSetup();
 	hardwareRCSetup();
-	//hardwareLightsSetup();
+	hardwareLightsSetup();
 
 	//hardwareIterationLights(0, false, false);
 }
@@ -118,7 +118,7 @@ void controlOutputIteration() {
 	}
 
 	// Update lights
-	//hardwareLightsIteration(lightByte, rcMode, rcBrake);
+	hardwareLightsIteration(lightByte, rcMode, rcBrake);
 }
 
 

@@ -68,10 +68,10 @@
  */
 void neopixelInit(neopixelConfig* cfg, uint8_t** colorBuffer) {
 	palSetPadMode(cfg->port, cfg->pin, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);
-	palSetPad(cfg->port, cfg->pin);
+	palClearPad(cfg->port, cfg->pin);
 
 	// Allocate memory, set all elements to 0
-	uint8_t* allocatedBuffer = chHeapAlloc(NULL, sizeof(unsigned char) * cfg->numberOfLEDs * 3 * 8);
+	uint8_t* allocatedBuffer = chHeapAlloc(NULL, sizeof(unsigned char) * cfg->numberOfLEDs * 3);
 	*colorBuffer = allocatedBuffer;
 
 	uint32_t i;
