@@ -154,8 +154,6 @@ namespace lane {
 
             Canny(m_image_grey, m_image_grey, 50, 200, 3);
 
-            imshow("ok", m_image_grey);
-
             /**
              * TODO Look into HoughLines to find edges.
              * Example below.
