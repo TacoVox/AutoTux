@@ -4,7 +4,7 @@
 #define SIMGAIN 2.6;
 #define SIMDISTANCE 280;
 
-#define CARGAIN 1.7;
+#define CARGAIN 0.8;
 #define CARDISTANCE 220;
 
 #include <memory>
@@ -61,13 +61,20 @@ namespace lane {
              * @return true if successfully processed.
              */
             bool readSharedImage(odcore::data::Container &c);
-            int m_distToLeftMarking;
-            int m_distToRightMarking;
 
         private:
+            std::shared_ptr<odcore::wrapper::SharedMemory> m_sharedImageMemory;
             bool m_hasAttachedToSharedImageMemory;
             bool m_debug;
-            bool panicStop;
+            cv::Mat m_image;
+
+            automotive::VehicleControl m_vehicleControl;
+            autotux::LaneRecommendationMSG laneRecommendation;
+            autotux::OvertakingMSG overtaking;
+            autotux::config::LaneFollowerMSG config;
+            automotive::miniature::SensorBoardData sensorBoardData;
+
+            odcore::data::TimeStamp m_previousTime;
             double m_eSum;
             double m_eOld;
 
@@ -80,29 +87,25 @@ namespace lane {
             // Proportional gain. Values above 1 amplifies e and vice versa.
             // 1 too low for right curve, 4 too twitchy. 2-3 seems very good
             double P_GAIN;
-            // Cross track error rate gain. Affects the angle based on how fast we
-            // are moving towards the desired center of the lane. Counters the primary
-            // proportional correction. Increase if car wobbles around centerline
-            // because of of overcorrection.
-            double E_GAIN;
+
             // Integral gain. Adjusts based on accumulated e values, to correct for
             // offset.
             double I_GAIN;
 
-            bool inLeftLane;
-
-            std::shared_ptr<odcore::wrapper::SharedMemory> m_sharedImageMemory;
-            cv::Mat m_image;
-            odcore::data::TimeStamp m_previousTime;
-
-            automotive::VehicleControl m_vehicleControl;
-
-            autotux::LaneRecommendation laneRecommendation;
+            // Cross track error rate gain. Affects the angle based on how fast we
+            // are moving towards the desired center of the lane. Counters the primary
+            // proportional correction. Increase if car wobbles around centerline
+            // because of of overcorrection.
+            double D_GAIN;
 
             virtual void setUp();
             virtual void tearDown();
 
-            void processImage();
+            uint8_t getThreshold(double lightValue);
+            void processImage(uint8_t threshold);
+            void drawLines();
+            double laneDetection();
+            void laneFollowing(double e);
             void getLaneRecommendation(odcore::data::Container &c);
         };
     } // follower

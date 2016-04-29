@@ -1,8 +1,5 @@
-/*
- * hardwareRC.c
- *
- *  Created on: Apr 4, 2016
- *      Author: jerker
+/** @file	hardwareRC.c
+ * 	@brief Reads the PWM signals from the RC receiver using ICU timers.
  */
 
 #include <hal.h>
@@ -17,7 +14,9 @@
 static void icuCallbackThrottle(ICUDriver *icup);
 static void icuCallbackSteering(ICUDriver *icup);
 
-
+/**
+ * ICU configuration for the throttle channel.
+ */
 static ICUConfig icuConfigThrottle = {
   ICU_INPUT_ACTIVE_HIGH,
   1000000,
@@ -28,6 +27,9 @@ static ICUConfig icuConfigThrottle = {
   0
 };
 
+/**
+ * ICU configuration for the steering channel.
+ */
 static ICUConfig icuConfigSteering = {
   ICU_INPUT_ACTIVE_HIGH,
   1000000,
@@ -38,20 +40,21 @@ static ICUConfig icuConfigSteering = {
   0
 };
 
-
-// The resulting pulsewidth values
+/**
+ * The resulting pulse width values.
+ */
 static icucnt_t pw[RC_CHANNELS];
 
 
 //-----------------------------------------------------------------------------
-// "Public" interface
+// Public interface
 //-----------------------------------------------------------------------------
 
 
 /*
  * Sets up the pins etc.
  */
-void hardwareSetupRC() {
+void hardwareRCSetup() {
 	// Throttle
 	palSetPadMode(RC_PIN_GROUPS[0], RC_PIN_NUMBERS[0], PAL_MODE_ALTERNATE(2));
 	icuStart(RC_TIMER_THROTTLE, &icuConfigThrottle);
@@ -65,24 +68,29 @@ void hardwareSetupRC() {
 	icuEnableNotifications(RC_TIMER_STEERING);
 }
 
-
-
 /*
- * Getter for the values. Specify a US sensor.
+ * Getter for the values. Specify an RC channel.
  */
-icucnt_t hardwareGetValuesRC(RC_CHANNEL channel) {
+icucnt_t hardwareRCGetValues(RC_CHANNEL channel) {
 	return pw[channel];
 }
 
+
 //-----------------------------------------------------------------------------
-// "Private" implementation
+// Implementation. The static functions below are inaccessible to other modules
 //-----------------------------------------------------------------------------
 
 
+/**
+ * Callback function for the throttle measurement
+ */
 static void icuCallbackThrottle(ICUDriver *icup) {
 	pw[THROTTLE] = icuGetWidthX(icup);
 }
 
+/**
+ * Callback function for the steering measurement
+ */
 static void icuCallbackSteering(ICUDriver *icup) {
 	pw[STEERING] = icuGetWidthX(icup);
 }

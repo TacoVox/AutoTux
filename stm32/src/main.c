@@ -1,13 +1,9 @@
-/**
- * Main file for the stm32 part of AutoTux.
- * Some of the files such as usbcfg.*, chconf, mcuconf and halconf are from the ChibiOS
- * examples for stm32. The config files are tailored for our particular needs.
- * Also note this from the ChibiOS example readme:
+/** @file	main.c
+ *  @brief Main file for the stm32 part of AutoTux.
  *
- * "Some files used by the demo are not part of ChibiOS/RT but are copyright of
- * ST Microelectronics and are licensed under a different license.
- * Also note that not all the files present in the ST library are distributed
- * with ChibiOS/RT, you can find the whole library on the ST web site."
+ * Initializes ChibiOS and the hardware, makes serial connection start it's own
+ * thread, and then proceeds to the main loop that reads sensor input and outputs
+ * control data to the hardware.
  */
 
 
@@ -16,17 +12,23 @@
 #include <hal.h>
 
 // Local includes
-#include "hardware/sensorInput.h"
-#include "hardware/controlOutput.h"
+#include "sensorInput.h"
+#include "controlOutput.h"
 #include "serial/serialConnection.h"
-#include "hardware/neopixelSWD.h"
 
 
 //-----------------------------------------------------------------------------
-// Implementation - main loop.
+// Main loop
 //-----------------------------------------------------------------------------
 
 
+/**
+ * @brief Main loop.
+ *
+ * Initializes ChibiOS and the hardware, makes serial connection start it's own
+ * thread, and then proceeds to the main loop that reads sensor input and outputs
+ * control data to the hardware.
+ */
 int main(void) {
 	// ChibiOS initialization
 	halInit();

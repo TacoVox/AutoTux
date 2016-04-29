@@ -1,5 +1,7 @@
-/*
- * hardwareLights.c
+/** @file	hardwareLights.c
+ * 	@brief Handles the lights of the car.
+ *
+ * Uses neopixelSWD as the driver for the LEDs.
  */
 
 #include "neopixelSWD.h"
@@ -10,24 +12,46 @@
 // Definitions
 //-----------------------------------------------------------------------------
 
-#define ITERATIONS_PER_FLASH_STATE 4
+static void updateColorBuffer(void);
+static void setLightBools(unsigned char lightByte, bool rcMode, bool rcBrakeLight);
+static bool checkBrakeBit(unsigned char lightByte);
+static bool checkReverseBit(unsigned char lightByte);
+static bool checkFlashLeftBit(unsigned char lightByte);
+static bool checkFlashRightBit(unsigned char lightByte);
 
-void updateColorBuffer(void);
-void setLightBools(unsigned char lightByte, bool rcMode, bool rcBrakeLight);
-bool checkBrakeBit(unsigned char lightByte);
-bool checkReverseBit(unsigned char lightByte);
-bool checkFlashLeftBit(unsigned char lightByte);
-bool checkFlashRightBit(unsigned char lightByte);
-
+/**
+ * Holds the color buffer for the LED strip
+ */
 static uint8_t* colorBuffer = 0;
+
+/**
+ * Configuration for the neopixel LED driver
+ */
 static neopixelConfig cfg = {
-	GPIOA, // TODO: move pin to config
-	6,
+	LED_PORT,
+	LED_PIN,
 	16,
 	false
 };
+
+/**
+ * Whether the corresponding lights are currently on or off.
+ */
 static bool brakeLight, flashLeft, flashRight, reverseLight, rcLight;
-static bool lightsHaveChanged, flashState;
+
+/**
+ * Used to only write to LED chain if any changes have occured.
+ */
+static bool lightsHaveChanged;
+
+/**
+ * @brief Used to determine if flashing lights are currently in a high or low state.
+ *
+ * The actual state of whether they are turned on or off from the "driver"
+ * perspective is kept in flashLeft and flashRight.
+ */
+static bool flashState;
+
 
 //-----------------------------------------------------------------------------
 // Public interface
@@ -35,17 +59,16 @@ static bool lightsHaveChanged, flashState;
 
 
 /*
- * Sets up the pin and color buffer.
+ * Sets up the pin and color buffer. Initializes head and tail lights.
  */
-void hardwareSetupLights(void) {
-
+void hardwareLightsSetup(void) {
 	neopixelInit(&cfg, &colorBuffer);
 
 	// Headlights
-	neopixelSetColor(colorBuffer, LED(1) | LED(2) | LED(5) | LED(6), 30, 30, 30);
+	neopixelSetColor(colorBuffer, HEADLIGHT_LEDS, HEADLIGHT_R, HEADLIGHT_G, HEADLIGHT_B);
 
 	// Tail lights
-	neopixelSetColor(colorBuffer, LED(9) | LED(14), 40, 0, 0);
+	neopixelSetColor(colorBuffer, TAILLIGHT_LEDS, TAILLIGHT_R, TAILLIGHT_G, TAILLIGHT_B);
 
 	// Sleep a while to make sure voltage on the car stabilizes before write occurs
 	chThdSleepMilliseconds(100);
@@ -53,9 +76,10 @@ void hardwareSetupLights(void) {
 }
 
 /**
- *
+ * Determines which lights should be on and off at this point, and forwards to hardware
+ * when needed.
  */
-void hardwareIterationLights(unsigned char lightByte, bool rcMode, bool rcBrakeLight) {
+void hardwareLightsIteration(unsigned char lightByte, bool rcMode, bool rcBrakeLight) {
 	static uint8_t flashStateCounter = 0;
 
 	// First process inputs, refine into bools for which lights are on and off
@@ -85,45 +109,47 @@ void hardwareIterationLights(unsigned char lightByte, bool rcMode, bool rcBrakeL
 // Implementation. The static functions below are inaccessible to other modules
 //-----------------------------------------------------------------------------
 
-void updateColorBuffer(void) {
+/**
+ * Updates the color buffer based on the booleans holding the state of each light.
+ */
+static void updateColorBuffer(void) {
 	// Let flashing activate and deactivate "naturally" aligned with the
 	// flashState pace.
 	if (flashLeft && flashState) {
-		neopixelSetColor(colorBuffer, LED(7) | LED(8), 230, 130, 0);
+		neopixelSetColor(colorBuffer, FLASHLEFT_LEDS, FLASH_R, FLASH_G, FLASH_B);
 	}
 	if (flashRight && flashState) {
-		neopixelSetColor(colorBuffer, LED(0) | LED(15), 230, 130, 0);
+		neopixelSetColor(colorBuffer, FLASHLEFT_LEDS, FLASH_R, FLASH_G, FLASH_B);
 	}
 	if (!flashState) {
 		// Turn off all corner leds
-		neopixelSetColor(colorBuffer, LED(0) | LED(7) | LED(8) | LED(15), 0, 0, 0);
-
+		neopixelSetColor(colorBuffer, FLASHLEFT_LEDS | FLASHRIGHT_LEDS, 0, 0, 0);
 	}
 
 	if (reverseLight) {
-		neopixelSetColor(colorBuffer, LED(11), 60, 60, 60);
+		neopixelSetColor(colorBuffer, REVERSE_LEDS, REVERSE_R, REVERSE_G, REVERSE_B);
 	} else {
-		neopixelSetColor(colorBuffer, LED(11), 0, 0, 0);
+		neopixelSetColor(colorBuffer, REVERSE_LEDS, 0, 0, 0);
 	}
 
 	if (brakeLight) {
-		neopixelSetColor(colorBuffer, LED(10) | LED(13), 255, 0, 0);
+		neopixelSetColor(colorBuffer, BRAKE_LEDS, BRAKE_R, BRAKE_G, BRAKE_B);
 	} else {
-		neopixelSetColor(colorBuffer, LED(10) | LED(13), 0, 0, 0);
+		neopixelSetColor(colorBuffer, BRAKE_LEDS, 0, 0, 0);
 	}
 
 	if (rcLight) {
-		neopixelSetColor(colorBuffer, LED(3) | LED(4) | LED(12), 0, 0, 150);
+		neopixelSetColor(colorBuffer, RCLIGHT_LEDS, RCLIGHT_R, RCLIGHT_G, RCLIGHT_B);
 	} else {
-		neopixelSetColor(colorBuffer, LED(3) | LED(4) | LED(12), 0, 0, 0);
+		neopixelSetColor(colorBuffer, RCLIGHT_LEDS, 0, 0, 0);
 	}
 }
 
 
 /**
- * Choose which lights should be on and off
+ * Helper function that chooses which lights should be on and off.
  */
-void setLightBools(unsigned char lightByte, bool rcMode, bool rcBrakeLight) {
+static void setLightBools(unsigned char lightByte, bool rcMode, bool rcBrakeLight) {
 	// Assumption: rcLight = (rcMode || rcBrakeLight)
 	if (rcLight != (rcMode || rcBrakeLight)) {
 		rcLight = (rcMode || rcBrakeLight);
@@ -151,18 +177,30 @@ void setLightBools(unsigned char lightByte, bool rcMode, bool rcBrakeLight) {
 	}
 }
 
-bool checkBrakeBit(unsigned char lightByte) {
+/**
+ * Returns true if the brake bit is set in the light control byte.
+ */
+static bool checkBrakeBit(unsigned char lightByte) {
 	return (lightByte &  LIGHT_BIT_BRAKE) == LIGHT_BIT_BRAKE;
 }
 
-bool checkReverseBit(unsigned char lightByte) {
+/**
+ * Returns true if the reverse bit is set in the light control byte.
+ */
+static bool checkReverseBit(unsigned char lightByte) {
 	return (lightByte &  LIGHT_BIT_REVERSE) == LIGHT_BIT_REVERSE;
 }
 
-bool checkFlashLeftBit(unsigned char lightByte) {
+/**
+ * Returns true if the flash left bit is set in the light control byte.
+ */
+static bool checkFlashLeftBit(unsigned char lightByte) {
 	return (lightByte &  LIGHT_BIT_FLASH_LEFT) == LIGHT_BIT_FLASH_LEFT;
 }
 
-bool checkFlashRightBit(unsigned char lightByte) {
+/**
+ * Returns true if the flash right bit is set in the light control byte.
+ */
+static bool checkFlashRightBit(unsigned char lightByte) {
 	return (lightByte &  LIGHT_BIT_FLASH_RIGHT) == LIGHT_BIT_FLASH_RIGHT;
 }

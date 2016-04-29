@@ -1,10 +1,16 @@
+/** @file	neopixelSWD.c
+ * 	@brief	Software driver for WS2812 neooixel in ChibiOS.
+ *
+ * 	Uses software bitbanging.
+ */
+
 #include <hal.h>
 #include "neopixelSWD.h"
 
+//-----------------------------------------------------------------------------
+// Definitions
+//-----------------------------------------------------------------------------
 
-// seems to be around 21 ms per NOP - maybe it's because one oscillation
-// in 68mhz is 5.95 ns, and it usually takes three for each iteration of the NOP
-// for loops (the NOP, the boolean check and the counter increase)?
 
 /*
  * The below values work fine with OPEN DRAIN mode.
@@ -19,16 +25,50 @@
  * maybe the signal is just very fast at going high, but slower when going
  * low) the zeroes are understood as ones if we use the same HIGH_TIME_0!
  * Here we need to use a significantly lower HIGH_TIME_0.
+ *
+ * In general, the time seems to be around 21 ms per NOP - maybe it's because
+ * one oscillation in 68mhz is 5.95 ns, and it usually takes three for each
+ * iteration of the NOP for loops (the NOP, the boolean check and the counter
+ * increase)?
  */
-#define HIGH_TIME_1 38 // 800 ns // 40
-#define LOW_TIME_1 22 // 450 ns // 20
-#define HIGH_TIME_0 5 // 400 ns // 15 // 12 för lågt, 24 för högt
-#define LOW_TIME_0 55 // 850 ns // 40
-#define RESET_TIME_CLEAR 10000 // 50 microseconds
 
+/**
+ * The number of NOP loop iterations the signal should be high when sending a 1.
+ */
+#define HIGH_TIME_1 38
+
+/**
+ * The number of NOP loop iterations the signal should be low when sending a 1.
+ */
+#define LOW_TIME_1 22 // 450 ns // 20
+
+/**
+ * The number of NOP loop iterations the signal should be high when sending a 0.
+ */
+#define HIGH_TIME_0 5 // 400 ns // 15 // 12 för lågt, 24 för högt
+
+/**
+ * The number of NOP loop iterations the signal should be low when sending a 0.
+ */
+#define LOW_TIME_0 55 // 850 ns // 40
+
+/**
+ * The number of NOP loop iterations the signal should be high when sending a 1.
+ */
+#define RESET_TIME_CLEAR 2400 // 50 microseconds
+
+
+//-----------------------------------------------------------------------------
+// Public interface
+//-----------------------------------------------------------------------------
+
+
+/**
+ * Initializes the color buffer and the pin selected in the neopixelConfig.
+ */
 void neopixelInit(neopixelConfig* cfg, uint8_t** colorBuffer) {
-	//palSetPadMode(cfg->port, cfg->pin, PAL_MODE_OUTPUT_OPENDRAIN);
 	palSetPadMode(cfg->port, cfg->pin, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);
+	palSetPad(cfg->port, cfg->pin);
 
 	// Allocate memory, set all elements to 0
 	uint8_t* allocatedBuffer = chHeapAlloc(NULL, sizeof(unsigned char) * cfg->numberOfLEDs * 3 * 8);
@@ -40,8 +80,10 @@ void neopixelInit(neopixelConfig* cfg, uint8_t** colorBuffer) {
 
 
 /**
- * Nice way of setting colors by bit masks, for example LED(1) | LED(2). Works for
- * the 32 first LEDs. Be responsible, no error checking with the configured LED count.
+ * @brief Nice way of setting colors by bit masks, for example LED(1) | LED(2).
+ *
+ * Works for the 32 first LEDs. Be responsible, no error checking with the
+ * configured LED count.
  */
 void neopixelSetColor(uint8_t* colorBuffer, uint32_t ledMask,
 		unsigned char R, unsigned char G, unsigned char B) {
@@ -56,16 +98,19 @@ void neopixelSetColor(uint8_t* colorBuffer, uint32_t ledMask,
 	}
 }
 
+/**
+ * Writes the color buffer to the LEDs.
+ */
 void neopixelWrite(neopixelConfig* cfg, uint8_t* colorBuffer) {
-	uint32_t currentLEDColor;
+	// For timing reasons, we prepare variables before we start writing
 	uint32_t currentLED;
+	uint32_t currentLEDColor;
 	int c = 0;
 	int bit = 0;
-	chSysLock();
-
 	ioportid_t port = cfg->port;
 	ioportmask_t pin = cfg->pin;
 
+	chSysLock();
 	for (currentLED = 0; currentLED < cfg->numberOfLEDs; currentLED++) {
 
 		currentLEDColor = colorBuffer[currentLED * 3] << 16 | colorBuffer[currentLED * 3 + 1] << 8 |
@@ -88,14 +133,11 @@ void neopixelWrite(neopixelConfig* cfg, uint8_t* colorBuffer) {
 				for (c = 0; c < LOW_TIME_0 ; c++) __asm__("nop");
 			}
 		}
-		//for (c = 0; c < 10; c++) __asm__("nop");
 	}
 
 	if (cfg->enforceLatchTime) {
-		//palClearPad(GPIOA, 6);
+		// Make sure to keep the signal low for at least 50 us
 		for (c = 0; c < RESET_TIME_CLEAR; c++) __asm__("nop");
 	}
 	chSysUnlock();
 }
-
-

@@ -4,24 +4,25 @@ project(LaneFollower)
 # Set module paths, system dependant.
 # TODO Make cmake search for it
 set(CMAKE_MODULE_PATH "/opt/od/share/cmake-3.0/Modules" ${CMAKE_MODULE_PATH})
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -lopencv_core -lopencv_highgui -Werror -Wextra -Wshadow -Wno-deprecated -Wfloat-equal -Wpointer-arith -Wwrite-strings -Wpacked")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -lopencv_core -lopencv_highgui")
 
-SET (CXX_EFFECTIVE_CXX "-Wno-error=effc++ -Weffc++ -Wmissing-format-attribute
--Wredundant-decls ")
-
-SET (CXX_WARNING_ALL "-Wcast-align -Wchar-subscripts -Wcomment -Wdisabledoptimization
--Wformat -Wformat=2 -Wformat-nonliteral -Wformat-security -Wformat-y2k -
-Wfloat-equal -Winit-self -Winline -Winvalid-pch -Wlong-long -Wsign-compare -
-Wuninitialized -Wunreachable-code -Wunsafe-loop-optimizations -Wunused -Wunused-function
--Wunused-label -Wunused-parameter -Wunused-but-set-parameter -Wunused-but-set-variable -
-Wunused-value -Wunused-variable -Wno-maybe-uninitialized -Wunused-result -Wmissingbraces
--Wmissing-field-initializers -Wmissing-format-attribute -Wmissing-include-dirs -
-Wmissing-noreturn -Wparentheses -Wsign-compare -Wswitch -Wuninitialized -Wunknownpragmas
--Wunreachable-code -Wtrigraphs -Wvariadic-macros -Wvolatile-register-var -
-Wwrite-strings -Wpointer-arith -Wredundant-decls -Wreturn-type -Wsequence-point -Wstackprotector
--Wstrict-aliasing -Wstrict-aliasing=2 -Wsync-nand -Wsuggest-attribute=const -
-Warray-bounds -Wtrampolines -Wlogical-op -Wnormalized=nfc -Wvarargs -Wvector-operationperformance
--Wvla -Wtype-limits -Wc++11-compat -Woverloaded-virtual")
+# SET warning flags here and append them to the CMAKE_CXX_FLAGS
+SET(WARN "${WARN} -g -O -Wall -Weffc++ -pedantic -Wvolatile-register-var")
+SET(WARN "${WARN} -Wconversion -Wcast-align -Wwrite-strings -Wunused-variable")
+SET(WARN "${WARN} -Wcast-qual -Wchar-subscripts -Wvariadic-macros -Wimport")
+SET(WARN "${WARN} -Wcomment -Wunused-parameter -Wextra -Wdisabled-optimization")
+SET(WARN "${WARN} -Wfloat-equal -Wformat=2 -Wformat-nonliteral")
+SET(WARN "${WARN} -Wformat-security -Wformat-y2k -Wwrite-strings")
+SET(WARN "${WARN} -Winit-self -Wformat -Winline -Winvalid-pch -Wmissing-braces")
+SET(WARN "${WARN} -Wunsafe-loop-optimizations -Wlong-long -Wreturn-type")
+SET(WARN "${WARN} -Wmissing-field-initializers -Wmissing-format-attribute")
+SET(WARN "${WARN} -Wmissing-include-dirs -Wpacked -Wparentheses -Wunused-value")
+SET(WARN "${WARN} -Wmissing-noreturn -Wsequence-point -Wshadow -Wsign-compare")
+SET(WARN "${WARN} -Wpointer-arith -Wredundant-decls -Wstack-protector -Wswitch")
+SET(WARN "${WARN} -Wstrict-aliasing -Wstrict-aliasing=2 -Wswitch-enum -Wunused")
+SET(WARN "${WARN} -Wunknown-pragmas -Wunreachable-code -Wswitch-default")
+SET(WARN "${WARN} -Wunused-function -Wunused-label -Wtrigraphs -Wuninitialized")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARN} -pedantic-errors -Werror")
 
 # Require OpenDaVINCI
 set(OPENDAVINCI_DIR "/opt/od")
@@ -42,9 +43,9 @@ find_package(OpenCV REQUIRED)
 set(LIBRARIES ${OPENDAVINCI_LIBRARIES} ${AUTOMOTIVEDATA_LIBRARIES} ${OpenCV_LIBRARIES})
 
 # Include dirs
-include_directories(${OPENDAVINCI_INCLUDE_DIRS})
-include_directories(${AUTOMOTIVEDATA_INCLUDE_DIRS})
-include_directories(${OpenCV_INCLUDE_DIRS})
+include_directories(SYSTEM ${OPENDAVINCI_INCLUDE_DIRS})
+include_directories(SYSTEM ${AUTOMOTIVEDATA_INCLUDE_DIRS})
+include_directories(SYSTEM ${OpenCV_INCLUDE_DIRS})
 include_directories(include)
 
 # Build things?

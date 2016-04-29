@@ -19,6 +19,11 @@ namespace proxy {
                 if(m_vc.isOpened()) {
                     m_vc.set(CV_CAP_PROP_FRAME_HEIGHT, height);
                     m_vc.set(CV_CAP_PROP_FRAME_WIDTH, width);
+                    m_vc.set(CV_CAP_PROP_BRIGHTNESS, 0.0);
+
+                    // NOTE: system calls might be bad :(
+                    system("v4l2-ctl -c exposure_auto=1");
+                    system("v4l2-ctl -c exposure_absolute=60");
                 } else {
                     cerr << "CameraProxy: Could not open camera '" << name << "' with ID: " << id << endl;
                 }
@@ -50,10 +55,9 @@ namespace proxy {
             bool returnVal = false;
             if((dest != NULL) && (size > 0)) {
                 memcpy(dest, m_mat.data, size);
-                cout << "cp image" << endl;
 
                 // TODO Read debug config.
-                //imshow("WindowShowImage", m_mat);
+                imshow("WindowShowImage", m_mat);
                 waitKey(10);
                 returnVal = true;
             }

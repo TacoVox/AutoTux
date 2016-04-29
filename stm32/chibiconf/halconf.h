@@ -28,7 +28,7 @@
 #ifndef _HALCONF_H_
 #define _HALCONF_H_
 
-#include "mcuconf.h"
+#include "../chibiconf/mcuconf.h"
 
 //#if !defined (STM32F407xx) || defined(__DOXYGEN)
 //#define STM32F407xx TRUE
@@ -73,7 +73,7 @@
  * @brief   Enables the EXT subsystem.
  */
 #if !defined(HAL_USE_EXT) || defined(__DOXYGEN__)
-#define HAL_USE_EXT                 FALSE
+#define HAL_USE_EXT                 TRUE
 #endif
 
 /**

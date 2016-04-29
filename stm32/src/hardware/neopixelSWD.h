@@ -1,7 +1,7 @@
-/*
- * Software driver for WS2812.
+/** @file	neopixelSWD.c
+ * 	@brief	Software driver for WS2812 neooixel in ChibiOS.
  *
- * Usage example:
+ *  Uses software bitbanging. Usage example:
  *
  * 	uint8_t* colorBuffer = 0;
  * 	neopixelConfig cfg = {
@@ -15,17 +15,26 @@
  * 	chThdSleepMilliseconds(1000);
  * 	neopixelWrite(&cfg, colorBuffer);
  *
+ *  Buffer initialization inspired by omriiluz driver:
+ *  https://github.com/omriiluz/WS2812B-LED-Driver-ChibiOS
  *
  * 	TODO:
- * 	To make the driver work well with larger chains, it's good to be able to send an ARRAY of the leds we want to affect in setColor. Add one function for setColor with just one int argument, and one function that takes both an INTEGER ARRAY affectedLeds and an INTEGER ARRAYSIZE affectedLedCount. : )))
- * 	Clean up LED driver and put it on github : ))) For example, define the timings as macros relative to the frequency - IFNDEF FREQUENCY_MHZ DEFINE FREQUENCY_MHZ 168 should allow anyone to define another frequency.
+ * 	To make the driver work well with larger chains, it's good to be able to
+ * 	send an ARRAY of the leds we want to affect in setColor. Add one function
+ * 	for setColor with just one int argument, and one function that takes both
+ * 	an INTEGER ARRAY affectedLeds and an INTEGER ARRAYSIZE affectedLedCount.
+ *
+ * 	TODO:
+ * 	Clean up LED driver and put it on github, for example, define the timings as
+ * 	macros relative to the frequency - IFNDEF FREQUENCY_MHZ DEFINE FREQUENCY_MHZ
+ * 	168 should allow anyone to define another frequency.
  * 	OSC_TIME = 1 000 000 000 / (double)(FREQUENCY_MHZ * 000 000) = 5.95.
  * 	TIME_HIGH_1 = 400 // ns
  * 	OPERATIONS_PER_ITERATION 4 // 3 in current code
- * 	ITERATIONS_HIGH_1 = TIME_HIGH_1 / (OPERATIONS_PER_ITERATION * OSC_TIME) // T ex 400 / 21
- * 	HOWEVER these calculation may add more steps for each division and multiplication!?!??! (5 steps?) Maybe the nops are unneccessary also (without them, 4).
- * 	Make sure the total times for a 1 and 0 are equal.
- * 	(Optional: See if the values can be tweaked for push-pull and OSPEED_HIGHEST, which would probably be more exact - try shorter highs first, then longer highs. At least make a comment about it)
+ * 	ITERATIONS_HIGH_1 = TIME_HIGH_1 / (OPERATIONS_PER_ITERATION * OSC_TIME)
+ * 	(For example 400 / 21)
+ * 	HOWEVER these calculation may add more steps for each division and multiplication?
+ * 	(5 steps?) Maybe the nops are unneccessary also (without them, 4).
  */
 
 #ifndef LEDDRIVER_H_
@@ -35,9 +44,10 @@
 
 
 /**
- * Configuration struct for the neopixel SW driver.
- * It should be possible to run different LED chains
- * on different pins with different configs.
+ * @brief Configuration struct for the neopixel SW driver.
+ *
+ * It should be possible to run different LED chains on different pins with
+ * different configs.
  */
 typedef struct {
 	/**
@@ -64,12 +74,29 @@ typedef struct {
 
 } neopixelConfig;
 
-
-/** LEDs start from 0 */
+/**
+ * Helper macro for the setColor function with bit masks. LEDs start from 0.
+ */
 #define LED(i) (1 << i)
 
+
+/**
+ * Initializes the color buffer and the pin selected in the neopixelConfig.
+ */
 void neopixelInit(neopixelConfig* cfg, uint8_t** colorBuffer);
+
+/**
+ * @brief Nice way of setting colors by bit masks, for example LED(1) | LED(2).
+ *
+ * Works for the 32 first LEDs. Be responsible, no error checking with the
+ * configured LED count.
+ */
 void neopixelSetColor(uint8_t* colorBuffer, uint32_t ledMask, unsigned char R, unsigned char G, unsigned char B);
+
+/**
+ * Writes the color buffer to the LEDs.
+ */
 void neopixelWrite(neopixelConfig* cfg, uint8_t* colorBuffer);
+
 
 #endif /* LEDDRIVER_H_ */

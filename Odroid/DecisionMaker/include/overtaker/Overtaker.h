@@ -15,37 +15,22 @@ namespace  overtaker{
     class Overtaker {
     private:
         // SIMULATOR VALUES
-        const double APPROACH_TRIGGER = 12.0;
-        const double OVT_TRIGGER = 7.5;
-        const double LEFT_SWITCH_DIST = 3.8;
-        const double LEFT_SWITCH_LT_DIST = 4.4;
-        const double LEFT_SWITCH_RT_DIST = 2.8;
-        const double ADJUST_L_S_DIST = 0.0;
-        const double ADJUST_L_S_LT_DIST = 0.0;
-        const double ADJUST_L_S_RT_DIST = 2.0;
-        const double RIGHT_SWITCH_DIST = 3.0;
-        const double RIGHT_SWITCH_LT_DIST = 2.6;
-        const double RIGHT_SWITCH_RT_DIST = 4.0;
-        const double ADJUST_R_S_DIST = 0.0;
-        const double ADJUST_R_S_LT_DIST = 0.0;
-        const double ADJUST_R_S_RT_DIST = 0.0;
+//      const double OVT_TRIGGER = 7.5;
+//      const double LEFT_SWITCH_DIST = 3.8;
+//      const double ADJUST_L_S_DIST = 0.0;
+//      const double RIGHT_SWITCH_DIST = 3.0;
+//      const double ADJUST_R_S_DIST = 0.0;
+//	    const double IR_SENSOR_RANGE = 7.0;
+//	    const double US_SENSOR_RANGE = 8.0;
 
-        /* CAR VALUES
-        const double APPROACH_TRIGGER = 12.0;
-        const double OVT_TRIGGER = 7.5;
-        const double LEFT_SWITCH_DIST = 3.8;
-        const double LEFT_SWITCH_LT_DIST = 4.4;
-        const double LEFT_SWITCH_RT_DIST = 2.8;
+        //CAR VALUES
+        const double OVT_TRIGGER = 0.60;
+        const double LEFT_SWITCH_DIST = 0.30;
         const double ADJUST_L_S_DIST = 0.0;
-        const double ADJUST_L_S_LT_DIST = 0.0;
-        const double ADJUST_L_S_RT_DIST = 2.0;
-        const double RIGHT_SWITCH_DIST = 3.0;
-        const double RIGHT_SWITCH_LT_DIST = 3.0;
-        const double RIGHT_SWITCH_RT_DIST = 4.0;
+        const double RIGHT_SWITCH_DIST = 0.30;
         const double ADJUST_R_S_DIST = 0.0;
-        const double ADJUST_R_S_LT_DIST = 0.0;
-        const double ADJUST_R_S_RT_DIST = 0.0;
-        */
+	    const double IR_SENSOR_RANGE = 0.15;
+	    const double US_SENSOR_RANGE = 0.20;
 
     public:
         Overtaker();
@@ -53,17 +38,18 @@ namespace  overtaker{
         void obstacleDetection(automotive::miniature::SensorBoardData, automotive::VehicleData, automotive::VehicleControl);
 
         bool getIsOverriding();
+        bool isLeftLane();
         VehicleControl getOvtControl();
 
     private:
         VehicleControl ovtControl;
         bool isOverridingControls;
         double traveledPath;
-        enum STATE {FREE_LANE, APPROACHING, LEFT_SWITCH, LEFT_SWITCH_LT, LEFT_SWITCH_RT, ADJUST_LEFT_SWICH, ADJUST_LEFT_SWITCH_LT, ADJUST_LEFT_SWITCH_RT,
-                    LEFT_LANE, PARALLEL, RIGHT_SWITCH, RIGHT_SWITCH_LT, RIGHT_SWITCH_RT, ADJUST_RIGHT_SWITCH, ADJUST_RIGHT_SWITCH_LT, ADJUST_RIGHT_SWITCH_RT};
+        enum STATE {FREE_LANE, LEFT_SWITCH, ADJUST_LEFT_SWICH, LEFT_LANE, PARALLEL, RIGHT_SWITCH, ADJUST_RIGHT_SWITCH};
 
         enum STATE state;
         double enterSwitchAngle;
+        bool leftLane;
 
         const double ULTRASONIC_FRONT_RIGHT = 4;
         const double ULTRASONIC_FRONT_FORWARD = 3;

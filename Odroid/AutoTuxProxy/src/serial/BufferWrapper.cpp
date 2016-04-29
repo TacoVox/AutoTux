@@ -62,29 +62,29 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> data)
         if (*it == DEL_ONE && *(it+DEL_TWO_POS) == DEL_TWO &&
                 *(it+DEL_DBCOLON_POS) == DEL_DBCOLON && *(it+DEL_COMMA_POS) == DEL_COMMA) {
             unsigned char us1 = *(it+US1_POS);
-            printf("US1:%i ", us1);
+            //printf("US1:%i ", us1);
             unsigned char us2 = *(it+US2_POS);
-            printf("US2:%i ", us2);
+            //printf("US2:%i ", us2);
             unsigned char ir1 = *(it+IR1_POS);
-            printf("IR1:%i ", ir1);
+            //printf("IR1:%i ", ir1);
             unsigned char ir2 = *(it+IR2_POS);
-            printf("IR2:%i ", ir2);
+            //printf("IR2:%i ", ir2);
             unsigned char ir3 = *(it+IR3_POS);
-            printf("IR3:%i ", ir3);
+            //printf("IR3:%i ", ir3);
             unsigned char wheel = *(it+WHL_POS);
-            printf("WHEEL:%i ", wheel);
+            //printf("WHEEL:%i ", wheel);
             unsigned char dis1 = *(it+DIS_POS_1);
-            printf("DIS1:%i ", dis1);
+            //printf("DIS1:%i ", dis1);
             unsigned char dis2 = *(it+DIS_POS_2);
-            printf("DIS2:%i ", dis2);
+            //printf("DIS2:%i ", dis2);
             unsigned char dis3 = *(it+DIS_POS_3);
-            printf("DIS3:%i ", dis3);
+            //printf("DIS3:%i ", dis3);
             unsigned char dis4 = *(it+DIS_POS_4);
-            printf("DIS4:%i ", dis4);
+            //printf("DIS4:%i ", dis4);
             unsigned char light = *(it+LIGHT_SEN);
-            printf("LIGHT:%i ", light);
+            //printf("LIGHT:%i ", light);
             unsigned char check = *(it+CHK_SUM);
-            printf("CHECK:%i\n", check);
+            //printf("CHECK:%i\n", check);
             // fill the vector
             valid_pkt = {us1, us2, ir1, ir2, ir3, wheel, dis1, dis2, dis3, dis4, light};
             // check if correct checksum
@@ -119,7 +119,7 @@ vector<unsigned char> serial::BufferWrapper::readReceiveBuffer(void)
     // check for size, i.e. not empty
     if(buffer_in.size() != 0)
     {
-        // get the most recent packet, always in first position
+        // get 3the most recent packet, always in first position
         std::vector<unsigned char> vec = buffer_in.at(0);
         // clear the buffer
         buffer_in.clear();

@@ -1,5 +1,10 @@
-/**
- * Control output
+/** @file	controlOutput.c
+ * 	@brief	Handles the output of control data to the hardware.
+ *
+ *  Control data is received by the serialConnection which calls the setter
+ *  controlOutputSetData in this module. In case any problems occur with the
+ *  communication, this module will make sure that if no valid values are
+ *  received for a while, the car will 	stop.
  */
 
 
@@ -8,25 +13,39 @@
 #include <hal.h>
 
 // Local includes
-#include "../autotuxconfig.h"
+#include "autotuxconfig.h"
 #include "controlOutput.h"
-#include "hardwarePWM.h"
-#include "hardwareRC.h"
-#include "hardwareLights.h"
+#include "hardware/hardwarePWM.h"
+#include "hardware/hardwareRC.h"
+#include "hardware/hardwareLights.h"
+
 
 //-----------------------------------------------------------------------------
 // Definitions
 //-----------------------------------------------------------------------------
 
 
+static void controlOutputStopCenter(void);
 static bool handleRCMode(void);
 static bool rcModeCheck(void);
-static unsigned char controlData[CONTROL_BYTE_COUNT];
+
+
+/**
+ * Holds the latest control data received from the serial connection.
+ */
+static unsigned char controlData[CONTROL_DATA_BYTES];
+
+/**
+ * @brief Whether control values are so new they have not been output to HW yet.
+ *
+ * Used to notice whenever we haven't received valid communication for a while,
+ * so we can take appropriate measure (stop the car, center wheels).
+ */
 static bool controlValuesAreNew = false;
 
 
 //-----------------------------------------------------------------------------
-// "Public" interface
+// Public interface
 //-----------------------------------------------------------------------------
 
 
@@ -35,40 +54,25 @@ static bool controlValuesAreNew = false;
  */
 void controlOutputSetup(void) {
 	// TODO: also initialize RC here later?
-	hardwareSetupPWM();
-	hardwareSetupLights();
+	hardwarePWMSetup();
+	hardwareRCSetup();
+	//hardwareLightsSetup();
+
+	//hardwareIterationLights(0, false, false);
 }
-
-
-/**
- * Engine stopped, wheels centered (unless in RC mode).
- */
-void controlOutputStopCenter(void) {
-	if (!handleRCMode()) {
-		hardwareSetValuesPWM(PWM_OUTPUT_ESC, SPEED_STOP);
-		hardwareSetValuesPWM(PWM_OUTPUT_SERVO, WHEELS_CENTERED_ANGLE);
-	}
-
-	// Regardless, reset controlData to corresponding values.
-	controlData[CONTROL_BYTE_SPEED] = SPEED_STOP;
-	controlData[CONTROL_BYTE_ANGLE] = WHEELS_CENTERED_ANGLE;
-}
-
-
 
 /**
  * Output control data to engine and wheels (unless in RC mode).
  */
 void controlOutputSetData(unsigned char* newControlData) {
 	// Value copy!
-	for (int i = 0; i < CONTROL_BYTE_COUNT; i++) {
+	for (int i = 0; i < CONTROL_DATA_BYTES; i++) {
 		controlData[i] = newControlData[i];
 	}
 
 	// Touch this variable
 	controlValuesAreNew = true;
 }
-
 
 /**
  * Output control data to engine and wheels (unless in RC mode).
@@ -80,11 +84,11 @@ void controlOutputIteration() {
 
 	if (!rcMode) {
 		// RC mode not activated - check only for RC transmitter brake
-		if (hardwareGetValuesRC(THROTTLE) >= RC_THROTTLE_ON_TRESHOLD &&
-				hardwareGetValuesRC(THROTTLE) <= RC_THROTTLE_BRAKE_TRESHOLD) {
+		if (hardwareRCGetValues(THROTTLE) >= RC_THROTTLE_ON_TRESHOLD &&
+				hardwareRCGetValues(THROTTLE) <= RC_THROTTLE_BRAKE_TRESHOLD) {
 
 			// RC transmitter brake - stop the car
-			hardwareSetValuesPWM(PWM_OUTPUT_ESC, SPEED_STOP);
+			hardwarePWMSetValues(PWM_OUTPUT_ESC, SPEED_STOP);
 			rcBrake = true;
 
 		} else {
@@ -92,10 +96,10 @@ void controlOutputIteration() {
 			if (controlValuesAreNew) {
 				// Drive according to controlData
 				// Speed controlled by int corresponding to SPEED enum in config
-				hardwareSetValuesPWM(PWM_OUTPUT_ESC, controlData[CONTROL_BYTE_SPEED]);
+				hardwarePWMSetValues(PWM_OUTPUT_ESC, controlData[CONTROL_BYTE_SPEED]);
 
 				// Wheel angle: 90 degress +- ~30 degrees.
-				hardwareSetValuesPWM(PWM_OUTPUT_SERVO, controlData[CONTROL_BYTE_ANGLE]);
+				hardwarePWMSetValues(PWM_OUTPUT_SERVO, controlData[CONTROL_BYTE_ANGLE]);
 
 				controlValuesAreNew = false;
 				iterationsNoNewValues = 0;
@@ -112,25 +116,39 @@ void controlOutputIteration() {
 	}
 
 	// Update lights
-	hardwareIterationLights(LIGHT_BIT_FLASH_LEFT, rcMode, rcBrake);
+	//hardwareLightsIteration(LIGHT_BIT_FLASH_LEFT, rcMode, rcBrake);
 }
 
 
 //-----------------------------------------------------------------------------
-// "Private" implementation
+// Implementation. The static functions below are inaccessible to other modules
 //-----------------------------------------------------------------------------
 
+
+/**
+ * Stop engine and center wheels (unless in RC mode).
+ */
+static void controlOutputStopCenter(void) {
+	if (!handleRCMode()) {
+		hardwarePWMSetValues(PWM_OUTPUT_ESC, SPEED_STOP);
+		hardwarePWMSetValues(PWM_OUTPUT_SERVO, WHEELS_CENTERED_ANGLE);
+	}
+
+	// Regardless, reset controlData to corresponding values.
+	controlData[CONTROL_BYTE_SPEED] = SPEED_STOP;
+	controlData[CONTROL_BYTE_ANGLE] = WHEELS_CENTERED_ANGLE;
+}
 
 /**
  * Returns true if RC mode is active and RC signal was forwarded to hardware.
  * Returns false if RC mode off.
  */
-bool handleRCMode(void) {
-	if (hardwareGetValuesRC(THROTTLE) > RC_THROTTLE_ON_TRESHOLD) {
+static bool handleRCMode(void) {
+	if (hardwareRCGetValues(THROTTLE) > RC_THROTTLE_ON_TRESHOLD) {
 		if (rcModeCheck()) {
 			// Forward RC signal to hardware
 			// But first attenuate speed
-			int esc_pw = hardwareGetValuesRC(THROTTLE);
+			int esc_pw = hardwareRCGetValues(THROTTLE);
 			if (esc_pw > SPEED_PULSEWIDTHS[SPEED_STOP]) {
 				// Output a fifth of the input
 				esc_pw = SPEED_PULSEWIDTHS[SPEED_STOP] +
@@ -141,7 +159,7 @@ bool handleRCMode(void) {
 						((SPEED_PULSEWIDTHS[SPEED_STOP] - esc_pw) * RC_BACKWARD_MULTIPLIER);
 			}
 
-			hardwareSetValuesPWM_RC(esc_pw, hardwareGetValuesRC(STEERING));
+			hardwarePWMSetValuesRC(esc_pw, hardwareRCGetValues(STEERING));
 			return true;
 		}
 	}
@@ -152,13 +170,13 @@ bool handleRCMode(void) {
  * Turns RC mode on or off based on the amount of consecutive iterations
  * with the values from the RC transmitter above or under certain treshold values.
  */
-bool rcModeCheck(void) {
+static bool rcModeCheck(void) {
 	static int itAboveActivationTreshold = 0;
 	static int itBelowDeactivationTreshold = 0;
 	static bool rcMode = false;
 	static int itWindowToCenterToSwitch = 0;
 	static bool ledState = false; // Led state for blinking
-	icucnt_t steeringPW = hardwareGetValuesRC(STEERING);
+	icucnt_t steeringPW = hardwareRCGetValues(STEERING);
 
 	// Restore LED state - will be changed only if blinking occurs below
 	if (rcMode) palSetPad(GPIOD, GPIOD_LED6);
@@ -225,4 +243,3 @@ bool rcModeCheck(void) {
 	}
 	return rcMode;
 }
-

@@ -11,20 +11,18 @@
 #include "../autotuxconfig.h"
 
 /*
- * Sets up the US sensor pins etc.
+ * Sets up the WE sensor pins etc.
  */
 void hardwareSetupWE(void);
 
-void hardwareIterationWE(void);
+//void hardwareIterationWE(void);
 
 
 /*
- * Getter for the values. Specify a US sensor.
+ * Getter for the values. Either speed or distance.
  */
 
-//int hardwareGetValuesWE(void);
-
-int hardwareGetValuesWESpeed(void);
-int hardwareGetValuesWEDistance(void);
+int hardwareGetValuesWESpeed(void); /*!< Returns speed in cm/s */
+int hardwareGetValuesWEDistance(void); /*!< Returns distance in cm */
 
 #endif /* HARDWAREWE_H_ */
