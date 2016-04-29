@@ -38,7 +38,8 @@ usb_handler::USBHandler::~USBHandler()
 void usb_handler::USBHandler::run()
 {
     // connect and set the buffer wrapper
-    uc->connect();
+    while (uc->connect() == false)
+        ;
 
     // main loop
     while (running) {
