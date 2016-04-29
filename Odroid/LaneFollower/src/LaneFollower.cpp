@@ -135,9 +135,11 @@ namespace lane {
         }
 
         uint8_t LaneFollower::getThreshold(double lightValue) {
-            double returnVal = log(lightValue) * 58.0 + lightValue * 0.16 - 30.0 + (pow((lightValue - 80.0) * 0.1, 3.0)) * 0.0034;
+            if(lightValue < 30.0)
+                lightValue = 30.0;
 
-            cout << "Threshold: " << returnVal << endl;
+            double returnVal = log10(lightValue) * 58.0 + lightValue * 0.16 - 30.0 + (pow((lightValue - 80.0) * 0.1, 3.0)) * 0.0034;
+
             return (uint8_t)returnVal;
         }
 
@@ -380,7 +382,7 @@ namespace lane {
                 if (has_next_frame) {
                     sensorBoardData = sbd_container.getData<automotive::miniature::SensorBoardData>();
 
-                    processImage(getThreshold(sensorBoardData.getValueForKey_MapOfDistances(6)));
+                    processImage(getThreshold(sensorBoardData.getValueForKey_MapOfDistances(5)));
                     double detection = laneDetection();
                     laneFollowing(detection);
                 }
