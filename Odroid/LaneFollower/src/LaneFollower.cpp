@@ -393,10 +393,10 @@ namespace lane {
                     laneFollowing(detection);
                 }
 
-                Container outContainer(m_laneRecommendation);
+                Container laneRecommendationContainer(m_laneRecommendation);
                 Container processedImageContainer(m_sharedProcessedImage);
                 getConference().send(processedImageContainer);
-                getConference().send(outContainer);
+                getConference().send(laneRecommendationContainer);
             }
 
             return ModuleExitCodeMessage::OKAY;
