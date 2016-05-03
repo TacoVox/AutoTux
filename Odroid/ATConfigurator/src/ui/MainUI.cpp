@@ -40,7 +40,11 @@ void ui::MainUI::handleKeys(void) {
         if(keyPressed == 'w')
             menu.selUp();
         else if(keyPressed == 's')
-            menu.selDown();
+            menu.selDn();
+        else if(keyPressed == 'a')
+            menu.selLeft();
+        else if(keyPressed == 'd')
+            menu.selRight();
         else if(keyPressed == '#')
             menu.select();
 
