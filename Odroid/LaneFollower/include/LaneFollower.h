@@ -4,7 +4,7 @@
 #define SIMGAIN 2.6;
 #define SIMDISTANCE 280;
 
-#define CARGAIN 0.8;
+#define CARGAIN 0.9;
 #define CARDISTANCE 220;
 
 #include <memory>
@@ -83,7 +83,7 @@ namespace lane {
             int32_t stop_scanline;
 
             // For introduction to algorithm see
-            // https://www  .youtube.com/watch?v=4Y7zG48uHRo
+            // https://www.youtube.com/watch?v=4Y7zG48uHRo
             // Proportional gain. Values above 1 amplifies e and vice versa.
             // 1 too low for right curve, 4 too twitchy. 2-3 seems very good
             double P_GAIN;
@@ -102,11 +102,9 @@ namespace lane {
             virtual void tearDown();
 
             uint8_t getThreshold(double lightValue);
-            void processImage(uint8_t threshold);
-            void drawLines();
+            void processImage();
             double laneDetection();
             void laneFollowing(double e);
-            void getLaneRecommendation(odcore::data::Container &c);
         };
     } // follower
 } // lane
