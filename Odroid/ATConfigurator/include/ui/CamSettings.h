@@ -1,19 +1,19 @@
 //
-// Created by jonas on 4/26/16.
+// Created by jonas on 5/3/16.
 //
 
-#ifndef ATCONFIGURATOR_VALMONITOR_H
-#define ATCONFIGURATOR_VALMONITOR_H
+#ifndef ATCONFIGURATOR_CAMSETTINGS_H
+#define ATCONFIGURATOR_CAMSETTINGS_H
 
 #include "ui/ATCWindow.h"
 #include <ncurses.h>
 #include <string>
 
 namespace ui {
-    class ValMonitor : public ATCWindow {
+    class CamSettings : public ATCWindow {
     public:
-        ValMonitor(void);
-        ValMonitor(int, int);
+        CamSettings(void);
+        CamSettings(int, int);
         void refresh(void);
         void selUp(void);
         void selDn(void);
@@ -24,10 +24,9 @@ namespace ui {
     private:
         int xsize;
         int ysize;
-        WINDOW* _valmonitor;
+        WINDOW* _camsettings;
         void printVals(void);
-        const char* dtostr(std::string, double);
     };
 }
 
-#endif //ATCONFIGURATOR_VALMONITOR_H
+#endif //ATCONFIGURATOR_CAMSETTINGS_H

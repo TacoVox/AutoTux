@@ -93,10 +93,12 @@ VehicleControl Parker::parallelPark(SensorBoardData sbd, VehicleData vd){
             break;
         }
         case PHASE2:{
+	cout << "Backing Straight" << endl;
             vc = backingStraight(vd, BACKING_STRAIGHT);
             break;
         }
         case PHASE3:{
+	cout << "Backing Left" << endl;
             vc = backingLeft(vd, BACKING_LEFT);
             break;
         }
@@ -248,10 +250,12 @@ VehicleControl Parker::backingLeft(VehicleData vd, double add){
     reversing = true;
     controlTemp.setSteeringWheelAngle(-0.5); // 45
     controlTemp.setBrakeLights(false);
+    controlTemp.setSpeed(-1);
     if(carPosition + add < vd.getAbsTraveledPath()){
         cout << "Backing left finished" << endl;
         controlTemp.setSpeed(0);
         controlTemp.setBrakeLights(true);
+	controlTemp.setSteeringWheelAngle(0);
         carPosition = carPosition + add;
         parkstate = PHASE6;
     }
@@ -290,7 +294,7 @@ VehicleControl Parker::backAroundCorner(VehicleData vd, double add){
         controlTemp.setSpeed(0);
         controlTemp.setSteeringWheelAngle(0);
         carPosition = carPosition + add ;
-        parkstate = PHASE2;
+        parkstate = PHASE3;
     }
     return controlTemp;
 }

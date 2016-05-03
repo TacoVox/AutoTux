@@ -60,6 +60,30 @@ void Overtaker::obstacleDetection(SensorBoardData sensorData, VehicleData vehicl
             break;
         }
 
+	case TMP_SWITCH:{
+
+	
+	cout << "Overtaker: TMP_SWTICH" << endl;
+	double x = vehicleData.getAbsTraveledPath();
+	cout << "***TRAVELED: " << x << endl;
+	cout << "Threshold: " << traveledPath + 0.40 << endl;
+	    if(isRightLaneClear(sensorData) && x > traveledPath + 1.0){
+
+                consecReadings++;
+
+                if(consecReadings >= NUM_OF_READINGS + 3){
+                    cout << "SWITCHING TO RIGHT LANE" << endl;
+                    traveledPath = vehicleData.getAbsTraveledPath();
+                    ovtControl.setSpeed(1);
+                    ovtControl.setFlashingLightsRight(true);
+                    isOverridingControls = true;
+                    state = RIGHT_SWITCH;
+                    consecReadings = 0;
+                }
+            }
+	    break;
+	}
+
         case LEFT_LANE:{
             cout << "Overtaker: LEFT LANE" << endl;
 
@@ -122,8 +146,9 @@ bool Overtaker::isObstacleOnLane(SensorBoardData sbd, const double range){
 
     double frontUsSensor = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD);
     cout << "US Sensor: " << frontUsSensor << endl;
-
+    
     if(frontUsSensor < range && frontUsSensor > 0){
+	cout << "*****FRONT US sensor: " << frontUsSensor << endl;
         return true;
     }
 
@@ -166,8 +191,9 @@ void Overtaker::adjustLeftSwitch(VehicleData vehicleData, const double trvStart,
 
     // Exit state if traveled enough...
     if(traveled > maxTrv){
+ 	traveledPath = vehicleData.getAbsTraveledPath();
         isOverridingControls = false;
-        state = LEFT_LANE;
+        state = TMP_SWITCH;
         leftLane = true;
         return;
     }
@@ -179,7 +205,7 @@ void Overtaker::adjustLeftSwitch(VehicleData vehicleData, const double trvStart,
 bool Overtaker::isParallelToObstacle(SensorBoardData sensorData) {
 
     // Check if right-side sensors detect obstacle
-    bool us_fr = isObstacleDetected(sensorData, ULTRASONIC_FRONT_RIGHT, US_SENSOR_RANGE);
+    bool us_fr = isObstacleDetected(sensorData, ULTRASONIC_FRONT_RIGHT, US_FRONT_RIGHT_RANGE);
     bool ir_fr = isObstacleDetected(sensorData, INFRARED_FRONT_RIGHT, IR_SENSOR_RANGE);
     bool ir_rr = isObstacleDetected(sensorData, INFRARED_REAR_RIGHT, IR_SENSOR_RANGE);
 

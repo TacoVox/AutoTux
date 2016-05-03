@@ -24,16 +24,21 @@ namespace  overtaker{
 //	    const double US_SENSOR_RANGE = 8.0;
 
         //CAR VALUES
-        const double OVT_TRIGGER = 0.60;
-        const double LEFT_SWITCH_DIST = 0.45;
+
+	// On a straight, it needs to look further ahead, less if it's in a turn
+        const double OVT_TRIGGER = 0.65;
+	// On straight a straight, left switch distance needs to be longer
+        const double LEFT_SWITCH_DIST = 0.50;
         const double ADJUST_L_S_DIST = 0.0;
-        const double RIGHT_SWITCH_DIST = 0.30;
+        const double RIGHT_SWITCH_DIST = 0.50;
         const double ADJUST_R_S_DIST = 0.0;
-	    const double IR_SENSOR_RANGE = 0.40;
-	    const double US_SENSOR_RANGE = 0.40;
+	const double IR_SENSOR_RANGE = 0.25;
+	const double US_SENSOR_RANGE = 0.40;
+	const double US_FRONT_RIGHT_RANGE = 0.30;
+	  
 
         // GENERAL VALUES
-        const int NUM_OF_READINGS = 3;
+        const int NUM_OF_READINGS = 1;
 
     public:
         Overtaker();
@@ -48,7 +53,8 @@ namespace  overtaker{
         VehicleControl ovtControl;
         bool isOverridingControls;
         double traveledPath;
-        enum STATE {FREE_LANE, LEFT_SWITCH, ADJUST_LEFT_SWITCH, LEFT_LANE, PARALLEL, RIGHT_SWITCH, ADJUST_RIGHT_SWITCH};
+	double traveledPath2;
+        enum STATE {FREE_LANE, LEFT_SWITCH, ADJUST_LEFT_SWITCH, LEFT_LANE, PARALLEL, RIGHT_SWITCH, ADJUST_RIGHT_SWITCH, TMP_SWITCH};
         enum STATE state;
         bool leftLane;
         int consecReadings;
