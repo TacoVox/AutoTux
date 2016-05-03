@@ -43,6 +43,13 @@ void ui::ValMonitor::printVals(void) {
               dtostr("IR3", od::ConferenceData::instance()->getIR3()));
 }
 
+void ui::ValMonitor::selUp(void) {}
+void ui::ValMonitor::selDn(void) {}
+void ui::ValMonitor::selLeft(void) {}
+void ui::ValMonitor::selRight(void) {}
+void ui::ValMonitor::incr(void) {}
+void ui::ValMonitor::decr(void) {}
+
 const char* ui::ValMonitor::dtostr(std::string field, double val) {
     std::string str = field.append(": ");
     std::ostringstream valcon;

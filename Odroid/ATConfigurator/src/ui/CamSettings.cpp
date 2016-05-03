@@ -42,4 +42,11 @@ void ui::CamSettings::printVals(void) {
     mvwprintw(_camsettings, 3, 36, "%u", od::ConferenceData::instance()->getThresholdB());
 }
 
+void ui::CamSettings::selUp(void) {}
+void ui::CamSettings::selDn(void) {}
+void ui::CamSettings::selLeft(void) {}
+void ui::CamSettings::selRight(void) {}
+void ui::CamSettings::incr(void) {}
+void ui::CamSettings::decr(void) {}
+
 
