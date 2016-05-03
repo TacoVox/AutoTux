@@ -6,7 +6,11 @@
 
 od::ConferenceData* od::ConferenceData::_instance = 0;
 
-od::ConferenceData::ConferenceData() { }
+od::ConferenceData::ConferenceData() : speed(0.0), angle(90.0), us1(0.0),
+                                       us2(0.0), ir1(0.0), ir2(0.0), ir3(0.0),
+                                       roadWidth(220), gainP(0.9), gainI(0.0),
+                                       gainD(0.0), thresholdB(200),
+                                       thresholdD(50) { }
 od::ConferenceData::ConferenceData(const ConferenceData &) { }
 od::ConferenceData::~ConferenceData() { }
 
@@ -43,3 +47,27 @@ void od::ConferenceData::setIR2(double ir) { this->ir2 = ir; }
 double od::ConferenceData::getIR3(void) { return this->ir3; }
 
 void od::ConferenceData::setIR3(double ir) { this->ir3 = ir; }
+
+uint32 od::ConferenceData::getRoadWidth() { return this->roadWidth; }
+
+void od::ConferenceData::setRoadWidth(uint32 rw) { this->roadWidth = rw; }
+
+double od::ConferenceData::getGainP() { return this->gainP; }
+
+void od::ConferenceData::setGainP(double gp) { this->gainP = gp; }
+
+double od::ConferenceData::getGainI() { return this->gainI; }
+
+void od::ConferenceData::setGainI(double gi) { this->gainI = gi; }
+
+double od::ConferenceData::getGainD() { return this->gainD; }
+
+void od::ConferenceData::setGainD(double gd) { this->gainD = gd; }
+
+uint8 od::ConferenceData::getThresholdB() { return this->thresholdB; }
+
+void od::ConferenceData::setThresholdB(uint8 tb) { this->thresholdB = tb; }
+
+uint8 od::ConferenceData::getThresholdD() { return this->thresholdD; }
+
+void od::ConferenceData::setThresholdD(uint8 td) { this->thresholdD = td; }
