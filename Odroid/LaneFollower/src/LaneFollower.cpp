@@ -151,8 +151,6 @@ namespace lane {
 
             Canny(m_image_grey, m_image_grey, 30, 200, 3);
 
-            imshow("LOL", m_image_grey);
-
             if(m_sharedProcessedImageMemory.get() && m_sharedProcessedImageMemory->isValid()) {
                 m_sharedProcessedImageMemory->lock();
                 memcpy(m_sharedProcessedImageMemory->getSharedMemory(), m_image_grey.data, 640*480);
