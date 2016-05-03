@@ -152,7 +152,7 @@ namespace lane {
             // Make the new image gray scale
             cvtColor(m_image_grey, m_image_grey, COLOR_BGR2GRAY);
 
-            Canny(m_image_grey, m_image_grey, 50, 200, 3);
+            Canny(m_image_grey, m_image_grey, 30, 200, 3);
 
             /**
              * TODO Look into HoughLines to find edges.
@@ -353,9 +353,10 @@ namespace lane {
                laneRecommendation.getDistance_to_line() > 150)
                 laneRecommendation.setDistance_to_line(-1);
 
-            //cout << "STOPLINE: " << laneRecommendation.getDistance_to_line() << endl;
+            cout << "STOPLINE: " << laneRecommendation.getDistance_to_line() << endl;
 
             laneRecommendation.setAngle(desiredSteering);
+            cout << "DS: " << laneRecommendation.getAngle() << endl;
         }
 
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode LaneFollower::body() {

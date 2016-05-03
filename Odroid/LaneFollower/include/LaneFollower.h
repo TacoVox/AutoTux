@@ -4,7 +4,7 @@
 #define SIMGAIN 2.6;
 #define SIMDISTANCE 280;
 
-#define CARGAIN 0.8;
+#define CARGAIN 0.9;
 #define CARDISTANCE 220;
 
 #include <memory>

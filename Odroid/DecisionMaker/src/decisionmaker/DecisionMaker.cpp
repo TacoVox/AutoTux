@@ -47,7 +47,7 @@ void DecisionMaker::tearDown(){
 */
 void DecisionMaker::laneFollowing() {
 
-    if(stopCounter > 0) {
+    /*if(stopCounter > 0) {
 
         if(stopCounter == 90) {
             //cout << "WAKING UP" << endl;
@@ -76,9 +76,10 @@ void DecisionMaker::laneFollowing() {
     }
 
     //cout << "Distance to line: " << getDistanceToLine() << endl;
-
+*/
     vehicleControl.setSpeed(speed);
     vehicleControl.setSteeringWheelAngle(getAngle());
+    cout << "DS: " << getAngle() << endl;
 }
 
 /**
@@ -108,7 +109,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
     addDataStoreFor(lifoQueue);
 
     // Set initial state of the car
-    STATE state = DRIVING;
+    STATE state = PARKING;
 
     VehicleData vd;
     SensorBoardData sbd;
@@ -137,14 +138,14 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
 
         //state = dmMSG.getState();
 
-        cout << "SensorValues BACK RIGHT: " <<  sbd.getValueForKey_MapOfDistances(2) << endl;
-        //cout << "Distance: " << vd.getAbsTraveledPath() << endl;
+        //cout << "SensorValues BACK RIGHT: " <<  sbd.getValueForKey_MapOfDistances(2) << endl;
+        cout << "Distance: " << vd.getAbsTraveledPath() << endl;
 
        //cout << "DecisionMaker US Sensor: " << sbd.getValueForKey_MapOfDistances(4) << endl;
-        cout << "SensorValues FROM 5: " <<  sbd.getValueForKey_MapOfDistances(5) << endl;
-        cout << "SensorValues FRONT RIGHT: " <<  sbd.getValueForKey_MapOfDistances(6) << endl;
-        cout << "SensorValues FRONT RIGHT: " <<  sbd.getValueForKey_MapOfDistances(0) << endl;
-        cout << "SensorValues Back: " <<  sbd.getValueForKey_MapOfDistances(1) << endl;
+        cout << "SensorValues FROM US_FRONT: " <<  sbd.getValueForKey_MapOfDistances(3) << endl;
+        //cout << "SensorValues FRONT RIGHT: " <<  sbd.getValueForKey_MapOfDistances(6) << endl;
+        //cout << "SensorValues FRONT RIGHT: " <<  sbd.getValueForKey_MapOfDistances(0) << endl;
+        //cout << "SensorValues Back: " <<  sbd.getValueForKey_MapOfDistances(1) << endl;
 
         if(!ovt.isLeftLane()){
             ovtMSG.setLeftlane(NOTLEFTLANE);
@@ -166,10 +167,11 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                     cout <<"DM: LANE FOLLOWER Instructions" << endl;
 
                     if(!isStopLine) {
-                        speed = 2;
+                        speed = 1;
                     }
 
                     laneFollowing();
+		    cout << sbd.getValueForKey_MapOfDistances(3) << endl;
                 }
 
                 break;
