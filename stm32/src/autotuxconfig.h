@@ -235,7 +235,7 @@ static const ioportmask_t RC_PIN_NUMBERS[] = {4, 6};
 /**
  * Ticks per meter. Used for distance and speed calculation.
  */
-#define WE_TICKS_PER_METER 68.49 // 44.07
+#define WE_TICKS_PER_METER 50 // 68.49 // 44.07
 
 /**
  * Pin for wheel encoder. Currently A2.
@@ -278,7 +278,7 @@ typedef enum {SPEED_REVERSE, SPEED_STOP, SPEED_FORWARD_LOW, SPEED_FORWARD_CRUISE
 /**
  * Pulse widths for each speed step.
  */
-static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1108, 1350, 1425, 1440};
+static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1120, 1350, 1419, 1430};
 
 /**
  * Pulse width values for wheels centered and their extreme positions.
@@ -356,7 +356,7 @@ static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1108, 1350,
 #define LIGHT_RCLIGHT_LEDS LED(3) | LED(4) | LED(12)
 #define LIGHT_RCLIGHT_R 0
 #define LIGHT_RCLIGHT_G 0
-#define LIGHT_RCLIGHT_B 150
+#define LIGHT_RCLIGHT_B 80
 
 
 #endif /* AUTOTUXCONFIG_H_ */

@@ -90,6 +90,8 @@ void controlOutputIteration() {
 
 			// RC transmitter brake - stop the car
 			hardwarePWMSetValues(PWM_OUTPUT_ESC, SPEED_STOP);
+			// However, steer as the odroid desires
+			hardwarePWMSetValues(PWM_OUTPUT_SERVO, controlData[CONTROL_BYTE_ANGLE]);
 			rcBrake = true;
 
 		} else {
@@ -188,7 +190,7 @@ static bool rcModeCheck(void) {
 	if (itWindowToCenterToSwitch == 0) {
 		// Step 1 check
 		// Only check for activation of RC mode if not already active
-		if (!rcMode && steeringPW > RC_STEERING_ACTIVATION_TRESHOLD) {
+		if (!rcMode && steeringPW > RC_STEERING_ACTIVATION_TRESHOLD && steeringPW < 2400) {
 			// Increase counter if we're on the way towards activation
 			if (itAboveActivationTreshold < RC_ITERATIONS_TO_CHANGE_MODE) {
 				itAboveActivationTreshold++;
