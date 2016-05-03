@@ -20,6 +20,7 @@ namespace ui {
         void selDown(void);
         void selUp(void);
         void select(void);
+        void unselect(void);
     private:
         int xsize;
         int ysize;
@@ -28,6 +29,7 @@ namespace ui {
         std::vector<std::unique_ptr<ui::ATCWindow>> windows;
         int curritem;
         int currwindow;
+        bool menusel;
         void genMenu(void);
     };
 }
