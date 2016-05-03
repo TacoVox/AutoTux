@@ -45,8 +45,14 @@ void ui::MainUI::handleKeys(void) {
             menu.selLeft();
         else if(keyPressed == 'd')
             menu.selRight();
-        else if(keyPressed == '#')
+        else if(keyPressed == 'p')
             menu.select();
+        else if(keyPressed == 'o')
+            menu.unselect();
+        else if(keyPressed == '+')
+            menu.incr();
+        else if(keyPressed == '-')
+            menu.decr();
 
         keyPressed = '\0';
     }

@@ -23,6 +23,8 @@ namespace ui {
         void selRight(void);
         void select(void);
         void unselect(void);
+        void incr(void);
+        void decr(void);
     private:
         int xsize;
         int ysize;
