@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <memory>
+#include <tiff.h>
 
 namespace od {
     class ConferenceData {
@@ -26,6 +27,18 @@ namespace od {
         void setIR2(double);
         double getIR3(void);
         void setIR3(double);
+        uint32 getRoadWidth(void);
+        void setRoadWidth(uint32 roadWidth);
+        double getGainP(void);
+        void setGainP(double gainP);
+        double getGainI(void);
+        void setGainI(double gainI);
+        double getGainD(void);
+        void setGainD(double gainD);
+        uint8 getThresholdB(void);
+        void setThresholdB(uint8 thresholdB);
+        uint8 getThresholdD(void);
+        void setThresholdD(uint8 thresholdD);
     private:
         ConferenceData();
         ConferenceData(const ConferenceData&);
@@ -37,6 +50,12 @@ namespace od {
         double ir1;
         double ir2;
         double ir3;
+        uint32 roadWidth;
+        double gainP;
+        double gainI;
+        double gainD;
+        uint8 thresholdB;
+        uint8 thresholdD;
         static ConferenceData* _instance;
     };
 }

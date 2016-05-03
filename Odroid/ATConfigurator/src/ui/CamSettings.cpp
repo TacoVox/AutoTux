@@ -2,13 +2,13 @@
 // Created by jonas on 5/3/16.
 //
 
-#include <sstream>
 #include "ui/CamSettings.h"
 #include "od/ConferenceData.h"
 
 ui::CamSettings::CamSettings(void) { CamSettings(80, 20); }
 
 ui::CamSettings::CamSettings(int x, int y) : xsize(x - 2), ysize(y - 2),
+                                             selectedItem(0),
                                            _camsettings(newwin(ysize - 2, xsize - 16, 1, 16)) {
     mvwaddstr(_camsettings, 1, 1, "Cam Settings Test");
 }
@@ -23,17 +23,101 @@ void ui::CamSettings::printVals(void) {
     wmove(_camsettings, 1, 1);
     wclrtobot(_camsettings);
 
-    mvwaddstr(_camsettings, 1, 1,
-              dtostr("Speed", od::ConferenceData::instance()->getSpeed()));
+    if(selectedItem == 0)
+        wattron(_camsettings, A_STANDOUT);
+    mvwaddstr(_camsettings, 1, 1, "Gain P:    ");
+    mvwprintw(_camsettings, 1, 9, "%g", od::ConferenceData::instance()->getGainP());
+    wattroff(_camsettings, A_STANDOUT);
+
+    if(selectedItem == 1)
+        wattron(_camsettings, A_STANDOUT);
+    mvwaddstr(_camsettings, 2, 1, "Gain D:    ");
+    mvwprintw(_camsettings, 2, 9, "%g", od::ConferenceData::instance()->getGainD());
+    wattroff(_camsettings, A_STANDOUT);
+
+    if(selectedItem == 2)
+        wattron(_camsettings, A_STANDOUT);
+    mvwaddstr(_camsettings, 3, 1, "Gain I:    ");
+    mvwprintw(_camsettings, 3, 9, "%g", od::ConferenceData::instance()->getGainI());
+    wattroff(_camsettings, A_STANDOUT);
+
+    if(selectedItem == 3)
+        wattron(_camsettings, A_STANDOUT);
+    mvwaddstr(_camsettings, 1, 20, "Road Width:     ");
+    mvwprintw(_camsettings, 1, 36, "%u", od::ConferenceData::instance()->getRoadWidth());
+    wattroff(_camsettings, A_STANDOUT);
+
+    if(selectedItem == 4)
+        wattron(_camsettings, A_STANDOUT);
+    mvwaddstr(_camsettings, 2, 20, "Threshold Low:     ");
+    mvwprintw(_camsettings, 2, 36, "%u", od::ConferenceData::instance()->getThresholdD());
+    wattroff(_camsettings, A_STANDOUT);
+
+    if(selectedItem == 5)
+        wattron(_camsettings, A_STANDOUT);
+    mvwaddstr(_camsettings, 3, 20, "Threshold High:     ");
+    mvwprintw(_camsettings, 3, 36, "%u", od::ConferenceData::instance()->getThresholdB());
+    wattroff(_camsettings, A_STANDOUT);
 }
 
-const char *ui::CamSettings::dtostr(std::string field, double val) {
-    std::string str = field.append(": ");
-    std::ostringstream valcon;
-    valcon << val;
-    str.append(valcon.str());
-    return str.c_str();
+void ui::CamSettings::selUp(void) {
+    if(selectedItem == 0)
+        selectedItem = 5;
+    else
+        selectedItem--;
 }
 
+void ui::CamSettings::selDn(void) {
+    if(selectedItem + 1 == 6)
+        selectedItem = 0;
+    else
+        selectedItem++;
+}
+
+void ui::CamSettings::selLeft(void) {
+    if(selectedItem < 4)
+        selectedItem += 3;
+    else
+        selectedItem -= 3;
+}
+
+void ui::CamSettings::selRight(void) {
+    if(selectedItem > 3)
+        selectedItem -= 3;
+    else
+        selectedItem += 3;
+}
+
+void ui::CamSettings::incr(void) {
+    if(selectedItem == 0) {
+        od::ConferenceData::instance()->setGainP(od::ConferenceData::instance()->getGainP() + 0.1);
+    } else if(selectedItem == 1) {
+        od::ConferenceData::instance()->setGainD(od::ConferenceData::instance()->getGainD() + 0.1);
+    } else if(selectedItem == 2) {
+        od::ConferenceData::instance()->setGainI(od::ConferenceData::instance()->getGainI() + 0.1);
+    } else if(selectedItem == 3) {
+        od::ConferenceData::instance()->setRoadWidth((uint32)(od::ConferenceData::instance()->getRoadWidth() + 1));
+    } else if(selectedItem == 4) {
+        od::ConferenceData::instance()->setThresholdD((uint8)(od::ConferenceData::instance()->getThresholdD() + 1));
+    } else if(selectedItem == 5) {
+        od::ConferenceData::instance()->setThresholdB((uint8)(od::ConferenceData::instance()->getThresholdB() + 1));
+    }
+}
+
+void ui::CamSettings::decr(void) {
+    if(selectedItem == 0) {
+        od::ConferenceData::instance()->setGainP(od::ConferenceData::instance()->getGainP() - 0.1);
+    } else if(selectedItem == 1) {
+        od::ConferenceData::instance()->setGainD(od::ConferenceData::instance()->getGainD() - 0.1);
+    } else if(selectedItem == 2) {
+        od::ConferenceData::instance()->setGainI(od::ConferenceData::instance()->getGainI() - 0.1);
+    } else if(selectedItem == 3) {
+        od::ConferenceData::instance()->setRoadWidth((uint32)(od::ConferenceData::instance()->getRoadWidth() - 1));
+    } else if(selectedItem == 4) {
+        od::ConferenceData::instance()->setThresholdD((uint8)(od::ConferenceData::instance()->getThresholdD() - 1));
+    } else if(selectedItem == 5) {
+        od::ConferenceData::instance()->setThresholdB((uint8)(od::ConferenceData::instance()->getThresholdB() - 1));
+    }
+}
 
 

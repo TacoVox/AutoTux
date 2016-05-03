@@ -15,6 +15,12 @@ namespace ui {
         ValMonitor(void);
         ValMonitor(int, int);
         void refresh(void);
+        void selUp(void);
+        void selDn(void);
+        void selLeft(void);
+        void selRight(void);
+        void incr(void);
+        void decr(void);
     private:
         int xsize;
         int ysize;
