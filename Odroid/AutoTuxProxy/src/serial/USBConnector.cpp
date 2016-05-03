@@ -57,6 +57,10 @@ usb_connector::USBConnector::~USBConnector()
 }
 
 
+IUSBConnector::~IUSBConnector()
+{}
+
+
 /*! sets the buffer wrapper for this connector */
 void usb_connector::USBConnector::set_buffer_wrapper(std::shared_ptr<serial::BufferWrapper> ptr)
 {
@@ -235,7 +239,7 @@ int usb_connector::USBConnector::write(void)
 
 
 /*! disconnects and closes the usb stream */
-void usb_connector::USBConnector::disconnect(void)
+bool usb_connector::USBConnector::disconnect(void)
 {
     cout << "disconnecting from usb stream... ";
     // release resources here
@@ -244,5 +248,7 @@ void usb_connector::USBConnector::disconnect(void)
     libusb_close(usb_dev);
     libusb_exit(ctx); 
     cout << "[OK]" << endl;
+
+    return true;
 }
 

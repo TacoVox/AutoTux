@@ -25,7 +25,9 @@ std::mutex rsm;
 std::mutex rrm;
 
 /*! constructor */
-serial::BufferWrapper::BufferWrapper() : buffer_in({}), buffer_out({})
+serial::BufferWrapper::BufferWrapper() :
+    buffer_in({}),
+    buffer_out({})
 {
     cout << "creating buffer wrapper... ";
     cout << "[OK]" << endl;
@@ -88,7 +90,7 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> data)
             // fill the vector
             valid_pkt = {us1, us2, ir1, ir2, ir3, wheel, dis1, dis2, dis3, dis4, light};
             // check if correct checksum
-            if (check == checksum(&valid_pkt)) {
+            if (check == checksum(valid_pkt)) {
                 cout << "checksum OK" << endl;
                 break;
             }
@@ -168,11 +170,11 @@ vector<unsigned char> serial::BufferWrapper::readSendBuffer(void)
 
 
 /*! calculates and returns the checksum for a valid packet */
-unsigned char serial::BufferWrapper::checksum(const std::vector<unsigned char> *pkt)
+unsigned char serial::BufferWrapper::checksum(const std::vector<unsigned char> pkt)
 {
     unsigned char chksum = 0;
-    if (pkt->size() == 0) return chksum;
-    for (auto it = pkt->begin(); it != pkt->end(); ++it) {
+    if (pkt.size() == 0) return chksum;
+    for (auto it = pkt.begin(); it != pkt.end(); ++it) {
         // the checksum is calculated by XOR all elements
         chksum = (unsigned char)(chksum ^ *it);
     }
