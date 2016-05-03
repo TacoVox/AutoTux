@@ -34,14 +34,16 @@ namespace decisionmaker{
         virtual void setUp();
         virtual void tearDown();
 
-        odcore::data::Container containerVehicleData;
-        odcore::data::Container containerSensorBoardData;
-        odcore::data::Container containerDecisionMakerMSG;
-        odcore::data::Container laneRecommendation;
+        automotive::VehicleData vd;
+        automotive::miniature::SensorBoardData sbd;
+        autotux::DecisionMakerMSG dmMSG;
+        autotux::LaneRecommendationMSG lrMSG;
 
         double speed;
         bool isStopLine;
         int stopCounter;
+
+        int8_t printCounter;
 
         const bool NOTLEFTLANE = false;
         const bool LEFTLANE = true;
@@ -50,6 +52,7 @@ namespace decisionmaker{
         bool isDataQuality();
         double getDistanceToLine();
         void laneFollowing();
+        void printDebug();
     };
 
 } //DecisionMaker
