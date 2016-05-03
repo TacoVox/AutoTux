@@ -53,7 +53,8 @@ namespace lane {
                 stop_scanline(),
                 P_GAIN(),
                 I_GAIN(),
-                D_GAIN() {}
+                D_GAIN(),
+                printCounter(0) {}
 
         LaneFollower::~LaneFollower() { }
 
@@ -350,13 +351,31 @@ namespace lane {
             if (desiredSteering < -0.5) desiredSteering = -0.5;
 
             if(laneRecommendation.getDistance_to_line() < 5 ||
-               laneRecommendation.getDistance_to_line() > 150)
+                laneRecommendation.getDistance_to_line() > 150) {
+                // Set distance to line to -1 if it's too far away or too close
                 laneRecommendation.setDistance_to_line(-1);
-
-            cout << "STOPLINE: " << laneRecommendation.getDistance_to_line() << endl;
+            }
 
             laneRecommendation.setAngle(desiredSteering);
-            cout << "DS: " << laneRecommendation.getAngle() << endl;
+        }
+
+        /**
+         * Function that prints debug output every second instead of every iteration.
+         */
+
+        void LaneFollower::printDebug() {
+            if(printCounter == 30) {
+
+                // Print values sent through to the DM
+                cout << "STOPLINE: " << laneRecommendation.getDistance_to_line() << endl;
+                cout << "DESIRED STEERING: " << laneRecommendation.getAngle() << endl;
+
+                // Reset counter
+                printCounter = 0;
+            }
+            else {
+                printCounter++;
+            }
         }
 
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode LaneFollower::body() {
@@ -392,6 +411,9 @@ namespace lane {
                     double detection = laneDetection();
                     laneFollowing(detection);
                 }
+
+                // Print debug output
+                printDebug();
 
                 Container outContainer(laneRecommendation);
                 getConference().send(outContainer);

@@ -101,8 +101,11 @@ namespace lane {
             virtual void setUp();
             virtual void tearDown();
 
+            int8_t printCounter;
+
             uint8_t getThreshold(double lightValue);
             void processImage();
+            void printDebug();
             double laneDetection();
             void laneFollowing(double e);
         };
