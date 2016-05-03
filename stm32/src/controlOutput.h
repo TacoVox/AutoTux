@@ -15,12 +15,12 @@
 /**
  * The default control bytes (engine stopped, wheels centered).
  */
-#define DEFAULT_CONTROL_BYTES {SPEED_STOP, WHEELS_CENTERED_ANGLE}
+#define DEFAULT_CONTROL_BYTES {SPEED_STOP, CTRL_OUT_WHEELS_CENTERED_ANGLE}
 
 /**
  * Use these to easily access the correct byte in the control byte array.
  */
-typedef enum {CONTROL_BYTE_SPEED, CONTROL_BYTE_ANGLE} CONTROL_BYTES;
+typedef enum {CONTROL_BYTE_SPEED, CONTROL_BYTE_ANGLE, CONTROL_BYTE_LIGHTS} CONTROL_BYTES;
 
 
 /**

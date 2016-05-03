@@ -18,33 +18,33 @@ static void adcCallback(ADCDriver *adcp, adcsample_t *buffer, size_t n);
 /**
  *	Sample buffer array
  */
-static adcsample_t irSamples[ADC_SAMPLES * ADC_CHANNELS] = {0};
+static adcsample_t irSamples[IR_ADC_SAMPLES * IR_ADC_CHANNELS] = {0};
 
 /**
  * Array for averages
  */
-static adcsample_t irAvg[ADC_CHANNELS];
+static adcsample_t irAvg[IR_ADC_CHANNELS];
 
 /**
  * The resulting centimeter values
  */
-static int irCm[ADC_CHANNELS];
+static int irCm[IR_ADC_CHANNELS];
 
 /**
  * ADC group config
  */
 static const ADCConversionGroup adc_group = {
   false, // No circular buffer (stop after filling the buffer each time)
-  ADC_CHANNELS,
+  IR_ADC_CHANNELS,
   adcCallback, // Callback
   NULL,
   0,
   ADC_CR2_SWSTART,
-  ADC_SAMPLE_RATES,
+  IR_ADC_SAMPLE_RATES,
   0,
-  ADC_SQR1_NUM_CH(ADC_CHANNELS),
+  ADC_SQR1_NUM_CH(IR_ADC_CHANNELS),
   0,
-  ADC_SEQUENCE
+  IR_ADC_SEQUENCE
 };
 
 
@@ -58,8 +58,8 @@ static const ADCConversionGroup adc_group = {
  */
 void hardwareIRSetup() {
 	adcStart(&ADCD1, NULL);
-	for (int i = 0; i < ADC_CHANNELS; i++) {
-		palSetPadMode(ADC_PIN_GROUPS[i], ADC_PIN_NUMBERS[i], PAL_MODE_INPUT_ANALOG);
+	for (int i = 0; i < IR_ADC_CHANNELS; i++) {
+		palSetPadMode(IR_ADC_PIN_GROUPS[i], IR_ADC_PIN_NUMBERS[i], PAL_MODE_INPUT_ANALOG);
 	}
 }
 
@@ -67,7 +67,7 @@ void hardwareIRSetup() {
  * Call this each time an analog read should be performed.
  */
 void hardwareIRIteration() {
-	adcStartConversion(&ADCD1, &adc_group, &irSamples[0], ADC_SAMPLES);
+	adcStartConversion(&ADCD1, &adc_group, &irSamples[0], IR_ADC_SAMPLES);
 }
 
 /*

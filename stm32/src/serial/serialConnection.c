@@ -190,6 +190,8 @@ static THD_FUNCTION(serialThread, arg) {
 			connectionLinkActive = TRUE;
 		} else {
 			connectionLinkActive = FALSE;
+			// Connection problems - light up red LED
+			palSetPad(GPIOD, GPIOD_LED5);
 		}
 
 
