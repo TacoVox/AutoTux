@@ -46,7 +46,7 @@ void DecisionMaker::tearDown(){
 */
 void DecisionMaker::laneFollowing() {
 
-    /*if(stopCounter > 0) {
+    if(stopCounter > 0) {
 
         if(stopCounter == 90) {
             //cout << "WAKING UP" << endl;
@@ -60,6 +60,7 @@ void DecisionMaker::laneFollowing() {
             stopCounter++;
         }
     }
+
     else if(getDistanceToLine() < 50 && getDistanceToLine() != -1) {
         cout << "STOPPING!" << endl;
         vehicleControl.setBrakeLights(true);
@@ -74,11 +75,8 @@ void DecisionMaker::laneFollowing() {
         speed = 1;
     }
 
-    //cout << "Distance to line: " << getDistanceToLine() << endl;
-*/
     vehicleControl.setSpeed(speed);
     vehicleControl.setSteeringWheelAngle(getAngle());
-    cout << "DS: " << getAngle() << endl;
 }
 
 /**
@@ -114,10 +112,10 @@ void DecisionMaker::printDebug() {
 
         // Sensors received from proxy
         cout << "IR FRONT RIGHT: " << sbd.getValueForKey_MapOfDistances(0);
-        cout << "IR REAR: " << sbd.getValueForKey_MapOfDistances(1);
-        cout << "IR REAR RIGHT: " << sbd.getValueForKey_MapOfDistances(2);
-        cout << "US FRONT: " << sbd.getValueForKey_MapOfDistances(3);
-        cout << "US FRONT RIGHT: " << sbd.getValueForKey_MapOfDistances(4) << endl;
+        cout << " | IR REAR: " << sbd.getValueForKey_MapOfDistances(1);
+        cout << " | IR REAR RIGHT: " << sbd.getValueForKey_MapOfDistances(2);
+        cout << " | US FRONT: " << sbd.getValueForKey_MapOfDistances(3);
+        cout << " | US FRONT RIGHT: " << sbd.getValueForKey_MapOfDistances(4) << endl;
 
         // Reset counter
         printCounter = 0;
@@ -132,7 +130,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
     addDataStoreFor(lifoQueue);
 
     // Set initial state of the car
-    STATE state = PARKING;
+    STATE state = DRIVING;
 
     Container containerSensorBoardData, containerVehicleData, containerDecisionMakerMSG, containerLaneRecommendationMSG;
     OvertakingMSG ovtMSG;
@@ -184,7 +182,6 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                     }
 
                     laneFollowing();
-		    cout << sbd.getValueForKey_MapOfDistances(3) << endl;
                 }
 
                 break;
