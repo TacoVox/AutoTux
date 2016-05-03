@@ -19,6 +19,7 @@ namespace ui {
         void refresh(void);
         void selDown(void);
         void selUp(void);
+        void select(void);
     private:
         int xsize;
         int ysize;
@@ -26,6 +27,7 @@ namespace ui {
         std::vector<std::string> items;
         std::vector<std::unique_ptr<ui::ATCWindow>> windows;
         int curritem;
+        int currwindow;
         void genMenu(void);
     };
 }
