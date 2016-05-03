@@ -41,7 +41,7 @@ void ui::MainUI::handleKeys(void) {
             menu.selUp();
         else if(keyPressed == 's')
             menu.selDown();
-        else if(keyPressed == KEY_ENTER)
+        else if(keyPressed == '#')
             menu.select();
 
         keyPressed = '\0';
