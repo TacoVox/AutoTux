@@ -24,6 +24,7 @@ namespace ui {
     private:
         int xsize;
         int ysize;
+        int selectedItem;
         WINDOW* _camsettings;
         void printVals(void);
     };
