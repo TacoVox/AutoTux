@@ -59,9 +59,21 @@ void ui::Menu::select(void) {
         exit(0);
     else
         currwindow = curritem;
+
+    menusel = false;
 }
 
 void ui::Menu::unselect(void) { menusel = true; }
+
+void ui::Menu::incr() {
+    if(!menusel)
+        windows.at(currwindow)->incr();
+}
+
+void ui::Menu::decr() {
+    if(!menusel)
+        windows.at(currwindow)->decr();
+}
 
 void ui::Menu::genMenu(void) {
     int i;
