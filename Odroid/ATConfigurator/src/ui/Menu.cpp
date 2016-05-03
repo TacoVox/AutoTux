@@ -12,14 +12,14 @@ ui::Menu::Menu(int x, int y) : xsize(x), ysize(y),
                                _menu(newwin(ysize - 2, 15, 1, 0)),
                                items({"Cockpit", "Camera Setup",
                                      "Camera View", "Quit"}),
-                               curritem(0) {
+                               curritem(0), currwindow(0) {
     windows.push_back((std::unique_ptr<ATCWindow>)new ValMonitor(xsize, ysize));
     wborder(_menu, ' ', ACS_VLINE, ' ', ' ', ' ', ACS_VLINE, ' ', ACS_VLINE);
 }
 
 void ui::Menu::refresh(void) {
     genMenu();
-    windows.at(0)->refresh();
+    windows.at(currwindow)->refresh();
     wrefresh(_menu);
 }
 
@@ -35,6 +35,13 @@ void ui::Menu::selUp(void) {
         curritem = (int)items.size() - 1;
     else
         curritem--;
+}
+
+void ui::Menu::select(void) {
+    if (curritem == 3)
+        exit(0);
+    else
+        currwindow = 0;//curritem;
 }
 
 void ui::Menu::genMenu(void) {
