@@ -20,7 +20,7 @@ namespace ui {
         int ysize;
         WINDOW* _valmonitor;
         void printVals(void);
-        std::string dtostr(double);
+        const char* dtostr(std::string, double);
     };
 }
 
