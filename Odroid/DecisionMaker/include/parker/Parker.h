@@ -22,18 +22,15 @@ namespace parker {
         const double SPOT_SIZE = 0.70;
         const double ADJUST_BEFORE_PARKING = 0.08;
         const double BACK_AROUND_CORNER = 0.45;
-        const double BACKING_STRAIGHT = 0.03;
         const double BACKING_LEFT = 0.48;
-        const double ADJUST_IN_SPOT_FORWARD = 0.10;
-        const double ADJUST_IN_SPOT_BACK = 0.10;
 
         const double SENSOR_SAFETY_MIN = 0.03;
         const double SENSOR_SAFETY_MAX = 0.04;
 
-        const double IRSENSOR_DISTANCE_MIN = 0.02;
+        const double IRSENSOR_DISTANCE_MIN = 0.05;
         const double IRSENSOR_DISTANCE_MAX = 0.22;
 
-        const double ULTRASENSOR_DISTANCE_MIN = 0.02;
+        const double ULTRASENSOR_DISTANCE_MIN = 0.05;
         const double ULTRASENSOR_DISTANCE_MAX = 90;
         const double ENOUGH_SPACE_DISTANCE = 0.85;
 
@@ -63,8 +60,8 @@ namespace parker {
         //----------------------------------------
 
 
-        enum STATE {FINDOBJECT, FINDGAPSTART, FINDGAPEND, ENOUGHSPACE};
-        enum PARKSTATE {PHASE0,PHASE1, PHASE2, PHASE3, PHASE4, PHASE5, PHASE6, SAFETYSTOP};
+        enum STATE {FINDOBJECT, FINDGAPSTART, FINDGAPEND, CHECKSPACE};
+        enum PARKSTATE {PHASE0,PHASE1, PHASE2, PHASE3, SAFETYSTOP};
         PARKSTATE parkstate;
         STATE state;
 
@@ -79,7 +76,7 @@ namespace parker {
         bool objInFront;
         int turningCounter;
         bool reversing;
-        odcore::base::LIFOQueue lifoQueue;
+        bool outOfSpot;
 
         const int FREQUENCY = 5;
 
@@ -95,13 +92,9 @@ namespace parker {
         void enoughSpace();
         automotive::VehicleControl adjustBeforeParking(automotive::VehicleData, double);
         automotive::VehicleControl backAroundCorner(automotive::VehicleData, double);
-        automotive::VehicleControl backingStraight(automotive::VehicleData, double);
-        automotive::VehicleControl backingLeft(automotive::VehicleData, double);
-        automotive::VehicleControl adjustInSpotForward(automotive::VehicleData, double);
-        automotive::VehicleControl adjustInSpotBack(automotive::VehicleData, double);
+        automotive::VehicleControl getParallelInSpot(automotive::miniature::SensorBoardData, automotive::VehicleData, double);
         automotive::VehicleControl midOfSpot(automotive::miniature::SensorBoardData);
         bool isNotSafe(automotive::miniature::SensorBoardData);
-        automotive::VehicleControl goBackToLane(automotive::VehicleData);
         void inBetweenObjects(automotive::miniature::SensorBoardData);
         void objectBehind(automotive::miniature::SensorBoardData);
 
@@ -112,7 +105,8 @@ namespace parker {
         bool getFoundSpot();
         bool getIsParked();
         bool isReversing();
-
+        bool isOutOfSpot();
+        automotive::VehicleControl goBackToLane(automotive::miniature::SensorBoardData, automotive::VehicleData, double);
         automotive::VehicleControl parallelPark(automotive::miniature::SensorBoardData, automotive::VehicleData);
     };
 }
