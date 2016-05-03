@@ -15,6 +15,7 @@ using namespace std;
 
 /*! constructor */
 usb_connector::USBConnector::USBConnector() :
+    verbose{false},
     bw{},
     ctx{},
     usb_dev{}
@@ -26,6 +27,7 @@ usb_connector::USBConnector::USBConnector() :
 
 /*! copy constructor */
 usb_connector::USBConnector::USBConnector(const usb_connector::USBConnector &usb) :
+    verbose{usb.verbose},
     bw{usb.bw},
     ctx{usb.ctx},
     usb_dev{usb.usb_dev}
@@ -36,6 +38,7 @@ usb_connector::USBConnector::USBConnector(const usb_connector::USBConnector &usb
 usb_connector::USBConnector &
 usb_connector::USBConnector::operator=(const usb_connector::USBConnector &usb)
 {
+    verbose = usb.verbose;
     bw = usb.bw;
     ctx = usb.ctx;
     usb_dev = usb.usb_dev;
@@ -64,8 +67,14 @@ IUSBConnector::~IUSBConnector()
 /*! sets the buffer wrapper for this connector */
 void usb_connector::USBConnector::set_buffer_wrapper(std::shared_ptr<serial::BufferWrapper> ptr)
 {
-    cout << "setting buffer wrapper to usb connector" << endl;
     bw = ptr;
+}
+
+
+/*! sets verbose */
+void usb_connector::USBConnector::set_verbose(bool ver)
+{
+    verbose = ver;
 }
 
 
@@ -193,8 +202,10 @@ int usb_connector::USBConnector::read(void)
     // the actual bytes read and the timeout for the operation
     int res = libusb_bulk_transfer(usb_dev, USB_ENDPOINT_IN,
                                    data, READ_LEN, &transferred, 20);
+    if (verbose) {
+        cout << "actual bytes read: " << transferred << endl;
+    }
     if (res == 0) {
-        cout << "bytes read: " << transferred << endl;
         // the vector holding the data from the read
         vector<unsigned char> vec(data, data + transferred);
         // append to the receive buffer
@@ -228,8 +239,8 @@ int usb_connector::USBConnector::write(void)
     // the actual bytes written and the timeout for the operation
     int res = libusb_bulk_transfer(usb_dev, USB_ENDPOINT_OUT,
                                    data, (unsigned int)len, &transferred, 20);
-    if (res == 0) {
-        cout << "bytes sent: " << transferred << endl;
+    if (verbose) {
+        cout << "actual bytes written: " << transferred << endl;
     }
     // delete allocated memory
     delete [] data;

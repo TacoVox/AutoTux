@@ -17,6 +17,7 @@ using namespace std;
 
 /*! constructor */
 usb_handler::USBHandler::USBHandler(std::shared_ptr<usb_connector::USBConnector> ptr) :
+    verbose{false},
     running{true},
     uc{ptr}
 {
@@ -45,7 +46,9 @@ void usb_handler::USBHandler::run()
     while (running) {
         // read from usb
         int res1 = uc->read();
-        cout << "result from read: " << res1 << endl;
+        if (verbose) {
+            cout << "result from read: " << res1 << endl;
+        }
         // if not successful read, check if we
         // need to reconnect
         if (res1 != 0) {
@@ -53,7 +56,9 @@ void usb_handler::USBHandler::run()
         }
         // write it to usb
         int res2 = uc->write();
-        cout << "result from write: " << res2 << endl;
+        if (verbose) {
+            cout << "result from write: " << res2 << endl;
+        }
         // if not successful write, check if we
         // need to reconnect
         if (res2 != 0) {
@@ -75,8 +80,14 @@ void usb_handler::USBHandler::stop()
 /*! sets the usb connector for this handler */
 void usb_handler::USBHandler::set_usb_connector(std::shared_ptr<usb_connector::USBConnector> ptr)
 {
-    cout << "setting usb connector to usb handler" << endl;
     uc = ptr;
+}
+
+
+/*! sets verbose */
+void usb_handler::USBHandler::set_verbose(bool ver)
+{
+    verbose = ver;
 }
 
 

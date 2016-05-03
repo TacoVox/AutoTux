@@ -22,8 +22,8 @@ namespace proxy {
                     m_vc.set(CV_CAP_PROP_BRIGHTNESS, 0.0);
 
                     // NOTE: system calls might be bad :(
-                    system("v4l2-ctl -c exposure_auto=1");
-                    system("v4l2-ctl -c exposure_absolute=60");
+                    //system("v4l2-ctl -c exposure_auto=1");
+                    //system("v4l2-ctl -c exposure_absolute=60");
                 } else {
                     cerr << "CameraProxy: Could not open camera '" << name << "' with ID: " << id << endl;
                 }

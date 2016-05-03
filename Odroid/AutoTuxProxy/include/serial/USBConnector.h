@@ -52,6 +52,8 @@ namespace usb_connector
         int write(void);       
         /*! sets the buffer wrapper for this connector */
         void set_buffer_wrapper(std::shared_ptr<serial::BufferWrapper>);
+        /*! sets verbose */
+        void set_verbose(bool);
     private:
         /*! initializes libusb */
         bool init_libusb(void);
@@ -60,6 +62,8 @@ namespace usb_connector
         /*! claims the interface of the USB for I/O operations */
         bool claim_interface(void);
     private:
+        /*! is it verbose mode */
+        bool verbose;
         /*! the buffer wrapper */
         std::shared_ptr<serial::BufferWrapper> bw;
         /*! libusb context */
