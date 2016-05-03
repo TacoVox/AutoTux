@@ -20,7 +20,7 @@ namespace lane {
         using namespace odtools::player;
 
         // SET TO TRUE WHEN USING THE SIMULATOR
-        const bool SIMMODE = true;
+        const bool SIMMODE = false;
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) :
                 TimeTriggeredConferenceClientModule(argc, argv, "LaneFollower"),
@@ -44,12 +44,6 @@ namespace lane {
                 P_GAIN(),
                 I_GAIN(),
                 D_GAIN() {
-            m_sharedProcessedImageMemory = SharedMemoryFactory::createSharedMemory("ProcessedImage", 640*480*1);
-            m_sharedProcessedImage.setName("ProcessedImage");
-            m_sharedProcessedImage.setWidth(640);
-            m_sharedProcessedImage.setHeight(480);
-            m_sharedProcessedImage.setBytesPerPixel(1);
-            m_sharedProcessedImage.setSize(640*480);
         }
 
         LaneFollower::~LaneFollower() { }
@@ -101,9 +95,21 @@ namespace lane {
             if (c.getDataType() == SharedImage::ID()) {
                 SharedImage si = c.getData<SharedImage>();
 
+
                 // Have we already attached to the shared memory containing the image?
                 if (!m_hasAttachedToSharedImageMemory) {
                     m_sharedImageMemory = SharedMemoryFactory::attachToSharedMemory(si.getName());
+
+                    // Set processed image things
+                    m_sharedProcessedImageMemory = SharedMemoryFactory::createSharedMemory("ProcessedImage", si.getHeight()*si.getWidth());
+                    m_sharedProcessedImage.setName("ProcessedImage");
+                    m_sharedProcessedImage.setWidth(si.getWidth());
+                    m_sharedProcessedImage.setHeight(si.getHeight());
+                    m_sharedProcessedImage.setBytesPerPixel(1);
+                    m_sharedProcessedImage.setSize(si.getWidth()*si.getHeight());
+
+                    // We have now attached to the shared image memory.
+                    m_hasAttachedToSharedImageMemory = true;
                 }
 
                 // Did we successfully connect?
@@ -153,7 +159,7 @@ namespace lane {
 
             if(m_sharedProcessedImageMemory.get() && m_sharedProcessedImageMemory->isValid()) {
                 m_sharedProcessedImageMemory->lock();
-                memcpy(m_sharedProcessedImageMemory->getSharedMemory(), m_image_grey.data, 640*480);
+                memcpy(m_sharedProcessedImageMemory->getSharedMemory(), m_image_grey.data, 640*480); // Set size dynamically?
                 m_sharedProcessedImageMemory->unlock();
             }
 
