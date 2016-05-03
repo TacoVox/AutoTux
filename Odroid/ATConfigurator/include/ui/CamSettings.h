@@ -20,7 +20,6 @@ namespace ui {
         int ysize;
         WINDOW* _camsettings;
         void printVals(void);
-        const char* dtostr(std::string, double);
     };
 }
 

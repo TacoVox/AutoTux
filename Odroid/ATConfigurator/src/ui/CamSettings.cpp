@@ -23,17 +23,23 @@ void ui::CamSettings::printVals(void) {
     wmove(_camsettings, 1, 1);
     wclrtobot(_camsettings);
 
-    mvwaddstr(_camsettings, 1, 1,
-              dtostr("Speed", od::ConferenceData::instance()->getSpeed()));
-}
+    mvwaddstr(_camsettings, 1, 1, "Gain P:");
+    mvwprintw(_camsettings, 1, 9, "%g", od::ConferenceData::instance()->getGainP());
 
-const char *ui::CamSettings::dtostr(std::string field, double val) {
-    std::string str = field.append(": ");
-    std::ostringstream valcon;
-    valcon << val;
-    str.append(valcon.str());
-    return str.c_str();
-}
+    mvwaddstr(_camsettings, 2, 1, "Gain D:");
+    mvwprintw(_camsettings, 2, 9, "%g", od::ConferenceData::instance()->getGainD());
 
+    mvwaddstr(_camsettings, 3, 1, "Gain I:");
+    mvwprintw(_camsettings, 3, 9, "%g", od::ConferenceData::instance()->getGainI());
+
+    mvwaddstr(_camsettings, 1, 20, "Road Width:");
+    mvwprintw(_camsettings, 1, 36, "%u", od::ConferenceData::instance()->getRoadWidth());
+
+    mvwaddstr(_camsettings, 2, 20, "Threshold Low:");
+    mvwprintw(_camsettings, 2, 36, "%u", od::ConferenceData::instance()->getThresholdD());
+
+    mvwaddstr(_camsettings, 3, 20, "Threshold High:");
+    mvwprintw(_camsettings, 3, 36, "%u", od::ConferenceData::instance()->getThresholdB());
+}
 
 
