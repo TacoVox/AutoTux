@@ -52,12 +52,27 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_NAME}lib-static ${LIBRARIES})
 
 
 # GTest
-find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIRS})
+SET(LIBPREFIX "${CMAKE_STATIC_LIBRARY_PREFIX}")
+SET(LIBSUFFIX "${CMAKE_STATIC_LIBRARY_SUFFIX}")
+SET(GTEST_LOCATION "/usr/src/googletest-master/googletest/build")
+SET(GTEST_INCLUDES "/usr/src/googletest-master/googletest/include")
+SET(GTEST_LIBRARY  "${GTEST_LOCATION}/${LIBPREFIX}gtest${LIBSUFFIX}")
+SET(GTEST_MAINLIB  "${GTEST_LOCATION}/${LIBPREFIX}gtest_main${LIBSUFFIX}")
+
+# GMock
+SET(LIBPREFIX "${CMAKE_STATIC_LIBRARY_PREFIX}")
+SET(LIBSUFFIX "${CMAKE_STATIC_LIBRARY_SUFFIX}")
+SET(GMOCK_LOCATION "/usr/src/googletest-master/googlemock/build")
+SET(GMOCK_INCLUDES "/usr/src/googletest-master/googlemock/include")
+SET(GMOCK_LIBRARY  "${GMOCK_LOCATION}/${LIBPREFIX}gmock${LIBSUFFIX}")
+SET(GMOCK_MAINLIB  "${GMOCK_LOCATION}/${LIBPREFIX}gmock_main${LIBSUFFIX}")
+
+INCLUDE_DIRECTORIES(SYSTEM ${GTEST_INCLUDES})
+INCLUDE_DIRECTORIES(SYSTEM ${GMOCK_INCLUDES})
 
 # Link runTests with what we want to test and the GTest and pthread library
-add_executable(runTests "${CMAKE_CURRENT_SOURCE_DIR}/testsuite/BufferWrapperTest.cpp")
-target_link_libraries(runTests ${PROJECT_NAME}lib-static ${LIBRARIES} ${GTEST_LIBRARIES} pthread)
+ADD_EXECUTABLE(runTests "${CMAKE_CURRENT_SOURCE_DIR}/testsuite/BufferWrapperTest.cpp")
+TARGET_LINK_LIBRARIES(runTests ${PROJECT_NAME}lib-static ${LIBRARIES} ${GTEST_LIBRARY} ${GTEST_MAINLIB} ${GMOCK_LIBRARY} ${GMOCK_MAINLIB} pthread)
 
 # find CxxTest
 #find_package(CxxTest REQUIRED)

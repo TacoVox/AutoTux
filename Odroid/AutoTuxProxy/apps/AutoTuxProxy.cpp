@@ -14,9 +14,9 @@ using namespace usb_handler;
 using namespace usb_connector;
 using namespace proxy::camera;
 
-shared_ptr<USBHandler> uh;
 
 static void handler(int);
+bool verbose(int, char**);
 
 int32_t main(int32_t argc, char **argv) {
 
@@ -24,14 +24,20 @@ int32_t main(int32_t argc, char **argv) {
 
     cout << "Starting up AutoTuxProxy..." << endl;
 
+    bool is_verbose = verbose(argc, argv);
+
     shared_ptr<BufferWrapper> bw = (shared_ptr<BufferWrapper>) new BufferWrapper();
+    bw->set_verbose(is_verbose);
+
     shared_ptr<USBConnector> uc = (shared_ptr<USBConnector>) new USBConnector();
-    uh = (shared_ptr<USBHandler>) new USBHandler(uc);
-
     uc->set_buffer_wrapper(bw);
+    uc->set_verbose(is_verbose);
 
-    thread ucthread(&USBHandler::run, uh);
-    ucthread.detach();
+    shared_ptr<USBHandler> uh = (shared_ptr<USBHandler>) new USBHandler(uc);
+    uh->set_verbose(is_verbose);
+
+    thread uhthread(&USBHandler::run, uh);
+    uhthread.detach();
 
     proxy::Proxy proxy(argc, argv, bw);
     proxy.runModule();
@@ -42,9 +48,18 @@ int32_t main(int32_t argc, char **argv) {
 
 static void handler(int signum)
 {
-    cout << "caught signal: " << signum << endl;
-    uh->stop();
-    uh->~USBHandler();
     exit(signum);
+}
+
+
+bool verbose(int argc, char *argv[])
+{
+    for (int i = 1; i < argc; i++) {
+        string temp(argv[i]);
+        if (temp == "--verbose=1") {
+            return true;
+        }
+    }
+    return false;
 }
 

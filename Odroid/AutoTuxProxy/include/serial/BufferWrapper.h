@@ -12,6 +12,7 @@
 // ==================================================
 #include <vector>
 #include <deque>
+#include <memory>
 
 // packet values positions
 #define SBDPKTSIZE      16
@@ -59,8 +60,12 @@ namespace serial
         /*! returns a valid packet to write to the serial */
         std::vector<unsigned char> readSendBuffer(void);
         /*! returns the checksum for a valid packet */
-        unsigned char checksum(const std::vector<unsigned char> *);
+        unsigned char checksum(const std::vector<unsigned char>);
+        /*! sets verbose */
+        void set_verbose(bool);
     private:
+        /*! is it verbose mode */
+        bool verbose;
         /*! the receive buffer */
         std::deque<std::vector<unsigned char>> buffer_in;
         /*! the send buffer */
