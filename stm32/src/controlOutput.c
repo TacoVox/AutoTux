@@ -16,6 +16,7 @@
 #include "autotuxconfig.h"
 #include "controlOutput.h"
 #include "hardware/hardwarePWM.h"
+#include "hardware/hardwareUS.h"
 #include "hardware/hardwareRC.h"
 #include "hardware/hardwareLights.h"
 
@@ -120,7 +121,7 @@ void controlOutputIteration() {
 	}
 
 	// Update lights
-	hardwareLightsIteration(lightByte, rcMode, rcBrake);
+	hardwareLightsIteration(lightByte, rcMode, rcBrake, hardwareUSGetLightValue());
 }
 
 
