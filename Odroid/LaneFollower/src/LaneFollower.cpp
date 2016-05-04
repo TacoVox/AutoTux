@@ -409,6 +409,8 @@ namespace lane {
                     D_GAIN = m_config.getGainD();
 
                     configContainerTimeStamp = TimeStamp();
+
+                    LaneFollower::toLogger(LogMessage::DEBUG, m_config.toString());
                 }
 
                 m_overtaking = overtaking_container.getData<OvertakingMSG>();
