@@ -27,8 +27,8 @@ std::mutex rrm;
 /*! constructor */
 serial::BufferWrapper::BufferWrapper() :
     verbose{false},
-    buffer_in({}),
-    buffer_out({})
+    buffer_in{},
+    buffer_out{}
 {
     cout << "creating buffer wrapper... ";
     cout << "[OK]" << endl;
@@ -54,16 +54,18 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> data)
         arb.unlock();
         return;
     }
-    // the vector to hold the correct packet
-    vector<unsigned char> valid_pkt;
+
     // loop through the received data from the read and look
     // for a correct packet
     for (auto it = data.begin(); it != data.end(); it++) {
         if (it + SBDPKTSIZE > data.end()) {
             break;
         }
-        if (*it == DEL_ONE && *(it+DEL_TWO_POS) == DEL_TWO &&
-                *(it+DEL_DBCOLON_POS) == DEL_DBCOLON && *(it+DEL_COMMA_POS) == DEL_COMMA) {
+        if (*it == DEL_ONE &&
+            *(it+DEL_TWO_POS) == DEL_TWO &&
+            *(it+DEL_DBCOLON_POS) == DEL_DBCOLON &&
+            *(it+DEL_COMMA_POS) == DEL_COMMA) {
+
             unsigned char us1 = *(it+US1_POS);
             unsigned char us2 = *(it+US2_POS);
             unsigned char ir1 = *(it+IR1_POS);
@@ -77,19 +79,20 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> data)
             unsigned char light = *(it+LIGHT_SEN);
             unsigned char check = *(it+CHK_SUM);
 
-            if (verbose == true) {
-                printf("US1:%i US2:%i IR1:%i IR2:%i IR3:%i WHEEL:%i DIS1:%i DIS2:%i DIS3:%i DIS4:%i LIGHT:%i\n",
+            if (verbose) {
+                printf("US1:%i US2:%i IR1:%i IR2:%i IR3:%i WHEEL:%i "
+                       "DIS1:%i DIS2:%i DIS3:%i DIS4:%i LIGHT:%i\n",
                        us1, us2, ir1, ir2, ir3, wheel, dis1, dis2, dis3, dis4, light);
             }
             // fill the vector
-            valid_pkt = {us1, us2, ir1, ir2, ir3, wheel, dis1, dis2, dis3, dis4, light};
+            vector<unsigned char> valid_pkt =
+                {us1, us2, ir1, ir2, ir3, wheel, dis1, dis2, dis3, dis4, light};
             // check if correct checksum
             if (check == checksum(valid_pkt)) {
+                buffer_in.push_front(valid_pkt);
                 break;
             }
             else {
-                // clear the return vector
-                valid_pkt.clear();
                 // find where next packet starts
                 it = find(it+1, data.end(), DEL_ONE);
                 // if not found, break
@@ -97,17 +100,13 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> data)
             }
         }
     }
-    // push in front of the buffer if valid data
-    if (valid_pkt.size() != 0) {
-        buffer_in.push_front(valid_pkt);
-    }
     // unlock mutex
     arb.unlock();
 }
 
 
 /*! returns the most recent valid packet from the read buffer */
-vector<unsigned char> serial::BufferWrapper::readReceiveBuffer(void)
+vector<unsigned char> serial::BufferWrapper::readReceiveBuffer()
 {
     rrm.lock();
     // check for size, i.e. not empty
@@ -140,7 +139,7 @@ void serial::BufferWrapper::appendSendBuffer(vector<unsigned char> vec)
 
 
 /*! returns the most recent valid packet from the send buffer */
-vector<unsigned char> serial::BufferWrapper::readSendBuffer(void)
+vector<unsigned char> serial::BufferWrapper::readSendBuffer()
 {
     rsm.lock();
     // check for size, i.e. not empty
@@ -175,7 +174,8 @@ unsigned char serial::BufferWrapper::checksum(const std::vector<unsigned char> p
 
 
 /*! sets verbose */
-void serial::BufferWrapper::set_verbose(bool verb)
+void serial::BufferWrapper::set_verbose(bool a_ver)
 {
-    verbose = verb;
+    verbose = a_ver;
 }
+

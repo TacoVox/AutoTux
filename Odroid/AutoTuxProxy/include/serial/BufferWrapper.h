@@ -54,11 +54,11 @@ namespace serial
         /*! appends data read from the serial to the receive buffer */
         void appendReceiveBuffer(std::vector<unsigned char>);
         /*! returns a valid packet from the receive buffer */
-        std::vector<unsigned char> readReceiveBuffer(void);
+        std::vector<unsigned char> readReceiveBuffer();
         /*! appends to the send buffer data to write to the serial */
         void appendSendBuffer(std::vector<unsigned char>);
         /*! returns a valid packet to write to the serial */
-        std::vector<unsigned char> readSendBuffer(void);
+        std::vector<unsigned char> readSendBuffer();
         /*! returns the checksum for a valid packet */
         unsigned char checksum(const std::vector<unsigned char>);
         /*! sets verbose */
@@ -71,7 +71,8 @@ namespace serial
         /*! the send buffer */
         std::deque<std::vector<unsigned char>> buffer_out;
     };
-}
+
+} // namespace
 
 
 #endif // BUFFERPARSER_H

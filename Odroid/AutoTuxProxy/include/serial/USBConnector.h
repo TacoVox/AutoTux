@@ -11,7 +11,6 @@
 // ==================================================
 #include <memory>
 #include <libusb-1.0/libusb.h>
-#include <serial/IUSBConnector.h>
 #include "serial/BufferWrapper.h"
 
 // define
@@ -29,9 +28,9 @@
 
 // USBConnector class
 // ============================
-namespace usb_connector
+namespace serial
 {
-    class USBConnector : public IUSBConnector
+    class USBConnector
     {
     public:
         /*! constructor */
@@ -43,24 +42,24 @@ namespace usb_connector
         /*! copy constructor */
         USBConnector & operator=(const USBConnector&);
         /*! connects to usb */
-        bool connect(void);
+        bool connect();
         /*! disconnects and closes the usb stream */
-        bool disconnect(void);
+        bool disconnect();
         /*! reads from the usb stream */
-        int read(void);
+        int read();
         /*! writes to the usb stream */
-        int write(void);       
+        int write();
         /*! sets the buffer wrapper for this connector */
         void set_buffer_wrapper(std::shared_ptr<serial::BufferWrapper>);
         /*! sets verbose */
         void set_verbose(bool);
     private:
         /*! initializes libusb */
-        bool init_libusb(void);
+        bool init_libusb();
         /*! gets a list of the devices and opens the one we need */
-        bool open_device(void);
+        bool open_device();
         /*! claims the interface of the USB for I/O operations */
-        bool claim_interface(void);
+        bool claim_interface();
     private:
         /*! is it verbose mode */
         bool verbose;
@@ -71,7 +70,7 @@ namespace usb_connector
         /*! libusb device handle */
         struct libusb_device_handle *usb_dev;
     };
-} // namespace usb_connector
+} // namespace
 
 #endif	// USBCONNECTOR_H
 

@@ -72,13 +72,6 @@ INCLUDE_DIRECTORIES(SYSTEM ${GMOCK_INCLUDES})
 
 # Link runTests with what we want to test and the GTest and pthread library
 ADD_EXECUTABLE(runTests "${CMAKE_CURRENT_SOURCE_DIR}/testsuite/BufferWrapperTest.cpp")
-TARGET_LINK_LIBRARIES(runTests ${PROJECT_NAME}lib-static ${LIBRARIES} ${GTEST_LIBRARY} ${GTEST_MAINLIB} ${GMOCK_LIBRARY} ${GMOCK_MAINLIB} pthread)
+#ADD_EXECUTABLE(runTests "${CMAKE_CURRENT_SOURCE_DIR}/testsuite/USBHandlerTest.cpp")
+TARGET_LINK_LIBRARIES(runTests ${PROJECT_NAME}lib-static ${GTEST_LIBRARY} ${GTEST_MAINLIB} ${GMOCK_LIBRARY} ${GMOCK_MAINLIB} pthread)
 
-# find CxxTest
-#find_package(CxxTest REQUIRED)
-#if (CXXTEST_FOUND)
-#    include_directories(${CXXTEST_INCLUDE_DIR})
-#    enable_testing()
-#    CXXTEST_ADD_TEST(BufferWrapperTest BufferWrapperTest.cpp "${CMAKE_CURRENT_SOURCE_DIR}/testsuite/BufferWrapperTestSuite.h")
-#    target_link_libraries(BufferWrapperTest ${PROJECT_NAME}lib-static ${LIBRARIES})
-#endif()
