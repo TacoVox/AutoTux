@@ -21,7 +21,7 @@ using namespace autotux;                    // For own data structures
 using namespace decisionmaker;
 using namespace overtaker;
 
-enum STATE {DRIVING, PARKING};
+enum STATE {LANE_FOLLOWING, DRIVING, PARKING};
 
 VehicleControl vehicleControl;
 
@@ -115,8 +115,8 @@ void DecisionMaker::printDebug() {
         cout << " | IR REAR: " << sbd.getValueForKey_MapOfDistances(1);
         cout << " | IR REAR RIGHT: " << sbd.getValueForKey_MapOfDistances(2);
         cout << " | US FRONT: " << sbd.getValueForKey_MapOfDistances(3);
-        cout << " | US FRONT RIGHT: " << sbd.getValueForKey_MapOfDistances(4) << endl;
-
+        cout << " | US FRONT RIGHT: " << sbd.getValueForKey_MapOfDistances(4);
+        cout << " | TRAVELED: " << vd.getAbsTraveledPath() << endl;
         // Reset counter
         printCounter = 0;
     }
@@ -165,17 +165,29 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
             ovtMSG.setLeftlane(LEFTLANE);
 
         switch (state){
+            // Pure Lane follower
+            case LANE_FOLLOWING:{
+
+                if(!isStopLine) {
+                    speed = 1;
+                }
+
+                laneFollowing();
+
+                break;
+            }
+            // Lane follower + overtaker
             case DRIVING:{
                 ovt.obstacleDetection(sbd, vd, vehicleControl);
 
                 // If overtaker is overriding control values...
                 if(ovt.getIsOverriding()) {
-                    cout << "DM: OVERTAKER is OVERRIDING" << endl;
+                    //cout << "DM: OVERTAKER is OVERRIDING" << endl;
                     vehicleControl = ovt.getOvtControl();
                 }
                     //... else follow lane-follower instructions...
                 else{
-                    cout <<"DM: LANE FOLLOWER Instructions" << endl;
+                    //cout <<"DM: LANE FOLLOWER Instructions" << endl;
 
                     if(!isStopLine) {
                         speed = 1;
@@ -186,6 +198,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
 
                 break;
             }
+            // Lane follower + parking
             case PARKING:{
 
                 if(parker.getFoundSpot()){
