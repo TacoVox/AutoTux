@@ -223,6 +223,17 @@ namespace lane {
 
                 // If the loop is currently checking at the height of our set control line
                 if(y == control_scanline) {
+
+                    // Quality check, if no pixels are detected on either side, set quality to false
+                    if(right.x < 0 && left.x < 0) {
+                        laneRecommendation.setQuality(false);
+                    }
+
+                    // Otherwise the quality is fine
+                    else {
+                        laneRecommendation.setQuality(true);
+                    }
+
                     // Right lane logic (prefer right line following)
                     if (!inLeftLane) {
                         if (right.x > 0) {
