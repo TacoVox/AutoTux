@@ -31,6 +31,12 @@ namespace od {
         void setIR2(double);
         double getIR3(void);
         void setIR3(double);
+        double getRec_angle(void);
+        void setRec_angle(double);
+        double getDistance_to_line(void);
+        void setDistance_to_line(double);
+        bool isQuality(void);
+        void setQuality(bool);
         uint32 getRoadWidth(void);
         void setRoadWidth(uint32 roadWidth);
         double getGainP(void);
@@ -55,6 +61,9 @@ namespace od {
         double ir1;
         double ir2;
         double ir3;
+        double rec_angle;
+        double distance_to_line;
+        bool quality;
         uint32 roadWidth;
         double gainP;
         double gainI;

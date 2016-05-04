@@ -68,6 +68,18 @@ double od::ConferenceData::getIR3(void) { return this->ir3; }
 
 void od::ConferenceData::setIR3(double ir) { this->ir3 = ir; }
 
+double od::ConferenceData::getRec_angle(void) { return this->rec_angle; }
+
+void od::ConferenceData::setRec_angle(double ra) { this->rec_angle = ra; }
+
+double od::ConferenceData::getDistance_to_line(void) { return this->distance_to_line; }
+
+void od::ConferenceData::setDistance_to_line(double dtl) { this->distance_to_line = dtl; }
+
+bool od::ConferenceData::isQuality(void) { return this->quality; }
+
+void od::ConferenceData::setQuality(bool q) { this->quality = q; }
+
 uint32 od::ConferenceData::getRoadWidth() { return this->roadWidth; }
 
 void od::ConferenceData::setRoadWidth(uint32 rw) { this->roadWidth = rw; }

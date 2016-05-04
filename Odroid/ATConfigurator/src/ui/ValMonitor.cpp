@@ -35,16 +35,16 @@ void ui::ValMonitor::printVals(void) {
     mvwprintw(_valmonitor, 1, 25, "%g", od::ConferenceData::instance()->getUS1());
 
     mvwaddstr(_valmonitor, 2, 20, "US2:");
-    mvwprintw(_valmonitor, 2, 30, "%g", od::ConferenceData::instance()->getUS2());
+    mvwprintw(_valmonitor, 2, 25, "%g", od::ConferenceData::instance()->getUS2());
 
     mvwaddstr(_valmonitor, 3, 20, "IR1:");
-    mvwprintw(_valmonitor, 3, 30, "%g", od::ConferenceData::instance()->getIR1());
+    mvwprintw(_valmonitor, 3, 25, "%g", od::ConferenceData::instance()->getIR1());
 
     mvwaddstr(_valmonitor, 4, 20, "IR2:");
-    mvwprintw(_valmonitor, 4, 30, "%g", od::ConferenceData::instance()->getIR2());
+    mvwprintw(_valmonitor, 4, 25, "%g", od::ConferenceData::instance()->getIR2());
 
     mvwaddstr(_valmonitor, 5, 20, "IR3:");
-    mvwprintw(_valmonitor, 5, 30, "%g", od::ConferenceData::instance()->getIR3());
+    mvwprintw(_valmonitor, 5, 25, "%g", od::ConferenceData::instance()->getIR3());
 }
 
 //Do nothing for now
