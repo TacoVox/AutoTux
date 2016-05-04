@@ -1,5 +1,5 @@
 //
-// Created by jonas on 4/28/16.
+// Created by Jonas Kahler on 4/28/16.
 //
 
 #include "od/ConferenceModule.h"
@@ -7,12 +7,14 @@
 #include "od/ConferenceData.h"
 #include <automotivedata/generated/automotive/VehicleControl.h>
 #include <automotivedata/generated/automotive/miniature/SensorBoardData.h>
+#include <automotivedata/generated/autotux/config/LaneFollowerMSG.h>
 
 using namespace std;
 using namespace odcore::base::module;
 using namespace odcore::data;
 using namespace automotive;
 using namespace automotive::miniature;
+using namespace autotux::config;
 
 od::ConferenceModule::ConferenceModule(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "Configurator") {}
@@ -42,6 +44,11 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode od::ConferenceModule::
         ConferenceData::instance()->setIR1(sensorMap[0]);
         ConferenceData::instance()->setIR2(sensorMap[2]);
         ConferenceData::instance()->setIR3(sensorMap[1]);
+
+        if(od::ConferenceData::instance()->isNewData()) {
+            getConference().send(*od::ConferenceData::instance()->genLaneFollowerContainer());
+            od::ConferenceData::instance()->setNewData(false);
+        }
     }
 
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
