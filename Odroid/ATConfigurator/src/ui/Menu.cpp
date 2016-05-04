@@ -2,6 +2,7 @@
 // Created by Jonas Kahler on 4/27/16.
 //
 
+#include <od/ConferenceData.h>
 #include "ui/Menu.h"
 #include "ui/ValMonitor.h"
 #include "ui/CamSettings.h"
