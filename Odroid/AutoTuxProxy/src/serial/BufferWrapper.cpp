@@ -79,7 +79,7 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> data)
             unsigned char light = *(it+LIGHT_SEN);
             unsigned char check = *(it+CHK_SUM);
 
-            if (verbose == true) {
+            if (verbose) {
                 printf("US1:%i US2:%i IR1:%i IR2:%i IR3:%i WHEEL:%i "
                        "DIS1:%i DIS2:%i DIS3:%i DIS4:%i LIGHT:%i\n",
                        us1, us2, ir1, ir2, ir3, wheel, dis1, dis2, dis3, dis4, light);
@@ -178,3 +178,4 @@ void serial::BufferWrapper::set_verbose(bool a_ver)
 {
     verbose = a_ver;
 }
+

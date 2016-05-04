@@ -1,9 +1,9 @@
 
 #include "serial/BufferWrapper.h"
 #include <iostream>
-#include <memory>
+//#include <memory>
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
+//#include <gmock/gmock.h>
 
 
 #define STREAM_LEN 128
@@ -85,8 +85,8 @@ public:
             invalid_data.push_back(end_del);
         }
     }
-
 }; // BufferWrapperTest
+
 
 /*! tests that checksum works in buffer wrapper */
 TEST_F(BufferWrapperTest, CheckSumZero) {
@@ -104,6 +104,7 @@ TEST_F(BufferWrapperTest, CheckSumZero) {
 
     ASSERT_EQ((unsigned char) 48, bw.checksum(test_vec));
 }
+
 
 /*! tests that checksum works in buffer wrapper */
 TEST_F(BufferWrapperTest, CheckSumNonZero) {
@@ -135,6 +136,7 @@ TEST_F(BufferWrapperTest, AppendValidToReceiveBuffer) {
     ASSERT_TRUE(v.at(3) == '5');
     ASSERT_TRUE(v.at(4) == '6');
 }
+
 
 /*! tests append invalid data stream to receive buffer */
 TEST_F(BufferWrapperTest, AppendInvalidToReceiveBuffer) {
@@ -190,6 +192,7 @@ TEST_F(BufferWrapperTest, AppendInvalidToReceiveBuffer) {
     ASSERT_TRUE(v.size() == 0);
 }
 
+
 /*! tests appending empty data to send buffer */
 TEST_F(BufferWrapperTest, AppendEmptyToSendBuffer) {
     bw.appendSendBuffer({});
@@ -197,7 +200,9 @@ TEST_F(BufferWrapperTest, AppendEmptyToSendBuffer) {
     ASSERT_TRUE(invalid_data.size() == 0);
 }
 
+
 } // namespace
+
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
