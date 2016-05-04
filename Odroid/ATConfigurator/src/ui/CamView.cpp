@@ -15,3 +15,12 @@ void ui::CamView::refresh(void) {
     //printVals();
     wrefresh(_camview);
 }
+
+void ui::CamView::select(void) {}
+void ui::CamView::unselect(void) {}
+void ui::CamView::selUp(void) {}
+void ui::CamView::selDn(void) {}
+void ui::CamView::selLeft(void) {}
+void ui::CamView::selRight(void) {}
+void ui::CamView::incr(void) {}
+void ui::CamView::decr(void) {}

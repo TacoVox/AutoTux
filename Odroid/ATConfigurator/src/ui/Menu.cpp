@@ -2,6 +2,7 @@
 // Created by Jonas Kahler on 4/27/16.
 //
 
+#include <od/ConferenceData.h>
 #include "ui/Menu.h"
 #include "ui/ValMonitor.h"
 #include "ui/CamSettings.h"
@@ -26,18 +27,32 @@ void ui::Menu::refresh(void) {
     wrefresh(_menu);
 }
 
-void ui::Menu::selDown(void) {
-    if(curritem + 1 == (int)items.size())
+void ui::Menu::selDn(void) {
+    if(!menusel)
+        windows.at(currwindow)->selDn();
+    else if(curritem + 1 == (int)items.size())
         curritem = 0;
     else
         curritem++;
 }
 
 void ui::Menu::selUp(void) {
-    if(curritem == 0)
+    if(!menusel)
+        windows.at(currwindow)->selUp();
+    else if(curritem == 0)
         curritem = (int)items.size() - 1;
     else
         curritem--;
+}
+
+void ui::Menu::selLeft() {
+    if(!menusel)
+        windows.at(currwindow)->selLeft();
+}
+
+void ui::Menu::selRight() {
+    if(!menusel)
+        windows.at(currwindow)->selRight();
 }
 
 void ui::Menu::select(void) {
@@ -45,16 +60,30 @@ void ui::Menu::select(void) {
         exit(0);
     else
         currwindow = curritem;
+
+    menusel = false;
+    windows.at(currwindow)->select();
 }
 
 void ui::Menu::unselect(void) {
+    windows.at(currwindow)->unselect();
+    menusel = true;
+}
 
+void ui::Menu::incr() {
+    if(!menusel)
+        windows.at(currwindow)->incr();
+}
+
+void ui::Menu::decr() {
+    if(!menusel)
+        windows.at(currwindow)->decr();
 }
 
 void ui::Menu::genMenu(void) {
     int i;
     for(i = 0; i < (int)items.size(); i++) {
-        if(i == curritem)
+        if(i == curritem && menusel)
             wattron(_menu, A_STANDOUT);
         else
             wattroff(_menu, A_STANDOUT);

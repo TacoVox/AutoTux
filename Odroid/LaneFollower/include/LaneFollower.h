@@ -109,7 +109,10 @@ namespace lane {
             virtual void setUp();
             virtual void tearDown();
 
+            int8_t printCounter;
+
             void processImage();
+            void printDebug();
             double laneDetection();
             void laneFollowing(double e);
         };

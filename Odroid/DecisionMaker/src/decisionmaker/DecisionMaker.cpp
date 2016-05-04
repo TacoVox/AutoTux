@@ -30,9 +30,8 @@ VehicleControl vehicleControl;
  */
 DecisionMaker::DecisionMaker(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "DecisionMaker"),
-        ovt(), parker(), containerVehicleData(), containerSensorBoardData(), containerDecisionMakerMSG(), laneRecommendation(),
-        speed(), isStopLine(false), stopCounter(0){
-}
+        ovt(), parker(), vd(), sbd(), dmMSG(), lrMSG(),
+        speed(), isStopLine(false), stopCounter(0), printCounter(0) {}
 
 DecisionMaker::~DecisionMaker() {}
 
@@ -47,7 +46,7 @@ void DecisionMaker::tearDown(){
 */
 void DecisionMaker::laneFollowing() {
 
-    /*if(stopCounter > 0) {
+    if(stopCounter > 0) {
 
         if(stopCounter == 90) {
             //cout << "WAKING UP" << endl;
@@ -61,6 +60,7 @@ void DecisionMaker::laneFollowing() {
             stopCounter++;
         }
     }
+
     else if(getDistanceToLine() < 50 && getDistanceToLine() != -1) {
         cout << "STOPPING!" << endl;
         vehicleControl.setBrakeLights(true);
@@ -75,33 +75,54 @@ void DecisionMaker::laneFollowing() {
         speed = 1;
     }
 
-    //cout << "Distance to line: " << getDistanceToLine() << endl;
-*/
     vehicleControl.setSpeed(speed);
     vehicleControl.setSteeringWheelAngle(getAngle());
-    cout << "DS: " << getAngle() << endl;
 }
 
 /**
  * Gets the angle given by LaneRecommandation
  */
 double DecisionMaker::getAngle() {
-    return laneRecommendation.getData<LaneRecommendationMSG>().getAngle();
+    return lrMSG.getAngle();
 }
 /**
  * True if Data sent by the LaneRecommendation are considered reliable.
  */
 bool DecisionMaker::isDataQuality(){
-    return laneRecommendation.getData<LaneRecommendationMSG>().getQuality();
-
+    return lrMSG.getQuality();
 }
 /**
  * Get's the distance from a stop Line
  * @TODO is not found yet
  */
 double DecisionMaker::getDistanceToLine() {
-    return laneRecommendation.getData<LaneRecommendationMSG>().getDistance_to_line();
+    return lrMSG.getDistance_to_line();
+}
 
+/**
+ * Function that prints debug output every second instead of every iterration.
+ */
+
+void DecisionMaker::printDebug() {
+    if(printCounter == 30) {
+
+        // Values received from lane follower
+        cout << "STOPLINE: " << getDistanceToLine() << endl;
+        cout << "DESIRED STEERING: " << getAngle() << endl;
+
+        // Sensors received from proxy
+        cout << "IR FRONT RIGHT: " << sbd.getValueForKey_MapOfDistances(0);
+        cout << " | IR REAR: " << sbd.getValueForKey_MapOfDistances(1);
+        cout << " | IR REAR RIGHT: " << sbd.getValueForKey_MapOfDistances(2);
+        cout << " | US FRONT: " << sbd.getValueForKey_MapOfDistances(3);
+        cout << " | US FRONT RIGHT: " << sbd.getValueForKey_MapOfDistances(4) << endl;
+
+        // Reset counter
+        printCounter = 0;
+    }
+    else {
+        printCounter++;
+    }
 }
 
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() {
@@ -109,11 +130,9 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
     addDataStoreFor(lifoQueue);
 
     // Set initial state of the car
-    STATE state = PARKING;
+    STATE state = DRIVING;
 
-    VehicleData vd;
-    SensorBoardData sbd;
-    DecisionMakerMSG dmMSG;
+    Container containerSensorBoardData, containerVehicleData, containerDecisionMakerMSG, containerLaneRecommendationMSG;
     OvertakingMSG ovtMSG;
     LightSystem lightSystem;
 
@@ -131,21 +150,13 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
         containerVehicleData = getKeyValueDataStore().get(automotive::VehicleData::ID());
         vd = containerVehicleData.getData<VehicleData>();
 
-        laneRecommendation = getKeyValueDataStore().get(autotux::LaneRecommendationMSG::ID());
-
         containerDecisionMakerMSG = getKeyValueDataStore().get(autotux::DecisionMakerMSG::ID());
         dmMSG = containerDecisionMakerMSG.getData<DecisionMakerMSG>();
 
+        containerLaneRecommendationMSG = getKeyValueDataStore().get(autotux::LaneRecommendationMSG::ID());
+        lrMSG = containerLaneRecommendationMSG.getData<LaneRecommendationMSG>();
+
         //state = dmMSG.getState();
-
-        //cout << "SensorValues BACK RIGHT: " <<  sbd.getValueForKey_MapOfDistances(2) << endl;
-        cout << "Distance: " << vd.getAbsTraveledPath() << endl;
-
-       //cout << "DecisionMaker US Sensor: " << sbd.getValueForKey_MapOfDistances(4) << endl;
-        cout << "SensorValues FROM US_FRONT: " <<  sbd.getValueForKey_MapOfDistances(3) << endl;
-        //cout << "SensorValues FRONT RIGHT: " <<  sbd.getValueForKey_MapOfDistances(6) << endl;
-        //cout << "SensorValues FRONT RIGHT: " <<  sbd.getValueForKey_MapOfDistances(0) << endl;
-        //cout << "SensorValues Back: " <<  sbd.getValueForKey_MapOfDistances(1) << endl;
 
         if(!ovt.isLeftLane()){
             ovtMSG.setLeftlane(NOTLEFTLANE);
@@ -171,7 +182,6 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                     }
 
                     laneFollowing();
-		    cout << sbd.getValueForKey_MapOfDistances(3) << endl;
                 }
 
                 break;
@@ -204,6 +214,10 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                 break;
             }
         }
+
+        // Print debug output
+        printDebug();
+
         // Pack and send containers
         Container control(vehicleControl);
         Container lane(ovtMSG);

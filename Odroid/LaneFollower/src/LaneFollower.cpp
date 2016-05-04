@@ -20,7 +20,7 @@ namespace lane {
         using namespace odtools::player;
 
         // SET TO TRUE WHEN USING THE SIMULATOR
-        const bool SIMMODE = false;
+        const bool SIMMODE = true;
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) :
                 TimeTriggeredConferenceClientModule(argc, argv, "LaneFollower"),
@@ -43,8 +43,8 @@ namespace lane {
                 m_stopScanline(110),
                 P_GAIN(0.9),
                 I_GAIN(0),
-                D_GAIN(0) {
-        }
+                D_GAIN(0),
+                printCounter(0) {}
 
         LaneFollower::~LaneFollower() { }
 
@@ -213,6 +213,16 @@ namespace lane {
 
                 // If the loop is currently checking at the height of our set control line
                 if(y == m_controlScanline) {
+                    // Quality check, if no pixels are detected on either side, set quality to false
+                    if(right.x < 0 && left.x < 0) {
+                        m_laneRecommendation.setQuality(false);
+                    }
+
+                    // Otherwise the quality is fine
+                    else {
+                        m_laneRecommendation.setQuality(true);
+                    }
+
                     // Right lane logic (prefer right line following)
                     if (!inLeftLane) {
                         if (right.x > 0) {
@@ -341,9 +351,32 @@ namespace lane {
             if (desiredSteering < -0.5) desiredSteering = -0.5;
 
             if(m_laneRecommendation.getDistance_to_line() < 5 || m_laneRecommendation.getDistance_to_line() > 150)
+                // Set distance to line to -1 if it's too far away or too close
                 m_laneRecommendation.setDistance_to_line(-1);
 
             m_laneRecommendation.setAngle(desiredSteering);
+        }
+
+        /**
+         * Function that prints debug output every second instead of every iteration.
+         */
+
+        void LaneFollower::printDebug() {
+            if(printCounter == 30) {
+
+                // Print values sent through to the DM
+                cout << "STOPLINE: " << m_laneRecommendation.getDistance_to_line() << endl;
+                cout << "DESIRED STEERING: " << m_laneRecommendation.getAngle() << endl;
+                cout << "QUALITY: " << m_laneRecommendation.getQuality() << endl;
+                cout << "IN LEFT LANE: " << m_overtaking.getLeftlane() << endl;
+                cout << "-----------------------------------" << endl;
+
+                // Reset counter
+                printCounter = 0;
+            }
+            else {
+                printCounter++;
+            }
         }
 
         ModuleExitCodeMessage::ModuleExitCode LaneFollower::body() {
@@ -373,12 +406,13 @@ namespace lane {
                     laneFollowing(detection);
                 }
 
+                printDebug();
+
                 Container laneRecommendationContainer(m_laneRecommendation);
                 Container processedImageContainer(m_sharedProcessedImage);
                 getConference().send(processedImageContainer);
                 getConference().send(laneRecommendationContainer);
             }
-
             return ModuleExitCodeMessage::OKAY;
         }
 

@@ -17,10 +17,14 @@ namespace ui {
         Menu(void);
         Menu(int, int);
         void refresh(void);
-        void selDown(void);
+        void selDn(void);
         void selUp(void);
+        void selLeft(void);
+        void selRight(void);
         void select(void);
         void unselect(void);
+        void incr(void);
+        void decr(void);
     private:
         int xsize;
         int ysize;

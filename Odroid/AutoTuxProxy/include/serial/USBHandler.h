@@ -25,12 +25,16 @@ namespace usb_handler {
         void stop();
         /*! sets the usb connector for this handler */
         void set_usb_connector(std::shared_ptr<usb_connector::USBConnector>);
+        /*! sets verbose */
+        void set_verbose(bool);
     private:
         /*! reconnects the usb */
         void reconnect();
         /*! returns true if reconnection needed, false otherwise*/
         bool is_reconnect(int);
     private:
+        /*! is it verbose mode */
+        bool verbose;
         /*! loop control */
         bool running;
         /*! the usb connector */

@@ -25,7 +25,10 @@ std::mutex rsm;
 std::mutex rrm;
 
 /*! constructor */
-serial::BufferWrapper::BufferWrapper() : buffer_in({}), buffer_out({})
+serial::BufferWrapper::BufferWrapper() :
+    verbose{false},
+    buffer_in({}),
+    buffer_out({})
 {
     cout << "creating buffer wrapper... ";
     cout << "[OK]" << endl;
@@ -62,38 +65,29 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> data)
         if (*it == DEL_ONE && *(it+DEL_TWO_POS) == DEL_TWO &&
                 *(it+DEL_DBCOLON_POS) == DEL_DBCOLON && *(it+DEL_COMMA_POS) == DEL_COMMA) {
             unsigned char us1 = *(it+US1_POS);
-            //printf("US1:%i ", us1);
             unsigned char us2 = *(it+US2_POS);
-            //printf("US2:%i ", us2);
             unsigned char ir1 = *(it+IR1_POS);
-            //printf("IR1:%i ", ir1);
             unsigned char ir2 = *(it+IR2_POS);
-            //printf("IR2:%i ", ir2);
             unsigned char ir3 = *(it+IR3_POS);
-            //printf("IR3:%i ", ir3);
             unsigned char wheel = *(it+WHL_POS);
-            //printf("WHEEL:%i ", wheel);
             unsigned char dis1 = *(it+DIS_POS_1);
-            //printf("DIS1:%i ", dis1);
             unsigned char dis2 = *(it+DIS_POS_2);
-            //printf("DIS2:%i ", dis2);
             unsigned char dis3 = *(it+DIS_POS_3);
-            //printf("DIS3:%i ", dis3);
             unsigned char dis4 = *(it+DIS_POS_4);
-            //printf("DIS4:%i ", dis4);
             unsigned char light = *(it+LIGHT_SEN);
-            //printf("LIGHT:%i ", light);
             unsigned char check = *(it+CHK_SUM);
-            //printf("CHECK:%i\n", check);
+
+            if (verbose == true) {
+                printf("US1:%i US2:%i IR1:%i IR2:%i IR3:%i WHEEL:%i DIS1:%i DIS2:%i DIS3:%i DIS4:%i LIGHT:%i\n",
+                       us1, us2, ir1, ir2, ir3, wheel, dis1, dis2, dis3, dis4, light);
+            }
             // fill the vector
             valid_pkt = {us1, us2, ir1, ir2, ir3, wheel, dis1, dis2, dis3, dis4, light};
             // check if correct checksum
-            if (check == checksum(&valid_pkt)) {
-                cout << "checksum OK" << endl;
+            if (check == checksum(valid_pkt)) {
                 break;
             }
             else {
-                cout << "checksum FAIL" << endl;
                 // clear the return vector
                 valid_pkt.clear();
                 // find where next packet starts
@@ -168,13 +162,20 @@ vector<unsigned char> serial::BufferWrapper::readSendBuffer(void)
 
 
 /*! calculates and returns the checksum for a valid packet */
-unsigned char serial::BufferWrapper::checksum(const std::vector<unsigned char> *pkt)
+unsigned char serial::BufferWrapper::checksum(const std::vector<unsigned char> pkt)
 {
     unsigned char chksum = 0;
-    if (pkt->size() == 0) return chksum;
-    for (auto it = pkt->begin(); it != pkt->end(); ++it) {
+    if (pkt.size() == 0) return chksum;
+    for (auto it = pkt.begin(); it != pkt.end(); ++it) {
         // the checksum is calculated by XOR all elements
         chksum = (unsigned char)(chksum ^ *it);
     }
     return chksum;
+}
+
+
+/*! sets verbose */
+void serial::BufferWrapper::set_verbose(bool verb)
+{
+    verbose = verb;
 }
