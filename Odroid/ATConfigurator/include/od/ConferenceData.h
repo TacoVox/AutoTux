@@ -8,11 +8,13 @@
 #include <vector>
 #include <memory>
 #include <tiff.h>
+#include <opendavinci/odcore/data/Container.h>
 
 namespace od {
     class ConferenceData {
     public:
         static ConferenceData* instance(void);
+        std::shared_ptr<odcore::data::Container> genLaneFollowerContainer(void);
         bool isNewData(void);
         void setNewData(bool);
         double getSpeed(void);

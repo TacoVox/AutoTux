@@ -3,6 +3,7 @@
 //
 
 #include "od/ConferenceData.h"
+#include <automotivedata/generated/autotux/config/LaneFollowerMSG.h>
 
 od::ConferenceData* od::ConferenceData::_instance = 0;
 
@@ -18,6 +19,21 @@ od::ConferenceData* od::ConferenceData::instance(void) {
     if (!_instance)
         _instance = new od::ConferenceData();
     return _instance;
+}
+
+std::shared_ptr<odcore::data::Container> od::ConferenceData::genLaneFollowerContainer(void) {
+    autotux::config::LaneFollowerMSG lfm;
+    lfm.setThresholdB(this->thresholdB);
+    lfm.setThresholdD(this->thresholdD);
+    lfm.setRoadWidth(this->roadWidth);
+    lfm.setGainD(this->gainD);
+    lfm.setGainI(this->gainI);
+    lfm.setGainP(this->gainP);
+
+    std::shared_ptr<odcore::data::Container> lfc =
+            (std::shared_ptr<odcore::data::Container>)new odcore::data::Container(lfm);
+
+    return lfc;
 }
 
 bool od::ConferenceData::isNewData(void) { return this->newData; }
