@@ -8,7 +8,7 @@
 ui::CamSettings::CamSettings(void) { CamSettings(80, 20); }
 
 ui::CamSettings::CamSettings(int x, int y) : xsize(x - 2), ysize(y - 2),
-                                             selectedItem(0),
+                                             selectedItem(0), active(false),
                                            _camsettings(newwin(ysize - 2, xsize - 16, 1, 16)) {
     mvwaddstr(_camsettings, 1, 1, "Cam Settings Test");
 }
@@ -23,42 +23,46 @@ void ui::CamSettings::printVals(void) {
     wmove(_camsettings, 1, 1);
     wclrtobot(_camsettings);
 
-    if(selectedItem == 0)
+    if(selectedItem == 0 && active)
         wattron(_camsettings, A_STANDOUT);
     mvwaddstr(_camsettings, 1, 1, "Gain P:    ");
     mvwprintw(_camsettings, 1, 9, "%g", od::ConferenceData::instance()->getGainP());
     wattroff(_camsettings, A_STANDOUT);
 
-    if(selectedItem == 1)
+    if(selectedItem == 1 && active)
         wattron(_camsettings, A_STANDOUT);
     mvwaddstr(_camsettings, 2, 1, "Gain D:    ");
     mvwprintw(_camsettings, 2, 9, "%g", od::ConferenceData::instance()->getGainD());
     wattroff(_camsettings, A_STANDOUT);
 
-    if(selectedItem == 2)
+    if(selectedItem == 2 && active)
         wattron(_camsettings, A_STANDOUT);
     mvwaddstr(_camsettings, 3, 1, "Gain I:    ");
     mvwprintw(_camsettings, 3, 9, "%g", od::ConferenceData::instance()->getGainI());
     wattroff(_camsettings, A_STANDOUT);
 
-    if(selectedItem == 3)
+    if(selectedItem == 3 && active)
         wattron(_camsettings, A_STANDOUT);
     mvwaddstr(_camsettings, 1, 20, "Road Width:     ");
     mvwprintw(_camsettings, 1, 36, "%u", od::ConferenceData::instance()->getRoadWidth());
     wattroff(_camsettings, A_STANDOUT);
 
-    if(selectedItem == 4)
+    if(selectedItem == 4 && active)
         wattron(_camsettings, A_STANDOUT);
     mvwaddstr(_camsettings, 2, 20, "Threshold Low:     ");
     mvwprintw(_camsettings, 2, 36, "%u", od::ConferenceData::instance()->getThresholdD());
     wattroff(_camsettings, A_STANDOUT);
 
-    if(selectedItem == 5)
+    if(selectedItem == 5 && active)
         wattron(_camsettings, A_STANDOUT);
     mvwaddstr(_camsettings, 3, 20, "Threshold High:     ");
     mvwprintw(_camsettings, 3, 36, "%u", od::ConferenceData::instance()->getThresholdB());
     wattroff(_camsettings, A_STANDOUT);
 }
+
+void ui::CamSettings::select(void) {active = true; }
+
+void ui::CamSettings::unselect(void) { active = false; }
 
 void ui::CamSettings::selUp(void) {
     if(selectedItem == 0)
@@ -75,14 +79,14 @@ void ui::CamSettings::selDn(void) {
 }
 
 void ui::CamSettings::selLeft(void) {
-    if(selectedItem < 4)
+    if(selectedItem < 3)
         selectedItem += 3;
     else
         selectedItem -= 3;
 }
 
 void ui::CamSettings::selRight(void) {
-    if(selectedItem > 3)
+    if(selectedItem > 2)
         selectedItem -= 3;
     else
         selectedItem += 3;

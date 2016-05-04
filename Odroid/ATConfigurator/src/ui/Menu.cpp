@@ -61,9 +61,13 @@ void ui::Menu::select(void) {
         currwindow = curritem;
 
     menusel = false;
+    windows.at(currwindow)->select();
 }
 
-void ui::Menu::unselect(void) { menusel = true; }
+void ui::Menu::unselect(void) {
+    windows.at(currwindow)->unselect();
+    menusel = true;
+}
 
 void ui::Menu::incr() {
     if(!menusel)
