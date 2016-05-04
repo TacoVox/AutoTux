@@ -8,11 +8,15 @@
 #include <vector>
 #include <memory>
 #include <tiff.h>
+#include <opendavinci/odcore/data/Container.h>
 
 namespace od {
     class ConferenceData {
     public:
         static ConferenceData* instance(void);
+        std::shared_ptr<odcore::data::Container> genLaneFollowerContainer(void);
+        bool isNewData(void);
+        void setNewData(bool);
         double getSpeed(void);
         void setSpeed(double);
         double getAngle(void);
@@ -27,6 +31,12 @@ namespace od {
         void setIR2(double);
         double getIR3(void);
         void setIR3(double);
+        double getRec_angle(void);
+        void setRec_angle(double);
+        double getDistance_to_line(void);
+        void setDistance_to_line(double);
+        bool isQuality(void);
+        void setQuality(bool);
         uint32 getRoadWidth(void);
         void setRoadWidth(uint32 roadWidth);
         double getGainP(void);
@@ -43,6 +53,7 @@ namespace od {
         ConferenceData();
         ConferenceData(const ConferenceData&);
         ~ConferenceData();
+        bool newData;
         double speed;
         double angle;
         double us1;
@@ -50,6 +61,9 @@ namespace od {
         double ir1;
         double ir2;
         double ir3;
+        double rec_angle;
+        double distance_to_line;
+        bool quality;
         uint32 roadWidth;
         double gainP;
         double gainI;

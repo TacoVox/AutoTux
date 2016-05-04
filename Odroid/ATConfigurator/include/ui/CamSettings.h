@@ -15,6 +15,8 @@ namespace ui {
         CamSettings(void);
         CamSettings(int, int);
         void refresh(void);
+        void select(void);
+        void unselect(void);
         void selUp(void);
         void selDn(void);
         void selLeft(void);
@@ -25,6 +27,7 @@ namespace ui {
         int xsize;
         int ysize;
         int selectedItem;
+        bool active;
         WINDOW* _camsettings;
         void printVals(void);
     };

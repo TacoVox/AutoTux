@@ -15,6 +15,8 @@ namespace ui {
         ValMonitor(void);
         ValMonitor(int, int);
         void refresh(void);
+        void select(void);
+        void unselect(void);
         void selUp(void);
         void selDn(void);
         void selLeft(void);
@@ -26,7 +28,6 @@ namespace ui {
         int ysize;
         WINDOW* _valmonitor;
         void printVals(void);
-        const char* dtostr(std::string, double);
     };
 }
 

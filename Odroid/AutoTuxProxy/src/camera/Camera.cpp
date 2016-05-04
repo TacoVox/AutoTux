@@ -19,17 +19,17 @@ namespace proxy {
             m_name(name),
             m_id(id),
             m_width(width),
-            m_height(height),
+            m_height(height/2),
             m_bpp(bpp),
             m_size(0) {
 
-            m_sharedMemory = odcore::wrapper::SharedMemoryFactory::createSharedMemory(name, width * height * bpp);
+            m_sharedMemory = odcore::wrapper::SharedMemoryFactory::createSharedMemory(name, width * height/2 * bpp);
             m_sharedImage.setName(name);
             m_sharedImage.setWidth(width);
-            m_sharedImage.setHeight(height);
+            m_sharedImage.setHeight(height/2);
             m_sharedImage.setBytesPerPixel(bpp);
 
-            m_size = width * height * bpp;
+            m_size = width * height/2 * bpp;
             m_sharedImage.setSize(m_size);
         }
 

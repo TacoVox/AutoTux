@@ -3,6 +3,7 @@
 //
 
 #include "od/ConferenceData.h"
+#include <automotivedata/generated/autotux/config/LaneFollowerMSG.h>
 
 od::ConferenceData* od::ConferenceData::_instance = 0;
 
@@ -19,6 +20,25 @@ od::ConferenceData* od::ConferenceData::instance(void) {
         _instance = new od::ConferenceData();
     return _instance;
 }
+
+std::shared_ptr<odcore::data::Container> od::ConferenceData::genLaneFollowerContainer(void) {
+    autotux::config::LaneFollowerMSG lfm;
+    lfm.setThresholdB(this->thresholdB);
+    lfm.setThresholdD(this->thresholdD);
+    lfm.setRoadWidth(this->roadWidth);
+    lfm.setGainD(this->gainD);
+    lfm.setGainI(this->gainI);
+    lfm.setGainP(this->gainP);
+
+    std::shared_ptr<odcore::data::Container> lfc =
+            (std::shared_ptr<odcore::data::Container>)new odcore::data::Container(lfm);
+
+    return lfc;
+}
+
+bool od::ConferenceData::isNewData(void) { return this->newData; }
+
+void od::ConferenceData::setNewData(bool nd) { this->newData = nd; }
 
 double od::ConferenceData::getSpeed(void) { return this->speed; }
 
@@ -47,6 +67,18 @@ void od::ConferenceData::setIR2(double ir) { this->ir2 = ir; }
 double od::ConferenceData::getIR3(void) { return this->ir3; }
 
 void od::ConferenceData::setIR3(double ir) { this->ir3 = ir; }
+
+double od::ConferenceData::getRec_angle(void) { return this->rec_angle; }
+
+void od::ConferenceData::setRec_angle(double ra) { this->rec_angle = ra; }
+
+double od::ConferenceData::getDistance_to_line(void) { return this->distance_to_line; }
+
+void od::ConferenceData::setDistance_to_line(double dtl) { this->distance_to_line = dtl; }
+
+bool od::ConferenceData::isQuality(void) { return this->quality; }
+
+void od::ConferenceData::setQuality(bool q) { this->quality = q; }
 
 uint32 od::ConferenceData::getRoadWidth() { return this->roadWidth; }
 
