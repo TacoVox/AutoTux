@@ -157,7 +157,7 @@ namespace proxy {
         unsigned char chsum = checksum({speed, angle, lights});
 
         //Some fancy debug output
-        cout << "Speed: " << speed << " Angle: " << angle << endl;
+        //cout << "Speed: " << speed << " Angle: " << angle << endl;
 
         return {'4', ':', speed, angle, lights, chsum, ','};
     }
