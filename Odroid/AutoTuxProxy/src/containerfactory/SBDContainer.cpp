@@ -33,11 +33,11 @@ shared_ptr<Container> containerfactory::SBDContainer::genSBDContainer(vector<uns
     //Receiving order: (US1 byte)(US2 byte)(IR1 byte)(IR2 byte)(IR3 byte)
     //OD order: (IR1 byte)(IR3 byte)(IR2 byte)(US1 byte)(US2 byte)
     sensordata[0] = values.at(2) / 100.0;
-    cout << "IR1: " << sensordata[0];
+    //cout << "IR1: " << sensordata[0];
     sensordata[1] = values.at(4) / 100.0;
-    cout << "IR3: " << sensordata[1];
+    //cout << "IR3: " << sensordata[1];
     sensordata[2] = values.at(3) / 100.0;
-    cout << "IR2: " << sensordata[2] << endl;
+    //cout << "IR2: " << sensordata[2] << endl;
     sensordata[3] = values.at(0) / 100.0;
     sensordata[4] = values.at(1) / 100.0;
     sensordata[5] = values.at(10);
