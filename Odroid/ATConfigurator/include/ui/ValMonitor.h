@@ -15,11 +15,12 @@ namespace ui {
         ValMonitor(void);
         ValMonitor(int, int);
         void refresh(void);
+        void select(void);
+        void unselect(void);
         void selUp(void);
         void selDn(void);
         void selLeft(void);
         void selRight(void);
-        void unsel(void);
         void incr(void);
         void decr(void);
     private:

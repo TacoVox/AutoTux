@@ -16,6 +16,8 @@ void ui::CamView::refresh(void) {
     wrefresh(_camview);
 }
 
+void ui::CamView::select(void) {}
+void ui::CamView::unselect(void) {}
 void ui::CamView::selUp(void) {}
 void ui::CamView::selDn(void) {}
 void ui::CamView::selLeft(void) {}
