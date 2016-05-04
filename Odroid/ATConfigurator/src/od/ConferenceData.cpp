@@ -36,10 +36,6 @@ std::shared_ptr<odcore::data::Container> od::ConferenceData::genLaneFollowerCont
     return lfc;
 }
 
-bool od::ConferenceData::isNewData(void) { return this->newData; }
-
-void od::ConferenceData::setNewData(bool nd) { this->newData = nd; }
-
 double od::ConferenceData::getSpeed(void) { return this->speed; }
 
 void od::ConferenceData::setSpeed(double s) { this->speed = s; }

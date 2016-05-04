@@ -106,8 +106,6 @@ void ui::CamSettings::incr(void) {
     } else if(selectedItem == 5) {
         od::ConferenceData::instance()->setThresholdB((uint8)(od::ConferenceData::instance()->getThresholdB() + 1));
     }
-
-    od::ConferenceData::instance()->setNewData(true);
 }
 
 void ui::CamSettings::decr(void) {
@@ -124,8 +122,6 @@ void ui::CamSettings::decr(void) {
     } else if(selectedItem == 5) {
         od::ConferenceData::instance()->setThresholdB((uint8)(od::ConferenceData::instance()->getThresholdB() - 1));
     }
-
-    od::ConferenceData::instance()->setNewData(true);
 }
 
 
