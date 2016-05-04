@@ -4,6 +4,7 @@
 
 #ifndef ATCONFIGURATOR_ATCWINDOW_H
 #define ATCONFIGURATOR_ATCWINDOW_H
+
 namespace ui {
     class ATCWindow {
     public:
@@ -12,8 +13,10 @@ namespace ui {
         virtual void selDn(void) = 0;
         virtual void selLeft(void) = 0;
         virtual void selRight(void) = 0;
+        virtual void unsel(void) = 0;
         virtual void incr(void) = 0;
         virtual void decr(void) = 0;
     };
 }
+
 #endif //ATCONFIGURATOR_ATCWINDOW_H

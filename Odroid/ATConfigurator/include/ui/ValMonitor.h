@@ -19,6 +19,7 @@ namespace ui {
         void selDn(void);
         void selLeft(void);
         void selRight(void);
+        void unsel(void);
         void incr(void);
         void decr(void);
     private:
@@ -26,7 +27,6 @@ namespace ui {
         int ysize;
         WINDOW* _valmonitor;
         void printVals(void);
-        const char* dtostr(std::string, double);
     };
 }
 

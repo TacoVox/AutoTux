@@ -19,12 +19,14 @@ namespace ui {
         void selDn(void);
         void selLeft(void);
         void selRight(void);
+        void unsel(void);
         void incr(void);
         void decr(void);
     private:
         int xsize;
         int ysize;
         int selectedItem;
+        bool active;
         WINDOW* _camsettings;
         void printVals(void);
     };
