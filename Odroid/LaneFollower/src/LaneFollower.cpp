@@ -38,12 +38,12 @@ namespace lane {
                 m_previousTime(),
                 m_eSum(0),
                 m_eOld(0),
-                m_distance(),
-                m_controlScanline(),
-                m_stopScanline(),
-                P_GAIN(),
-                I_GAIN(),
-                D_GAIN() {
+                m_distance(220),
+                m_controlScanline(222),
+                m_stopScanline(110),
+                P_GAIN(0.9),
+                I_GAIN(0),
+                D_GAIN(0) {
         }
 
         LaneFollower::~LaneFollower() { }
@@ -65,22 +65,11 @@ namespace lane {
                 I_GAIN = 0;
                 D_GAIN = 0;
             }
-
-            else {
-                m_distance = CARDISTANCE;
-                m_controlScanline = 462;
-                m_stopScanline = 350;
-
-                P_GAIN = CARGAIN;
-                I_GAIN = 0;
-                D_GAIN = 0;
-            }
         }
 
         // This method will run after return from body()
         void LaneFollower::tearDown() {
             if (!m_image.empty()) {
-                //cvReleaseImage(&m_image);
                 m_image.deallocate();
             }
 
@@ -94,56 +83,49 @@ namespace lane {
 
             if (c.getDataType() == SharedImage::ID()) {
                 SharedImage si = c.getData<SharedImage>();
+                if (si.getName() == "WebCam") { // Make this read from configuration file as the proxy does?
+                    // Have we already attached to the shared memory containing the image?
+                    if (!m_hasAttachedToSharedImageMemory) {
+                        m_sharedImageMemory = SharedMemoryFactory::attachToSharedMemory(si.getName());
 
+                        // Set processed image things
+                        m_sharedProcessedImageMemory = SharedMemoryFactory::createSharedMemory("ProcessedImage",
+                                                                                               si.getHeight() *
+                                                                                               si.getWidth());
+                        m_sharedProcessedImage.setName("ProcessedImage");
+                        m_sharedProcessedImage.setWidth(si.getWidth());
+                        m_sharedProcessedImage.setHeight(si.getHeight());
+                        m_sharedProcessedImage.setBytesPerPixel(1);
+                        m_sharedProcessedImage.setSize(si.getWidth() * si.getHeight());
 
-                // Have we already attached to the shared memory containing the image?
-                if (!m_hasAttachedToSharedImageMemory) {
-                    m_sharedImageMemory = SharedMemoryFactory::attachToSharedMemory(si.getName());
-
-                    // Set processed image things
-                    m_sharedProcessedImageMemory = SharedMemoryFactory::createSharedMemory("ProcessedImage", si.getHeight()*si.getWidth());
-                    m_sharedProcessedImage.setName("ProcessedImage");
-                    m_sharedProcessedImage.setWidth(si.getWidth());
-                    m_sharedProcessedImage.setHeight(si.getHeight());
-                    m_sharedProcessedImage.setBytesPerPixel(1);
-                    m_sharedProcessedImage.setSize(si.getWidth()*si.getHeight());
-
-                    // We have now attached to the shared image memory.
-                    m_hasAttachedToSharedImageMemory = true;
-                }
-
-                // Did we successfully connect?
-                if (m_sharedImageMemory->isValid()) {
-                    Lock l(m_sharedImageMemory);
-                    // Create image(cv::Mat) if empty.
-                    if (m_image.empty()) {
-                        m_image.create(si.getHeight(), si.getWidth(), CV_8UC3);
-                    } else {
-                        // Copy image data form SharedImageMemory
-                        memcpy(m_image.data, m_sharedImageMemory->getSharedMemory(),
-                               si.getHeight() * si.getWidth() * si.getBytesPerPixel());
+                        // We have now attached to the shared image memory.
+                        m_hasAttachedToSharedImageMemory = true;
                     }
 
-                    // Mirror image
-                    // NOTE: For simulator.
-                    if(SIMMODE)
-                    {
-                        flip(m_image, m_image, -1);
-                    }
+                    // Did we successfully connect?
+                    if (m_sharedImageMemory->isValid()) {
+                        m_sharedImageMemory->lock();
+                        // Create image(cv::Mat) if empty.
+                        if (m_image.empty()) {
+                            m_image.create(si.getHeight(), si.getWidth(), CV_8UC3);
+                        } else {
+                            // Copy image data form SharedImageMemory
+                            memcpy(m_image.data, m_sharedImageMemory->getSharedMemory(),
+                                   si.getHeight() * si.getWidth() * si.getBytesPerPixel());
+                        }
+                        m_sharedImageMemory->unlock();
 
-                    returnValue = true;
+                        // Mirror image
+                        // NOTE: For simulator.
+                        if (SIMMODE) {
+                            flip(m_image, m_image, -1);
+                        }
+
+                        returnValue = true;
+                    }
                 }
             }
             return returnValue;
-        }
-
-        uint8_t LaneFollower::getThreshold(double lightValue) {
-            if(lightValue < 30.0)
-                lightValue = 30.0;
-
-            double returnVal = log10(lightValue) * 58.0 + lightValue * 0.16 - 30.0 + (pow((lightValue - 80.0) * 0.1, 3.0)) * 0.0034;
-
-            return (uint8_t)returnVal;
         }
 
         // Do magic to the image around here.
@@ -155,16 +137,16 @@ namespace lane {
             // Make the new image gray scale
             cvtColor(m_image_grey, m_image_grey, COLOR_BGR2GRAY);
 
-            Canny(m_image_grey, m_image_grey, 30, 200, 3);
+            Canny(m_image_grey, m_image_grey, 50, 200, 3);
 
             if(m_sharedProcessedImageMemory.get() && m_sharedProcessedImageMemory->isValid()) {
                 m_sharedProcessedImageMemory->lock();
-                memcpy(m_sharedProcessedImageMemory->getSharedMemory(), m_image_grey.data, 640*480); // Set size dynamically?
+                memcpy(m_sharedProcessedImageMemory->getSharedMemory(), m_image_grey.data, 640*240); // Set size dynamically?
                 m_sharedProcessedImageMemory->unlock();
             }
 
             /**
-             * TODO Look into HoughLines to find edges.
+             * TODO Look into Hough Lines to find edges.
              * Example below.
              */
 
@@ -269,7 +251,7 @@ namespace lane {
                                 0.5, CV_RGB(255, 0, 0));
                     }
                 }
-            }
+            } // for loop
 
             Vec3b pixelFrontLeft, pixelFrontRight;
             Point stop_left, stop_right;
@@ -373,9 +355,6 @@ namespace lane {
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() == ModuleStateMessage::RUNNING) {
                 bool has_next_frame = false;
 
-                // For future reference if we decide on using light sensor data
-                //Container sbd_container = getKeyValueDataStore().get(automotive::miniature::SensorBoardData::ID());
-
                 Container image_container = getKeyValueDataStore().get(SharedImage::ID());
                 Container config_container = getKeyValueDataStore().get(config::LaneFollowerMSG::ID());
                 Container overtaking_container = getKeyValueDataStore().get(OvertakingMSG::ID());
@@ -389,9 +368,6 @@ namespace lane {
                 }
 
                 if (has_next_frame) {
-                    // For future reference if we decide on using light sensor data
-                    //m_sensorBoardData = sbd_container.getData<automotive::miniature::SensorBoardData>();
-
                     processImage();
                     double detection = laneDetection();
                     laneFollowing(detection);

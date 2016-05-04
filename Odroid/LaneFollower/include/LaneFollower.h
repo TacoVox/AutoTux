@@ -4,9 +4,6 @@
 #define SIMGAIN 2.6;
 #define SIMDISTANCE 280;
 
-#define CARGAIN 0.9;
-#define CARDISTANCE 220;
-
 #include <iostream>
 #include <memory>
 #include <math.h>
@@ -112,7 +109,6 @@ namespace lane {
             virtual void setUp();
             virtual void tearDown();
 
-            uint8_t getThreshold(double lightValue);
             void processImage();
             double laneDetection();
             void laneFollowing(double e);
