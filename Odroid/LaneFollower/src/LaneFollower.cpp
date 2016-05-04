@@ -32,7 +32,7 @@ namespace lane {
         using namespace odtools::player;
 
         // SET TO TRUE WHEN USING THE SIMULATOR
-        const bool SIMMODE = false;
+        const bool SIMMODE = true;
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) :
                 TimeTriggeredConferenceClientModule(argc, argv, "LaneFollower"),
@@ -380,6 +380,9 @@ namespace lane {
                 // Print values sent through to the DM
                 cout << "STOPLINE: " << laneRecommendation.getDistance_to_line() << endl;
                 cout << "DESIRED STEERING: " << laneRecommendation.getAngle() << endl;
+                cout << "QUALITY: " << laneRecommendation.getQuality() << endl;
+                cout << "IN LEFT LANE: " << overtaking.getLeftlane() << endl;
+                cout << "-----------------------------------" << endl;
 
                 // Reset counter
                 printCounter = 0;
