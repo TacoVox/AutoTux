@@ -59,6 +59,9 @@ serial::USBConnector::~USBConnector()
 }
 
 
+//serial::IUSBConnector::~IUSBConnector() {}
+
+
 /*! sets the buffer wrapper for this connector */
 void serial::USBConnector::set_buffer_wrapper(std::shared_ptr<serial::BufferWrapper> p_bw)
 {

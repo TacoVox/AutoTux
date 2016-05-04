@@ -1,22 +1,23 @@
-
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include "serial/USBHandler.h"
 #include "MockUSBConnector.h"
 #include <iostream>
 #include <memory>
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
 
 using namespace std;
 using ::testing::AtLeast;
+using ::testing::Return;
 
-/*
+
 namespace {
 class USBHandlerTest : public ::testing::Test
 {
 public:
     serial::USBHandler uh;
-    MockUSBConnector mockUsbConn;
+    testing::StrictMock<MockUSBConnector> mockUsbConn;
+    //MockUSBConnector mockUsbConn;
 
     USBHandlerTest() :
         uh{},
@@ -33,11 +34,17 @@ public:
 }; // BufferWrapperTest
 
 } // namespace
-*/
+
 
 /*! */
-TEST(USBHandlerTest, Run)
+TEST_F(USBHandlerTest, Run)
 {
+    EXPECT_CALL(mockUsbConn, connect())
+            .Times(AtLeast(1))
+            .WillOnce(Return(true));
+    uh.set_usb_connector(mockUsbConn);
+    uh.run();
+    uh.stop();
 
 }
 

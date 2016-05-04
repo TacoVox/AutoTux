@@ -27,9 +27,10 @@ int32_t main(int32_t argc, char **argv) {
     shared_ptr<BufferWrapper> bw = (shared_ptr<BufferWrapper>) new BufferWrapper();
     bw->set_verbose(is_verbose);
 
-    shared_ptr<USBConnector> uc = (shared_ptr<USBConnector>) new USBConnector();
-    uc->set_buffer_wrapper(bw);
-    uc->set_verbose(is_verbose);
+    //shared_ptr<USBConnector> uc = (shared_ptr<USBConnector>) new USBConnector();
+    serial::USBConnector uc = serial::USBConnector();
+    uc.set_buffer_wrapper(bw);
+    uc.set_verbose(is_verbose);
 
     shared_ptr<USBHandler> uh = (shared_ptr<USBHandler>) new USBHandler();
     uh->set_usb_connector(uc);

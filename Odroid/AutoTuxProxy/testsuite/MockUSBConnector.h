@@ -4,20 +4,17 @@
  * @author Ivo
  */
 
-
-#ifndef MOCKUSBCONNECTOR_H
-#define MOCKUSBCONNECTOR_H
-
-#include <gmock/gmock.h>
 #include "serial/USBConnector.h"
+#include <gmock/gmock.h>
 
-class MockUSBConnector
+class MockUSBConnector : public serial::USBConnector
 {
 public:
-
+    MOCK_METHOD0(connect, bool());
+    MOCK_METHOD0(disconnect, bool());
+    MOCK_METHOD0(read, int());
+    MOCK_METHOD0(write, int());
 };
 
-
-#endif	// MOCKUSBCONNECTOR_H
 
 

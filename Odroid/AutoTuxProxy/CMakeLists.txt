@@ -7,7 +7,7 @@ PROJECT(AutoTuxProxy)
 SET(CMAKE_MODULE_PATH "/opt/od/share/cmake-2.8/Modules" ${CMAKE_MODULE_PATH})
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${CXX_OPTIONS} -pipe -std=c++11 -lusb-1.0 -lopencv_core -lopencv_highgui -lopencv_imgproc")
 # SET warning flags here and append them to the CMAKE_CXX_FLAGS
-SET(WARN "${WARN} -g -O -Wall -Weffc++ -pedantic -Wvolatile-register-var")
+SET(WARN "${WARN} -g -O -Wall -pedantic -Wvolatile-register-var")
 SET(WARN "${WARN} -Wconversion -Wcast-align -Wwrite-strings -Wunused-variable")
 SET(WARN "${WARN} -Wcast-qual -Wchar-subscripts -Wvariadic-macros -Wimport")
 SET(WARN "${WARN} -Wcomment -Wunused-parameter -Wextra -Wdisabled-optimization")
@@ -71,7 +71,7 @@ INCLUDE_DIRECTORIES(SYSTEM ${GTEST_INCLUDES})
 INCLUDE_DIRECTORIES(SYSTEM ${GMOCK_INCLUDES})
 
 # Link runTests with what we want to test and the GTest and pthread library
-ADD_EXECUTABLE(runTests "${CMAKE_CURRENT_SOURCE_DIR}/testsuite/BufferWrapperTest.cpp")
-#ADD_EXECUTABLE(runTests "${CMAKE_CURRENT_SOURCE_DIR}/testsuite/USBHandlerTest.cpp")
-TARGET_LINK_LIBRARIES(runTests ${PROJECT_NAME}lib-static ${GTEST_LIBRARY} ${GTEST_MAINLIB} ${GMOCK_LIBRARY} ${GMOCK_MAINLIB} pthread)
+#ADD_EXECUTABLE(runTests "${CMAKE_CURRENT_SOURCE_DIR}/testsuite/BufferWrapperTest.cpp")
+ADD_EXECUTABLE(runTests "${CMAKE_CURRENT_SOURCE_DIR}/testsuite/USBHandlerTest.cpp")
+TARGET_LINK_LIBRARIES(runTests ${PROJECT_NAME}lib-static ${LIBUSB_LIBRARIES} ${GTEST_LIBRARY} ${GTEST_MAINLIB} ${GMOCK_LIBRARY} ${GMOCK_MAINLIB} pthread usb-1.0)
 

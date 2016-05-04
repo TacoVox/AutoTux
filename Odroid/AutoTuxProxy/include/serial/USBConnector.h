@@ -11,6 +11,7 @@
 // ==================================================
 #include <memory>
 #include <libusb-1.0/libusb.h>
+#include "serial/IUSBConnector.h"
 #include "serial/BufferWrapper.h"
 
 // define
@@ -30,25 +31,35 @@
 // ============================
 namespace serial
 {
+    /*class IUSBConnector
+    {
+    public:
+        virtual ~IUSBConnector();
+        virtual bool connect() = 0;
+        virtual bool disconnect() = 0;
+        virtual int read() = 0;
+        virtual int write() = 0;
+    };*/
+
     class USBConnector
     {
     public:
         /*! constructor */
         USBConnector();
         /*! destructor */
-        ~USBConnector();
+        virtual ~USBConnector();
         /*! copy constructor */
         USBConnector(const USBConnector&);
         /*! copy constructor */
         USBConnector & operator=(const USBConnector&);
         /*! connects to usb */
-        bool connect();
+        virtual bool connect();
         /*! disconnects and closes the usb stream */
-        bool disconnect();
+        virtual bool disconnect();
         /*! reads from the usb stream */
-        int read();
+        virtual int read();
         /*! writes to the usb stream */
-        int write();
+        virtual int write();
         /*! sets the buffer wrapper for this connector */
         void set_buffer_wrapper(std::shared_ptr<serial::BufferWrapper>);
         /*! sets verbose */

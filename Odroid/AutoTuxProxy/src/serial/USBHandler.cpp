@@ -7,6 +7,7 @@
 
 
 #include <thread>
+#include <mutex>
 #include <chrono>
 #include <iostream>
 #include <cstring>
@@ -14,12 +15,14 @@
 
 using namespace std;
 
+// running mutex
+std::mutex m_stop;
 
 /*! constructor */
 serial::USBHandler::USBHandler() :
     verbose{false},
     running{true},
-    uc{}
+    uc{nullptr}
 {
     cout << "creating usb handler... ";
     cout << "[OK]" << endl;
@@ -72,14 +75,24 @@ void serial::USBHandler::run()
 /*! stops the handler, sets the loop control variable to false */
 void serial::USBHandler::stop()
 {
+    m_stop.lock();
     running = false;
+    m_stop.unlock();
 }
 
 
 /*! sets the usb connector for this handler */
+/*
 void serial::USBHandler::set_usb_connector(std::shared_ptr<serial::USBConnector> p_uc)
 {
     uc = p_uc;
+}
+*/
+
+/*! sets the usb connector for this handler */
+void serial::USBHandler::set_usb_connector(serial::USBConnector &p_uc)
+{
+    uc = &p_uc;
 }
 
 
