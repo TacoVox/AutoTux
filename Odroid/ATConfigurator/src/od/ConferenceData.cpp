@@ -20,6 +20,10 @@ od::ConferenceData* od::ConferenceData::instance(void) {
     return _instance;
 }
 
+bool od::ConferenceData::isNewData(void) { return this->newData; }
+
+void od::ConferenceData::setNewData(bool nd) { this->newData = nd; }
+
 double od::ConferenceData::getSpeed(void) { return this->speed; }
 
 void od::ConferenceData::setSpeed(double s) { this->speed = s; }

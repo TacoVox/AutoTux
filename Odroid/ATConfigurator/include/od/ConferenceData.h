@@ -13,6 +13,8 @@ namespace od {
     class ConferenceData {
     public:
         static ConferenceData* instance(void);
+        bool isNewData(void);
+        void setNewData(bool);
         double getSpeed(void);
         void setSpeed(double);
         double getAngle(void);
@@ -43,6 +45,7 @@ namespace od {
         ConferenceData();
         ConferenceData(const ConferenceData&);
         ~ConferenceData();
+        bool newData;
         double speed;
         double angle;
         double us1;
