@@ -50,7 +50,7 @@ namespace proxy {
         bool OpenCVCamera::copyImageTo(char *dest, const uint32_t &size) {
             bool returnVal = false;
             if((dest != NULL) && (size > 0)) {
-                memcpy(dest, m_mat.data, size);
+                memcpy(dest, m_mat.data+640*240*3, size);
                 returnVal = true;
             }
             return returnVal;
