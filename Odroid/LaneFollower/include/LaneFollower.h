@@ -89,6 +89,8 @@ namespace lane {
             int32_t m_distance;
             int32_t m_controlScanline;
             int32_t m_stopScanline;
+            int32_t  m_threshold1;
+            int32_t  m_threshold2;
 
             // For introduction to algorithm see
             // https://www.youtube.com/watch?v=4Y7zG48uHRo

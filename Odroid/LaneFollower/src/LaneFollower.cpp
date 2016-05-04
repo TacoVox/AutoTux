@@ -13,6 +13,7 @@ namespace lane {
         using namespace odcore::data::image;
         using namespace odcore::wrapper;
         using namespace autotux;
+        using namespace autotux::config;
 
         using namespace lane::follower;
 
@@ -20,7 +21,10 @@ namespace lane {
         using namespace odtools::player;
 
         // SET TO TRUE WHEN USING THE SIMULATOR
-        const bool SIMMODE = true;
+        // Do we want this in the configuration file?
+        const bool SIMMODE = false;
+
+        TimeStamp configContainerTimeStamp = TimeStamp();
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) :
                 TimeTriggeredConferenceClientModule(argc, argv, "LaneFollower"),
@@ -41,6 +45,8 @@ namespace lane {
                 m_distance(220),
                 m_controlScanline(222),
                 m_stopScanline(110),
+                m_threshold1(50),
+                m_threshold2(200),
                 P_GAIN(0.9),
                 I_GAIN(0),
                 D_GAIN(0),
@@ -137,7 +143,7 @@ namespace lane {
             // Make the new image gray scale
             cvtColor(m_image_grey, m_image_grey, COLOR_BGR2GRAY);
 
-            Canny(m_image_grey, m_image_grey, 50, 200, 3);
+            Canny(m_image_grey, m_image_grey, m_threshold1, m_threshold2, 3);
 
             if(m_sharedProcessedImageMemory.get() && m_sharedProcessedImageMemory->isValid()) {
                 m_sharedProcessedImageMemory->lock();
@@ -389,10 +395,25 @@ namespace lane {
                 bool has_next_frame = false;
 
                 Container image_container = getKeyValueDataStore().get(SharedImage::ID());
-                Container config_container = getKeyValueDataStore().get(config::LaneFollowerMSG::ID());
+                Container config_container = getKeyValueDataStore().get(LaneFollowerMSG::ID());
                 Container overtaking_container = getKeyValueDataStore().get(OvertakingMSG::ID());
 
-                m_config = config_container.getData<config::LaneFollowerMSG>();
+                if(config_container.getReceivedTimeStamp() > configContainerTimeStamp) {
+                    m_config = config_container.getData<LaneFollowerMSG>();
+
+                    m_threshold1 = m_config.getThresholdD();
+                    m_threshold2 = m_config.getThresholdB();
+                    m_distance = m_config.getRoadWidth();
+
+                    P_GAIN = m_config.getGainP();
+                    I_GAIN = m_config.getGainI();
+                    D_GAIN = m_config.getGainD();
+
+                    configContainerTimeStamp = TimeStamp();
+
+                    LaneFollower::toLogger(LogMessage::DEBUG, m_config.toString());
+                }
+
                 m_overtaking = overtaking_container.getData<OvertakingMSG>();
 
 
@@ -415,6 +436,5 @@ namespace lane {
             }
             return ModuleExitCodeMessage::OKAY;
         }
-
     } // detector
 } // lane

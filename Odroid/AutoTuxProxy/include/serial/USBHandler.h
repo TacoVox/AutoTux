@@ -11,12 +11,13 @@
 #include "serial/BufferWrapper.h"
 #include "serial/USBConnector.h"
 
-namespace usb_handler {
+namespace serial
+{
     class USBHandler
     {
     public:
         /*! constructor */
-        USBHandler(std::shared_ptr<usb_connector::USBConnector>);
+        USBHandler();
         /*! destructor */
         ~USBHandler();
         /*! run function for the thread */
@@ -24,7 +25,7 @@ namespace usb_handler {
         /*! stops the handler, sets the loop control variable to false */
         void stop();
         /*! sets the usb connector for this handler */
-        void set_usb_connector(std::shared_ptr<usb_connector::USBConnector>);
+        void set_usb_connector(std::shared_ptr<serial::USBConnector>);
         /*! sets verbose */
         void set_verbose(bool);
     private:
@@ -38,9 +39,9 @@ namespace usb_handler {
         /*! loop control */
         bool running;
         /*! the usb connector */
-        std::shared_ptr<usb_connector::USBConnector> uc;
+        std::shared_ptr<serial::USBConnector> uc;
 
     };
-} // namespace usb_handler
+} // namespace
 
 #endif	// USBHANDLER_H

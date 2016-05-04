@@ -10,8 +10,6 @@
 
 using namespace std;
 using namespace serial;
-using namespace usb_handler;
-using namespace usb_connector;
 using namespace proxy::camera;
 
 
@@ -33,7 +31,8 @@ int32_t main(int32_t argc, char **argv) {
     uc->set_buffer_wrapper(bw);
     uc->set_verbose(is_verbose);
 
-    shared_ptr<USBHandler> uh = (shared_ptr<USBHandler>) new USBHandler(uc);
+    shared_ptr<USBHandler> uh = (shared_ptr<USBHandler>) new USBHandler();
+    uh->set_usb_connector(uc);
     uh->set_verbose(is_verbose);
 
     thread uhthread(&USBHandler::run, uh);
