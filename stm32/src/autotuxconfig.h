@@ -18,7 +18,7 @@
 /**
  * Debug output. Set to 0 for normal packet output.
  */
-#define DEBUG_OUTPUT 1
+#define DEBUG_OUTPUT 0
 
 /**
  * @brief If this is exceeded, communication is seen as inactive.
@@ -272,9 +272,9 @@ typedef enum {SPEED_REVERSE, SPEED_STOP, SPEED_FORWARD_LOW, SPEED_FORWARD_CRUISE
 #define CTRL_OUT_SPEED_STEPS 4
 
 /**
- * Pulse widths for each speed step.
+ * Pulse widths for each speed step. 1414 very low forward speed good for basic lf.
  */
-static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1120, 1350, 1419, 1430};
+static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1120, 1350, 1415, 1424};
 
 /**
  * Pulse width values for wheels centered and their extreme positions.
@@ -315,7 +315,7 @@ static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1120, 1350,
 #define LIGHT_HEADLIGHT_HI_R 150
 #define LIGHT_HEADLIGHT_HI_G 150
 #define LIGHT_HEADLIGHT_HI_B 150
-#define LIGHT_HEADLIGHT_TRESHOLD 100
+#define LIGHT_HEADLIGHT_TRESHOLD 60
 
 /**
  * Tail light configuration.
