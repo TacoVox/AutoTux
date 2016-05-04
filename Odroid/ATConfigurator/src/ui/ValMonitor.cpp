@@ -31,20 +31,32 @@ void ui::ValMonitor::printVals(void) {
     mvwprintw(_valmonitor, 2, 8, "%g", od::ConferenceData::instance()->getAngle());
 
     //Current sensor values
-    mvwaddstr(_valmonitor, 1, 20, "US1:");
-    mvwprintw(_valmonitor, 1, 25, "%g", od::ConferenceData::instance()->getUS1());
+    mvwaddstr(_valmonitor, 1, 18, "US1:");
+    mvwprintw(_valmonitor, 1, 23, "%g", od::ConferenceData::instance()->getUS1());
 
-    mvwaddstr(_valmonitor, 2, 20, "US2:");
-    mvwprintw(_valmonitor, 2, 25, "%g", od::ConferenceData::instance()->getUS2());
+    mvwaddstr(_valmonitor, 2, 18, "US2:");
+    mvwprintw(_valmonitor, 2, 23, "%g", od::ConferenceData::instance()->getUS2());
 
-    mvwaddstr(_valmonitor, 3, 20, "IR1:");
-    mvwprintw(_valmonitor, 3, 25, "%g", od::ConferenceData::instance()->getIR1());
+    mvwaddstr(_valmonitor, 3, 18, "IR1:");
+    mvwprintw(_valmonitor, 3, 23, "%g", od::ConferenceData::instance()->getIR1());
 
-    mvwaddstr(_valmonitor, 4, 20, "IR2:");
-    mvwprintw(_valmonitor, 4, 25, "%g", od::ConferenceData::instance()->getIR2());
+    mvwaddstr(_valmonitor, 4, 18, "IR2:");
+    mvwprintw(_valmonitor, 4, 23, "%g", od::ConferenceData::instance()->getIR2());
 
-    mvwaddstr(_valmonitor, 5, 20, "IR3:");
-    mvwprintw(_valmonitor, 5, 25, "%g", od::ConferenceData::instance()->getIR3());
+    mvwaddstr(_valmonitor, 5, 18, "IR3:");
+    mvwprintw(_valmonitor, 5, 23, "%g", od::ConferenceData::instance()->getIR3());
+
+    mvwaddstr(_valmonitor, 1, 35, "Angle:");
+    mvwprintw(_valmonitor, 1, 50, "%g", od::ConferenceData::instance()->getRec_angle());
+
+    mvwaddstr(_valmonitor, 2, 35, "Dist. to line:");
+    mvwprintw(_valmonitor, 2, 50, "%g", od::ConferenceData::instance()->getDistance_to_line());
+
+    mvwaddstr(_valmonitor, 3, 35, "Quality:");
+    if(od::ConferenceData::instance()->isQuality())
+        mvwaddstr(_valmonitor, 3, 50, "true");
+    else
+        mvwaddstr(_valmonitor, 3, 50, "false");
 }
 
 //Do nothing for now
