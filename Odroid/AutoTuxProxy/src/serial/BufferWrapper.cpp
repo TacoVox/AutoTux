@@ -98,6 +98,10 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> data)
                 // if not found, break
                 if (it == data.end()) break;
             }
+        } else {
+            if (verbose) {
+                cout << "*** packet fail ***" << endl;
+            }
         }
     }
     // unlock mutex
