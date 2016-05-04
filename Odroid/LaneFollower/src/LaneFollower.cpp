@@ -21,7 +21,8 @@ namespace lane {
         using namespace odtools::player;
 
         // SET TO TRUE WHEN USING THE SIMULATOR
-        const bool SIMMODE = true;
+        // Do we want this in the configuration file?
+        const bool SIMMODE = false;
 
         TimeStamp configContainerTimeStamp = TimeStamp();
 
