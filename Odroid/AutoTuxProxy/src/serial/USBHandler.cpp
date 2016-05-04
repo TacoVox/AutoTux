@@ -16,10 +16,10 @@ using namespace std;
 
 
 /*! constructor */
-usb_handler::USBHandler::USBHandler(std::shared_ptr<usb_connector::USBConnector> ptr) :
+serial::USBHandler::USBHandler() :
     verbose{false},
     running{true},
-    uc{ptr}
+    uc{}
 {
     cout << "creating usb handler... ";
     cout << "[OK]" << endl;
@@ -27,16 +27,15 @@ usb_handler::USBHandler::USBHandler(std::shared_ptr<usb_connector::USBConnector>
 
 
 /*! destructor */
-usb_handler::USBHandler::~USBHandler()
+serial::USBHandler::~USBHandler()
 {
     cout << "destroying usb handler... ";
-    uc->~USBConnector();
     cout << "[OK]" << endl;
 }
 
 
 /*! run function for the thread */
-void usb_handler::USBHandler::run()
+void serial::USBHandler::run()
 {
     // connect and set the buffer wrapper
     while (uc->connect() == false)
@@ -71,28 +70,28 @@ void usb_handler::USBHandler::run()
 
 
 /*! stops the handler, sets the loop control variable to false */
-void usb_handler::USBHandler::stop()
+void serial::USBHandler::stop()
 {
     running = false;
 }
 
 
 /*! sets the usb connector for this handler */
-void usb_handler::USBHandler::set_usb_connector(std::shared_ptr<usb_connector::USBConnector> ptr)
+void serial::USBHandler::set_usb_connector(std::shared_ptr<serial::USBConnector> p_uc)
 {
-    uc = ptr;
+    uc = p_uc;
 }
 
 
 /*! sets verbose */
-void usb_handler::USBHandler::set_verbose(bool ver)
+void serial::USBHandler::set_verbose(bool a_ver)
 {
-    verbose = ver;
+    verbose = a_ver;
 }
 
 
 /*! reconnects the usb */
-void usb_handler::USBHandler::reconnect()
+void serial::USBHandler::reconnect()
 {
     cout << "reconnecting..." << endl; 
     uc->disconnect();
@@ -104,7 +103,7 @@ void usb_handler::USBHandler::reconnect()
 
 
 /*! returns true if reconnection needed, false otherwise*/
-bool usb_handler::USBHandler::is_reconnect(int error_code)
+bool serial::USBHandler::is_reconnect(int error_code)
 {
     switch (error_code) {
     case LIBUSB_ERROR_IO:

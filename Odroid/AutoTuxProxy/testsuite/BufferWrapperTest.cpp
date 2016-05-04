@@ -11,44 +11,33 @@
 using namespace std;
 
 namespace {
-
-// The fixture for testing class BufferWrapperTest.
 class BufferWrapperTest : public ::testing::Test
 {
 public:
-    // Objects declared here can be used by all tests.
-    unique_ptr<serial::BufferWrapper> bw;
+    serial::BufferWrapper bw;
     std::vector<unsigned char> valid_data;
     std::vector<unsigned char> invalid_data;
     std::vector<unsigned char> test_vec;
 
     BufferWrapperTest() :
-        bw(new serial::BufferWrapper()),
-        valid_data(),
-        invalid_data(),
-        test_vec()
+        bw{},
+        valid_data{},
+        invalid_data{},
+        test_vec{}
     {}
 
-    //virtual ~BufferWrapperTest(){}
-
-    // If the constructor and destructor are not enough for setting up
-    // and cleaning up each test, you can define the following methods:
-
-    //virtual void SetUp() {
-        // Code here will be called immediately after the constructor (right
-        // before each test).
-    //}
-
-    virtual void TearDown() {
-        // Code here will be called immediately after each test (right
-        // before the destructor).
+    virtual ~BufferWrapperTest()
+    {
         valid_data.clear();
         invalid_data.clear();
         test_vec.clear();
     }
 
+    //virtual void SetUp() {}
+    //virtual void TearDown() {}
+
     /*! returns a valid stream data */
-    std::vector<unsigned char> fill_valid(void) {
+    void fill_valid(void) {
         for (int i = 0; i < STREAM_LEN; i += SBDPKTSIZE) {
             if (i + SBDPKTSIZE > STREAM_LEN) break;
             valid_data.push_back(DEL_ONE);
@@ -68,15 +57,14 @@ public:
             valid_data.push_back('6');      // checksum
             valid_data.push_back(DEL_COMMA);
         }
-        return valid_data;
     }
 
     /*! returns an invalid stream data */
-    std::vector<unsigned char> fill_invalid(unsigned char first_del,
-                                            unsigned char second_del,
-                                            unsigned char third_del,
-                                            unsigned char checksum,
-                                            unsigned char end_del) {
+    void fill_invalid(unsigned char first_del,
+                      unsigned char second_del,
+                      unsigned char third_del,
+                      unsigned char checksum,
+                      unsigned char end_del) {
         for (int i = 0; i < STREAM_LEN; i += SBDPKTSIZE) {
             if (i + SBDPKTSIZE > STREAM_LEN) break;
             invalid_data.push_back(first_del);
@@ -96,14 +84,12 @@ public:
             invalid_data.push_back(checksum);
             invalid_data.push_back(end_del);
         }
-        return invalid_data;
     }
 
 }; // BufferWrapperTest
 
 /*! tests that checksum works in buffer wrapper */
-TEST_F(BufferWrapperTest, CheckSum) {
-
+TEST_F(BufferWrapperTest, CheckSumZero) {
     test_vec.push_back('0');      // us1
     test_vec.push_back('0');      // us2
     test_vec.push_back('0');      // ir1
@@ -116,11 +102,11 @@ TEST_F(BufferWrapperTest, CheckSum) {
     test_vec.push_back('0');       // dis4
     test_vec.push_back('0');       // light
 
-    ASSERT_EQ((unsigned char) 48, bw->checksum(test_vec));
+    ASSERT_EQ((unsigned char) 48, bw.checksum(test_vec));
+}
 
-    // clear after first test
-    test_vec.clear();
-
+/*! tests that checksum works in buffer wrapper */
+TEST_F(BufferWrapperTest, CheckSumNonZero) {
     test_vec.push_back('2');      // us1
     test_vec.push_back('3');      // us2
     test_vec.push_back('4');      // ir1
@@ -133,14 +119,13 @@ TEST_F(BufferWrapperTest, CheckSum) {
     test_vec.push_back('0');       // dis4
     test_vec.push_back('0');       // light
 
-    ASSERT_EQ((unsigned char) 54, bw->checksum(test_vec));
+    ASSERT_EQ((unsigned char) 54, bw.checksum(test_vec));
 }
 
 
 /*! tests append valid data stream to receive buffer */
-/*
 TEST_F(BufferWrapperTest, AppendValidToReceiveBuffer) {
-    valid_data = fill_valid();
+    fill_valid();
     bw.appendReceiveBuffer(valid_data);
     std::vector<unsigned char> v = bw.readReceiveBuffer();
     ASSERT_TRUE(v.size() != 0);
@@ -150,14 +135,12 @@ TEST_F(BufferWrapperTest, AppendValidToReceiveBuffer) {
     ASSERT_TRUE(v.at(3) == '5');
     ASSERT_TRUE(v.at(4) == '6');
 }
-*/
 
 /*! tests append invalid data stream to receive buffer */
-/*
 TEST_F(BufferWrapperTest, AppendInvalidToReceiveBuffer) {
 
     // wrong checksum
-    invalid_data = fill_invalid(DEL_ONE, DEL_TWO, DEL_DBCOLON, '8', DEL_COMMA);
+    fill_invalid(DEL_ONE, DEL_TWO, DEL_DBCOLON, '8', DEL_COMMA);
     bw.appendReceiveBuffer(invalid_data);
     std::vector<unsigned char> v = bw.readReceiveBuffer();
     ASSERT_TRUE(v.size() == 0);
@@ -166,7 +149,7 @@ TEST_F(BufferWrapperTest, AppendInvalidToReceiveBuffer) {
     v.clear();
 
     // wrong start delimiter
-    invalid_data = fill_invalid(DEL_TWO, DEL_TWO, DEL_DBCOLON, '6', DEL_COMMA);
+    fill_invalid(DEL_TWO, DEL_TWO, DEL_DBCOLON, '6', DEL_COMMA);
     bw.appendReceiveBuffer(invalid_data);
     v = bw.readReceiveBuffer();
     ASSERT_TRUE(v.size() == 0);
@@ -175,7 +158,7 @@ TEST_F(BufferWrapperTest, AppendInvalidToReceiveBuffer) {
     v.clear();
 
     // wrong second delimiter
-    invalid_data = fill_invalid(DEL_ONE, DEL_ONE, DEL_DBCOLON, '6', DEL_COMMA);
+    fill_invalid(DEL_ONE, DEL_ONE, DEL_DBCOLON, '6', DEL_COMMA);
     bw.appendReceiveBuffer(invalid_data);
     v = bw.readReceiveBuffer();
     ASSERT_TRUE(v.size() == 0);
@@ -184,7 +167,7 @@ TEST_F(BufferWrapperTest, AppendInvalidToReceiveBuffer) {
     v.clear();
 
     // wrong third delimiter
-    invalid_data = fill_invalid(DEL_ONE, DEL_TWO, DEL_COMMA, '6', DEL_COMMA);
+    fill_invalid(DEL_ONE, DEL_TWO, DEL_COMMA, '6', DEL_COMMA);
     bw.appendReceiveBuffer(invalid_data);
     v = bw.readReceiveBuffer();
     ASSERT_TRUE(v.size() == 0);
@@ -193,7 +176,7 @@ TEST_F(BufferWrapperTest, AppendInvalidToReceiveBuffer) {
     v.clear();
 
     // wrong end delimiter
-    invalid_data = fill_invalid(DEL_TWO, DEL_TWO, DEL_DBCOLON, '6', DEL_DBCOLON);
+    fill_invalid(DEL_TWO, DEL_TWO, DEL_DBCOLON, '6', DEL_DBCOLON);
     bw.appendReceiveBuffer(invalid_data);
     v = bw.readReceiveBuffer();
     ASSERT_TRUE(v.size() == 0);
@@ -206,16 +189,13 @@ TEST_F(BufferWrapperTest, AppendInvalidToReceiveBuffer) {
     v = bw.readReceiveBuffer();
     ASSERT_TRUE(v.size() == 0);
 }
-*/
 
 /*! tests appending empty data to send buffer */
-/*
 TEST_F(BufferWrapperTest, AppendEmptyToSendBuffer) {
     bw.appendSendBuffer({});
     invalid_data = bw.readSendBuffer();
     ASSERT_TRUE(invalid_data.size() == 0);
 }
-*/
 
 } // namespace
 
