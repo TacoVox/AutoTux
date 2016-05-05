@@ -63,10 +63,10 @@ void DecisionMaker::laneFollowing() {
 
     else if(getDistanceToLine() < 30 && getDistanceToLine() != -1) {
         cout << "STOPPING!" << endl;
-        vehicleControl.setBrakeLights(true);
-        speed = 0;
-        stopCounter = 1;
-        isStopLine = true;
+        //vehicleControl.setBrakeLights(true);
+       // speed = 0;
+       // stopCounter = 1;
+       // isStopLine = true;
     }
 
     else if(getDistanceToLine() < 50 && getDistanceToLine() != -1) {
@@ -130,7 +130,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
     addDataStoreFor(lifoQueue);
 
     // Set initial state of the car
-    STATE state = LANE_FOLLOWING;
+    STATE state = DRIVING;
 
     Container containerSensorBoardData, containerVehicleData, containerDecisionMakerMSG, containerLaneRecommendationMSG;
     OvertakingMSG ovtMSG;
