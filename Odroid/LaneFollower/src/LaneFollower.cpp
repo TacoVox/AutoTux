@@ -394,7 +394,7 @@ namespace lane {
 
             // ?
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() == ModuleStateMessage::RUNNING) {
-                startTime = getTimeStamp();
+                startTime = TimeStamp();
 				bool has_next_frame = false;
 
                 Container image_container = getKeyValueDataStore().get(SharedImage::ID());
@@ -437,7 +437,7 @@ namespace lane {
                 Container processedImageContainer(m_sharedProcessedImage);
                 getConference().send(processedImageContainer);
                 getConference().send(laneRecommendationContainer);
-				endTime = getTimeStamp();
+				endTime = TimeStamp();
                 printDebug();
             }
             return ModuleExitCodeMessage::OKAY;
