@@ -40,7 +40,8 @@ void hardwareLightsSetup(void);
  * Determines which lights should be on and off at this point, and forwards to hardware
  * when needed.
  */
-void hardwareLightsIteration(unsigned char lightByte, bool rcMode, bool rcBrakeLight);
+void hardwareLightsIteration(unsigned char lightByte, bool rcMode, bool rcBrakeLight,
+		uint8_t lightSensorReading);
 
 
 #endif /* HARDWARELIGHTS_H_ */

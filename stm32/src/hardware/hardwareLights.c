@@ -13,7 +13,8 @@
 //-----------------------------------------------------------------------------
 
 static void updateColorBuffer(void);
-static void setLightBools(unsigned char lightByte, bool rcMode, bool rcBrakeLight);
+static void setLightBools(unsigned char lightByte, bool rcMode, bool rcBrakeLight,
+		uint8_t lightSensorReading);
 static bool checkBrakeBit(unsigned char lightByte);
 static bool checkReverseBit(unsigned char lightByte);
 static bool checkFlashLeftBit(unsigned char lightByte);
@@ -47,7 +48,7 @@ static bool lightsOn = true;
 /**
  * Whether the corresponding lights are currently on or off.
  */
-static bool brakeLight, flashLeft, flashRight, reverseLight, rcLight;
+static bool brakeLight, flashLeft, flashRight, reverseLight, rcLight, headlightsHigh;
 
 /**
  * Used to only write to LED chain if any changes have occured.
@@ -80,9 +81,6 @@ void hardwareLightsSetup(void) {
 	uint32_t i;
 	for (i = 0; i < 16 * 3; i++) allLightsOffBuffer[i] = 0;
 
-	// Headlights
-	neopixelSetColor(colorBuffer, LIGHT_HEADLIGHT_LEDS, LIGHT_HEADLIGHT_R, LIGHT_HEADLIGHT_G, LIGHT_HEADLIGHT_B);
-
 	// Tail lights
 	neopixelSetColor(colorBuffer, LIGHT_TAILLIGHT_LEDS, LIGHT_TAILLIGHT_R, LIGHT_TAILLIGHT_G, LIGHT_TAILLIGHT_B);
 
@@ -95,11 +93,12 @@ void hardwareLightsSetup(void) {
  * Determines which lights should be on and off at this point, and forwards to hardware
  * when needed.
  */
-void hardwareLightsIteration(unsigned char lightByte, bool rcMode, bool rcBrakeLight) {
+void hardwareLightsIteration(unsigned char lightByte, bool rcMode, bool rcBrakeLight,
+		uint8_t lightSensorReading) {
 	static uint8_t flashStateCounter = 0;
 
 	// First process inputs, refine into bools for which lights are on and off
-	setLightBools(lightByte, rcMode, rcBrakeLight);
+	setLightBools(lightByte, rcMode, rcBrakeLight, lightSensorReading);
 
 	// If flashing is turned on, change state regularly.
 	if (flashLeft || flashRight) {
@@ -145,32 +144,46 @@ static void updateColorBuffer(void) {
 	// Let flashing activate and deactivate "naturally" aligned with the
 	// flashState pace.
 	if (flashLeft && flashState) {
-		neopixelSetColor(colorBuffer, LIGHT_FLASHLEFT_LEDS, LIGHT_FLASH_R, LIGHT_FLASH_G, LIGHT_FLASH_B);
+		neopixelSetColor(colorBuffer, LIGHT_FLASHLEFT_LEDS, LIGHT_FLASH_R,
+				LIGHT_FLASH_G, LIGHT_FLASH_B);
 	}
 	if (flashRight && flashState) {
-		neopixelSetColor(colorBuffer, LIGHT_FLASHLEFT_LEDS, LIGHT_FLASH_R, LIGHT_FLASH_G, LIGHT_FLASH_B);
+		neopixelSetColor(colorBuffer, LIGHT_FLASHLEFT_LEDS, LIGHT_FLASH_R,
+				LIGHT_FLASH_G, LIGHT_FLASH_B);
 	}
 	if (!flashState) {
 		// Turn off all corner leds
-		neopixelSetColor(colorBuffer, LIGHT_FLASHLEFT_LEDS | LIGHT_FLASHRIGHT_LEDS, 0, 0, 0);
+		neopixelSetColor(colorBuffer, LIGHT_FLASHLEFT_LEDS | LIGHT_FLASHRIGHT_LEDS,
+				0, 0, 0);
 	}
 
 	if (reverseLight) {
-		neopixelSetColor(colorBuffer, LIGHT_REVERSE_LEDS, LIGHT_REVERSE_R, LIGHT_REVERSE_G, LIGHT_REVERSE_B);
+		neopixelSetColor(colorBuffer, LIGHT_REVERSE_LEDS, LIGHT_REVERSE_R,
+				LIGHT_REVERSE_G, LIGHT_REVERSE_B);
 	} else {
 		neopixelSetColor(colorBuffer, LIGHT_REVERSE_LEDS, 0, 0, 0);
 	}
 
 	if (brakeLight) {
-		neopixelSetColor(colorBuffer, LIGHT_BRAKE_LEDS, LIGHT_BRAKE_R, LIGHT_BRAKE_G, LIGHT_BRAKE_B);
+		neopixelSetColor(colorBuffer, LIGHT_BRAKE_LEDS, LIGHT_BRAKE_R,
+				LIGHT_BRAKE_G, LIGHT_BRAKE_B);
 	} else {
 		neopixelSetColor(colorBuffer, LIGHT_BRAKE_LEDS, 0, 0, 0);
 	}
 
 	if (rcLight) {
-		neopixelSetColor(colorBuffer, LIGHT_RCLIGHT_LEDS, LIGHT_RCLIGHT_R, LIGHT_RCLIGHT_G, LIGHT_RCLIGHT_B);
+		neopixelSetColor(colorBuffer, LIGHT_RCLIGHT_LEDS, LIGHT_RCLIGHT_R,
+				LIGHT_RCLIGHT_G, LIGHT_RCLIGHT_B);
 	} else {
 		neopixelSetColor(colorBuffer, LIGHT_RCLIGHT_LEDS, 0, 0, 0);
+	}
+
+	if (headlightsHigh) {
+		neopixelSetColor(colorBuffer, LIGHT_HEADLIGHT_LEDS, LIGHT_HEADLIGHT_HI_R,
+				LIGHT_HEADLIGHT_HI_G, LIGHT_HEADLIGHT_HI_B);
+	} else {
+		neopixelSetColor(colorBuffer, LIGHT_HEADLIGHT_LEDS, LIGHT_HEADLIGHT_R,
+				LIGHT_HEADLIGHT_G, LIGHT_HEADLIGHT_B);
 	}
 }
 
@@ -178,7 +191,8 @@ static void updateColorBuffer(void) {
 /**
  * Helper function that chooses which lights should be on and off.
  */
-static void setLightBools(unsigned char lightByte, bool rcMode, bool rcBrakeLight) {
+static void setLightBools(unsigned char lightByte, bool rcMode, bool rcBrakeLight,
+		uint8_t lightSensorReading) {
 	// Assumption: rcLight = (rcMode || rcBrakeLight)
 	if (rcLight != (rcMode || rcBrakeLight)) {
 		rcLight = (rcMode || rcBrakeLight);
@@ -202,6 +216,10 @@ static void setLightBools(unsigned char lightByte, bool rcMode, bool rcBrakeLigh
 	}
 	if (flashRight != checkFlashRightBit(lightByte)) {
 		flashRight = checkFlashRightBit(lightByte);
+		lightsHaveChanged = true;
+	}
+	if (headlightsHigh != (lightSensorReading < LIGHT_HEADLIGHT_TRESHOLD)) {
+		headlightsHigh = (lightSensorReading < LIGHT_HEADLIGHT_TRESHOLD);
 		lightsHaveChanged = true;
 	}
 }
