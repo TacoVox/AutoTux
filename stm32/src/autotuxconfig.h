@@ -110,7 +110,7 @@
 /**
  * Cap for IR values, to clean up the signal.
  */
-#define IR_VALUE_CAP 25
+#define IR_VALUE_CAP 28
 
 /**
  * Used to identify each IR sensor

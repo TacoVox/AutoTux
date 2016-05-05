@@ -141,10 +141,14 @@ namespace lane {
         void LaneFollower::processImage() {
 
             // Copy the image to a matrix (this is the one we use for detection)
-            m_image_grey = m_image.clone();
+            //m_image_grey = m_image.clone();
+			
+			// Make a new greyscale matrix that will hold a greyscale copy
+			// of the original image
+			m_image_grey = Mat(m_image.rows, m_image.cols, CV_8UC1);
 
-            // Make the new image gray scale
-            cvtColor(m_image_grey, m_image_grey, COLOR_BGR2GRAY);
+            // Copy the greyscale information to the new matrix
+            cvtColor(m_image, m_image_grey, COLOR_BGR2GRAY);
 
             Canny(m_image_grey, m_image_grey, m_threshold1, m_threshold2, 3);
 			/*
