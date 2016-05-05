@@ -23,7 +23,8 @@ namespace lane {
         // SET TO TRUE WHEN USING THE SIMULATOR
         // Do we want this in the configuration file?
         const bool SIMMODE = false;
-
+		
+		Mat m_image_grey; 
 		TimeStamp startTime, endTime;
 
         TimeStamp configContainerTimeStamp = TimeStamp();
@@ -140,7 +141,7 @@ namespace lane {
         void LaneFollower::processImage() {
 
             // Copy the image to a matrix (this is the one we use for detection)
-            Mat m_image_grey = m_image.clone();
+            m_image_grey = m_image.clone();
 
             // Make the new image gray scale
             cvtColor(m_image_grey, m_image_grey, COLOR_BGR2GRAY);
@@ -190,7 +191,7 @@ namespace lane {
             double e = 0;
 
             // Lane detection loop
-            for(int32_t y = m_image.rows - 8; y > m_image.rows * .5; y -= 10) {
+            for(int32_t y = m_image_grey.rows - 8; y > m_image_grey.rows * .5; y -= 10) {
                 // Find red pixels
                 unsigned char pixelLeft, pixelRight;
                 Point left, right;
