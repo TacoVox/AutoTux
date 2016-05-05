@@ -174,13 +174,13 @@ namespace lane {
             }*/
 
             // Find contours on the image
-            vector<vector<Point>> contours;
-            findContours(m_image_grey, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+            //vector<vector<Point>> contours;
+            //findContours(m_image_grey, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
 
             // Draw the contours red
-            for(size_t idx = 0; idx < contours.size(); idx++) {
-                drawContours(m_image, contours, (int)idx, Scalar(0,0,255));
-            }
+            //for(size_t idx = 0; idx < contours.size(); idx++) {
+            //    drawContours(m_image, contours, (int)idx, Scalar(0,0,255));
+            //}
         }
 
         double LaneFollower::laneDetection() {
@@ -192,16 +192,16 @@ namespace lane {
             // Lane detection loop
             for(int32_t y = m_image.rows - 8; y > m_image.rows * .5; y -= 10) {
                 // Find red pixels
-                Vec3b pixelLeft, pixelRight;
+                unsigned char pixelLeft, pixelRight;
                 Point left, right;
 
                 left.y = y;
                 left.x = -1;
 
                 // Find first red pixel to the left (left line)
-                for (int x = m_image.cols / 2; x > 0; x--) {
-                    pixelLeft = m_image.at<Vec3b>(Point(x, y));
-                    if (pixelLeft.val[2] == 255) {
+                for (int x = m_image_grey.cols / 2; x > 0; x--) {
+                    pixelLeft = m_image_grey.at<unsigned char>(Point(x, y));
+                    if (pixelLeft == 150) {
                         left.x = x;
                         break;
                     }
@@ -211,9 +211,9 @@ namespace lane {
                 right.x = -1;
 
                 // Find first red pixel to the right (right line)
-                for (int x = m_image.cols / 2; x < m_image.cols; x++) {
-                    pixelRight = m_image.at<Vec3b>(Point(x, y));
-                    if (pixelRight.val[2] == 255) {
+                for (int x = m_image_grey.cols / 2; x < m_image_grey.cols; x++) {
+                    pixelRight = m_image_grey.at<unsigned char>(Point(x, y));
+                    if (pixelRight > 150) {
                         right.x = x;
                         break;
                     }
@@ -234,16 +234,16 @@ namespace lane {
                     // Right lane logic (prefer right line following)
                     if (!inLeftLane) {
                         if (right.x > 0) {
-                            e = ((right.x - m_image.cols / 2.0) - m_distance) / m_distance;
+                            e = ((right.x - m_image_grey.cols / 2.0) - m_distance) / m_distance;
                         } else if (left.x > 0) {
-                            e = (m_distance - (m_image.cols / 2.0 - left.x)) / m_distance;
+                            e = (m_distance - (m_image_grey.cols / 2.0 - left.x)) / m_distance;
                         }
                     } else {
                         // Left lane logic (prefer left line following)
                         if (left.x > 0) {
-                            e = (m_distance - (m_image.cols / 2.0 - left.x)) / m_distance;
+                            e = (m_distance - (m_image_grey.cols / 2.0 - left.x)) / m_distance;
                         } else if (right.x > 0) {
-                            e = ((right.x - m_image.cols / 2.0) - m_distance) / m_distance;
+                            e = ((right.x - m_image_grey.cols / 2.0) - m_distance) / m_distance;
                         }
                     }
                 }
@@ -271,18 +271,18 @@ namespace lane {
                 }
             } // for loop
 
-            Vec3b pixelFrontLeft, pixelFrontRight;
+            unsigned char pixelFrontLeft, pixelFrontRight;
             Point stop_left, stop_right;
 
             int left_dist = 0;
 
-            stop_left.x = (m_image.cols/2) - 50;
+            stop_left.x = (m_image_grey.cols/2) - 50;
             stop_left.y = m_controlScanline;
 
             // Find first red pixel in front (stopline)
             for(int i = m_controlScanline; i > m_stopScanline; i--) {
-                pixelFrontLeft = m_image.at<Vec3b>(Point(stop_left.x, i));
-                if(pixelFrontLeft.val[2] == 255) {
+                pixelFrontLeft = m_image_grey.at<unsigned char>(Point(stop_left.x, i));
+                if(pixelFrontLeft > 150) {
                     stop_left.y = i;
                     left_dist = m_controlScanline - stop_left.y;
                     break;
@@ -291,13 +291,13 @@ namespace lane {
 
             int right_dist = 0;
 
-            stop_right.x = (m_image.cols/2) + 50;
+            stop_right.x = (m_image_grey.cols/2) + 50;
             stop_right.y = m_controlScanline;
 
             // Find first red pixel in front (stopline)
             for(int i = m_controlScanline; i > m_stopScanline; i--) {
-                pixelFrontRight = m_image.at<Vec3b>(Point(stop_right.x, i));
-                if(pixelFrontRight.val[2] == 255) {
+                pixelFrontRight = m_image_grey.at<unsigned char>(Point(stop_right.x, i));
+                if(pixelFrontRight > 150) {
                     stop_right.y = i;
                     right_dist = m_controlScanline - stop_right.y;
                     break;
