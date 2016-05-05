@@ -376,7 +376,7 @@ namespace lane {
                 cout << "DESIRED STEERING: " << m_laneRecommendation.getAngle() << endl;
                 cout << "QUALITY: " << m_laneRecommendation.getQuality() << endl;
                 cout << "IN LEFT LANE: " << m_overtaking.getLeftlane() << endl;
-           		cout << "TIME IN BODY: " << (endTime - startTime) << endl;
+           		cout << "TIME IN BODY: " << (endTime.toMicroseconds() - startTime.toMicroseconds()) << endl;
 			   	cout << "-----------------------------------" << endl;
 
                 // Reset counter
