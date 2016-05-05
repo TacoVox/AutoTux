@@ -274,7 +274,7 @@ typedef enum {SPEED_REVERSE, SPEED_STOP, SPEED_FORWARD_LOW, SPEED_FORWARD_CRUISE
 /**
  * Pulse widths for each speed step. 1414 very low forward speed good for basic lf.
  */
-static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1120, 1350, 1415, 1424};
+static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1120, 1350, 1415, 1416};
 
 /**
  * Pulse width values for wheels centered and their extreme positions.
