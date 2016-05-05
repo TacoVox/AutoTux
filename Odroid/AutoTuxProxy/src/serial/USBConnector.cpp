@@ -70,7 +70,7 @@ serial::connector::USBConnector_impl::~USBConnector_impl()
 }
 
 
-serial::interface::USBConnector::~USBConnector() {}
+serial::conninter::USBConnector::~USBConnector() {}
 
 
 /*! sets the buffer wrapper for this connector */
@@ -146,16 +146,16 @@ bool serial::connector::USBConnector_impl::open_device()
 }
 
 
-/*! claims the interface of the USB for I/O operations */
+/*! claims the conninter of the USB for I/O operations */
 bool serial::connector::USBConnector_impl::claim_interface()
 {
     // to return
     bool result{false};
     // check if the kernel is active on the device and
-    // the interface we want to operate on
+    // the conninter we want to operate on
     int d = libusb_kernel_driver_active(usb_dev, 1);
     if (d == 1) {
-        cout << "freeing interface... ";
+        cout << "freeing conninter... ";
         // detach kernel if active
         libusb_detach_kernel_driver(usb_dev, 1);
         cout << "[OK]" << endl;
@@ -163,8 +163,8 @@ bool serial::connector::USBConnector_impl::claim_interface()
     else if (d < 0) {
         cout << "[FAIL] error code: " << d << endl;
     }
-    cout << "claiming interface... ";
-    // claim the interface for the device, this will let us
+    cout << "claiming conninter... ";
+    // claim the conninter for the device, this will let us
     // send and receive data
     int r = libusb_claim_interface(usb_dev, 1);
     if (r == 0) {

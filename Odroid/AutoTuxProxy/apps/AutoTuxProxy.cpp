@@ -10,7 +10,7 @@
 #include "serial/USBHandler.h"
 
 using namespace std;
-using namespace serial::interface;
+using namespace serial::conninter;
 using namespace serial::connector;
 using namespace serial::handler;
 using namespace serial::buffer;

@@ -28,8 +28,8 @@ namespace serial
             /*! stops the handler, sets the loop control variable to false */
             void stop();
             /*! sets the usb connector for this handler */
-            void set_usb_connector(std::shared_ptr<serial::interface::USBConnector>);
-            //void set_usb_connector(serial::interface::USBConnector*);
+            void set_usb_connector(std::shared_ptr<serial::conninter::USBConnector>);
+            //void set_usb_connector(serial::conninter::USBConnector*);
             /*! sets verbose */
             void set_verbose(bool);
             /*! returns running state */
@@ -45,8 +45,8 @@ namespace serial
             /*! loop control */
             volatile bool running;
             /*! the usb connector */
-            std::shared_ptr<serial::interface::USBConnector> uc;
-            //serial::interface::USBConnector *uc;
+            std::shared_ptr<serial::conninter::USBConnector> uc;
+            //serial::conninter::USBConnector *uc;
         };
     } // namespace handler
 } // namespace serial

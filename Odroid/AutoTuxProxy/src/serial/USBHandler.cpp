@@ -89,7 +89,7 @@ void serial::handler::USBHandler::stop()
 
 
 /*! sets the usb connector for this handler */
-void serial::handler::USBHandler::set_usb_connector(shared_ptr<serial::interface::USBConnector> p_uc)
+void serial::handler::USBHandler::set_usb_connector(shared_ptr<serial::conninter::USBConnector> p_uc)
 {
     uc = p_uc;
 }

@@ -11,7 +11,7 @@
 
 namespace serial
 {
-    namespace interface
+    namespace conninter
     {
         class USBConnector
         {
@@ -22,7 +22,7 @@ namespace serial
             virtual int read() = 0;
             virtual int write() = 0;
         };
-    } // namespace interface
+    } // namespace conninter
 } // namespace serial
 
 #endif	// AUTOTUXPROXY_USBCONNECTOR_H

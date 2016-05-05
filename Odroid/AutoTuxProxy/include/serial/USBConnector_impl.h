@@ -27,7 +27,7 @@ namespace serial
 {
     namespace connector
     {
-        class USBConnector_impl : public serial::interface::USBConnector
+        class USBConnector_impl : public serial::conninter::USBConnector
         {
         public:
             /*! constructor */
