@@ -22,7 +22,7 @@
 #include "hardware/hardwareWE.h"
 
 // Include RC in debug output
-#ifdef DEBUG
+#if DEBUG_OUTPUT == 1
 #include "hardware/hardwareRC.h"
 #endif
 
@@ -97,7 +97,7 @@ void sensorInputDebugOutput(BaseSequentialStream* SDU) {
 	// "\033[F" for going back to previous line
 	chprintf(SDU, "\033[");
 
-	#ifdef DEBUG
+	#if DEBUG_OUTPUT == 1
 	chprintf(SDU, "FTHROTTLE: %4i ", hardwareRCGetValues(THROTTLE));
 	chprintf(SDU, "STEERING: %4i ", hardwareRCGetValues(STEERING));
 	#endif

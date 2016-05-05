@@ -20,10 +20,6 @@
  */
 #define DEBUG_OUTPUT 0
 
-#if DEBUG_OUTPUT == 1
-#define DEBUG
-#endif
-
 /**
  * @brief If this is exceeded, communication is seen as inactive.
  *
@@ -276,9 +272,9 @@ typedef enum {SPEED_REVERSE, SPEED_STOP, SPEED_FORWARD_LOW, SPEED_FORWARD_CRUISE
 #define CTRL_OUT_SPEED_STEPS 4
 
 /**
- * Pulse widths for each speed step.
+ * Pulse widths for each speed step. 1414 very low forward speed good for basic lf.
  */
-static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1120, 1350, 1419, 1430};
+static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1120, 1350, 1415, 1424};
 
 /**
  * Pulse width values for wheels centered and their extreme positions.
@@ -316,11 +312,16 @@ static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1120, 1350,
 #define LIGHT_HEADLIGHT_G 30
 #define LIGHT_HEADLIGHT_B 30
 
+#define LIGHT_HEADLIGHT_HI_R 150
+#define LIGHT_HEADLIGHT_HI_G 150
+#define LIGHT_HEADLIGHT_HI_B 150
+#define LIGHT_HEADLIGHT_TRESHOLD 60
+
 /**
  * Tail light configuration.
  */
 #define LIGHT_TAILLIGHT_LEDS LED(9) | LED(14)
-#define LIGHT_TAILLIGHT_R 40
+#define LIGHT_TAILLIGHT_R 30
 #define LIGHT_TAILLIGHT_G 0
 #define LIGHT_TAILLIGHT_B 0
 
@@ -331,7 +332,7 @@ static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1120, 1350,
 #define LIGHT_FLASHLEFT_LEDS LED(7) | LED(8)
 #define LIGHT_FLASHRIGHT_LEDS LED(0) | LED(15)
 #define LIGHT_FLASH_R 230
-#define LIGHT_FLASH_G 110
+#define LIGHT_FLASH_G 90
 #define LIGHT_FLASH_B 0
 
 /**
