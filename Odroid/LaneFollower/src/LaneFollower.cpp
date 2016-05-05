@@ -13,6 +13,7 @@ namespace lane {
         using namespace odcore::data::image;
         using namespace odcore::wrapper;
         using namespace autotux;
+        using namespace autotux::config;
 
         using namespace lane::follower;
 
@@ -20,7 +21,13 @@ namespace lane {
         using namespace odtools::player;
 
         // SET TO TRUE WHEN USING THE SIMULATOR
-        const bool SIMMODE = true;
+        // Do we want this in the configuration file?
+        const bool SIMMODE = false;
+		
+		Mat m_image_grey; 
+		TimeStamp startTime, endTime;
+
+        TimeStamp configContainerTimeStamp = TimeStamp();
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) :
                 TimeTriggeredConferenceClientModule(argc, argv, "LaneFollower"),
@@ -38,12 +45,14 @@ namespace lane {
                 m_previousTime(),
                 m_eSum(0),
                 m_eOld(0),
-                m_distance(220),
+                m_distance(190),
                 m_controlScanline(222),
-                m_stopScanline(110),
-                P_GAIN(0.9),
-                I_GAIN(0),
-                D_GAIN(0),
+                m_stopScanline(10),
+                m_threshold1(50),
+                m_threshold2(200),
+                P_GAIN(0.80),
+                I_GAIN(0.0),
+                D_GAIN(0.0),
                 printCounter(0) {}
 
         LaneFollower::~LaneFollower() { }
@@ -132,14 +141,18 @@ namespace lane {
         void LaneFollower::processImage() {
 
             // Copy the image to a matrix (this is the one we use for detection)
-            Mat m_image_grey = m_image.clone();
+            //m_image_grey = m_image.clone();
+			
+			// Make a new greyscale matrix that will hold a greyscale copy
+			// of the original image
+			m_image_grey = Mat(m_image.rows, m_image.cols, CV_8UC1);
 
-            // Make the new image gray scale
-            cvtColor(m_image_grey, m_image_grey, COLOR_BGR2GRAY);
+            // Copy the greyscale information to the new matrix
+            cvtColor(m_image, m_image_grey, COLOR_BGR2GRAY);
 
-            Canny(m_image_grey, m_image_grey, 50, 200, 3);
-
-            if(m_sharedProcessedImageMemory.get() && m_sharedProcessedImageMemory->isValid()) {
+            Canny(m_image_grey, m_image_grey, m_threshold1, m_threshold2, 3);
+			
+     	    if(m_sharedProcessedImageMemory.get() && m_sharedProcessedImageMemory->isValid()) {
                 m_sharedProcessedImageMemory->lock();
                 memcpy(m_sharedProcessedImageMemory->getSharedMemory(), m_image_grey.data, 640*240); // Set size dynamically?
                 m_sharedProcessedImageMemory->unlock();
@@ -166,13 +179,13 @@ namespace lane {
             }*/
 
             // Find contours on the image
-            vector<vector<Point>> contours;
-            findContours(m_image_grey, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+            //vector<vector<Point>> contours;
+            //findContours(m_image_grey, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
 
             // Draw the contours red
-            for(size_t idx = 0; idx < contours.size(); idx++) {
-                drawContours(m_image, contours, (int)idx, Scalar(0,0,255));
-            }
+            //for(size_t idx = 0; idx < contours.size(); idx++) {
+            //    drawContours(m_image, contours, (int)idx, Scalar(0,0,255));
+            //}
         }
 
         double LaneFollower::laneDetection() {
@@ -182,18 +195,18 @@ namespace lane {
             double e = 0;
 
             // Lane detection loop
-            for(int32_t y = m_image.rows - 8; y > m_image.rows * .5; y -= 10) {
+            for(int32_t y = m_image_grey.rows - 8; y > m_image_grey.rows * .5; y -= 10) {
                 // Find red pixels
-                Vec3b pixelLeft, pixelRight;
+                unsigned char pixelLeft, pixelRight;
                 Point left, right;
 
                 left.y = y;
                 left.x = -1;
 
                 // Find first red pixel to the left (left line)
-                for (int x = m_image.cols / 2; x > 0; x--) {
-                    pixelLeft = m_image.at<Vec3b>(Point(x, y));
-                    if (pixelLeft.val[2] == 255) {
+                for (int x = m_image_grey.cols / 2; x > 0; x--) {
+                    pixelLeft = m_image_grey.at<unsigned char>(Point(x, y));
+                    if (pixelLeft == 150) {
                         left.x = x;
                         break;
                     }
@@ -203,9 +216,9 @@ namespace lane {
                 right.x = -1;
 
                 // Find first red pixel to the right (right line)
-                for (int x = m_image.cols / 2; x < m_image.cols; x++) {
-                    pixelRight = m_image.at<Vec3b>(Point(x, y));
-                    if (pixelRight.val[2] == 255) {
+                for (int x = m_image_grey.cols / 2; x < m_image_grey.cols; x++) {
+                    pixelRight = m_image_grey.at<unsigned char>(Point(x, y));
+                    if (pixelRight > 150) {
                         right.x = x;
                         break;
                     }
@@ -226,16 +239,16 @@ namespace lane {
                     // Right lane logic (prefer right line following)
                     if (!inLeftLane) {
                         if (right.x > 0) {
-                            e = ((right.x - m_image.cols / 2.0) - m_distance) / m_distance;
+                            e = ((right.x - m_image_grey.cols / 2.0) - m_distance) / m_distance;
                         } else if (left.x > 0) {
-                            e = (m_distance - (m_image.cols / 2.0 - left.x)) / m_distance;
+                            e = (m_distance - (m_image_grey.cols / 2.0 - left.x)) / m_distance;
                         }
                     } else {
                         // Left lane logic (prefer left line following)
                         if (left.x > 0) {
-                            e = (m_distance - (m_image.cols / 2.0 - left.x)) / m_distance;
+                            e = (m_distance - (m_image_grey.cols / 2.0 - left.x)) / m_distance;
                         } else if (right.x > 0) {
-                            e = ((right.x - m_image.cols / 2.0) - m_distance) / m_distance;
+                            e = ((right.x - m_image_grey.cols / 2.0) - m_distance) / m_distance;
                         }
                     }
                 }
@@ -263,18 +276,18 @@ namespace lane {
                 }
             } // for loop
 
-            Vec3b pixelFrontLeft, pixelFrontRight;
+            unsigned char pixelFrontLeft, pixelFrontRight;
             Point stop_left, stop_right;
 
             int left_dist = 0;
 
-            stop_left.x = (m_image.cols/2) - 50;
+            stop_left.x = (m_image_grey.cols/2) - 50;
             stop_left.y = m_controlScanline;
 
             // Find first red pixel in front (stopline)
             for(int i = m_controlScanline; i > m_stopScanline; i--) {
-                pixelFrontLeft = m_image.at<Vec3b>(Point(stop_left.x, i));
-                if(pixelFrontLeft.val[2] == 255) {
+                pixelFrontLeft = m_image_grey.at<unsigned char>(Point(stop_left.x, i));
+                if(pixelFrontLeft > 150) {
                     stop_left.y = i;
                     left_dist = m_controlScanline - stop_left.y;
                     break;
@@ -283,13 +296,13 @@ namespace lane {
 
             int right_dist = 0;
 
-            stop_right.x = (m_image.cols/2) + 50;
+            stop_right.x = (m_image_grey.cols/2) + 50;
             stop_right.y = m_controlScanline;
 
             // Find first red pixel in front (stopline)
             for(int i = m_controlScanline; i > m_stopScanline; i--) {
-                pixelFrontRight = m_image.at<Vec3b>(Point(stop_right.x, i));
-                if(pixelFrontRight.val[2] == 255) {
+                pixelFrontRight = m_image_grey.at<unsigned char>(Point(stop_right.x, i));
+                if(pixelFrontRight > 150) {
                     stop_right.y = i;
                     right_dist = m_controlScanline - stop_right.y;
                     break;
@@ -306,7 +319,7 @@ namespace lane {
                 }
             }
 
-            if((left_dist - right_dist > -5) && (left_dist - right_dist < 5)) {
+            if((left_dist - right_dist > -10) && (left_dist - right_dist < 10)) {
                 m_laneRecommendation.setDistance_to_line(left_dist);
             }
 
@@ -350,7 +363,7 @@ namespace lane {
             if (desiredSteering > 0.5) desiredSteering = 0.5;
             if (desiredSteering < -0.5) desiredSteering = -0.5;
 
-            if(m_laneRecommendation.getDistance_to_line() < 5 || m_laneRecommendation.getDistance_to_line() > 150)
+            if(m_laneRecommendation.getDistance_to_line() < 10 || m_laneRecommendation.getDistance_to_line() > 50)
                 // Set distance to line to -1 if it's too far away or too close
                 m_laneRecommendation.setDistance_to_line(-1);
 
@@ -360,16 +373,16 @@ namespace lane {
         /**
          * Function that prints debug output every second instead of every iteration.
          */
-
         void LaneFollower::printDebug() {
-            if(printCounter == 30) {
+            if(printCounter == 25) {
 
                 // Print values sent through to the DM
                 cout << "STOPLINE: " << m_laneRecommendation.getDistance_to_line() << endl;
                 cout << "DESIRED STEERING: " << m_laneRecommendation.getAngle() << endl;
                 cout << "QUALITY: " << m_laneRecommendation.getQuality() << endl;
                 cout << "IN LEFT LANE: " << m_overtaking.getLeftlane() << endl;
-                cout << "-----------------------------------" << endl;
+           		cout << "TIME IN BODY: " << (endTime.toMicroseconds() - startTime.toMicroseconds()) << endl;
+			   	cout << "-----------------------------------" << endl;
 
                 // Reset counter
                 printCounter = 0;
@@ -386,13 +399,34 @@ namespace lane {
 
             // ?
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() == ModuleStateMessage::RUNNING) {
-                bool has_next_frame = false;
+                startTime = TimeStamp();
+				bool has_next_frame = false;
 
                 Container image_container = getKeyValueDataStore().get(SharedImage::ID());
-                Container config_container = getKeyValueDataStore().get(config::LaneFollowerMSG::ID());
+               
+                Container config_container = getKeyValueDataStore().get(LaneFollowerMSG::ID());
                 Container overtaking_container = getKeyValueDataStore().get(OvertakingMSG::ID());
+				//cout << "ts: "<< config_container.getReceivedTimeStamp() <<endl;
 
-                m_config = config_container.getData<config::LaneFollowerMSG>();
+
+                // TODO We are receiving values all the time.
+                // Implement check if changed.
+                if(config_container.getReceivedTimeStamp() > configContainerTimeStamp) {
+                    m_config = config_container.getData<LaneFollowerMSG>();
+					if (m_config.getThresholdD() > 0) {
+                    	m_threshold1 = m_config.getThresholdD();
+                    	m_threshold2 = m_config.getThresholdB();
+                    	m_distance = m_config.getRoadWidth();
+
+                    	P_GAIN = m_config.getGainP();
+                    	I_GAIN = m_config.getGainI();
+                    	D_GAIN = m_config.getGainD();
+
+                    	configContainerTimeStamp = TimeStamp();
+
+                    	LaneFollower::toLogger(LogMessage::DEBUG, m_config.toString());
+                	}
+				}
                 m_overtaking = overtaking_container.getData<OvertakingMSG>();
 
 
@@ -405,16 +439,14 @@ namespace lane {
                     double detection = laneDetection();
                     laneFollowing(detection);
                 }
-
-                printDebug();
-
                 Container laneRecommendationContainer(m_laneRecommendation);
                 Container processedImageContainer(m_sharedProcessedImage);
                 getConference().send(processedImageContainer);
                 getConference().send(laneRecommendationContainer);
+				endTime = TimeStamp();
+                printDebug();
             }
             return ModuleExitCodeMessage::OKAY;
         }
-
     } // detector
 } // lane

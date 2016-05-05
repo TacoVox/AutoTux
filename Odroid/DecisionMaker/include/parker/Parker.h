@@ -19,49 +19,52 @@ namespace parker {
     private:
 
         //REAL CAR
-        const double SPOT_SIZE = 0.70;
-        const double ADJUST_BEFORE_PARKING = 0.08;
-        const double BACK_AROUND_CORNER = 0.45;
-        const double BACKING_LEFT = 0.48;
-
-        const double SENSOR_SAFETY_MIN = 0.03;
-        const double SENSOR_SAFETY_MAX = 0.04;
-
-        const double IRSENSOR_DISTANCE_MIN = 0.05;
-        const double IRSENSOR_DISTANCE_MAX = 0.22;
-
-        const double ULTRASENSOR_DISTANCE_MIN = 0.05;
-        const double ULTRASENSOR_DISTANCE_MAX = 90;
-        const double ENOUGH_SPACE_DISTANCE = 0.85;
-
-        const int SENSOR_CONVERSION = 100;
-        const double DISTANCE_FROM_BACK_OBJECT = 0.10;
+//        const double SPOT_SIZE = 0.70;
+//        const double ADJUST_BEFORE_PARKING = 0.08;
+//        const double BACK_AROUND_CORNER = 0.45;
+//        const double BACKING_STRAIGHT = 2;
+//        const double BACKING_LEFT = 0.48;
+//
+//        const double SENSOR_SAFETY_MIN = 0.03;
+//        const double SENSOR_SAFETY_MAX = 0.04;
+//
+//        const double IRSENSOR_DISTANCE_MIN = 0.05;
+//        const double IRSENSOR_DISTANCE_MAX = 0.22;
+//
+//        const double ULTRASENSOR_DISTANCE_MIN = 0.05;
+//        const double ULTRASENSOR_DISTANCE_MAX = 90;
+//        const double ENOUGH_SPACE_DISTANCE = 0.85;
+//
+//        const double SENSOR_DIFFERENCE_INBETWEEN = 0.08;
+//        const double SENSOR_DIFFERENCE_NO_FRONT = 0.04;
+//
+//        const double DISTANCE_FROM_BACK_OBJECT = 0.10;
 
         //-----------------------------------------
 
         //SIMULATION
-//        const double SPOT_SIZE = 7;
-//        const double ADJUST_BEFORE_PARKING = 2;
-//        const double BACK_AROUND_CORNER = 5;
-//        const double BACKING_STRAIGHT = 2;
-//        const double BACKING_LEFT = 2.5;
-//        const double ADJUST_IN_SPOT_FORWARD = 1.5;
-//        const double ADJUST_IN_SPOT_BACK = 1;
-//
-//        const double SENSOR_SAFETY_MIN = 0.2;
-//        const double SENSOR_SAFETY_MAX = 0.5;
-//        const double IRSENSOR_DISTANCE_MIN = 0;
-//        const double IRSENSOR DISTANCE_MAX = 25;
-//        const double ULTRSENSOR_DISTANCE_MIN = 0;
-//        const double ULTRASENSOR_DISTANCE_MAX = 40;
-//        const double ENOUGH_SPACE_DISTANCE = 7;
-//        const int SENSOR_CONVERSION = 1;
-//        const double DISTANCE_FROM_BACK_OBJECT = 2;
+        const double SPOT_SIZE = 6;
+        const double ADJUST_BEFORE_PARKING = 2;
+        const double BACK_AROUND_CORNER = 5;
+        const double BACKING_STRAIGHT = 2.3;
+        const double BACKING_LEFT = 5;
+
+        const double SENSOR_SAFETY_MIN = 0.2;
+        const double SENSOR_SAFETY_MAX = 0.5;
+        const double IRSENSOR_DISTANCE_MIN = 2;
+        const double IRSENSOR_DISTANCE_MAX = 25;
+        const double ULTRASENSOR_DISTANCE_MIN = 2;
+        const double ULTRASENSOR_DISTANCE_MAX = 40;
+        const double ENOUGH_SPACE_DISTANCE = 7.5;
+
+        const double SENSOR_DIFFERENCE_INBETWEEN = 0.5;
+        const double SENSOR_DIFFERENCE_NO_FRONT = 1.2;
+        const double DISTANCE_FROM_BACK_OBJECT = 2;
         //----------------------------------------
 
 
         enum STATE {FINDOBJECT, FINDGAPSTART, FINDGAPEND, CHECKSPACE};
-        enum PARKSTATE {PHASE0,PHASE1, PHASE2, PHASE3, SAFETYSTOP};
+        enum PARKSTATE {PHASE0,PHASE1, PHASE2, PHASE3, PHASE4, SAFETYSTOP};
         PARKSTATE parkstate;
         STATE state;
 
@@ -77,8 +80,9 @@ namespace parker {
         int turningCounter;
         bool reversing;
         bool outOfSpot;
+        bool isInSpot;
 
-        const int FREQUENCY = 5;
+        const int FREQUENCY = 3;
 
         const double ULTRASONIC_FRONT_FORWARD = 3;
         const double ULTRASONIC_FRONT_RIGHT = 4;
@@ -92,11 +96,14 @@ namespace parker {
         void enoughSpace();
         automotive::VehicleControl adjustBeforeParking(automotive::VehicleData, double);
         automotive::VehicleControl backAroundCorner(automotive::VehicleData, double);
+        automotive::VehicleControl backingStraight(automotive::VehicleData, double);
         automotive::VehicleControl getParallelInSpot(automotive::miniature::SensorBoardData, automotive::VehicleData, double);
         automotive::VehicleControl midOfSpot(automotive::miniature::SensorBoardData);
         bool isNotSafe(automotive::miniature::SensorBoardData);
         void inBetweenObjects(automotive::miniature::SensorBoardData);
         void objectBehind(automotive::miniature::SensorBoardData);
+        void checkIfInSpot(automotive::miniature::SensorBoardData);
+        bool sensorClear(double);
 
     public:
         Parker();
