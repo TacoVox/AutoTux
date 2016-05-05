@@ -151,12 +151,12 @@ namespace lane {
             cvtColor(m_image, m_image_grey, COLOR_BGR2GRAY);
 
             Canny(m_image_grey, m_image_grey, m_threshold1, m_threshold2, 3);
-			/*
+			
      	    if(m_sharedProcessedImageMemory.get() && m_sharedProcessedImageMemory->isValid()) {
                 m_sharedProcessedImageMemory->lock();
                 memcpy(m_sharedProcessedImageMemory->getSharedMemory(), m_image_grey.data, 640*240); // Set size dynamically?
                 m_sharedProcessedImageMemory->unlock();
-            }*/
+            }
 
             /**
              * TODO Look into Hough Lines to find edges.
@@ -440,8 +440,8 @@ namespace lane {
                     laneFollowing(detection);
                 }
                 Container laneRecommendationContainer(m_laneRecommendation);
-                //Container processedImageContainer(m_sharedProcessedImage);
-                //getConference().send(processedImageContainer);
+                Container processedImageContainer(m_sharedProcessedImage);
+                getConference().send(processedImageContainer);
                 getConference().send(laneRecommendationContainer);
 				endTime = TimeStamp();
                 printDebug();
