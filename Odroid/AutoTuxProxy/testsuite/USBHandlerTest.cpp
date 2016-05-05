@@ -1,9 +1,9 @@
+
+
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 #include "serial/USBHandler.h"
 #include "MockUSBConnector.h"
-#include <iostream>
-#include <memory>
+#include <thread>
 
 
 using namespace std;
@@ -11,41 +11,35 @@ using ::testing::AtLeast;
 using ::testing::Return;
 
 
-namespace {
-class USBHandlerTest : public ::testing::Test
+
+/**
+ * Tests that running boolean is false at beginning.
+ */
+TEST(USBHandlerTest, AssertRunningIsFalseAtBeginning)
 {
-public:
-    serial::USBHandler uh;
-    testing::StrictMock<MockUSBConnector> mockUsbConn;
-    //MockUSBConnector mockUsbConn;
+    // create a shared pointer, this is what we expect in the usb handler
+    shared_ptr<MockUSBConnector> pmock_uc = (shared_ptr<MockUSBConnector>) new MockUSBConnector();
+    serial::handler::USBHandler uh;
 
-    USBHandlerTest() :
-        uh{},
-        mockUsbConn{}
-    {
-        //uh.set_usb_connector(mockUsbConn);
-    }
+    uh.set_usb_connector(pmock_uc);
+    ASSERT_EQ(false, uh.get_running());
+}
 
-    //virtual ~USBHandlerTest() {}
-
-    //virtual void SetUp() {}
-    //virtual void TearDown() {}
-
-}; // BufferWrapperTest
-
-} // namespace
-
-
-/*! */
-TEST_F(USBHandlerTest, Run)
+/**
+ * Tests that running boolean is false at beginning.
+ */
+TEST(USBHandlerTest, AssertRunningIsFalseAt)
 {
-    EXPECT_CALL(mockUsbConn, connect())
-            .Times(AtLeast(1))
-            .WillOnce(Return(true));
-    uh.set_usb_connector(mockUsbConn);
-    uh.run();
+    // create a shared pointer, this is what we expect in the usb handler
+    shared_ptr<MockUSBConnector> pmock_uc = (shared_ptr<MockUSBConnector>) new MockUSBConnector();
+    serial::handler::USBHandler uh;
+
+    EXPECT_CALL(*pmock_uc, connect())
+            .WillRepeatedly(Return(true));
+    uh.set_usb_connector(pmock_uc);
+    //uh.run();
     uh.stop();
-
+    ASSERT_EQ(false, uh.get_running());
 }
 
 

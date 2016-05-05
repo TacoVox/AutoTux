@@ -25,8 +25,8 @@ std::mutex rsm;
 std::mutex rrm;
 
 /*! constructor */
-serial::BufferWrapper::BufferWrapper() :
-    verbose{false},
+serial::buffer::BufferWrapper::BufferWrapper(bool a_ver) :
+    verbose{a_ver},
     buffer_in{},
     buffer_out{}
 {
@@ -36,7 +36,7 @@ serial::BufferWrapper::BufferWrapper() :
 
 
 /*! destructor */
-serial::BufferWrapper::~BufferWrapper()
+serial::buffer::BufferWrapper::~BufferWrapper()
 {
     cout << "destroying buffer wrapper... ";
     cout << "[OK]" << endl;
@@ -44,7 +44,7 @@ serial::BufferWrapper::~BufferWrapper()
 
 
 /*! appends a correct packet to the receive buffer */
-void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> data)
+void serial::buffer::BufferWrapper::appendReceiveBuffer(vector<unsigned char> data)
 {
     // lock mutex
     arb.lock();
@@ -110,7 +110,7 @@ void serial::BufferWrapper::appendReceiveBuffer(vector<unsigned char> data)
 
 
 /*! returns the most recent valid packet from the read buffer */
-vector<unsigned char> serial::BufferWrapper::readReceiveBuffer()
+vector<unsigned char> serial::buffer::BufferWrapper::readReceiveBuffer()
 {
     rrm.lock();
     // check for size, i.e. not empty
@@ -132,7 +132,7 @@ vector<unsigned char> serial::BufferWrapper::readReceiveBuffer()
 
 
 /*! appends a correct packet to the send buffer */
-void serial::BufferWrapper::appendSendBuffer(vector<unsigned char> vec)
+void serial::buffer::BufferWrapper::appendSendBuffer(vector<unsigned char> vec)
 {
     // lock mutex
     asb.lock();
@@ -143,7 +143,7 @@ void serial::BufferWrapper::appendSendBuffer(vector<unsigned char> vec)
 
 
 /*! returns the most recent valid packet from the send buffer */
-vector<unsigned char> serial::BufferWrapper::readSendBuffer()
+vector<unsigned char> serial::buffer::BufferWrapper::readSendBuffer()
 {
     rsm.lock();
     // check for size, i.e. not empty
@@ -165,21 +165,13 @@ vector<unsigned char> serial::BufferWrapper::readSendBuffer()
 
 
 /*! calculates and returns the checksum for a valid packet */
-unsigned char serial::BufferWrapper::checksum(const std::vector<unsigned char> pkt)
+unsigned char serial::buffer::BufferWrapper::checksum(const std::vector<unsigned char> pkt)
 {
     unsigned char chksum = 0;
     if (pkt.size() == 0) return chksum;
     for (auto it = pkt.begin(); it != pkt.end(); ++it) {
         // the checksum is calculated by XOR all elements
-        chksum = (unsigned char)(chksum ^ *it);
+        chksum = chksum ^ *it;
     }
     return chksum;
 }
-
-
-/*! sets verbose */
-void serial::BufferWrapper::set_verbose(bool a_ver)
-{
-    verbose = a_ver;
-}
-

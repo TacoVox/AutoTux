@@ -8,9 +8,9 @@
 
 #include <thread>
 #include <mutex>
-#include <chrono>
 #include <iostream>
 #include <cstring>
+#include <libusb-1.0/libusb.h>
 #include "serial/USBHandler.h"
 
 using namespace std;
@@ -19,10 +19,10 @@ using namespace std;
 std::mutex m_stop;
 
 /*! constructor */
-serial::USBHandler::USBHandler() :
+serial::handler::USBHandler::USBHandler() :
     verbose{false},
-    running{true},
-    uc{nullptr}
+    running{false},
+    uc{}
 {
     cout << "creating usb handler... ";
     cout << "[OK]" << endl;
@@ -30,22 +30,27 @@ serial::USBHandler::USBHandler() :
 
 
 /*! destructor */
-serial::USBHandler::~USBHandler()
+serial::handler::USBHandler::~USBHandler()
 {
     cout << "destroying usb handler... ";
     cout << "[OK]" << endl;
 }
 
 
-/*! run function for the thread */
-void serial::USBHandler::run()
+/*! run */
+void serial::handler::USBHandler::run()
 {
-    // connect and set the buffer wrapper
-    while (uc->connect() == false)
-        ;
+    // call connect until true
+    while (1) {
+        if (uc->connect()) {
+            //running = true;
+            break;
+        }
+    }
 
     // main loop
     while (running) {
+        m_stop.lock();
         // read from usb
         int res1 = uc->read();
         if (verbose) {
@@ -66,6 +71,7 @@ void serial::USBHandler::run()
         if (res2 != 0) {
             if (is_reconnect(res2)) reconnect();
         }
+        m_stop.unlock();
         // sleep for 67, approximation to keep the frequency (30)
         this_thread::sleep_for(chrono::milliseconds(67));
     }
@@ -73,8 +79,9 @@ void serial::USBHandler::run()
 
 
 /*! stops the handler, sets the loop control variable to false */
-void serial::USBHandler::stop()
+void serial::handler::USBHandler::stop()
 {
+    cout << "*** calling stop ***" << endl;
     m_stop.lock();
     running = false;
     m_stop.unlock();
@@ -82,29 +89,27 @@ void serial::USBHandler::stop()
 
 
 /*! sets the usb connector for this handler */
-/*
-void serial::USBHandler::set_usb_connector(std::shared_ptr<serial::USBConnector> p_uc)
+void serial::handler::USBHandler::set_usb_connector(shared_ptr<serial::interface::USBConnector> p_uc)
 {
     uc = p_uc;
-}
-*/
-
-/*! sets the usb connector for this handler */
-void serial::USBHandler::set_usb_connector(serial::USBConnector &p_uc)
-{
-    uc = &p_uc;
 }
 
 
 /*! sets verbose */
-void serial::USBHandler::set_verbose(bool a_ver)
+void serial::handler::USBHandler::set_verbose(bool a_ver)
 {
     verbose = a_ver;
 }
 
 
+bool serial::handler::USBHandler::get_running()
+{
+    return running;
+}
+
+
 /*! reconnects the usb */
-void serial::USBHandler::reconnect()
+void serial::handler::USBHandler::reconnect()
 {
     cout << "reconnecting..." << endl; 
     uc->disconnect();
@@ -116,7 +121,7 @@ void serial::USBHandler::reconnect()
 
 
 /*! returns true if reconnection needed, false otherwise*/
-bool serial::USBHandler::is_reconnect(int error_code)
+bool serial::handler::USBHandler::is_reconnect(int error_code)
 {
     switch (error_code) {
     case LIBUSB_ERROR_IO:

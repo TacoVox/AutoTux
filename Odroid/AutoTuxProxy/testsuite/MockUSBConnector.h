@@ -7,7 +7,7 @@
 #include "serial/USBConnector.h"
 #include <gmock/gmock.h>
 
-class MockUSBConnector : public serial::USBConnector
+class MockUSBConnector : public serial::interface::USBConnector
 {
 public:
     MOCK_METHOD0(connect, bool());

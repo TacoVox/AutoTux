@@ -29,7 +29,7 @@ namespace proxy {
             m_camera{}
     { }
 
-    Proxy::Proxy(int32_t &argc, char **argv, shared_ptr<serial::BufferWrapper> bw) :
+    Proxy::Proxy(int32_t &argc, char **argv, shared_ptr<serial::buffer::BufferWrapper> bw) :
             TimeTriggeredConferenceClientModule(argc, argv, "Proxy"),
             interrupted{false},
             bufferWrapper{bw},
@@ -175,7 +175,7 @@ namespace proxy {
         interrupted = true;
     }
 
-    void Proxy::setBufferWrapper(shared_ptr<serial::BufferWrapper> bw) {
+    void Proxy::setBufferWrapper(shared_ptr<serial::buffer::BufferWrapper> bw) {
         this->bufferWrapper = bw;
     }
 }

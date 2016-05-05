@@ -30,16 +30,16 @@ namespace proxy {
         unsigned char checksum(std::vector<unsigned char>);
         //Private fields
         bool interrupted;
-        shared_ptr<serial::BufferWrapper> bufferWrapper;
+        shared_ptr<serial::buffer::BufferWrapper> bufferWrapper;
         unique_ptr<odtools::recorder::Recorder> m_recorder;
         unique_ptr<proxy::camera::Camera> m_camera;
 
     public:
-        Proxy(int32_t &argc, char **argv, shared_ptr<serial::BufferWrapper>);
+        Proxy(int32_t &argc, char **argv, shared_ptr<serial::buffer::BufferWrapper>);
         virtual ~Proxy();
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
         void interrupt(void);
-        void setBufferWrapper(shared_ptr<serial::BufferWrapper>);
+        void setBufferWrapper(shared_ptr<serial::buffer::BufferWrapper>);
     };
 }
 #endif // SERIALHANDLER_H

@@ -5,8 +5,8 @@
  */
 
 
-#ifndef BUFFERWRAPPER_H
-#define BUFFERWRAPPER_H
+#ifndef AUTOTUXPROXY_BUFFERWRAPPER_H
+#define AUTOTUXPROXY_BUFFERWRAPPER_H
 
 // include
 // ==================================================
@@ -44,35 +44,35 @@
 
 namespace serial
 {
-    class BufferWrapper
+    namespace buffer
     {
-    public:
-        /*! constructor */
-        BufferWrapper();
-        /*! destructor */
-        ~BufferWrapper();
-        /*! appends data read from the serial to the receive buffer */
-        void appendReceiveBuffer(std::vector<unsigned char>);
-        /*! returns a valid packet from the receive buffer */
-        std::vector<unsigned char> readReceiveBuffer();
-        /*! appends to the send buffer data to write to the serial */
-        void appendSendBuffer(std::vector<unsigned char>);
-        /*! returns a valid packet to write to the serial */
-        std::vector<unsigned char> readSendBuffer();
-        /*! returns the checksum for a valid packet */
-        unsigned char checksum(const std::vector<unsigned char>);
-        /*! sets verbose */
-        void set_verbose(bool);
-    private:
-        /*! is it verbose mode */
-        bool verbose;
-        /*! the receive buffer */
-        std::deque<std::vector<unsigned char>> buffer_in;
-        /*! the send buffer */
-        std::deque<std::vector<unsigned char>> buffer_out;
-    };
+        class BufferWrapper
+        {
+        public:
+            /*! constructor */
+            BufferWrapper(bool);
+            /*! destructor */
+            ~BufferWrapper();
+            /*! appends data read from the serial to the receive buffer */
+            void appendReceiveBuffer(std::vector<unsigned char>);
+            /*! returns a valid packet from the receive buffer */
+            std::vector<unsigned char> readReceiveBuffer();
+            /*! appends to the send buffer data to write to the serial */
+            void appendSendBuffer(std::vector<unsigned char>);
+            /*! returns a valid packet to write to the serial */
+            std::vector<unsigned char> readSendBuffer();
+            /*! returns the checksum for a valid packet */
+            unsigned char checksum(const std::vector<unsigned char>);
+        private:
+            /*! is it verbose mode */
+            bool verbose;
+            /*! the receive buffer */
+            std::deque<std::vector<unsigned char>> buffer_in;
+            /*! the send buffer */
+            std::deque<std::vector<unsigned char>> buffer_out;
+        };
+    } // namespace buffer
+} // namespace serial
 
-} // namespace
 
-
-#endif // BUFFERPARSER_H
+#endif // AUTOTUXPROXY_BUFFERPARSER_H
