@@ -169,7 +169,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
             case LANE_FOLLOWING:{
 
                 if(!isStopLine) {
-                    speed = 1;
+                    speed = 2;
                 }
 
                 laneFollowing();
