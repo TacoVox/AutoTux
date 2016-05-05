@@ -184,7 +184,8 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                 if(ovt.getIsOverriding()) {
                     //cout << "DM: OVERTAKER is OVERRIDING" << endl;
                     vehicleControl = ovt.getOvtControl();
-                }
+    		    	vehicleControl.setSpeed(1);    
+				}
                     //... else follow lane-follower instructions...
                 else{
                     //cout <<"DM: LANE FOLLOWER Instructions" << endl;
