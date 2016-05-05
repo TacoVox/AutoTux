@@ -1,5 +1,5 @@
 
-#include "serial/BufferWrapper.h"
+#include "serial/SerialBuffer.h"
 #include <iostream>
 //#include <memory>
 #include <gtest/gtest.h>
@@ -14,7 +14,7 @@ namespace {
     class BufferWrapperTest : public ::testing::Test
     {
     public:
-        serial::buffer::BufferWrapper bw;
+        serial::SerialBuffer bw;
         vector<unsigned char> valid_data;
         vector<unsigned char> invalid_data;
         vector<unsigned char> test_vec;

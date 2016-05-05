@@ -4,16 +4,12 @@
 #include <iostream>
 #include <thread>
 #include <csignal>
-#include <serial/USBConnector_impl.h>
-#include "serial/BufferWrapper.h"
+#include <serial/SerialIOImpl.h>
 #include "proxy/Proxy.h"
-#include "serial/USBHandler.h"
+#include "serial/SerialHandler.h"
 
 using namespace std;
-using namespace serial::conninter;
-using namespace serial::connector;
-using namespace serial::handler;
-using namespace serial::buffer;
+using namespace serial;
 using namespace proxy::camera;
 
 
@@ -30,20 +26,20 @@ int32_t main(int32_t argc, char **argv) {
     bool is_verbose = verbose(argc, argv);
 
     // the buffer wrapper
-    shared_ptr<BufferWrapper> bw =
-            (shared_ptr<BufferWrapper>) new BufferWrapper(is_verbose);
+    shared_ptr<SerialBuffer> bw =
+            (shared_ptr<SerialBuffer>) new SerialBuffer(is_verbose);
 
     // the usb connector
-    shared_ptr<USBConnector> uc =
-            (shared_ptr<USBConnector>) new USBConnector_impl(bw, is_verbose);
+    shared_ptr<SerialIOInterface> uc =
+            (shared_ptr<SerialIOInterface>) new SerialIOImpl(bw, is_verbose);
 
     // the usb handler
-    shared_ptr<USBHandler> uh = (shared_ptr<USBHandler>) new USBHandler();
+    shared_ptr<SerialHandler> uh = (shared_ptr<SerialHandler>) new SerialHandler();
     uh->set_usb_connector(uc);
     uh->set_verbose(is_verbose);
 
     // thread for the handler
-    thread uhthread(&USBHandler::run, uh);
+    thread uhthread(&SerialHandler::run, uh);
     uhthread.detach();
 
     proxy::Proxy proxy(argc, argv, bw);

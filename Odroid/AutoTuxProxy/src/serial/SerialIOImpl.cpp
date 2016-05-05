@@ -7,13 +7,13 @@
 
 #include <iostream>
 #include <thread>
-#include "serial/USBConnector_impl.h"
+#include "serial/SerialIOImpl.h"
 
 using namespace std;
 
 
 /*! constructor */
-serial::connector::USBConnector_impl::USBConnector_impl() :
+serial::SerialIOImpl::SerialIOImpl() :
     verbose{false},
     bw{},
     ctx{},
@@ -24,8 +24,8 @@ serial::connector::USBConnector_impl::USBConnector_impl() :
 }
 
 
-serial::connector::USBConnector_impl::USBConnector_impl(
-        std::shared_ptr<serial::buffer::BufferWrapper> p_bw, bool a_ver) :
+serial::SerialIOImpl::SerialIOImpl(
+        std::shared_ptr<serial::SerialBuffer> p_bw, bool a_ver) :
     verbose{a_ver},
     bw{p_bw},
     ctx{},
@@ -37,7 +37,7 @@ serial::connector::USBConnector_impl::USBConnector_impl(
 
 
 /*! copy constructor */
-serial::connector::USBConnector_impl::USBConnector_impl(const serial::connector::USBConnector_impl &usb) :
+serial::SerialIOImpl::SerialIOImpl(const serial::SerialIOImpl &usb) :
     verbose(usb.verbose),
     bw(usb.bw),
     ctx(usb.ctx),
@@ -46,8 +46,8 @@ serial::connector::USBConnector_impl::USBConnector_impl(const serial::connector:
 
 
 /*! copy constructor */
-serial::connector::USBConnector_impl &
-serial::connector::USBConnector_impl::operator=(const serial::connector::USBConnector_impl &usb)
+serial::SerialIOImpl &
+serial::SerialIOImpl::operator=(const serial::SerialIOImpl &usb)
 {
     this->verbose = usb.verbose;
     this->bw = usb.bw;
@@ -58,7 +58,7 @@ serial::connector::USBConnector_impl::operator=(const serial::connector::USBConn
 
 
 /*! destructor */
-serial::connector::USBConnector_impl::~USBConnector_impl()
+serial::SerialIOImpl::~SerialIOImpl()
 {
     cout << "destroying usb connector... ";
     // release all resources here
@@ -70,25 +70,25 @@ serial::connector::USBConnector_impl::~USBConnector_impl()
 }
 
 
-serial::conninter::USBConnector::~USBConnector() {}
+serial::SerialIOInterface::~SerialIOInterface() {}
 
 
 /*! sets the buffer wrapper for this connector */
-void serial::connector::USBConnector_impl::set_buffer_wrapper(std::shared_ptr<serial::buffer::BufferWrapper> p_bw)
+void serial::SerialIOImpl::set_buffer_wrapper(std::shared_ptr<serial::SerialBuffer> p_bw)
 {
     bw = p_bw;
 }
 
 
 /*! sets verbose */
-void serial::connector::USBConnector_impl::set_verbose(bool a_ver)
+void serial::SerialIOImpl::set_verbose(bool a_ver)
 {
     verbose = a_ver;
 }
 
 
 /*! initializes libusb */
-bool serial::connector::USBConnector_impl::init_libusb()
+bool serial::SerialIOImpl::init_libusb()
 {
     cout << "initializing libusb... ";
     int res = libusb_init(&ctx);
@@ -102,7 +102,7 @@ bool serial::connector::USBConnector_impl::init_libusb()
 
 
 /*! gets a list of the devices and opens the one we need */
-bool serial::connector::USBConnector_impl::open_device()
+bool serial::SerialIOImpl::open_device()
 {
     // to return
     bool result{false};
@@ -147,7 +147,7 @@ bool serial::connector::USBConnector_impl::open_device()
 
 
 /*! claims the conninter of the USB for I/O operations */
-bool serial::connector::USBConnector_impl::claim_interface()
+bool serial::SerialIOImpl::claim_interface()
 {
     // to return
     bool result{false};
@@ -179,7 +179,7 @@ bool serial::connector::USBConnector_impl::claim_interface()
 
 
 /*! connects to usb */
-bool serial::connector::USBConnector_impl::connect()
+bool serial::SerialIOImpl::connect()
 {
     cout << "usb connecting..." << endl;
     if (!init_libusb()) {
@@ -200,7 +200,7 @@ bool serial::connector::USBConnector_impl::connect()
 
 
 /*! reads from the usb stream */
-int serial::connector::USBConnector_impl::read()
+int serial::SerialIOImpl::read()
 {
     // allocate memory for use when reading from the usb
     unsigned char *data = new unsigned char[READ_LEN];
@@ -228,7 +228,7 @@ int serial::connector::USBConnector_impl::read()
 
 
 /*! writes to the usb stream */
-int serial::connector::USBConnector_impl::write()
+int serial::SerialIOImpl::write()
 {
     // get data from the send buffer
     vector<unsigned char> vec = bw->readSendBuffer();
@@ -259,7 +259,7 @@ int serial::connector::USBConnector_impl::write()
 
 
 /*! disconnects and closes the usb stream */
-bool serial::connector::USBConnector_impl::disconnect()
+bool serial::SerialIOImpl::disconnect()
 {
     cout << "disconnecting from usb stream... ";
     // release resources here

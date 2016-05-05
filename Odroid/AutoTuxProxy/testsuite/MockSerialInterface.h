@@ -4,10 +4,10 @@
  * @author Ivo
  */
 
-#include "serial/USBConnector.h"
+#include "serial/SerialIOInterface.h"
 #include <gmock/gmock.h>
 
-class MockUSBConnector : public serial::conninter::USBConnector
+class MockSerialInterface : public serial::SerialIOInterface
 {
 public:
     MOCK_METHOD0(connect, bool());

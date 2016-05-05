@@ -1,8 +1,8 @@
 
 
 #include <gtest/gtest.h>
-#include "serial/USBHandler.h"
-#include "MockUSBConnector.h"
+#include "serial/SerialHandler.h"
+#include "MockSerialInterface.h"
 #include <thread>
 
 
@@ -19,8 +19,8 @@ using ::testing::Invoke;
 TEST(USBHandlerTest, AssertRunningIsFalseAtBeginning)
 {
     // create a shared pointer, this is what we expect in the usb handler
-    shared_ptr<MockUSBConnector> pmock_uc = (shared_ptr<MockUSBConnector>) new MockUSBConnector();
-    serial::handler::USBHandler uh;
+    shared_ptr<MockSerialInterface> pmock_uc = (shared_ptr<MockSerialInterface>) new MockSerialInterface();
+    serial::SerialHandler uh;
 
     uh.set_usb_connector(pmock_uc);
     ASSERT_EQ(false, uh.get_running());
@@ -32,8 +32,8 @@ TEST(USBHandlerTest, AssertRunningIsFalseAtBeginning)
 TEST(USBHandlerTest, AssertRunningIsFalseAt)
 {
     // create a shared pointer, this is what we expect in the usb handler
-    shared_ptr<MockUSBConnector> pmock_uc = (shared_ptr<MockUSBConnector>) new MockUSBConnector();
-    serial::handler::USBHandler uh;
+    shared_ptr<MockSerialInterface> pmock_uc = (shared_ptr<MockSerialInterface>) new MockSerialInterface();
+    serial::SerialHandler uh;
 
     EXPECT_CALL(*pmock_uc, connect())
             .WillRepeatedly(Return(true));

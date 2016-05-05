@@ -10,7 +10,7 @@
 #include <iomanip>
 #include <mutex>
 #include <algorithm>
-#include "serial/BufferWrapper.h"
+#include "serial/SerialHandler.h"
 #include "containerfactory/SBDContainer.h"
 
 using namespace std;
@@ -25,7 +25,7 @@ std::mutex rsm;
 std::mutex rrm;
 
 /*! constructor */
-serial::buffer::BufferWrapper::BufferWrapper(bool a_ver) :
+serial::SerialBuffer::SerialBuffer(bool a_ver) :
     verbose{a_ver},
     buffer_in{},
     buffer_out{}
@@ -36,7 +36,7 @@ serial::buffer::BufferWrapper::BufferWrapper(bool a_ver) :
 
 
 /*! destructor */
-serial::buffer::BufferWrapper::~BufferWrapper()
+serial::SerialBuffer::~SerialBuffer()
 {
     cout << "destroying buffer wrapper... ";
     cout << "[OK]" << endl;
@@ -44,7 +44,7 @@ serial::buffer::BufferWrapper::~BufferWrapper()
 
 
 /*! appends a correct packet to the receive buffer */
-void serial::buffer::BufferWrapper::appendReceiveBuffer(vector<unsigned char> data)
+void serial::SerialBuffer::appendReceiveBuffer(vector<unsigned char> data)
 {
     // lock mutex
     arb.lock();
@@ -110,7 +110,7 @@ void serial::buffer::BufferWrapper::appendReceiveBuffer(vector<unsigned char> da
 
 
 /*! returns the most recent valid packet from the read buffer */
-vector<unsigned char> serial::buffer::BufferWrapper::readReceiveBuffer()
+vector<unsigned char> serial::SerialBuffer::readReceiveBuffer()
 {
     rrm.lock();
     // check for size, i.e. not empty
@@ -132,7 +132,7 @@ vector<unsigned char> serial::buffer::BufferWrapper::readReceiveBuffer()
 
 
 /*! appends a correct packet to the send buffer */
-void serial::buffer::BufferWrapper::appendSendBuffer(vector<unsigned char> vec)
+void serial::SerialBuffer::appendSendBuffer(vector<unsigned char> vec)
 {
     // lock mutex
     asb.lock();
@@ -143,7 +143,7 @@ void serial::buffer::BufferWrapper::appendSendBuffer(vector<unsigned char> vec)
 
 
 /*! returns the most recent valid packet from the send buffer */
-vector<unsigned char> serial::buffer::BufferWrapper::readSendBuffer()
+vector<unsigned char> serial::SerialBuffer::readSendBuffer()
 {
     rsm.lock();
     // check for size, i.e. not empty
@@ -165,7 +165,7 @@ vector<unsigned char> serial::buffer::BufferWrapper::readSendBuffer()
 
 
 /*! calculates and returns the checksum for a valid packet */
-unsigned char serial::buffer::BufferWrapper::checksum(const std::vector<unsigned char> pkt)
+unsigned char serial::SerialBuffer::checksum(const std::vector<unsigned char> pkt)
 {
     unsigned char chksum = 0;
     if (pkt.size() == 0) return chksum;
