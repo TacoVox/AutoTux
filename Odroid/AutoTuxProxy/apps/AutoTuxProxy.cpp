@@ -26,23 +26,24 @@ int32_t main(int32_t argc, char **argv) {
     bool is_verbose = verbose(argc, argv);
 
     // the buffer wrapper
-    shared_ptr<SerialBuffer> bw =
+    shared_ptr<SerialBuffer> sb =
             (shared_ptr<SerialBuffer>) new SerialBuffer(is_verbose);
 
     // the usb connector
-    shared_ptr<SerialIOInterface> uc =
-            (shared_ptr<SerialIOInterface>) new SerialIOImpl(bw, is_verbose);
+    shared_ptr<SerialIOInterface> sio =
+            (shared_ptr<SerialIOInterface>) new SerialIOImpl(sb, is_verbose);
 
     // the usb handler
-    shared_ptr<SerialHandler> uh = (shared_ptr<SerialHandler>) new SerialHandler();
-    uh->set_usb_connector(uc);
-    uh->set_verbose(is_verbose);
+    shared_ptr<SerialHandler> sh = (shared_ptr<SerialHandler>) new SerialHandler();
+    sh->set_usb_connector(sio);
+    sh->set_verbose(is_verbose);
 
     // thread for the handler
-    thread uhthread(&SerialHandler::run, uh);
+    thread uhthread(&SerialHandler::run, sh);
     uhthread.detach();
+    //sh->stop();
 
-    proxy::Proxy proxy(argc, argv, bw);
+    proxy::Proxy proxy(argc, argv, sb);
     proxy.runModule();
 
     return 0;
