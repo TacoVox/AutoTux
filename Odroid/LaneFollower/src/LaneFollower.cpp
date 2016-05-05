@@ -24,6 +24,8 @@ namespace lane {
         // Do we want this in the configuration file?
         const bool SIMMODE = false;
 
+		TimeStamp startTime, endTime;
+
         TimeStamp configContainerTimeStamp = TimeStamp();
 
         LaneFollower::LaneFollower(const int32_t &argc, char **argv) :
@@ -367,14 +369,15 @@ namespace lane {
          * Function that prints debug output every second instead of every iteration.
          */
         void LaneFollower::printDebug() {
-            if(printCounter == 30) {
+            if(printCounter == 25) {
 
                 // Print values sent through to the DM
                 cout << "STOPLINE: " << m_laneRecommendation.getDistance_to_line() << endl;
                 cout << "DESIRED STEERING: " << m_laneRecommendation.getAngle() << endl;
                 cout << "QUALITY: " << m_laneRecommendation.getQuality() << endl;
                 cout << "IN LEFT LANE: " << m_overtaking.getLeftlane() << endl;
-                cout << "-----------------------------------" << endl;
+           		cout << "TIME IN BODY: " << (endTime - startTime) << endl;
+			   	cout << "-----------------------------------" << endl;
 
                 // Reset counter
                 printCounter = 0;
@@ -391,7 +394,8 @@ namespace lane {
 
             // ?
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() == ModuleStateMessage::RUNNING) {
-                bool has_next_frame = false;
+                startTime = getTimeStamp();
+				bool has_next_frame = false;
 
                 Container image_container = getKeyValueDataStore().get(SharedImage::ID());
                 Container config_container = getKeyValueDataStore().get(LaneFollowerMSG::ID());
@@ -429,13 +433,12 @@ namespace lane {
                     double detection = laneDetection();
                     laneFollowing(detection);
                 }
-
-                printDebug();
-
                 Container laneRecommendationContainer(m_laneRecommendation);
                 Container processedImageContainer(m_sharedProcessedImage);
                 getConference().send(processedImageContainer);
                 getConference().send(laneRecommendationContainer);
+				endTime = getTimeStamp();
+                printDebug();
             }
             return ModuleExitCodeMessage::OKAY;
         }
