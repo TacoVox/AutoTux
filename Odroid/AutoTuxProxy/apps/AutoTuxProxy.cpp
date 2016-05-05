@@ -31,11 +31,12 @@ int32_t main(int32_t argc, char **argv) {
 
     // the usb connector
     shared_ptr<SerialIOInterface> sio =
-            (shared_ptr<SerialIOInterface>) new SerialIOImpl(sb, is_verbose);
+            (shared_ptr<SerialIOInterface>) new SerialIOImpl();
 
     // the usb handler
     shared_ptr<SerialHandler> sh = (shared_ptr<SerialHandler>) new SerialHandler();
-    sh->set_usb_connector(sio);
+    sh->set_serialio(sio);
+    sh->set_buffer(sb);
     sh->set_verbose(is_verbose);
 
     // thread for the handler

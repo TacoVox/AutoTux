@@ -26,8 +26,10 @@ namespace serial
         /*! stops the handler, sets the loop control variable to false */
         void stop();
         /*! sets the usb connector for this handler */
-        void set_usb_connector(std::shared_ptr<serial::SerialIOInterface>);
-        //void set_usb_connector(serial::conninter::SerialIOInterface*);
+        void set_serialio(std::shared_ptr<serial::SerialIOInterface>);
+        /*! sets the usb connector for this handler */
+        void set_buffer(std::shared_ptr<serial::SerialBuffer>);
+        //void set_serialio(serial::conninter::SerialIOInterface*);
         /*! sets verbose */
         void set_verbose(bool);
         /*! returns running state */
@@ -42,9 +44,10 @@ namespace serial
         bool verbose;
         /*! loop control */
         volatile bool running;
-        /*! the usb connector */
-        std::shared_ptr<serial::SerialIOInterface> pserial;
-        //serial::conninter::SerialIOInterface *uc;
+        /*! the serial io */
+        std::shared_ptr<serial::SerialIOInterface> pserio;
+        /*! the serial buffer */
+        std::shared_ptr<serial::SerialBuffer> pserbuf;
     };
 } // namespace serial
 

@@ -11,6 +11,7 @@
 #include <iostream>
 #include <cstring>
 #include <libusb-1.0/libusb.h>
+#include <serial/SerialIOImpl.h>
 #include "serial/SerialHandler.h"
 
 using namespace std;
@@ -22,7 +23,8 @@ std::mutex m_stop;
 serial::SerialHandler::SerialHandler() :
     verbose{false},
     running{false},
-    pserial{}
+    pserio{},
+    pserbuf{}
 {
     cout << "creating usb handler... ";
     cout << "[OK]" << endl;
@@ -42,27 +44,39 @@ void serial::SerialHandler::run()
 {
     // call connect until true
     while (1) {
-        if (pserial->connect()) {
-            //running = true;
+        if (pserio->connect()) {
+            running = true;
             break;
         }
     }
 
     // main loop
     while (running) {
+        cout << "serial handler running" << endl;
         m_stop.lock();
         // read from usb
-        int res1 = pserial->read();
+        int read_bytes;
+        unsigned char data[READ_LEN];
+        //std::array<unsigned char, 50> arr;
+        int res1 = pserio->read(data, &read_bytes);
         if (verbose) {
             cout << "result from read: " << res1 << endl;
         }
         // if not successful read, check if we
         // need to reconnect
-        if (res1 != 0) {
+        if (res1 == 0) {
+            // the vector holding the data from the read
+            vector<unsigned char> vec(data, data + read_bytes);
+            // append to the receive buffer
+            pserbuf->appendReceiveBuffer(vec);
+        }
+        else {
             if (is_reconnect(res1)) reconnect();
         }
+        //delete [] data;
         // write it to usb
-        int res2 = pserial->write();
+        vector<unsigned char> vec = pserbuf->readSendBuffer();
+        int res2 = pserio->write(vec);
         if (verbose) {
             cout << "result from write: " << res2 << endl;
         }
@@ -89,9 +103,18 @@ void serial::SerialHandler::stop()
 
 
 /*! sets the usb connector for this handler */
-void serial::SerialHandler::set_usb_connector(shared_ptr<serial::SerialIOInterface> p)
+void serial::SerialHandler::set_serialio(
+        shared_ptr<serial::SerialIOInterface> p)
 {
-    pserial = p;
+    pserio = p;
+}
+
+
+/*! sets the usb connector for this handler */
+void serial::SerialHandler::set_buffer(
+        shared_ptr<serial::SerialBuffer> p)
+{
+    pserbuf = p;
 }
 
 
@@ -112,9 +135,9 @@ bool serial::SerialHandler::get_running()
 void serial::SerialHandler::reconnect()
 {
     cout << "reconnecting..." << endl; 
-    pserial->disconnect();
+    pserio->disconnect();
     while (1) {       
-        if (pserial->connect()) break;
+        if (pserio->connect()) break;
         this_thread::sleep_for(chrono::milliseconds(500));
     }
 }

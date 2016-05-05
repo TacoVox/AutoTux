@@ -31,7 +31,7 @@ namespace serial
         /*! constructor */
         SerialIOImpl();
         /*! constructor */
-        SerialIOImpl(std::shared_ptr<serial::SerialBuffer>, bool);
+        SerialIOImpl(std::shared_ptr<serial::SerialBuffer>);
         /*! destructor */
         ~SerialIOImpl();
         /*! copy constructor */
@@ -43,13 +43,9 @@ namespace serial
         /*! disconnects and closes the usb stream */
         bool disconnect() override;
         /*! reads from the usb stream */
-        int read() override;
+        int read(unsigned char *, int *) override;
         /*! writes to the usb stream */
-        int write() override;
-        /*! sets the buffer wrapper for this connector */
-        void set_buffer_wrapper(std::shared_ptr<serial::SerialBuffer>);
-        /*! sets verbose */
-        void set_verbose(bool);
+        int write(std::vector<unsigned char>) override;
     private:
         /*! initializes libusb */
         bool init_libusb();
@@ -58,10 +54,6 @@ namespace serial
         /*! claims the interface of the USB for I/O operations */
         bool claim_interface();
     private:
-        /*! is it verbose mode */
-        bool verbose;
-        /*! the buffer wrapper */
-        std::shared_ptr<serial::SerialBuffer> bw;
         /*! libusb context */
         struct libusb_context *ctx;
         /*! libusb device handle */
