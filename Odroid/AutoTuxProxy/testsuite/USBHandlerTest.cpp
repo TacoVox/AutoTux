@@ -22,8 +22,8 @@ TEST(USBHandlerTest, AssertRunningIsFalseAtBeginning)
     shared_ptr<MockSerialInterface> pmock_uc = (shared_ptr<MockSerialInterface>) new MockSerialInterface();
     serial::SerialHandler uh;
 
-    uh.set_usb_connector(pmock_uc);
-    ASSERT_EQ(false, uh.get_running());
+    uh.set_serialio(pmock_uc);
+    ASSERT_EQ(true, uh.get_running());
 }
 
 /**
@@ -35,10 +35,19 @@ TEST(USBHandlerTest, AssertRunningIsFalseAt)
     shared_ptr<MockSerialInterface> pmock_uc = (shared_ptr<MockSerialInterface>) new MockSerialInterface();
     serial::SerialHandler uh;
 
+    //int read_bytes;
+    //unsigned char data[128];
+    //vector<unsigned char> vec = {};
+
     EXPECT_CALL(*pmock_uc, connect())
             .WillRepeatedly(Return(true));
-    uh.set_usb_connector(pmock_uc);
+    /*EXPECT_CALL(*pmock_uc, read(data, &read_bytes))
+            .WillRepeatedly(Return(0));
+    EXPECT_CALL(*pmock_uc, write(vec))
+            .WillRepeatedly(Return(0));*/
+    uh.set_serialio(pmock_uc);
     //uh.run();
+    //this_thread::sleep_for(chrono::seconds(5));
     uh.stop();
     ASSERT_EQ(false, uh.get_running());
 }

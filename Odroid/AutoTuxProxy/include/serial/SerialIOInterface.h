@@ -9,6 +9,8 @@
 #define AUTOTUXPROXY_USBCONNECTOR_H
 
 
+#include <vector>
+
 namespace serial
 {
     class SerialIOInterface
@@ -17,8 +19,8 @@ namespace serial
         virtual ~SerialIOInterface();
         virtual bool connect() = 0;
         virtual bool disconnect() = 0;
-        virtual int read() = 0;
-        virtual int write() = 0;
+        virtual int read(unsigned char *, int *) = 0;
+        virtual int write(std::vector<unsigned char>) = 0;
     };
 } // namespace serial
 
