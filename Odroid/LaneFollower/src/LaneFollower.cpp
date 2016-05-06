@@ -198,7 +198,7 @@ namespace lane {
             // Lane detection loop
             for(int32_t y = m_image_grey.rows - 8; y > m_image_grey.rows * .5; y -= 10) {
                 // Find red pixels
-                unsigned char pixelLeft, pixelRight;
+                uchar pixelLeft, pixelRight;
                 Point left, right;
 
                 left.y = y;
@@ -206,7 +206,7 @@ namespace lane {
 
                 // Find first red pixel to the left (left line)
                 for (int x = m_image_grey.cols / 2; x > 0; x--) {
-                    pixelLeft = m_image_grey.at<unsigned char>(Point(x, y));
+                    pixelLeft = m_image_grey.at<uchar>(Point(x, y));
                     if (pixelLeft == 120) {
                         left.x = x;
                         break;
@@ -218,7 +218,7 @@ namespace lane {
 
                 // Find first red pixel to the right (right line)
                 for (int x = m_image_grey.cols / 2; x < m_image_grey.cols; x++) {
-                    pixelRight = m_image_grey.at<unsigned char>(Point(x, y));
+                    pixelRight = m_image_grey.at<uchar>(Point(x, y));
                     if (pixelRight > 120) {
                         right.x = x;
                         break;
@@ -277,7 +277,7 @@ namespace lane {
                 }
             } // for loop
 
-            unsigned char pixelFrontLeft, pixelFrontRight;
+            uchar pixelFrontLeft, pixelFrontRight;
             Point stop_left, stop_right;
 
             int left_dist = 0;
@@ -287,7 +287,7 @@ namespace lane {
 
             // Find first red pixel in front (stopline)
             for(int i = m_controlScanline; i > m_stopScanline; i--) {
-                pixelFrontLeft = m_image_grey.at<unsigned char>(Point(stop_left.x, i));
+                pixelFrontLeft = m_image_grey.at<uchar>(Point(stop_left.x, i));
                 if(pixelFrontLeft > 120) {
                     stop_left.y = i;
                     left_dist = m_controlScanline - stop_left.y;
@@ -302,7 +302,7 @@ namespace lane {
 
             // Find first red pixel in front (stopline)
             for(int i = m_controlScanline; i > m_stopScanline; i--) {
-                pixelFrontRight = m_image_grey.at<unsigned char>(Point(stop_right.x, i));
+                pixelFrontRight = m_image_grey.at<uchar>(Point(stop_right.x, i));
                 if(pixelFrontRight > 120) {
                     stop_right.y = i;
                     right_dist = m_controlScanline - stop_right.y;
