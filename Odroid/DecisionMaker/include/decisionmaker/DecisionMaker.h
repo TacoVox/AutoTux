@@ -28,6 +28,10 @@ namespace decisionmaker{
         //virtual void nextContainer(odcore::data::Container &c);
 
     private:
+
+        enum STATE {LANE_FOLLOWING, DRIVING, PARKING, RESUME};
+        STATE state;
+
         overtaker::Overtaker ovt;
         parker::Parker parker;
 
