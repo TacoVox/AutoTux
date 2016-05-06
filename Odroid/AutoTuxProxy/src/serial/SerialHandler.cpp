@@ -22,7 +22,7 @@ std::mutex m_stop;
 /*! constructor */
 serial::SerialHandler::SerialHandler() :
     verbose{false},
-    running{false},
+    running{true},
     pserio{},
     pserbuf{}
 {
@@ -43,11 +43,8 @@ serial::SerialHandler::~SerialHandler()
 void serial::SerialHandler::run()
 {
     // call connect until true
-    while (1) {
-        if (pserio->connect()) {
-            running = true;
-            break;
-        }
+    while (!pserio->connect()) {
+        this_thread::sleep_for(chrono::seconds(2));
     }
 
     // main loop
@@ -61,6 +58,7 @@ void serial::SerialHandler::run()
         int res1 = pserio->read(data, &read_bytes);
         if (verbose) {
             cout << "result from read: " << res1 << endl;
+            cout << "bytes read: " << read_bytes << endl;
         }
         // if not successful read, check if we
         // need to reconnect
@@ -138,7 +136,7 @@ void serial::SerialHandler::reconnect()
     pserio->disconnect();
     while (1) {       
         if (pserio->connect()) break;
-        this_thread::sleep_for(chrono::milliseconds(500));
+        this_thread::sleep_for(chrono::seconds(2));
     }
 }
 

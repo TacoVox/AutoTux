@@ -47,8 +47,6 @@ namespace serial
         /*! writes to the usb stream */
         int write(std::vector<unsigned char>) override;
     private:
-        /*! initializes libusb */
-        bool init_libusb();
         /*! gets a list of the devices and opens the one we need */
         bool open_device();
         /*! claims the interface of the USB for I/O operations */

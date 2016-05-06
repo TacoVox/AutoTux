@@ -18,6 +18,7 @@ serial::SerialIOImpl::SerialIOImpl() :
     usb_dev{}
 {
     cout << "creating usb connector... ";
+    libusb_init(&ctx);
     cout << "[OK]" << endl;
 }
 
@@ -52,21 +53,10 @@ serial::SerialIOImpl::~SerialIOImpl()
 }
 
 
+/**
+ * Required by the interface.
+ */
 serial::SerialIOInterface::~SerialIOInterface() {}
-
-
-/*! initializes libusb */
-bool serial::SerialIOImpl::init_libusb()
-{
-    cout << "initializing libusb... ";
-    int res = libusb_init(&ctx);
-    if (res < 0) {
-        cout << "[FAIL] error code: " << res << endl;
-        return false;
-    }
-    cout << "[OK]" << endl;
-    return true;
-}
 
 
 /*! gets a list of the devices and opens the one we need */
@@ -137,14 +127,13 @@ bool serial::SerialIOImpl::claim_interface()
 bool serial::SerialIOImpl::connect()
 {
     cout << "usb connecting..." << endl;
-    if (init_libusb()) {
-        if (open_device()) {
-            if (claim_interface()) {
-                cout << "[OK]" << endl;
-                return true;
-            }
+    if (open_device()) {
+        if (claim_interface()) {
+            cout << "[OK]" << endl;
+            return true;
         }
     }
+
     cout << "[FAIL]" << endl;
     return false;
 }
@@ -213,7 +202,6 @@ bool serial::SerialIOImpl::disconnect()
     libusb_release_interface(usb_dev, 1);
     libusb_attach_kernel_driver(usb_dev, 1);
     libusb_close(usb_dev);
-    libusb_exit(ctx); 
     cout << "[OK]" << endl;
 
     return true;
