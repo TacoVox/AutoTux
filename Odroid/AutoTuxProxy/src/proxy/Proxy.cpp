@@ -148,8 +148,10 @@ namespace proxy {
             speed = 0; // backward
         }
 
-        //For debbug set the flashing light right
-        //vehicleControl.setFlashingLightsLeft(true);
+        //For debbug set the lights
+        vehicleControl.setBrakeLights(true);
+        lightSystem.setReverseLight(true);
+        vehicleControl.setFlashingLightsLeft(true);
         vehicleControl.setFlashingLightsRight(true);
 
         unsigned char lights = (unsigned char)vehicleControl.getBrakeLights();
