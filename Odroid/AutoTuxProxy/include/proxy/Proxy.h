@@ -1,7 +1,7 @@
 #ifndef SERIALHANDLER_H
 #define SERIALHANDLER_H
 
-#define MATH_PI  3.1415926535897
+#define MATH_PI  3.14159265358974
 
 #include <cstdint>
 #include <memory>
@@ -10,7 +10,7 @@
 #include <opendavinci/odtools/recorder/Recorder.h>
 
 #include "camera/Camera.h"
-#include "serial/BufferWrapper.h"
+#include "serial/SerialBuffer.h"
 
 namespace proxy {
     using namespace std;
@@ -30,16 +30,16 @@ namespace proxy {
         unsigned char checksum(std::vector<unsigned char>);
         //Private fields
         bool interrupted;
-        shared_ptr<serial::BufferWrapper> bufferWrapper;
+        shared_ptr<serial::SerialBuffer> bufferWrapper;
         unique_ptr<odtools::recorder::Recorder> m_recorder;
         unique_ptr<proxy::camera::Camera> m_camera;
 
     public:
-        Proxy(int32_t &argc, char **argv, shared_ptr<serial::BufferWrapper>);
+        Proxy(int32_t &argc, char **argv, shared_ptr<serial::SerialBuffer>);
         virtual ~Proxy();
         odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
         void interrupt(void);
-        void setBufferWrapper(shared_ptr<serial::BufferWrapper>);
+        void setBufferWrapper(shared_ptr<serial::SerialBuffer>);
     };
 }
 #endif // SERIALHANDLER_H

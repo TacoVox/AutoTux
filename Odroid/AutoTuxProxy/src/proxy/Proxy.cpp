@@ -29,7 +29,7 @@ namespace proxy {
             m_camera{}
     { }
 
-    Proxy::Proxy(int32_t &argc, char **argv, shared_ptr<serial::BufferWrapper> bw) :
+    Proxy::Proxy(int32_t &argc, char **argv, shared_ptr<serial::SerialBuffer> bw) :
             TimeTriggeredConferenceClientModule(argc, argv, "Proxy"),
             interrupted{false},
             bufferWrapper{bw},
@@ -148,6 +148,10 @@ namespace proxy {
             speed = 0; // backward
         }
 
+        //For debbug set the flashing light right
+        //vehicleControl.setFlashingLightsLeft(true);
+        vehicleControl.setFlashingLightsRight(true);
+
         unsigned char lights = (unsigned char)vehicleControl.getBrakeLights();
         lights = lights | (unsigned char)(lightSystem.getReverseLight() << 1);
         lights = lights | (unsigned char)(vehicleControl.getFlashingLightsLeft() << 2);
@@ -159,6 +163,13 @@ namespace proxy {
         //Some fancy debug output
         //cout << "Speed: " << speed << " Angle: " << angle << endl;
 
+        if(Proxy::isVerbose() && Proxy::getVerbosity() == 1) {
+            vector<unsigned char> debugvec = {'4', ':', speed, angle, lights, chsum, ','};
+            for(auto it = debugvec.begin(); it < debugvec.end(); it++) {
+                cout << *it;
+            }
+            cout << endl;
+        }
         return {'4', ':', speed, angle, lights, chsum, ','};
     }
 
@@ -175,7 +186,7 @@ namespace proxy {
         interrupted = true;
     }
 
-    void Proxy::setBufferWrapper(shared_ptr<serial::BufferWrapper> bw) {
+    void Proxy::setBufferWrapper(shared_ptr<serial::SerialBuffer> bw) {
         this->bufferWrapper = bw;
     }
 }
