@@ -4,52 +4,58 @@
 #include <iostream>
 #include <thread>
 #include <csignal>
-#include "serial/BufferWrapper.h"
+#include <serial/SerialIOImpl.h>
 #include "proxy/Proxy.h"
-#include "serial/USBHandler.h"
+#include "serial/SerialHandler.h"
 
 using namespace std;
 using namespace serial;
 using namespace proxy::camera;
 
 
-static void handler(int);
+//static void handler(int);
 bool verbose(int, char**);
 
 int32_t main(int32_t argc, char **argv) {
 
-    signal(SIGINT, handler);
+    //signal(SIGINT, handler);
 
     cout << "Starting up AutoTuxProxy..." << endl;
 
+    // get verbose level
     bool is_verbose = verbose(argc, argv);
 
-    shared_ptr<BufferWrapper> bw = (shared_ptr<BufferWrapper>) new BufferWrapper();
-    bw->set_verbose(is_verbose);
+    // the buffer wrapper
+    shared_ptr<SerialBuffer> sb =
+            (shared_ptr<SerialBuffer>) new SerialBuffer(is_verbose);
 
-    shared_ptr<USBConnector> uc = (shared_ptr<USBConnector>) new USBConnector();
-    uc->set_buffer_wrapper(bw);
-    uc->set_verbose(is_verbose);
+    // the usb connector
+    shared_ptr<SerialIOInterface> sio =
+            (shared_ptr<SerialIOInterface>) new SerialIOImpl();
 
-    shared_ptr<USBHandler> uh = (shared_ptr<USBHandler>) new USBHandler();
-    uh->set_usb_connector(uc);
-    uh->set_verbose(is_verbose);
+    // the usb handler
+    shared_ptr<SerialHandler> sh = (shared_ptr<SerialHandler>) new SerialHandler();
+    sh->set_serialio(sio);
+    sh->set_buffer(sb);
+    sh->set_verbose(is_verbose);
 
-    thread uhthread(&USBHandler::run, uh);
+    // thread for the handler
+    thread uhthread(&SerialHandler::run, sh);
     uhthread.detach();
+    //sh->stop();
 
-    proxy::Proxy proxy(argc, argv, bw);
+    proxy::Proxy proxy(argc, argv, sb);
     proxy.runModule();
 
     return 0;
 }
 
-
+/*
 static void handler(int signum)
 {
     exit(signum);
 }
-
+*/
 
 bool verbose(int argc, char *argv[])
 {
