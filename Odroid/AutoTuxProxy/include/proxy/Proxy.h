@@ -1,7 +1,7 @@
 #ifndef SERIALHANDLER_H
 #define SERIALHANDLER_H
 
-#define MATH_PI  3.1415926535897
+#define MATH_PI  3.14159265358974
 
 #include <cstdint>
 #include <memory>
