@@ -19,7 +19,7 @@ static int averageWithCircBuffer(int latestValue, US_SENSOR sensor);
 #define GAIN_REG 0x01		//!< The gain register of the US sensors (write)
 #define LIGHT_REG 0x01		//!< The light register of the US sensors (read)
 #define RANGE_REG 0x02		//!< The range egister of the US sensors (read)
-#define GAIN_SETTING 0x16	//!< Sets maximum analog gain to 265
+#define GAIN_SETTING 0x12	//!< Sets maximum analog gain
 #define START_RANGING 0x51	//!< The range command of the US sensors
 
 
@@ -57,7 +57,7 @@ static unsigned char lightSensorReading;
 /*
  * Circular buffer length
  */
-#define US_CIRCULAR_BUFFER_LENGTH 5
+#define US_CIRCULAR_BUFFER_LENGTH 4
 
 /**
  * Circular buffer, new values will be averaged with the others
@@ -130,7 +130,7 @@ void hardwareUSIterationStart() {
 void hardwareUSIterationEnd() {
 	msg_t status = MSG_OK;
 	systime_t timeout = MS2ST(10);
-	static int zero_occurences = 0;
+	static int zeroOccurences = 0;
 
 	i2cStart(US_I2C_DRIVER, &i2cConfig);
 	i2cAcquireBus(US_I2C_DRIVER);
@@ -146,15 +146,15 @@ void hardwareUSIterationEnd() {
 
 			// To smooth out occasional ranging errors,
 			// Only update the value to 0 if it has been so for three consecutive times
-			if (value == 0 && zero_occurences <= 2) {
-				zero_occurences++;
+			if (value == 0 && zeroOccurences <= 2) {
+				zeroOccurences++;
 			} else {
 				// Assign value.
 				usCm[currentSensor] = averageWithCircBuffer(value, currentSensor);
 
 			}
 			if (value > 0) {
-				zero_occurences = 0;
+				zeroOccurences = 0;
 			}
 
 		} else {
@@ -199,14 +199,14 @@ unsigned char hardwareUSGetLightValue(void) {
  * Averages the new value with the circular buffer and returns the result.
  */
 static int averageWithCircBuffer(int latestValue, US_SENSOR sensor) {
-	static int currentPosition = 0;
+	static int currentPosition[US_SENSORS] = {0};
 
 	// Add to next position in circular buffer
-	usCmCircBuffer[sensor][currentPosition] = latestValue;
-	if (currentPosition == US_CIRCULAR_BUFFER_LENGTH -1) {
-		currentPosition = 0;
+	usCmCircBuffer[sensor][currentPosition[sensor]] = latestValue;
+	if (currentPosition[sensor] == US_CIRCULAR_BUFFER_LENGTH -1) {
+		currentPosition[sensor] = 0;
 	} else {
-		currentPosition++;
+		currentPosition[sensor]++;
 	}
 
 	// Average
