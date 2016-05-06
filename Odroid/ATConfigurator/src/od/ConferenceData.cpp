@@ -99,3 +99,12 @@ void od::ConferenceData::setThresholdB(uint8 tb) { this->thresholdB = tb; }
 uint8 od::ConferenceData::getThresholdD() { return this->thresholdD; }
 
 void od::ConferenceData::setThresholdD(uint8 td) { this->thresholdD = td; }
+
+od::ConferenceData::STATE od::ConferenceData::getState(void) { return this->state; }
+
+void od::ConferenceData::setState(STATE s) { this->state = s; }
+
+
+
+
+

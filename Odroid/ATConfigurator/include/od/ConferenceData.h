@@ -12,8 +12,8 @@
 
 namespace od {
     class ConferenceData {
-        enum STATE {LANE_FOLLOWING, DRIVING, PARKING, RESUME};
     public:
+        enum STATE {LANE_FOLLOWING, DRIVING, PARKING, RESUME};
         static ConferenceData* instance(void);
         std::shared_ptr<odcore::data::Container> genLaneFollowerContainer(void);
         double getSpeed(void);
