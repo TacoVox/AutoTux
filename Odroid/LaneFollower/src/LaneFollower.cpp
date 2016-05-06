@@ -26,6 +26,7 @@ namespace lane {
 		
 		Mat m_image_grey; 
 		TimeStamp startTime, endTime;
+		int32_t realDistanceToStopline;
 
         TimeStamp configContainerTimeStamp = TimeStamp();
 
@@ -47,7 +48,7 @@ namespace lane {
                 m_eOld(0),
                 m_distance(190),
                 m_controlScanline(222),
-                m_stopScanline(10),
+                m_stopScanline(50),
                 m_threshold1(50),
                 m_threshold2(200),
                 P_GAIN(0.80),
@@ -206,7 +207,7 @@ namespace lane {
                 // Find first red pixel to the left (left line)
                 for (int x = m_image_grey.cols / 2; x > 0; x--) {
                     pixelLeft = m_image_grey.at<unsigned char>(Point(x, y));
-                    if (pixelLeft == 150) {
+                    if (pixelLeft == 120) {
                         left.x = x;
                         break;
                     }
@@ -218,7 +219,7 @@ namespace lane {
                 // Find first red pixel to the right (right line)
                 for (int x = m_image_grey.cols / 2; x < m_image_grey.cols; x++) {
                     pixelRight = m_image_grey.at<unsigned char>(Point(x, y));
-                    if (pixelRight > 150) {
+                    if (pixelRight > 120) {
                         right.x = x;
                         break;
                     }
@@ -287,7 +288,7 @@ namespace lane {
             // Find first red pixel in front (stopline)
             for(int i = m_controlScanline; i > m_stopScanline; i--) {
                 pixelFrontLeft = m_image_grey.at<unsigned char>(Point(stop_left.x, i));
-                if(pixelFrontLeft > 150) {
+                if(pixelFrontLeft > 120) {
                     stop_left.y = i;
                     left_dist = m_controlScanline - stop_left.y;
                     break;
@@ -302,7 +303,7 @@ namespace lane {
             // Find first red pixel in front (stopline)
             for(int i = m_controlScanline; i > m_stopScanline; i--) {
                 pixelFrontRight = m_image_grey.at<unsigned char>(Point(stop_right.x, i));
-                if(pixelFrontRight > 150) {
+                if(pixelFrontRight > 120) {
                     stop_right.y = i;
                     right_dist = m_controlScanline - stop_right.y;
                     break;
@@ -319,7 +320,7 @@ namespace lane {
                 }
             }
 
-            if((left_dist - right_dist > -10) && (left_dist - right_dist < 10)) {
+            if((left_dist - right_dist > -15) && (left_dist - right_dist < 15)) {
                 m_laneRecommendation.setDistance_to_line(left_dist);
             }
 
@@ -362,7 +363,8 @@ namespace lane {
             // Limit max steering angle based on car limits
             if (desiredSteering > 0.5) desiredSteering = 0.5;
             if (desiredSteering < -0.5) desiredSteering = -0.5;
-
+			
+			realDistanceToStopline = m_laneRecommendation.getDistance_to_line();
             if(m_laneRecommendation.getDistance_to_line() < 10 || m_laneRecommendation.getDistance_to_line() > 50)
                 // Set distance to line to -1 if it's too far away or too close
                 m_laneRecommendation.setDistance_to_line(-1);
@@ -378,7 +380,8 @@ namespace lane {
 
                 // Print values sent through to the DM
                 cout << "STOPLINE: " << m_laneRecommendation.getDistance_to_line() << endl;
-                cout << "DESIRED STEERING: " << m_laneRecommendation.getAngle() << endl;
+    			cout << "REAL STOPLINE: " << realDistanceToStopline << endl;
+				cout << "DESIRED STEERING: " << m_laneRecommendation.getAngle() << endl;
                 cout << "QUALITY: " << m_laneRecommendation.getQuality() << endl;
                 cout << "IN LEFT LANE: " << m_overtaking.getLeftlane() << endl;
            		cout << "TIME IN BODY: " << (endTime.toMicroseconds() - startTime.toMicroseconds()) << endl;
