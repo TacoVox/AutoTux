@@ -69,7 +69,7 @@ void Overtaker::obstacleDetection(SensorBoardData sensorData, VehicleData vehicl
             if(isRightLaneClear(sensorData)){
                 cout << "Transition to RIGHT-SWITCH" << endl;
                 traveledPath = vehicleData.getAbsTraveledPath();
-                //ovtControl.setFlashingLightsRight(true);
+                ovtControl.setFlashingLightsRight(true);
                 state = RIGHT_SWITCH;
             }
             break;
@@ -78,7 +78,7 @@ void Overtaker::obstacleDetection(SensorBoardData sensorData, VehicleData vehicl
             if(switchToRightLane(vehicleData, traveledPath, RIGHT_SWITCH_DIST)){
                 cout << "Transition to ADJUST-RIGHT-SWITCH" << endl;
                 traveledPath = vehicleData.getAbsTraveledPath();
-                //ovtControl.setFlashingLightsRight(false);
+                ovtControl.setFlashingLightsRight(false);
                 state = ADJUST_RIGHT_SWITCH;
             }
             break;
