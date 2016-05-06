@@ -9,8 +9,8 @@ od::ConferenceData* od::ConferenceData::_instance = 0;
 
 od::ConferenceData::ConferenceData() : speed(0.0), angle(90.0), us1(0.0),
                                        us2(0.0), ir1(0.0), ir2(0.0), ir3(0.0),
-                                       roadWidth(190), gainP(0.8), gainI(0.0),
-                                       gainD(0.0), thresholdB(200),
+                                       roadWidth(230), gainP(1.1), gainI(0.0),
+                                       gainD(0.1), thresholdB(200),
                                        thresholdD(50) { }
 od::ConferenceData::ConferenceData(const ConferenceData &) { }
 od::ConferenceData::~ConferenceData() { }
