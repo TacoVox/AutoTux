@@ -163,7 +163,7 @@ namespace proxy {
         //Some fancy debug output
         //cout << "Speed: " << speed << " Angle: " << angle << endl;
 
-        if(Proxy::isVerbose() && Proxy::getVerbosity() == 1) {
+        if(Proxy::getVerbosity() == 2) {
             vector<unsigned char> debugvec = {'4', ':', speed, angle, lights, chsum, ','};
             for(auto it = debugvec.begin(); it < debugvec.end(); it++) {
                 cout << *it;
