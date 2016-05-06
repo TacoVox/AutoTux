@@ -173,7 +173,7 @@ void Parker::inBetweenObjects(SensorBoardData sbd, VehicleData vd) {
     double backSensor = sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK);
 
     if (isAccurate == FREQUENCY) {
-        if((max(&frontSensor, &backSensor) - min(&frontSensor, &backSensor)) < SENSOR_DIFFERENCE_INBETWEEN) {
+        if((max(frontSensor, backSensor) - min(frontSensor, backSensor)) < SENSOR_DIFFERENCE_INBETWEEN) {
             controlTemp.setSpeed(0);
             controlTemp.setBrakeLights(true);
             carPosition = vd.getAbsTraveledPath();
