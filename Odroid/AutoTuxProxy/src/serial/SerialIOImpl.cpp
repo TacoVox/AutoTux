@@ -1,4 +1,4 @@
-/*!
+/**
  * Implementation of the USBConnector.h. Responsible for reading and
  * writing from/to the usb serial connection.
  *
@@ -7,49 +7,43 @@
 
 #include <iostream>
 #include <thread>
-#include <chrono>
-#include "serial/USBConnector.h"
+#include "serial/SerialIOImpl.h"
 
 using namespace std;
 
 
 /*! constructor */
-serial::USBConnector::USBConnector() :
-    verbose{false},
-    bw{},
+serial::SerialIOImpl::SerialIOImpl() :
     ctx{},
     usb_dev{}
 {
     cout << "creating usb connector... ";
+    libusb_init(&ctx);
     cout << "[OK]" << endl;
 }
 
 
 /*! copy constructor */
-serial::USBConnector::USBConnector(const serial::USBConnector &usb) :
-    verbose{usb.verbose},
-    bw{usb.bw},
-    ctx{usb.ctx},
-    usb_dev{usb.usb_dev}
+serial::SerialIOImpl::SerialIOImpl(const serial::SerialIOImpl &usb) :
+    ctx(usb.ctx),
+    usb_dev(usb.usb_dev)
 {}
 
 
 /*! copy constructor */
-serial::USBConnector &
-serial::USBConnector::operator=(const serial::USBConnector &usb)
+serial::SerialIOImpl &
+serial::SerialIOImpl::operator=(const serial::SerialIOImpl &usb)
 {
-    verbose = usb.verbose;
-    bw = usb.bw;
-    ctx = usb.ctx;
-    usb_dev = usb.usb_dev;
+    this->ctx = usb.ctx;
+    this->usb_dev = usb.usb_dev;
     return *this;
 }
 
 
 /*! destructor */
-serial::USBConnector::~USBConnector()
+serial::SerialIOImpl::~SerialIOImpl()
 {
-    cout << "destroying usb connector... ";
+    cout << "destroying serial io... ";
     // release all resources here
     libusb_release_interface(usb_dev, 1);
     libusb_attach_kernel_driver(usb_dev, 1);
@@ -59,36 +53,14 @@ serial::USBConnector::~USBConnector()
 }
 
 
-/*! sets the buffer wrapper for this connector */
-void serial::USBConnector::set_buffer_wrapper(std::shared_ptr<serial::BufferWrapper> p_bw)
-{
-    bw = p_bw;
-}
-
-
-/*! sets verbose */
-void serial::USBConnector::set_verbose(bool a_ver)
-{
-    verbose = a_ver;
-}
-
-
-/*! initializes libusb */
-bool serial::USBConnector::init_libusb()
-{
-    cout << "initializing libusb... ";
-    int res = libusb_init(&ctx);
-    if (res < 0) {
-        cout << "[FAIL] error code: " << res << endl;
-        return false;
-    }
-    cout << "[OK]" << endl;
-    return true;
-}
+/**
+ * Required by the interface.
+ */
+serial::SerialIOInterface::~SerialIOInterface() {}
 
 
 /*! gets a list of the devices and opens the one we need */
-bool serial::USBConnector::open_device()
+bool serial::SerialIOImpl::open_device()
 {
     // to return
     bool result{false};
@@ -96,13 +68,6 @@ bool serial::USBConnector::open_device()
     struct libusb_device **devs;
     // get available devices
     ssize_t dev_count = libusb_get_device_list(ctx, &devs);
-    cout << "finding devices... ";
-    if (dev_count < 0) {
-        cout << "[FAIL] error code: " << dev_count << endl;
-    }
-    else {
-        cout << "[OK] " << endl;
-    }
     cout << "opening device... ";
     // go through the devices list searching for the one we need
     for (ssize_t i = 0; i < dev_count; i++) {
@@ -132,25 +97,19 @@ bool serial::USBConnector::open_device()
 }
 
 
-/*! claims the interface of the USB for I/O operations */
-bool serial::USBConnector::claim_interface()
+/*! claims the conninter of the USB for I/O operations */
+bool serial::SerialIOImpl::claim_interface()
 {
     // to return
     bool result{false};
     // check if the kernel is active on the device and
     // the interface we want to operate on
-    int d = libusb_kernel_driver_active(usb_dev, 1);
-    if (d == 1) {
-        cout << "freeing interface... ";
+    if (libusb_kernel_driver_active(usb_dev, 1) == 1) {
         // detach kernel if active
         libusb_detach_kernel_driver(usb_dev, 1);
-        cout << "[OK]" << endl;
-    }
-    else if (d < 0) {
-        cout << "[FAIL] error code: " << d << endl;
     }
     cout << "claiming interface... ";
-    // claim the interface for the device, this will let us
+    // claim the conninter for the device, this will let us
     // send and receive data
     int r = libusb_claim_interface(usb_dev, 1);
     if (r == 0) {
@@ -165,59 +124,53 @@ bool serial::USBConnector::claim_interface()
 
 
 /*! connects to usb */
-bool serial::USBConnector::connect()
+bool serial::SerialIOImpl::connect()
 {
     cout << "usb connecting..." << endl;
-    if (!init_libusb()) {
-        cout << "[FAIL]" << endl;
-        return false;
+    if (open_device()) {
+        if (claim_interface()) {
+            cout << "[OK]" << endl;
+            return true;
+        }
     }
-    if (!open_device()) {
-        cout << "[FAIL]" << endl;
-        return false;
-    }
-    if (!claim_interface()) {
-        cout << "[FAIL]" << endl;
-        return false;
-    }
-    cout << "[OK]" << endl;
-    return true;
+
+    cout << "[FAIL]" << endl;
+    return false;
 }
 
 
 /*! reads from the usb stream */
-int serial::USBConnector::read()
+int serial::SerialIOImpl::read(unsigned char *data, int *transferred)
 {
     // allocate memory for use when reading from the usb
-    unsigned char *data = new unsigned char[READ_LEN];
+    //unsigned char *data = new unsigned char[READ_LEN];
     // actual bytes read
-    int transferred;
+    //int transferred;
     // pass to the transfer the usb device, the endpoint (read in),
     // the char array to store the data read, the size, an int for
     // the actual bytes read and the timeout for the operation
     int res = libusb_bulk_transfer(usb_dev, USB_ENDPOINT_IN,
-                                   data, READ_LEN, &transferred, 20);
-    if (verbose) {
-        cout << "actual bytes read: " << transferred << endl;
-    }
+                                   data, READ_LEN, transferred, 20);
+    /*
     if (res == 0) {
         // the vector holding the data from the read
         vector<unsigned char> vec(data, data + transferred);
         // append to the receive buffer
-        bw->appendReceiveBuffer(vec);
+        pserialbuf->appendReceiveBuffer(vec);
     }
+     */
     // delete the allocated memory
-    delete [] data;
+    //delete [] data;
     // return the result from the read
     return res;
 }
 
 
 /*! writes to the usb stream */
-int serial::USBConnector::write()
+int serial::SerialIOImpl::write(vector<unsigned char> vec)
 {
     // get data from the send buffer
-    vector<unsigned char> vec = bw->readSendBuffer();
+    //vector<unsigned char> vec = pserialbuf->readSendBuffer();
     // get length
     long unsigned int len{vec.size()};
     // check for length, if 0 return
@@ -234,9 +187,6 @@ int serial::USBConnector::write()
     // the actual bytes written and the timeout for the operation
     int res = libusb_bulk_transfer(usb_dev, USB_ENDPOINT_OUT,
                                    data, (unsigned int)len, &transferred, 20);
-    if (verbose) {
-        cout << "actual bytes written: " << transferred << endl;
-    }
     // delete allocated memory
     delete [] data;
     // return result from the write
@@ -245,14 +195,13 @@ int serial::USBConnector::write()
 
 
 /*! disconnects and closes the usb stream */
-bool serial::USBConnector::disconnect()
+bool serial::SerialIOImpl::disconnect()
 {
     cout << "disconnecting from usb stream... ";
     // release resources here
     libusb_release_interface(usb_dev, 1);
     libusb_attach_kernel_driver(usb_dev, 1);
     libusb_close(usb_dev);
-    libusb_exit(ctx); 
     cout << "[OK]" << endl;
 
     return true;

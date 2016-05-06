@@ -1,20 +1,16 @@
-/*!
- * USBConnector header. Declares the functions and member variables.
- *
- * @author Ivo
- */
+//
+// Created by ivo on 5/5/16.
+//
+
+#ifndef AUTOTUXPROXY_USBCONNECTOR_IMPL_H
+#define AUTOTUXPROXY_USBCONNECTOR_IMPL_H
 
 
-#ifndef USBCONNECTOR_H
-#define USBCONNECTOR_H
-// include
-// ==================================================
 #include <memory>
 #include <libusb-1.0/libusb.h>
-#include "serial/BufferWrapper.h"
+#include "serial/SerialIOInterface.h"
+#include "serial/SerialBuffer.h"
 
-// define
-// ==================================================
 // STM
 #define USB_VENDOR_ID	    0x0483
 #define USB_PRODUCT_ID	    0x5740
@@ -26,51 +22,41 @@
 // error code on empty data to write
 #define EMPTY_DATA          -13
 
-// USBConnector class
-// ============================
+
 namespace serial
 {
-    class USBConnector
+    class SerialIOImpl : public serial::SerialIOInterface
     {
     public:
         /*! constructor */
-        USBConnector();
+        SerialIOImpl();
+        /*! constructor */
+        SerialIOImpl(std::shared_ptr<serial::SerialBuffer>);
         /*! destructor */
-        ~USBConnector();
+        ~SerialIOImpl();
         /*! copy constructor */
-        USBConnector(const USBConnector&);
+        SerialIOImpl(const SerialIOImpl&);
         /*! copy constructor */
-        USBConnector & operator=(const USBConnector&);
+        SerialIOImpl & operator=(const SerialIOImpl&);
         /*! connects to usb */
-        bool connect();
+        bool connect() override;
         /*! disconnects and closes the usb stream */
-        bool disconnect();
+        bool disconnect() override;
         /*! reads from the usb stream */
-        int read();
+        int read(unsigned char *, int *) override;
         /*! writes to the usb stream */
-        int write();
-        /*! sets the buffer wrapper for this connector */
-        void set_buffer_wrapper(std::shared_ptr<serial::BufferWrapper>);
-        /*! sets verbose */
-        void set_verbose(bool);
+        int write(std::vector<unsigned char>) override;
     private:
-        /*! initializes libusb */
-        bool init_libusb();
         /*! gets a list of the devices and opens the one we need */
         bool open_device();
         /*! claims the interface of the USB for I/O operations */
         bool claim_interface();
     private:
-        /*! is it verbose mode */
-        bool verbose;
-        /*! the buffer wrapper */
-        std::shared_ptr<serial::BufferWrapper> bw;
         /*! libusb context */
         struct libusb_context *ctx;
         /*! libusb device handle */
         struct libusb_device_handle *usb_dev;
     };
-} // namespace
+ } // namespace serial
 
-#endif	// USBCONNECTOR_H
-
+#endif // AUTOTUXPROXY_USBCONNECTOR_IMPL_H
