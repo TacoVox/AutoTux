@@ -26,7 +26,7 @@ namespace lane {
 		
 		Mat m_image_grey; 
 		TimeStamp startTime, endTime;
-		int32_t realDistanceToStopline;
+		double realDistanceToStopline;
 
         TimeStamp configContainerTimeStamp = TimeStamp();
 
