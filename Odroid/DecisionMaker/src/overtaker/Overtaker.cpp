@@ -13,14 +13,17 @@ using namespace overtaker;
 /* @doc Constructor.
  * */
 Overtaker::Overtaker():
-    ovtControl(), isOverridingControls(false), traveledPath(0), state(FREE_LANE),
-    leftLane(false), consecReadings(0), min_us_fr(OVT_TRIGGER){}
+    ovtControl(), isOverridingControls(false), traveledPath(0), totalTraveled(0), state(FREE_LANE),
+    leftLane(false), consecReadings(0), idle_frame_counter(0), min_us_fr(OVT_TRIGGER){}
 
 Overtaker::~Overtaker(){}
 
 /* @doc Run obstacle detection according to overtaker Finite State Machine
  * */
 void Overtaker::obstacleDetection(SensorBoardData sensorData, VehicleData vehicleData, VehicleControl dmControl) {
+
+    // Check if we want to reset FSM
+    resetFSM(vehicleData, totalTraveled, 125);
 
     switch(state){
         case FREE_LANE:{
@@ -40,6 +43,7 @@ void Overtaker::obstacleDetection(SensorBoardData sensorData, VehicleData vehicl
             if(cornerDetection(sensorData, vehicleData, ULTRASONIC_FRONT_RIGHT, traveledPath, LEFT_SWITCH_DIST)){
                 cout << "Transition to ADJUST LEFT-SWITCH" << endl;
                 traveledPath = vehicleData.getAbsTraveledPath();
+                ovtControl.setFlashingLightsLeft(false);
                 state = ADJUST_LEFT_SWITCH;
             }
             break;
@@ -65,6 +69,7 @@ void Overtaker::obstacleDetection(SensorBoardData sensorData, VehicleData vehicl
             if(isRightLaneClear(sensorData)){
                 cout << "Transition to RIGHT-SWITCH" << endl;
                 traveledPath = vehicleData.getAbsTraveledPath();
+                ovtControl.setFlashingLightsRight(true);
                 state = RIGHT_SWITCH;
             }
             break;
@@ -73,6 +78,7 @@ void Overtaker::obstacleDetection(SensorBoardData sensorData, VehicleData vehicl
             if(switchToRightLane(vehicleData, traveledPath, RIGHT_SWITCH_DIST)){
                 cout << "Transition to ADJUST-RIGHT-SWITCH" << endl;
                 traveledPath = vehicleData.getAbsTraveledPath();
+                ovtControl.setFlashingLightsRight(false);
                 state = ADJUST_RIGHT_SWITCH;
             }
             break;
@@ -106,6 +112,29 @@ void Overtaker::stopCar(){
     ovtControl.setSteeringWheelAngle(0.0);
     ovtControl.setSpeed(0);
 }
+
+/* @doc Helper function for testing. Resets Overtaker FSM
+ *      .
+ * */
+void Overtaker::resetFSM(VehicleData vd, const double lastTraveled, const int maxFrames) {
+
+    double newTraveled = vd.getAbsTraveledPath();
+
+    if(newTraveled == lastTraveled){
+        idle_frame_counter++;
+        if(idle_frame_counter >= maxFrames){
+            cout << "*** Resetting Overtaker FSM after " << maxFrames << " frames" << endl;
+            idle_frame_counter = 0;
+            state = FREE_LANE;
+        }
+    }else{
+        idle_frame_counter = 0;
+    }
+
+    totalTraveled = newTraveled;
+
+}
+
 
 /* @doc Returns true if US_FF sensor detects obstacle in front of the car
  *      within 'range' distance.
@@ -296,6 +325,7 @@ void Overtaker::keepParallelToObstacle(SensorBoardData sensorData, const double 
 
     double diff = frontRightDist - rearRightDist;
 
+    // *** USE PROPORTIONAL GAIN?? ***
     cout << "***DIFF: " << diff << endl;
     // *** To-Do: adjust steering angle by difference
     if(diff > diff_margin){

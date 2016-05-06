@@ -58,35 +58,67 @@ void ui::CamSettings::printVals(void) {
     mvwaddstr(_camsettings, 3, 20, "Threshold High:     ");
     mvwprintw(_camsettings, 3, 36, "%u", od::ConferenceData::instance()->getThresholdB());
     wattroff(_camsettings, A_STANDOUT);
+
+    if(selectedItem == 6 && active)
+        wattron(_camsettings, A_STANDOUT);
+    mvwaddstr(_camsettings, 1, 49, "Lane Following [ ]");
+    wattroff(_camsettings, A_STANDOUT);
+
+    if(selectedItem == 7 && active)
+        wattron(_camsettings, A_STANDOUT);
+    mvwaddstr(_camsettings, 2, 49, "Driving        [ ]");
+    wattroff(_camsettings, A_STANDOUT);
+
+    if(selectedItem == 8 && active)
+        wattron(_camsettings, A_STANDOUT);
+    mvwaddstr(_camsettings, 3, 49, "Parking        [ ]");
+    wattroff(_camsettings, A_STANDOUT);
+
+    if(selectedItem == 9 && active)
+        wattron(_camsettings, A_STANDOUT);
+    mvwaddstr(_camsettings, 4, 49, "Resume         [ ]");
+    wattroff(_camsettings, A_STANDOUT);
+
+    //Set the X
+    int state = static_cast<int>(od::ConferenceData::instance()->getState());
+    state++;
+    mvwaddch(_camsettings, state, 65, 'X');
 }
 
-void ui::CamSettings::select(void) {active = true; }
+void ui::CamSettings::select(void) {
+    if(selectedItem > 5) {
+        od::ConferenceData::STATE state =
+                static_cast<od::ConferenceData::STATE>(selectedItem - 6);
+        od::ConferenceData::instance()->setState(state);
+    }
+    active = true;
+}
 
 void ui::CamSettings::unselect(void) { active = false; }
 
 void ui::CamSettings::selUp(void) {
     if(selectedItem == 0)
-        selectedItem = 5;
+        selectedItem = 9;
     else
         selectedItem--;
 }
 
 void ui::CamSettings::selDn(void) {
-    if(selectedItem + 1 == 6)
+    if(selectedItem == 9)
         selectedItem = 0;
     else
         selectedItem++;
 }
 
 void ui::CamSettings::selLeft(void) {
-    if(selectedItem < 3)
+    if(selectedItem < 6)//3
         selectedItem += 3;
     else
         selectedItem -= 3;
 }
 
 void ui::CamSettings::selRight(void) {
-    if(selectedItem > 2)
+    if(selectedItem > 5)//2
         selectedItem -= 3;
     else
         selectedItem += 3;

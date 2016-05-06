@@ -21,7 +21,6 @@ using namespace autotux;                    // For own data structures
 using namespace decisionmaker;
 using namespace overtaker;
 
-enum STATE {LANE_FOLLOWING, DRIVING, PARKING};
 
 VehicleControl vehicleControl;
 
@@ -30,7 +29,7 @@ VehicleControl vehicleControl;
  */
 DecisionMaker::DecisionMaker(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "DecisionMaker"),
-        ovt(), parker(), vd(), sbd(), dmMSG(), lrMSG(),
+        state(DRIVING),ovt(), parker(), vd(), sbd(), dmMSG(), lrMSG(),
         speed(), isStopLine(false), stopCounter(0), printCounter(0) {}
 
 DecisionMaker::~DecisionMaker() {}
@@ -102,7 +101,6 @@ double DecisionMaker::getDistanceToLine() {
 /**
  * Function that prints debug output every second instead of every iterration.
  */
-
 void DecisionMaker::printDebug() {
     if(printCounter == 30) {
 
@@ -128,9 +126,6 @@ void DecisionMaker::printDebug() {
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() {
     LIFOQueue lifoQueue;
     addDataStoreFor(lifoQueue);
-
-    // Set initial state of the car
-    STATE state = DRIVING;
 
     Container containerSensorBoardData, containerVehicleData, containerDecisionMakerMSG, containerLaneRecommendationMSG;
     OvertakingMSG ovtMSG;
@@ -210,12 +205,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                         lightSystem.setReverseLight(false);
 
                     if(!parker.getIsParked()) {
-			cout << "HELLO I WILL PARK NOW!" << endl;
                         vehicleControl = parker.parallelPark(sbd, vd);
-                    }
-                    else {
-                        cout << "NOW PARKED!!!" << endl;
-                        break;
                     }
                 }
                 else{
@@ -225,6 +215,14 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                     }
                     laneFollowing();
                 }
+                break;
+            }
+            case RESUME:{
+                if(!parker.isOutOfSpot()){
+                    vehicleControl = parker.goBackToLane(sbd, vd, 0.1);
+                }
+                else
+                    state = LANE_FOLLOWING;
                 break;
             }
         }

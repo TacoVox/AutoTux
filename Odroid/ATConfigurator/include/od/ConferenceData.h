@@ -13,6 +13,7 @@
 namespace od {
     class ConferenceData {
     public:
+        enum STATE {LANE_FOLLOWING, DRIVING, PARKING, RESUME};
         static ConferenceData* instance(void);
         std::shared_ptr<odcore::data::Container> genLaneFollowerContainer(void);
         double getSpeed(void);
@@ -47,6 +48,8 @@ namespace od {
         void setThresholdB(uint8 thresholdB);
         uint8 getThresholdD(void);
         void setThresholdD(uint8 thresholdD);
+        STATE getState(void);
+        void setState(STATE);
     private:
         ConferenceData();
         ConferenceData(const ConferenceData&);
@@ -67,6 +70,7 @@ namespace od {
         double gainD;
         uint8 thresholdB;
         uint8 thresholdD;
+        STATE state;
         static ConferenceData* _instance;
     };
 }
