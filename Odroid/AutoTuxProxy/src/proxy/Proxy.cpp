@@ -149,10 +149,10 @@ namespace proxy {
         }
 
         //For debbug set the lights
-        vehicleControl.setBrakeLights(true);
-        lightSystem.setReverseLight(true);
-        vehicleControl.setFlashingLightsLeft(true);
-        vehicleControl.setFlashingLightsRight(true);
+        //vehicleControl.setBrakeLights(true);
+        //lightSystem.setReverseLight(true);
+        //vehicleControl.setFlashingLightsLeft(true);
+        //vehicleControl.setFlashingLightsRight(true);
 
         unsigned char lights = (unsigned char)vehicleControl.getBrakeLights();
         lights = lights | (unsigned char)(lightSystem.getReverseLight() << 1);
@@ -166,6 +166,7 @@ namespace proxy {
         //cout << "Speed: " << speed << " Angle: " << angle << endl;
 
         if(Proxy::getVerbosity() == 2) {
+            cout << "Send packet: ";
             vector<unsigned char> debugvec = {'4', ':', speed, angle, lights, chsum, ','};
             for(auto it = debugvec.begin(); it < debugvec.end(); it++) {
                 printf("%u", *it);
