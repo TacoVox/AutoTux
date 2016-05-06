@@ -148,9 +148,11 @@ namespace proxy {
             speed = 0; // backward
         }
 
-        //For debbug set the flashing light right
+        //For debbug set the lights
+        //vehicleControl.setBrakeLights(true);
+        //lightSystem.setReverseLight(true);
         //vehicleControl.setFlashingLightsLeft(true);
-        vehicleControl.setFlashingLightsRight(true);
+        //vehicleControl.setFlashingLightsRight(true);
 
         unsigned char lights = (unsigned char)vehicleControl.getBrakeLights();
         lights = lights | (unsigned char)(lightSystem.getReverseLight() << 1);
@@ -163,10 +165,12 @@ namespace proxy {
         //Some fancy debug output
         //cout << "Speed: " << speed << " Angle: " << angle << endl;
 
-        if(Proxy::isVerbose() && Proxy::getVerbosity() == 1) {
+        if(Proxy::getVerbosity() == 2) {
+            cout << "Send packet: ";
             vector<unsigned char> debugvec = {'4', ':', speed, angle, lights, chsum, ','};
             for(auto it = debugvec.begin(); it < debugvec.end(); it++) {
-                cout << *it;
+                printf("%u", *it);
+                cout << " ";
             }
             cout << endl;
         }
