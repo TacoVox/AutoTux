@@ -169,6 +169,7 @@ namespace proxy {
             vector<unsigned char> debugvec = {'4', ':', speed, angle, lights, chsum, ','};
             for(auto it = debugvec.begin(); it < debugvec.end(); it++) {
                 printf("%u", *it);
+                cout << " ";
             }
             cout << endl;
         }
