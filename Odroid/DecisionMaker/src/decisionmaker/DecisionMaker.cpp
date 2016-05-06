@@ -62,15 +62,15 @@ void DecisionMaker::laneFollowing() {
     }
 
     else if(getDistanceToLine() < 30 && getDistanceToLine() != -1) {
-        cout << "STOPPING!" << endl;
+        //cout << "STOPPING!" << endl;
         //vehicleControl.setBrakeLights(true);
-       // speed = 0;
-       // stopCounter = 1;
-       // isStopLine = true;
+        //speed = 0;
+        //stopCounter = 1;
+        //isStopLine = true;
     }
 
     else if(getDistanceToLine() < 50 && getDistanceToLine() != -1) {
-        cout << "Slowing down..." << endl;
+        //cout << "Slowing down..." << endl;
         vehicleControl.setBrakeLights(false);
         speed = 1;
     }
@@ -184,9 +184,9 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
                 if(ovt.getIsOverriding()) {
                     //cout << "DM: OVERTAKER is OVERRIDING" << endl;
                     vehicleControl = ovt.getOvtControl();
-    		    	vehicleControl.setSpeed(1);    
+
 				}
-                    //... else follow lane-follower instructions...
+                //... else follow lane-follower instructions...
                 else{
                     //cout <<"DM: LANE FOLLOWER Instructions" << endl;
 
