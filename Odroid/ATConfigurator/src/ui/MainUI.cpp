@@ -35,7 +35,8 @@ void ui::MainUI::mainLoop(void) {
 
         header.refresh();
         menu.refresh();
-        windows.at(menu.getCurrent())->refresh();
+        if(menu.getCurrent() != 4)
+            windows.at(menu.getCurrent())->refresh();
         footer.refresh();
 
         std::this_thread::sleep_for(std::chrono::milliseconds(25));
@@ -62,7 +63,10 @@ void ui::MainUI::handleKeys(void) {
             windows.at(menu.getCurrent())->selRight();
         } else if(keyPressed == KEY_RETURN) {
             menu.setActive(false);
-            windows.at(menu.getCurrent())->select();
+            if(menu.getCurrent() != 4)
+                windows.at(menu.getCurrent())->select();
+            else
+                quit();
         } else if(keyPressed == KEY_BACKSPACE || keyPressed == KEY_ESCAPE) {
             windows.at(menu.getCurrent())->unselect();
             menu.setActive(true);

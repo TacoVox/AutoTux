@@ -14,15 +14,14 @@ ui::ValMonitor::ValMonitor(int x, int y) : xsize(x - 2), ysize(y - 2),
 }
 
 void ui::ValMonitor::refresh(void) {
+    //Clear the screen
+    wmove(_valmonitor, 1, 1);
+    wclrtobot(_valmonitor);
     printVals();
     wrefresh(_valmonitor);
 }
 
 void ui::ValMonitor::printVals(void) {
-    //Clear the screen
-    wmove(_valmonitor, 1, 1);
-    wclrtobot(_valmonitor);
-
     mvwaddstr(_valmonitor, 1, 1, "CTRL DATA");
     mvwaddstr(_valmonitor, 1, 18, "SENSOR DATA");
     mvwaddstr(_valmonitor, 1, 35, "LANE REC DATA");
