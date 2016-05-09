@@ -8,7 +8,6 @@
 #ifndef AUTOTUXPROXY_USBHANDLER_H
 #define AUTOTUXPROXY_USBHANDLER_H
 
-#include <atomic>
 #include "serial/SerialBuffer.h"
 #include "serial/SerialIOInterface.h"
 
@@ -32,13 +31,10 @@ namespace serial
         //void set_serialio(serial::conninter::SerialIOInterface*);
         /*! sets verbose */
         void set_verbose(bool);
-        /*! returns running state */
-        bool get_running();
-    private:
+        int readOp();
+        int writeOp();
         /*! reconnects the usb */
-        void reconnect();
-        /*! returns true if reconnection needed, false otherwise*/
-        bool is_reconnect(int);
+        bool reconnect();
     private:
         /*! is it verbose mode */
         bool verbose;
@@ -49,6 +45,10 @@ namespace serial
         /*! the serial buffer */
         std::shared_ptr<serial::SerialBuffer> pserbuf;
     };
+
+    /*! returns true if reconnection needed, false otherwise*/
+    bool is_reconnect(int);
+
 } // namespace serial
 
 #endif	// AUTOTUXPROXY_USBHANDLER_H

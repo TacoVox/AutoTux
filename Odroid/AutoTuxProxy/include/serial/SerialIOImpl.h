@@ -30,8 +30,6 @@ namespace serial
     public:
         /*! constructor */
         SerialIOImpl();
-        /*! constructor */
-        SerialIOImpl(std::shared_ptr<serial::SerialBuffer>);
         /*! destructor */
         ~SerialIOImpl();
         /*! copy constructor */
