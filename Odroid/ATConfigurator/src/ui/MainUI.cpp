@@ -17,17 +17,14 @@ ui::MainUI::MainUI(void) : mode(0), _window(initscr()),
 }
 
 void ui::MainUI::mainLoop(void) {
+    keypad(_window, true);
+    nodelay(_window, true);
     while(!interrupted) {
+        keyPressed = getch();
         handleKeys();
         menu.refresh();
         footer.refresh();
         std::this_thread::sleep_for(std::chrono::milliseconds(25));
-    }
-}
-
-void ui::MainUI::inputLoop(void) {
-    while(!interrupted) {
-        keyPressed = getchar();
     }
 }
 
@@ -37,17 +34,17 @@ void ui::MainUI::quit(void) {
 
 void ui::MainUI::handleKeys(void) {
     if(keyPressed != '\0') {
-        if(keyPressed == 'w')
+        if(keyPressed == KEY_UP)
             menu.selUp();
-        else if(keyPressed == 's')
+        else if(keyPressed == KEY_DOWN)
             menu.selDn();
-        else if(keyPressed == 'a')
+        else if(keyPressed == KEY_LEFT)
             menu.selLeft();
-        else if(keyPressed == 'd')
+        else if(keyPressed == KEY_RIGHT)
             menu.selRight();
-        else if(keyPressed == 'p')
+        else if(keyPressed == KEY_RETURN)
             menu.select();
-        else if(keyPressed == 'o')
+        else if(keyPressed == KEY_BACKSPACE || keyPressed == KEY_ESCAPE)
             menu.unselect();
         else if(keyPressed == '+')
             menu.incr();

@@ -5,6 +5,9 @@
 #ifndef ATCONFIGURATOR_MAINUI_H
 #define ATCONFIGURATOR_MAINUI_H
 
+#define KEY_RETURN 10 //Override non working ncurses value
+#define KEY_ESCAPE 27
+
 #include <string>
 #include <ncurses.h>
 #include <memory>
@@ -17,7 +20,6 @@ namespace ui {
     public:
         MainUI(void);
         void mainLoop(void);
-        void inputLoop(void);
         void quit(void);
     private:
         short int mode;

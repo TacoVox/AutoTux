@@ -5,6 +5,7 @@
 #include <od/ConferenceData.h>
 #include "ui/Menu.h"
 #include "ui/ValMonitor.h"
+#include "ui/State.h"
 #include "ui/CamSettings.h"
 #include "ui/CamView.h"
 
@@ -12,10 +13,11 @@ ui::Menu::Menu(void) { Menu(80, 20); }
 
 ui::Menu::Menu(int x, int y) : xsize(x), ysize(y),
                                _menu(newwin(ysize - 2, 15, 1, 0)),
-                               items({"Cockpit", "Camera Setup",
+                               items({"Cockpit", "State", "Camera Setup",
                                      "Camera View", "Quit"}),
                                curritem(0), currwindow(0), menusel(true) {
     windows.push_back((std::unique_ptr<ATCWindow>)new ValMonitor(xsize, ysize));
+    windows.push_back((std::unique_ptr<ATCWindow>)new State(xsize, ysize));
     windows.push_back((std::unique_ptr<ATCWindow>)new CamSettings(xsize, ysize));
     windows.push_back((std::unique_ptr<ATCWindow>)new CamView(xsize, ysize));
     wborder(_menu, ' ', ACS_VLINE, ' ', ' ', ' ', ACS_VLINE, ' ', ACS_VLINE);
@@ -56,7 +58,7 @@ void ui::Menu::selRight() {
 }
 
 void ui::Menu::select(void) {
-    if (curritem == 3)
+    if (curritem == 4)
         exit(0);
     else
         currwindow = curritem;
