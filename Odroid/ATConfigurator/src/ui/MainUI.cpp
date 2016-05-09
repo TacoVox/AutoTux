@@ -36,6 +36,8 @@ void ui::MainUI::mainLoop(void) {
         menu.refresh();
         if(menu.getCurrent() != 4)
             windows.at(menu.getCurrent())->refresh();
+        else
+            windows.at(3)->refresh();
         footer.refresh();
 
         handleKeys();
@@ -63,12 +65,11 @@ void ui::MainUI::handleKeys(void) {
             windows.at(menu.getCurrent())->selLeft();
         } else if(keyPressed == KEY_RIGHT && !menu.isActive()) {
             windows.at(menu.getCurrent())->selRight();
+        } else if(keyPressed == KEY_RETURN && menu.getCurrent() == 4) {
+            quit();
         } else if(keyPressed == KEY_RETURN) {
             menu.setActive(false);
-            if(menu.getCurrent() != 4)
-                windows.at(menu.getCurrent())->select();
-            else
-                quit();
+            windows.at(menu.getCurrent())->select();
         } else if(keyPressed == KEY_BACKSPACE || keyPressed == KEY_ESCAPE) {
             windows.at(menu.getCurrent())->unselect();
             menu.setActive(true);
