@@ -21,6 +21,11 @@
 #define DEBUG_OUTPUT 0
 
 /**
+ * Calibration mode. Use with debug mode.
+ */
+#define CALIBRATION_MODE 0
+
+/**
  * @brief If this is exceeded, communication is seen as inactive.
  *
  * If more iterations than this occurs without receiving a valid packet,
@@ -68,8 +73,8 @@
  *
  * DON'T USE VALUES HIGHER THAN ONE UNLESS YOU KNOW WHAT YOU'RE DOING.
  */
-#define RC_FORWARD_MULTIPLIER 0.2
-#define RC_BACKWARD_MULTIPLIER 0.7
+#define RC_FORWARD_MULTIPLIER 0.2 // 0.2
+#define RC_BACKWARD_MULTIPLIER 0.7 // 0.7
 
 /**
  * When RC is on, the throttle signal is above this treshold value
@@ -231,7 +236,7 @@ static const ioportmask_t RC_PIN_NUMBERS[] = {4, 6};
 /**
  * Ticks per meter. Used for distance and speed calculation.
  */
-#define WE_TICKS_PER_METER 50 // 68.49 // 44.07
+#define WE_TICKS_PER_METER 42 // 68.49 // 44.07
 
 /**
  * Pin for wheel encoder. Currently A2.
@@ -272,9 +277,12 @@ typedef enum {SPEED_REVERSE, SPEED_STOP, SPEED_FORWARD_LOW, SPEED_FORWARD_CRUISE
 #define CTRL_OUT_SPEED_STEPS 4
 
 /**
- * Pulse widths for each speed step. 1414 very low forward speed good for basic lf.
+ * Pulse widths for each speed step. Calibrated as 1400 neutral, 800 rev, 2400 max forward
  */
-static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1120, 1350, 1415, 1416};
+//static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1120, 1350, 1415, 1416};
+//static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1131, 1360, 1425, 1426};
+static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1150, 1400, 1482, 1486};
+
 
 /**
  * Pulse width values for wheels centered and their extreme positions.
