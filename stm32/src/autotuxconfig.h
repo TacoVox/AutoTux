@@ -22,6 +22,8 @@
 
 /**
  * Calibration mode. Use with debug mode.
+ * NOTE: Don't calibrate ESC without changing the PWM values that the
+ * board sends out! Use 800 back, 1400 neutral, 2400 forward.
  */
 #define CALIBRATION_MODE 0
 
