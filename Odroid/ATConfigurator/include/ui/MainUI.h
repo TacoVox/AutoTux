@@ -31,6 +31,7 @@ namespace ui {
         Header header;
         Footer footer;
         Menu menu;
+        std::vector<std::unique_ptr<ui::ATCWindow>> windows;
         void handleKeys(void);
     };
 }
