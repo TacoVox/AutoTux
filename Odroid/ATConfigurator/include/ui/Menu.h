@@ -21,6 +21,7 @@ namespace ui {
         bool isActive(void);
         void selDn(void);
         void selUp(void);
+        int getCurrent(void);
     private:
         int xsize;
         int ysize;

@@ -38,6 +38,8 @@ void ui::Menu::selUp(void) {
         curritem--;
 }
 
+int ui::Menu::getCurrent(void) { return this->curritem; }
+
 void ui::Menu::genMenu(void) {
     int i;
     for(i = 0; i < (int)items.size(); i++) {
@@ -52,10 +54,3 @@ void ui::Menu::genMenu(void) {
             mvwaddstr(_menu, i + 1, 1, items.at(i).c_str());
     }
 }
-
-
-
-
-
-
-
