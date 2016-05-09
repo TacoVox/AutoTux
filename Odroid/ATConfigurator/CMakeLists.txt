@@ -6,7 +6,7 @@ PROJECT(ATConfigurator)
 
 SET(CMAKE_MODULE_PATH "/opt/od/share/cmake-2.8/Modules" ${CMAKE_MODULE_PATH})
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${CXX_OPTIONS} -pipe -std=c++11 -lncurses -lmenu")
-# SET warning flags here and append them to the CMAKE_CXX_FLAGS -Weffc++
+# SET warning flags here and append them to the CMAKE_CXX_FLAGS -Weffc++ -Wunsafe-loop-optimizations
 SET(WARN "${WARN} -g -O -Wall -pedantic -Wvolatile-register-var")
 SET(WARN "${WARN} -Wconversion -Wcast-align -Wwrite-strings -Wunused-variable")
 SET(WARN "${WARN} -Wcast-qual -Wchar-subscripts -Wvariadic-macros -Wimport")
@@ -14,7 +14,7 @@ SET(WARN "${WARN} -Wcomment -Wunused-parameter -Wextra -Wdisabled-optimization")
 SET(WARN "${WARN} -Wfloat-equal -Wformat=2 -Wformat-nonliteral")
 SET(WARN "${WARN} -Wformat-security -Wformat-y2k -Wwrite-strings")
 SET(WARN "${WARN} -Winit-self -Wformat -Winline -Winvalid-pch -Wmissing-braces")
-SET(WARN "${WARN} -Wunsafe-loop-optimizations -Wlong-long -Wreturn-type")
+SET(WARN "${WARN} -Wlong-long -Wreturn-type")
 SET(WARN "${WARN} -Wmissing-field-initializers -Wmissing-format-attribute")
 SET(WARN "${WARN} -Wmissing-include-dirs -Wpacked -Wparentheses -Wunused-value")
 SET(WARN "${WARN} -Wmissing-noreturn -Wsequence-point -Wshadow -Wsign-compare")
