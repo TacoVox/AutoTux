@@ -9,7 +9,6 @@
 #include <automotivedata/generated/automotive/miniature/SensorBoardData.h>
 #include <automotivedata/generated/autotux/config/LaneFollowerMSG.h>
 #include <automotivedata/generated/autotux/LaneRecommendationMSG.h>
-#include <automotivedata/generated/autotux/DecisionMakerMSG.h>
 
 using namespace std;
 using namespace odcore::base::module;
@@ -59,10 +58,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode od::ConferenceModule::
         getConference().send(*od::ConferenceData::instance()->genLaneFollowerContainer());
 
         //Send state
-        DecisionMakerMSG decisionMakerMSG;
-        decisionMakerMSG.setState(ConferenceData::instance()->getState());
-        Container dmc(decisionMakerMSG);
-        getConference().send(dmc);
+        getConference().send(*od::ConferenceData::instance()->genDecisionMakerContainer());
     }
 
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;

@@ -29,16 +29,24 @@ void Overtaker::obstacleDetection(SensorBoardData sensorData, VehicleData vehicl
         case FREE_LANE:{
             // If close to obstacle switch lane to overtake...
             if(isObstacleOnLane(sensorData, OVT_TRIGGER)){
-                cout << "Transition to LEFT-SWITCH" << endl;
+                cout << "Transition to INIT-LEFT-SWITCH" << endl;
                 isOverridingControls = true;
                 traveledPath = vehicleData.getAbsTraveledPath();
-                min_us_fr = US_SENSOR_LIMIT;
+                min_us_fr = 0.4;
                 ovtControl.setSpeed(1);
                 ovtControl.setFlashingLightsLeft(true);
-                state = LEFT_SWITCH;
+                state = INIT_LEFT_SWITCH;
             }
             break;
         }
+	case INIT_LEFT_SWITCH:{
+	    if(turnLeft(vehicleData, traveledPath, 0.15)){
+	        cout << "Transition to LEFT-SWITCH" << endl;
+		traveledPath = vehicleData.getAbsTraveledPath();
+		state = LEFT_SWITCH;
+	    }
+	    break;
+	}
         case LEFT_SWITCH:{
             if(cornerDetection(sensorData, vehicleData, ULTRASONIC_FRONT_RIGHT, traveledPath, LEFT_SWITCH_DIST)){
                 cout << "Transition to ADJUST LEFT-SWITCH" << endl;
@@ -153,6 +161,19 @@ bool Overtaker::isObstacleOnLane(SensorBoardData sbd, const double range){
     return false;
 }
 
+/* ...
+*/
+bool Overtaker::turnLeft(VehicleData vd, const double trvStart, const double distance) {
+    double traveled = vd.getAbsTraveledPath() - trvStart;
+
+    if(traveled > distance) {
+        return true;
+    }
+	
+    ovtControl.setSteeringWheelAngle(-0.5235);
+    
+    return false;
+}
 /* @doc Returns true if 'sensor' distance signals we passed a corner
  *      obstacle.
  * */
@@ -310,7 +331,7 @@ void Overtaker::keepParallelToObstacle(SensorBoardData sensorData, const double 
     // If none of the two IR sensors is detecting the obstacle...
     if(!ir_fr && !ir_rr){
         cout << "KEEP-PARALLEL: Lost sight of obstacle" << endl;
-        ovtControl.setSteeringWheelAngle(0.2);
+        ovtControl.setSteeringWheelAngle(0.5235);
         return;
     }
 

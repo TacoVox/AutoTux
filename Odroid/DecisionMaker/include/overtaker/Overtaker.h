@@ -27,7 +27,7 @@ namespace  overtaker{
 
 		//CAR VALUES
 		// *** On a straight, it needs to look further ahead, less if it's in a turn ***
-		const double OVT_TRIGGER = 0.60;
+		const double OVT_TRIGGER = 0.70;
 		// *** On straight a straight, left switch distance needs to be longer ***
 		const double LEFT_SWITCH_DIST = 0.00;
 		const double ADJUST_L_S_DIST = 0.30;
@@ -63,7 +63,7 @@ namespace  overtaker{
         bool checkReadingsCounter();
 
 		double traveledPath, totalTraveled;
-        enum STATE {FREE_LANE, LEFT_SWITCH, ADJUST_LEFT_SWITCH, SEARCH_END,
+        enum STATE {FREE_LANE, INIT_LEFT_SWITCH, LEFT_SWITCH, ADJUST_LEFT_SWITCH, SEARCH_END,
 					REACH_END, RIGHT_SWITCH, ADJUST_RIGHT_SWITCH};
         enum STATE state;
         bool leftLane;
@@ -75,6 +75,8 @@ namespace  overtaker{
 
 
         bool isObstacleOnLane(automotive::miniature::SensorBoardData, const double);
+		
+		bool turnLeft(automotive::VehicleData, const double, const double);
 		bool cornerDetection(automotive::miniature::SensorBoardData, automotive::VehicleData, const int, const double, const double);
 		bool adjustLeftSwitch(automotive::VehicleData, const double, const double);
 

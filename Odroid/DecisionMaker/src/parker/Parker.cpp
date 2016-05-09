@@ -173,7 +173,7 @@ void Parker::inBetweenObjects(SensorBoardData sbd, VehicleData vd) {
     double backSensor = sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK);
 
     if (isAccurate == FREQUENCY) {
-        if((max(&frontSensor, &backSensor) - min(&frontSensor, &backSensor)) < SENSOR_DIFFERENCE_INBETWEEN) {
+        if((max(frontSensor, backSensor) - min(frontSensor, backSensor)) < SENSOR_DIFFERENCE_INBETWEEN) {
             controlTemp.setSpeed(0);
             controlTemp.setBrakeLights(true);
             carPosition = vd.getAbsTraveledPath();
@@ -362,6 +362,7 @@ void Parker::findObject(SensorBoardData sbd) {
     //To check if the sensors are in the ranges of where it can find a object
     if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > IRSENSOR_DISTANCE_MIN &&
             sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < IRSENSOR_DISTANCE_MAX){
+	cout << isAccurate << endl;
         isAccurate++;
     }
     else
