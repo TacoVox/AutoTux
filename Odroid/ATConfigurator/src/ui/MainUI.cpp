@@ -31,7 +31,6 @@ ui::MainUI::MainUI(void) : mode(0), _window(initscr()),
 void ui::MainUI::mainLoop(void) {
     while(!interrupted) {
         keyPressed = getch();
-        handleKeys();
 
         header.refresh();
         menu.refresh();
@@ -39,12 +38,15 @@ void ui::MainUI::mainLoop(void) {
             windows.at(menu.getCurrent())->refresh();
         footer.refresh();
 
+        handleKeys();
+
         std::this_thread::sleep_for(std::chrono::milliseconds(25));
     }
 }
 
 void ui::MainUI::quit(void) {
-     endwin();
+    interrupted = true;
+    endwin();
 }
 
 void ui::MainUI::handleKeys(void) {
