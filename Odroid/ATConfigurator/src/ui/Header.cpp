@@ -18,6 +18,8 @@ ui::Header::Header(int x, int y) : xsize(x), ysize(y),
     wrefresh(_header);
 }
 
+void ui::Header::refresh(void) { wrefresh(_header); }
+
 
 
 
