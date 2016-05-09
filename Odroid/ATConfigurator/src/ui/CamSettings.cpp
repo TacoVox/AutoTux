@@ -123,5 +123,3 @@ void ui::CamSettings::decr(void) {
         od::ConferenceData::instance()->setThresholdB((uint8)(od::ConferenceData::instance()->getThresholdB() - 1));
     }
 }
-
-
