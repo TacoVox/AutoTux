@@ -16,6 +16,7 @@ namespace od {
         enum STATE {LANE_FOLLOWING, DRIVING, PARKING, RESUME};
         static ConferenceData* instance(void);
         std::shared_ptr<odcore::data::Container> genLaneFollowerContainer(void);
+        std::shared_ptr<odcore::data::Container> genDecisionMakerContainer(void);
         double getSpeed(void);
         void setSpeed(double);
         double getAngle(void);

@@ -4,6 +4,7 @@
 
 #include "od/ConferenceData.h"
 #include <automotivedata/generated/autotux/config/LaneFollowerMSG.h>
+#include <automotivedata/generated/autotux/DecisionMakerMSG.h>
 
 od::ConferenceData* od::ConferenceData::_instance = 0;
 
@@ -35,6 +36,18 @@ std::shared_ptr<odcore::data::Container> od::ConferenceData::genLaneFollowerCont
 
     return lfc;
 }
+
+std::shared_ptr<odcore::data::Container> od::ConferenceData::genDecisionMakerContainer(void) {
+    autotux::DecisionMakerMSG dmg;
+    dmg.setState(this->state);
+
+    std::shared_ptr<odcore::data::Container> dmc =
+            (std::shared_ptr<odcore::data::Container>)new odcore::data::Container(dmg);
+
+    return dmc;
+}
+
+
 
 double od::ConferenceData::getSpeed(void) { return this->speed; }
 
