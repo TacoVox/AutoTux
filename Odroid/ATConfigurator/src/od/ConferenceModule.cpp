@@ -59,9 +59,9 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode od::ConferenceModule::
         ConferenceData::instance()->setQuality(laneRecommendationMSG.getQuality());
 
         //Get the shared image address
-        Container image_container = getKeyValueDataStore().get(SharedImage::ID());
-        if (image_container.getDataType() == SharedImage::ID())
-            readSharedImage(image_container);
+        //Container image_container = getKeyValueDataStore().get(SharedImage::ID());
+        //if (image_container.getDataType() == SharedImage::ID())
+        //    readSharedImage(image_container);
 
         //Send out the configured vals
         getConference().send(*od::ConferenceData::instance()->genLaneFollowerContainer());

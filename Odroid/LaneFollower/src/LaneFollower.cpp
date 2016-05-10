@@ -22,7 +22,7 @@ namespace lane {
 
         // SET TO TRUE WHEN USING THE SIMULATOR
         // Do we want this in the configuration file?
-        const bool SIMMODE = true;
+        const bool SIMMODE = false;
 		
 		Mat m_image_grey; 
 		TimeStamp startTime, endTime;
@@ -322,9 +322,17 @@ namespace lane {
                 }
             }
 
-            if((left_dist - right_dist > -15) && (left_dist - right_dist < 15)) {
-                m_laneRecommendation.setDistance_to_line(left_dist);
-            }
+	    static int counter = 0;
+
+            if(counter < 4 && (left_dist - right_dist > -25) && (left_dist - right_dist < 25)) {
+                counter ++;
+            } else {
+		counter = 0;
+	    }
+
+	    if(counter > 3) {
+		m_laneRecommendation.setDistance_to_line(left_dist);
+            } 
 
             return e;
         }
@@ -387,6 +395,7 @@ namespace lane {
                 cout << "QUALITY: " << m_laneRecommendation.getQuality() << endl;
                 cout << "IN LEFT LANE: " << m_overtaking.getLeftlane() << endl;
            		cout << "TIME IN BODY: " << (endTime.toMicroseconds() - startTime.toMicroseconds()) << endl;
+		cout << "ROADWIDTH: " << m_distance << endl;
 			   	cout << "-----------------------------------" << endl;
 
                 // Reset counter
