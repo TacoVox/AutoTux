@@ -136,7 +136,7 @@ void Parker::objectBehind(SensorBoardData sbd, VehicleData vd) {
     double backSensor = sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK);
 
     if (isAccurate == ACCURENCE) {
-        if (std::abs(DISTANCE_FROM_BACK_OBJECT - backSensor) < SENSOR_DIFFERENCE_NO_FRONT){
+        if (backSensor > SENSOR_DIFFERENCE_NO_FRONT){
             controlTemp.setSpeed(0);
             controlTemp.setBrakeLights(true);
             carPosition = vd.getAbsTraveledPath();
@@ -172,10 +172,12 @@ void Parker::inBetweenObjects(SensorBoardData sbd, VehicleData vd) {
 
     double frontSensor = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD);
     double backSensor = sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK);
-
+	
     if (isAccurate == ACCURENCE) {
+	cout << "Correct values" << endl;
         if(std::abs(frontSensor - backSensor) < SENSOR_DIFFERENCE_INBETWEEN) {
-            controlTemp.setSpeed(0);
+	cout << "In the middle" << endl;            
+controlTemp.setSpeed(0);
             controlTemp.setBrakeLights(true);
             carPosition = vd.getAbsTraveledPath();
             isParked = true;
@@ -183,13 +185,15 @@ void Parker::inBetweenObjects(SensorBoardData sbd, VehicleData vd) {
         }
         else if(frontSensor >
                  backSensor) {
-            isAccurate = 0;
+	cout << "Going Forward" << endl;           
+isAccurate = 0;
             controlTemp.setSpeed(1);
             reversing = false;
         }
         else if(frontSensor <
                  backSensor) {
-            isAccurate = 0;
+        	cout << "Going backwards" << endl; 
+	   isAccurate = 0;
             controlTemp.setSpeed(-1);
             reversing = true;
         }

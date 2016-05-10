@@ -238,8 +238,8 @@ namespace lane {
                         m_laneRecommendation.setQuality(true);
                     }
 
-					if (right.x > 0) right.x += 30;
-					if (left.x > 0) left.x += 30;
+					if (right.x > 0) right.x += m_roadOffset;
+					if (left.x > 0) left.x += m_roadOffset;
 
                     // Right lane logic (prefer right line following)
                     if (!inLeftLane) {
