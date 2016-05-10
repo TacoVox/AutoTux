@@ -24,7 +24,8 @@ using namespace autotux;
 using namespace autotux::config;
 
 od::ConferenceModule::ConferenceModule(const int32_t &argc, char **argv) :
-        TimeTriggeredConferenceClientModule(argc, argv, "Configurator") {}
+        TimeTriggeredConferenceClientModule(argc, argv, "Configurator"),
+        m_hasAttachedToSharedImageMemory(false), m_sharedImageMemory(), m_image() {}
 
 od::ConferenceModule::~ConferenceModule() {}
 
