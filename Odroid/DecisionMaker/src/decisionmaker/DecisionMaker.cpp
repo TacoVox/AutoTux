@@ -127,8 +127,6 @@ void DecisionMaker::printDebug() {
 }
 
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() {
-    LIFOQueue lifoQueue;
-    addDataStoreFor(lifoQueue);
 
     Container containerSensorBoardData, containerVehicleData, containerDecisionMakerMSG, containerLaneRecommendationMSG;
     OvertakingMSG ovtMSG;
