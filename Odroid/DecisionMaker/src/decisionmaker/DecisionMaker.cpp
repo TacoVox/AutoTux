@@ -176,17 +176,18 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
             }
             // Lane follower + overtaker
             case DRIVING:{
-                ovt.obstacleDetection(sbd, vd, vehicleControl);
+
+                ovt.setLaneFollowerAngle(getAngle());
+                //ovt.obstacleDetection(sbd, vd);
+                ovt.newObstacleDetection(sbd, vd);
 
                 // If overtaker is overriding control values...
                 if(ovt.getIsOverriding()) {
-                    //cout << "DM: OVERTAKER is OVERRIDING" << endl;
                     vehicleControl = ovt.getOvtControl();
 
 				}
                 //... else follow lane-follower instructions...
                 else{
-                    //cout <<"DM: LANE FOLLOWER Instructions" << endl;
 
                     if(!isStopLine) {
                         speed = 1;
