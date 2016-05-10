@@ -47,8 +47,6 @@ std::shared_ptr<odcore::data::Container> od::ConferenceData::genDecisionMakerCon
     return dmc;
 }
 
-
-
 double od::ConferenceData::getSpeed(void) { return this->speed; }
 
 void od::ConferenceData::setSpeed(double s) { this->speed = s; }
