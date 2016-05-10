@@ -30,9 +30,9 @@ namespace  overtaker{
 		const double OVT_TRIGGER = 0.70;
 		// *** On straight a straight, left switch distance needs to be longer ***
 		const double LEFT_SWITCH_DIST = 0.00;
-		const double ADJUST_L_S_DIST = 0.30;
-		const double RIGHT_SWITCH_DIST = 0.50;
-		const double ADJUST_R_S_DIST = 0.1;
+		const double ADJUST_L_S_DIST = 0.50;
+		const double RIGHT_SWITCH_DIST = 0.68;
+		const double ADJUST_R_S_DIST = 0.0;
 		const double US_SENSOR_RANGE = 0.40;
 		const double US_FRONT_RIGHT_RANGE = 0.30;
 
@@ -51,11 +51,13 @@ namespace  overtaker{
     public:
         Overtaker();
         virtual ~Overtaker();
-        void obstacleDetection(automotive::miniature::SensorBoardData, automotive::VehicleData, automotive::VehicleControl);
+        void obstacleDetection(automotive::miniature::SensorBoardData, automotive::VehicleData);
+		void newObstacleDetection(automotive::miniature::SensorBoardData, automotive::VehicleData);
 
         bool getIsOverriding();
         bool isLeftLane();
         VehicleControl getOvtControl();
+		void setLaneFollowerAngle(double);
 
     private:
         VehicleControl ovtControl;
@@ -69,6 +71,7 @@ namespace  overtaker{
         bool leftLane;
         int consecReadings, idle_frame_counter;
         double min_us_fr;
+		double laneFollowerAngle;
 
 		void stopCar();
 		bool isObstacleDetected(automotive::miniature::SensorBoardData, const double, const double);

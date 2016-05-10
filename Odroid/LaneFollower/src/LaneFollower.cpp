@@ -22,7 +22,7 @@ namespace lane {
 
         // SET TO TRUE WHEN USING THE SIMULATOR
         // Do we want this in the configuration file?
-        const bool SIMMODE = true;
+        const bool SIMMODE = false;
 		
 		Mat m_image_grey; 
 		TimeStamp startTime, endTime;
@@ -196,8 +196,8 @@ namespace lane {
             double e = 0;
 
             // Lane detection loop
-            for(int32_t y = m_image_grey.rows - 8; y > m_image_grey.rows * .5; y -= 10) {
-                // Find red pixels
+             	int32_t y = m_controlScanline;
+				  // Find red pixels
                 uchar pixelLeft, pixelRight;
                 Point left, right;
 
@@ -207,7 +207,7 @@ namespace lane {
                 // Find first red pixel to the left (left line)
                 for (int x = m_image_grey.cols / 2; x > 0; x--) {
                     pixelLeft = m_image_grey.at<uchar>(Point(x, y));
-                    if (pixelLeft == 120) {
+                    if (pixelLeft > 120) {
                         left.x = x;
                         break;
                     }
@@ -236,6 +236,9 @@ namespace lane {
                     else {
                         m_laneRecommendation.setQuality(true);
                     }
+
+					if (right.x > 0) right.x += 30;
+					if (left.x > 0) left.x += 30;
 
                     // Right lane logic (prefer right line following)
                     if (!inLeftLane) {
@@ -275,7 +278,6 @@ namespace lane {
                                 0.5, CV_RGB(255, 0, 0));
                     }
                 }
-            } // for loop
 
             uchar pixelFrontLeft, pixelFrontRight;
             Point stop_left, stop_right;
@@ -320,9 +322,17 @@ namespace lane {
                 }
             }
 
-            if((left_dist - right_dist > -15) && (left_dist - right_dist < 15)) {
-                m_laneRecommendation.setDistance_to_line(left_dist);
-            }
+	    static int counter = 0;
+
+            if(counter < 4 && (left_dist - right_dist > -25) && (left_dist - right_dist < 25)) {
+                counter ++;
+            } else {
+		counter = 0;
+	    }
+
+	    if(counter > 3) {
+		m_laneRecommendation.setDistance_to_line(left_dist);
+            } 
 
             return e;
         }
@@ -385,6 +395,7 @@ namespace lane {
                 cout << "QUALITY: " << m_laneRecommendation.getQuality() << endl;
                 cout << "IN LEFT LANE: " << m_overtaking.getLeftlane() << endl;
            		cout << "TIME IN BODY: " << (endTime.toMicroseconds() - startTime.toMicroseconds()) << endl;
+		cout << "ROADWIDTH: " << m_distance << endl;
 			   	cout << "-----------------------------------" << endl;
 
                 // Reset counter

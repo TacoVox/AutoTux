@@ -5,8 +5,8 @@
  */
 
 
-#ifndef AUTOTUXPROXY_USBCONNECTOR_H
-#define AUTOTUXPROXY_USBCONNECTOR_H
+#ifndef AUTOTUXPROXY_SERIALIOINTERFACE_H
+#define AUTOTUXPROXY_SERIALIOINTERFACE_H
 
 
 #include <vector>
@@ -24,5 +24,5 @@ namespace serial
     };
 } // namespace serial
 
-#endif	// AUTOTUXPROXY_USBCONNECTOR_H
+#endif	// AUTOTUXPROXY_SERIALIOINTERFACE_H
 
