@@ -37,6 +37,8 @@ namespace od {
         void setDistance_to_line(double);
         bool isQuality(void);
         void setQuality(bool);
+        double getAbsPath(void);
+        void setAbsPath(double);
         uint32 getRoadWidth(void);
         void setRoadWidth(uint32 roadWidth);
         double getGainP(void);
@@ -65,6 +67,7 @@ namespace od {
         double rec_angle;
         double distance_to_line;
         bool quality;
+        double absPath;
         uint32 roadWidth;
         double gainP;
         double gainI;
