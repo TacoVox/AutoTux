@@ -26,7 +26,7 @@ namespace lane {
 		
 		Mat m_image_grey; 
 		TimeStamp startTime, endTime;
-		double realDistanceToStopline;
+		double realDistanceToStopline;		
 
         TimeStamp configContainerTimeStamp = TimeStamp();
 
@@ -47,11 +47,12 @@ namespace lane {
                 m_eSum(0),
                 m_eOld(0),
                 m_distance(190),
-                m_controlScanline(222),
+		m_controlScanline(222),
                 m_stopScanline(50),
-                m_threshold1(50),
+	        m_threshold1(50),
                 m_threshold2(200),
-                P_GAIN(0.80),
+		m_roadOffset(30),
+         	P_GAIN(0.80),
                 I_GAIN(0.0),
                 D_GAIN(0.0),
                 printCounter(0) {}
@@ -437,7 +438,7 @@ namespace lane {
                     	D_GAIN = m_config.getGainD();
 
                     	configContainerTimeStamp = TimeStamp();
-
+			m_roadOffset = m_config.getLightThreshold();
                     	LaneFollower::toLogger(LogMessage::DEBUG, m_config.toString());
                 	}
 				}
