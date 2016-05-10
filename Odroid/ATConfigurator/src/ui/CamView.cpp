@@ -10,17 +10,19 @@
 ui::CamView::CamView(void) { CamView(80, 20); }
 
 ui::CamView::CamView(int x, int y) : xsize(x - 2), ysize(y - 2),
-                                             _camview(newwin(ysize - 2, xsize - 16, 1, 16)) {
-    mvwaddstr(_camview, 0, 0, "Cam View Test");
-}
+                                             _camview(newwin(ysize - 2, xsize - 16, 1, 16)) {}
 
 void ui::CamView::refresh(void) {
     wmove(_camview, 0, 0);
     wclrtobot(_camview);
-    if(std::ifstream("camview.jpg"))
-        mvwaddstr(_camview, 1, 0, loadImage().c_str());
-    else
-        mvwaddstr(_camview, 1, 0, "No image available.");
+    if(od::ConferenceData::instance()->isCamView()) {
+        if (std::ifstream("camview.jpg"))
+            mvwaddstr(_camview, 1, 0, loadImage().c_str());
+        else
+            mvwaddstr(_camview, 1, 1, "No image available.");
+    } else {
+        mvwaddstr(_camview, 1, 1, "To load up an image press ENTER!");
+    }
     wrefresh(_camview);
 }
 
