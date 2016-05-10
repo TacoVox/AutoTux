@@ -51,11 +51,13 @@ namespace  overtaker{
     public:
         Overtaker();
         virtual ~Overtaker();
-        void obstacleDetection(automotive::miniature::SensorBoardData, automotive::VehicleData, automotive::VehicleControl);
+        void obstacleDetection(automotive::miniature::SensorBoardData, automotive::VehicleData);
+		void newObstacleDetection(automotive::miniature::SensorBoardData, automotive::VehicleData);
 
         bool getIsOverriding();
         bool isLeftLane();
         VehicleControl getOvtControl();
+		void setLaneFollowerAngle(double);
 
     private:
         VehicleControl ovtControl;
@@ -69,6 +71,7 @@ namespace  overtaker{
         bool leftLane;
         int consecReadings, idle_frame_counter;
         double min_us_fr;
+		double laneFollowerAngle;
 
 		void stopCar();
 		bool isObstacleDetected(automotive::miniature::SensorBoardData, const double, const double);
