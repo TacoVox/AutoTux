@@ -56,6 +56,9 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode od::ConferenceModule::
 
         //Send out the configured vals
         getConference().send(*od::ConferenceData::instance()->genLaneFollowerContainer());
+
+        //Send state
+        getConference().send(*od::ConferenceData::instance()->genDecisionMakerContainer());
     }
 
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;

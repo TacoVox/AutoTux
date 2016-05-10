@@ -4,14 +4,15 @@
 
 #include "od/ConferenceData.h"
 #include <automotivedata/generated/autotux/config/LaneFollowerMSG.h>
+#include <automotivedata/generated/autotux/DecisionMakerMSG.h>
 
 od::ConferenceData* od::ConferenceData::_instance = 0;
 
-od::ConferenceData::ConferenceData() : speed(0.0), angle(90.0), us1(0.0),
+od::ConferenceData::ConferenceData() : speed(0.0), angle(0.0), us1(0.0),
                                        us2(0.0), ir1(0.0), ir2(0.0), ir3(0.0),
-                                       roadWidth(190), gainP(0.8), gainI(0.0),
-                                       gainD(0.0), thresholdB(200),
-                                       thresholdD(50) { }
+                                       roadWidth(230), gainP(1.1), gainI(0.0),
+                                       gainD(0.1), thresholdB(200),
+                                       thresholdD(50),  state(DRIVING) { }
 od::ConferenceData::ConferenceData(const ConferenceData &) { }
 od::ConferenceData::~ConferenceData() { }
 
@@ -35,6 +36,18 @@ std::shared_ptr<odcore::data::Container> od::ConferenceData::genLaneFollowerCont
 
     return lfc;
 }
+
+std::shared_ptr<odcore::data::Container> od::ConferenceData::genDecisionMakerContainer(void) {
+    autotux::DecisionMakerMSG dmg;
+    dmg.setState(this->state);
+
+    std::shared_ptr<odcore::data::Container> dmc =
+            (std::shared_ptr<odcore::data::Container>)new odcore::data::Container(dmg);
+
+    return dmc;
+}
+
+
 
 double od::ConferenceData::getSpeed(void) { return this->speed; }
 
@@ -65,7 +78,7 @@ double od::ConferenceData::getIR3(void) { return this->ir3; }
 void od::ConferenceData::setIR3(double ir) { this->ir3 = ir; }
 
 double od::ConferenceData::getRec_angle(void) { return this->rec_angle; }
-
+(char)269
 void od::ConferenceData::setRec_angle(double ra) { this->rec_angle = ra; }
 
 double od::ConferenceData::getDistance_to_line(void) { return this->distance_to_line; }
@@ -75,6 +88,10 @@ void od::ConferenceData::setDistance_to_line(double dtl) { this->distance_to_lin
 bool od::ConferenceData::isQuality(void) { return this->quality; }
 
 void od::ConferenceData::setQuality(bool q) { this->quality = q; }
+
+double od::ConferenceData::getAbsPath(void) { return this->absPath; }
+
+void od::ConferenceData::setAbsPath(double ap) { this->absPath = ap; }
 
 uint32 od::ConferenceData::getRoadWidth() { return this->roadWidth; }
 
@@ -99,3 +116,7 @@ void od::ConferenceData::setThresholdB(uint8 tb) { this->thresholdB = tb; }
 uint8 od::ConferenceData::getThresholdD() { return this->thresholdD; }
 
 void od::ConferenceData::setThresholdD(uint8 td) { this->thresholdD = td; }
+
+od::ConferenceData::STATE od::ConferenceData::getState(void) { return this->state; }
+
+void od::ConferenceData::setState(STATE s) { this->state = s; }

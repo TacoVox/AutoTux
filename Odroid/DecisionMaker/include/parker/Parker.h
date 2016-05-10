@@ -19,29 +19,29 @@ namespace parker {
     private:
 
         //REAL CAR
-//        const double SPOT_SIZE = 0.70;
-//        const double ADJUST_BEFORE_PARKING = 0.08;
-//        const double BACK_AROUND_CORNER = 0.45;
-//        const double BACKING_STRAIGHT = 2;
-//        const double BACKING_LEFT = 0.48;
-//
-//        const double SENSOR_SAFETY_MIN = 0.03;
-//        const double SENSOR_SAFETY_MAX = 0.04;
-//
-//        const double IRSENSOR_DISTANCE_MIN = 0.05;
-//        const double IRSENSOR_DISTANCE_MAX = 0.22;
-//
-//        const double ULTRASENSOR_DISTANCE_MIN = 0.05;
-//        const double ULTRASENSOR_DISTANCE_MAX = 90;
-//        const double ENOUGH_SPACE_DISTANCE = 0.85;
-//
-//        const double SENSOR_DIFFERENCE_INBETWEEN = 0.08;
-//        const double SENSOR_DIFFERENCE_NO_FRONT = 0.04;
-//
-//        const double DISTANCE_FROM_BACK_OBJECT = 0.10;
+        const double SPOT_SIZE = 0.65;
+        const double ADJUST_BEFORE_PARKING = 0.08;
+        const double BACK_AROUND_CORNER = 0.40;
+        const double BACKING_STRAIGHT = 0.03;
+        const double BACKING_LEFT = 0.43;
+
+        const double SENSOR_SAFETY_MIN = 0.03;
+        const double SENSOR_SAFETY_MAX = 0.04;
+
+        const double IRSENSOR_DISTANCE_MIN = 0.10;
+        const double IRSENSOR_DISTANCE_MAX = 0.25;
+
+        const double ULTRASENSOR_DISTANCE_MIN = 0.05;
+        const double ULTRASENSOR_DISTANCE_MAX = 0.90;
+        const double ENOUGH_SPACE_DISTANCE = 0.90;
+
+        const double SENSOR_DIFFERENCE_INBETWEEN = 0.08;
+        const double SENSOR_DIFFERENCE_NO_FRONT = 0.04;
+
+        const double DISTANCE_FROM_BACK_OBJECT = 0.10;
 
         //-----------------------------------------
-
+/*
         //SIMULATION
         const double SPOT_SIZE = 6;
         const double ADJUST_BEFORE_PARKING = 2;
@@ -62,7 +62,7 @@ namespace parker {
         const double DISTANCE_FROM_BACK_OBJECT = 2;
         //----------------------------------------
 
-
+*/
         enum STATE {FINDOBJECT, FINDGAPSTART, FINDGAPEND, CHECKSPACE};
         enum PARKSTATE {PHASE0,PHASE1, PHASE2, PHASE3, PHASE4, SAFETYSTOP};
         PARKSTATE parkstate;
@@ -98,12 +98,13 @@ namespace parker {
         automotive::VehicleControl backAroundCorner(automotive::VehicleData, double);
         automotive::VehicleControl backingStraight(automotive::VehicleData, double);
         automotive::VehicleControl getParallelInSpot(automotive::miniature::SensorBoardData, automotive::VehicleData, double);
-        automotive::VehicleControl midOfSpot(automotive::miniature::SensorBoardData);
+        automotive::VehicleControl midOfSpot(automotive::miniature::SensorBoardData, automotive::VehicleData);
         bool isNotSafe(automotive::miniature::SensorBoardData);
-        void inBetweenObjects(automotive::miniature::SensorBoardData);
-        void objectBehind(automotive::miniature::SensorBoardData);
+        void inBetweenObjects(automotive::miniature::SensorBoardData, automotive::VehicleData);
+        void objectBehind(automotive::miniature::SensorBoardData, automotive::VehicleData);
         void checkIfInSpot(automotive::miniature::SensorBoardData);
         bool sensorClear(double);
+        automotive::VehicleControl stop();
 
     public:
         Parker();

@@ -112,7 +112,9 @@ void controlOutputIteration() {
 				// No new values! Worrying.
 				if (iterationsNoNewValues > MAX_ITERATIONS_WITHOUT_RECEIVE) {
 					// Stop the car and center wheels!
-					controlOutputStopCenter();
+					if (CALIBRATION_MODE == 0) {
+						controlOutputStopCenter();
+					}
 				} else {
 					iterationsNoNewValues++;
 				}

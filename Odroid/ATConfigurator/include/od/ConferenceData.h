@@ -13,8 +13,10 @@
 namespace od {
     class ConferenceData {
     public:
+        enum STATE {LANE_FOLLOWING, DRIVING, PARKING, RESUME};
         static ConferenceData* instance(void);
         std::shared_ptr<odcore::data::Container> genLaneFollowerContainer(void);
+        std::shared_ptr<odcore::data::Container> genDecisionMakerContainer(void);
         double getSpeed(void);
         void setSpeed(double);
         double getAngle(void);
@@ -35,6 +37,8 @@ namespace od {
         void setDistance_to_line(double);
         bool isQuality(void);
         void setQuality(bool);
+        double getAbsPath(void);
+        void setAbsPath(double);
         uint32 getRoadWidth(void);
         void setRoadWidth(uint32 roadWidth);
         double getGainP(void);
@@ -47,6 +51,8 @@ namespace od {
         void setThresholdB(uint8 thresholdB);
         uint8 getThresholdD(void);
         void setThresholdD(uint8 thresholdD);
+        STATE getState(void);
+        void setState(STATE);
     private:
         ConferenceData();
         ConferenceData(const ConferenceData&);
@@ -61,12 +67,14 @@ namespace od {
         double rec_angle;
         double distance_to_line;
         bool quality;
+        double absPath;
         uint32 roadWidth;
         double gainP;
         double gainI;
         double gainD;
         uint8 thresholdB;
         uint8 thresholdD;
+        STATE state;
         static ConferenceData* _instance;
     };
 }

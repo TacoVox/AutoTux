@@ -14,7 +14,6 @@ namespace ui {
     public:
         Footer(void);
         Footer(int, int);
-        WINDOW* getFooter(void);
         void refresh(void);
     private:
         int xsize;

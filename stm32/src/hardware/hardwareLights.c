@@ -109,6 +109,9 @@ void hardwareLightsIteration(unsigned char lightByte, bool rcMode, bool rcBrakeL
 			flashState = !flashState;
 			lightsHaveChanged = true;
 		}
+	} else {
+		// Make sure flashState is off, otherwise it may get stuck in on
+		flashState = false;
 	}
 
 	// Check master light switch
@@ -148,7 +151,7 @@ static void updateColorBuffer(void) {
 				LIGHT_FLASH_G, LIGHT_FLASH_B);
 	}
 	if (flashRight && flashState) {
-		neopixelSetColor(colorBuffer, LIGHT_FLASHLEFT_LEDS, LIGHT_FLASH_R,
+		neopixelSetColor(colorBuffer, LIGHT_FLASHRIGHT_LEDS, LIGHT_FLASH_R,
 				LIGHT_FLASH_G, LIGHT_FLASH_B);
 	}
 	if (!flashState) {

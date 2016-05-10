@@ -60,7 +60,7 @@ void ui::CamSettings::printVals(void) {
     wattroff(_camsettings, A_STANDOUT);
 }
 
-void ui::CamSettings::select(void) {active = true; }
+void ui::CamSettings::select(void) { active = true; }
 
 void ui::CamSettings::unselect(void) { active = false; }
 
@@ -72,7 +72,7 @@ void ui::CamSettings::selUp(void) {
 }
 
 void ui::CamSettings::selDn(void) {
-    if(selectedItem + 1 == 6)
+    if(selectedItem == 5)
         selectedItem = 0;
     else
         selectedItem++;
@@ -123,5 +123,3 @@ void ui::CamSettings::decr(void) {
         od::ConferenceData::instance()->setThresholdB((uint8)(od::ConferenceData::instance()->getThresholdB() - 1));
     }
 }
-
-

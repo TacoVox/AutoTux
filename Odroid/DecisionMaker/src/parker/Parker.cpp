@@ -98,23 +98,24 @@ VehicleControl Parker::parallelPark(SensorBoardData sbd, VehicleData vd){
         }
         case PHASE4:{
             carPosition = vd.getAbsTraveledPath();
-            vc = midOfSpot(sbd);
+            vc = midOfSpot(sbd, vd);
             break;
         }
         case SAFETYSTOP:{
+            vc = stop();
             break;
         }
     }
     return vc;
 }
 
-VehicleControl Parker::midOfSpot(SensorBoardData sbd) {
+VehicleControl Parker::midOfSpot(SensorBoardData sbd, VehicleData vd) {
     if(objInFront) {
-        inBetweenObjects(sbd);
+        inBetweenObjects(sbd, vd);
     }
         // If there isn't any vehicle infront of the car
     else {
-        objectBehind(sbd);
+        objectBehind(sbd, vd);
     }
     return controlTemp;
 }
@@ -122,7 +123,7 @@ VehicleControl Parker::midOfSpot(SensorBoardData sbd) {
 /*
  * If the car dosn't have an object infront of it it executes this
  */
-void Parker::objectBehind(SensorBoardData sbd) {
+void Parker::objectBehind(SensorBoardData sbd, VehicleData vd) {
     if ((sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > IRSENSOR_DISTANCE_MIN &&
          sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) < IRSENSOR_DISTANCE_MAX)) {
         isAccurate++;
@@ -137,6 +138,7 @@ void Parker::objectBehind(SensorBoardData sbd) {
             min(DISTANCE_FROM_BACK_OBJECT, backSensor)) < SENSOR_DIFFERENCE_NO_FRONT){
             controlTemp.setSpeed(0);
             controlTemp.setBrakeLights(true);
+            carPosition = vd.getAbsTraveledPath();
             isParked = true;
             reversing = false;
         }
@@ -157,7 +159,7 @@ void Parker::objectBehind(SensorBoardData sbd) {
 /*
  * When it is parking in between two object this is executed
  */
-void Parker::inBetweenObjects(SensorBoardData sbd) {
+void Parker::inBetweenObjects(SensorBoardData sbd, VehicleData vd) {
     if ((sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) > SENSOR_SAFETY_MIN &&
          sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) < ULTRASENSOR_DISTANCE_MAX)
         && (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > SENSOR_SAFETY_MIN &&
@@ -171,9 +173,10 @@ void Parker::inBetweenObjects(SensorBoardData sbd) {
     double backSensor = sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK);
 
     if (isAccurate == FREQUENCY) {
-        if((max(&frontSensor, &backSensor) - min(&frontSensor, &backSensor)) < SENSOR_DIFFERENCE_INBETWEEN) {
+        if((max(frontSensor, backSensor) - min(frontSensor, backSensor)) < SENSOR_DIFFERENCE_INBETWEEN) {
             controlTemp.setSpeed(0);
             controlTemp.setBrakeLights(true);
+            carPosition = vd.getAbsTraveledPath();
             isParked = true;
             reversing = false;
         }
@@ -359,6 +362,7 @@ void Parker::findObject(SensorBoardData sbd) {
     //To check if the sensors are in the ranges of where it can find a object
     if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > IRSENSOR_DISTANCE_MIN &&
             sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < IRSENSOR_DISTANCE_MAX){
+	cout << isAccurate << endl;
         isAccurate++;
     }
     else
@@ -472,5 +476,10 @@ VehicleControl Parker::goBackToLane(SensorBoardData sbd, VehicleData vd, double 
     }
     else
         resume = true;
+    return controlTemp;
+}
+
+VehicleControl Parker::stop() {
+    controlTemp.setSpeed(0);
     return controlTemp;
 }

@@ -15,11 +15,9 @@ ui::Footer::Footer(int x, int y) : xsize(x), ysize(y),
     wbkgd(_footer, COLOR_PAIR(1));
 }
 
-WINDOW *ui::Footer::getFooter(void) {
-    return _footer;
-}
-
 void ui::Footer::refresh(void) {
+    wmove(_footer, 0, 0);
+    wclrtobot(_footer);
     time = std::time(nullptr);
     std::string timestring = std::asctime(std::localtime(&time));
     mvwaddstr(_footer, 0, (xsize - (int)timestring.size()), timestring.c_str());
