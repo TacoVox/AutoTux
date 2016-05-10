@@ -27,6 +27,7 @@ std::shared_ptr<odcore::data::Container> od::ConferenceData::genLaneFollowerCont
     lfm.setThresholdB(this->thresholdB);
     lfm.setThresholdD(this->thresholdD);
     lfm.setRoadWidth(this->roadWidth);
+    lfm.setLightThreshold(this->roadOffset);
     lfm.setGainD(this->gainD);
     lfm.setGainI(this->gainI);
     lfm.setGainP(this->gainP);
@@ -94,6 +95,10 @@ void od::ConferenceData::setAbsPath(double ap) { this->absPath = ap; }
 uint32 od::ConferenceData::getRoadWidth() { return this->roadWidth; }
 
 void od::ConferenceData::setRoadWidth(uint32 rw) { this->roadWidth = rw; }
+
+uint8 od::ConferenceData::getRoadOffset(void) { return this->roadOffset; }
+
+void od::ConferenceData::setRoadOffset(uint8 ro) { this->roadOffset = ro; }
 
 double od::ConferenceData::getGainP() { return this->gainP; }
 

@@ -40,17 +40,19 @@ namespace od {
         double getAbsPath(void);
         void setAbsPath(double);
         uint32 getRoadWidth(void);
-        void setRoadWidth(uint32 roadWidth);
+        void setRoadWidth(uint32);
+        uint8 getRoadOffset(void);
+        void setRoadOffset(uint8);
         double getGainP(void);
-        void setGainP(double gainP);
+        void setGainP(double);
         double getGainI(void);
-        void setGainI(double gainI);
+        void setGainI(double);
         double getGainD(void);
-        void setGainD(double gainD);
+        void setGainD(double);
         uint8 getThresholdB(void);
-        void setThresholdB(uint8 thresholdB);
+        void setThresholdB(uint8);
         uint8 getThresholdD(void);
-        void setThresholdD(uint8 thresholdD);
+        void setThresholdD(uint8);
         STATE getState(void);
         void setState(STATE);
     private:
@@ -69,6 +71,7 @@ namespace od {
         bool quality;
         double absPath;
         uint32 roadWidth;
+        uint8 roadOffset;
         double gainP;
         double gainI;
         double gainD;
