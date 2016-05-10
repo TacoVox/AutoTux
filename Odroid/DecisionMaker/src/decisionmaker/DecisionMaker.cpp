@@ -29,7 +29,7 @@ VehicleControl vehicleControl;
  */
 DecisionMaker::DecisionMaker(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "DecisionMaker"),
-        state(DRIVING),ovt(), parker(), vd(), sbd(), dmMSG(), lrMSG(),
+        state(LANE_FOLLOWING),ovt(), parker(), vd(), sbd(), dmMSG(), lrMSG(),
         speed(), isStopLine(false), stopCounter(0), printCounter(0) {}
 
 DecisionMaker::~DecisionMaker() {}
@@ -154,7 +154,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
         containerLaneRecommendationMSG = getKeyValueDataStore().get(autotux::LaneRecommendationMSG::ID());
         lrMSG = containerLaneRecommendationMSG.getData<LaneRecommendationMSG>();
 
-      	//state = static_cast<DecisionMaker::STATE>(dmMSG.getState());
+      	state = static_cast<DecisionMaker::STATE>(dmMSG.getState());
 	
         if(!ovt.isLeftLane()){
             ovtMSG.setLeftlane(NOTLEFTLANE);
