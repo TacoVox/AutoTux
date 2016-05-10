@@ -48,28 +48,28 @@ void DecisionMaker::laneFollowing() {
     if(stopCounter > 0) {
 
         if(stopCounter == 50) {
-            //cout << "WAKING UP" << endl;
+            cout << "WAKING UP" << endl;
             stopCounter = 0;
             isStopLine = false;
             vehicleControl.setBrakeLights(false);
         }
 
         else {
-            //cout << "SLEEPING..." << endl;
+            cout << "SLEEPING..." << endl;
             stopCounter++;
         }
     }
 
     else if(getDistanceToLine() < 30 && getDistanceToLine() != -1) {
-        //cout << "STOPPING!" << endl;
-        //vehicleControl.setBrakeLights(true);
-        //speed = 0;
-        //stopCounter = 1;
-        //isStopLine = true;
+        cout << "STOPPING!" << endl;
+        vehicleControl.setBrakeLights(true);
+        speed = 0;
+        stopCounter = 1;
+        isStopLine = true;
     }
 
     else if(getDistanceToLine() < 50 && getDistanceToLine() != -1) {
-        //cout << "Slowing down..." << endl;
+        cout << "Slowing down..." << endl;
         vehicleControl.setBrakeLights(false);
         speed = 1;
     }
@@ -116,7 +116,7 @@ void DecisionMaker::printDebug() {
         cout << " | US FRONT RIGHT: " << sbd.getValueForKey_MapOfDistances(4);
         cout << " | TRAVELED: " << vd.getAbsTraveledPath() << endl;
 	
-	printf("%i\n", state);
+	printf("%u\n", state);
 
         // Reset counter
         printCounter = 0;
@@ -154,7 +154,8 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
         containerLaneRecommendationMSG = getKeyValueDataStore().get(autotux::LaneRecommendationMSG::ID());
         lrMSG = containerLaneRecommendationMSG.getData<LaneRecommendationMSG>();
 
-      	state = static_cast<DecisionMaker::STATE>(dmMSG.getState());
+      	//state = static_cast<DecisionMaker::STATE>(dmMSG.getState());
+	//printf("%u\n", dmMSG.getState());
 	
         if(!ovt.isLeftLane()){
             ovtMSG.setLeftlane(NOTLEFTLANE);
