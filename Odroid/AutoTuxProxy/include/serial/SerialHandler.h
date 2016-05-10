@@ -5,8 +5,8 @@
  */
 
 
-#ifndef AUTOTUXPROXY_USBHANDLER_H
-#define AUTOTUXPROXY_USBHANDLER_H
+#ifndef AUTOTUXPROXY_SERIALHANDLER_H
+#define AUTOTUXPROXY_SERIALHANDLER_H
 
 #include "serial/SerialBuffer.h"
 #include "serial/SerialIOInterface.h"
@@ -28,7 +28,6 @@ namespace serial
         void set_serialio(std::shared_ptr<serial::SerialIOInterface>);
         /*! sets the usb connector for this handler */
         void set_buffer(std::shared_ptr<serial::SerialBuffer>);
-        //void set_serialio(serial::conninter::SerialIOInterface*);
         /*! sets verbose */
         void set_verbose(bool);
         int readOp();
@@ -51,4 +50,4 @@ namespace serial
 
 } // namespace serial
 
-#endif	// AUTOTUXPROXY_USBHANDLER_H
+#endif	// AUTOTUXPROXY_SERIALHANDLER_H

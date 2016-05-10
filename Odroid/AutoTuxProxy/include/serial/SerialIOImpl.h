@@ -2,8 +2,8 @@
 // Created by ivo on 5/5/16.
 //
 
-#ifndef AUTOTUXPROXY_USBCONNECTOR_IMPL_H
-#define AUTOTUXPROXY_USBCONNECTOR_IMPL_H
+#ifndef AUTOTUXPROXY_SERIALIOIMPL_H
+#define AUTOTUXPROXY_SERIALIOIMPL_H
 
 
 #include <memory>
@@ -57,4 +57,4 @@ namespace serial
     };
  } // namespace serial
 
-#endif // AUTOTUXPROXY_USBCONNECTOR_IMPL_H
+#endif // AUTOTUXPROXY_SERIALIOIMPL_H

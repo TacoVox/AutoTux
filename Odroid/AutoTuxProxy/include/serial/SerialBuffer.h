@@ -5,8 +5,8 @@
  */
 
 
-#ifndef AUTOTUXPROXY_BUFFERWRAPPER_H
-#define AUTOTUXPROXY_BUFFERWRAPPER_H
+#ifndef AUTOTUXPROXY_SERIALBUFFER_H
+#define AUTOTUXPROXY_SERIALBUFFER_H
 
 // include
 // ==================================================
@@ -72,4 +72,4 @@ namespace serial
 } // namespace serial
 
 
-#endif // AUTOTUXPROXY_BUFFERPARSER_H
+#endif // AUTOTUXPROXY_SERIALBUFFER_H
