@@ -23,7 +23,7 @@ serial::SerialHandler::SerialHandler() :
     pserio{},
     pserbuf{}
 {
-    cout << "creating usb handler... ";
+    cout << "creating serial handler... ";
     cout << "[OK]" << endl;
 }
 
@@ -31,7 +31,7 @@ serial::SerialHandler::SerialHandler() :
 /*! destructor */
 serial::SerialHandler::~SerialHandler()
 {
-    cout << "destroying usb handler... ";
+    cout << "destroying serial handler... ";
     cout << "[OK]" << endl;
 }
 

@@ -30,7 +30,7 @@ serial::SerialBuffer::SerialBuffer(bool a_ver) :
     buffer_in{},
     buffer_out{}
 {
-    cout << "creating buffer wrapper... ";
+    cout << "creating serial buffer... ";
     cout << "[OK]" << endl;
 }
 
@@ -38,7 +38,7 @@ serial::SerialBuffer::SerialBuffer(bool a_ver) :
 /*! destructor */
 serial::SerialBuffer::~SerialBuffer()
 {
-    cout << "destroying buffer wrapper... ";
+    cout << "destroying serial buffer... ";
     cout << "[OK]" << endl;
 }
 

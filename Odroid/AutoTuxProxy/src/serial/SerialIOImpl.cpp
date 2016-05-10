@@ -17,7 +17,7 @@ serial::SerialIOImpl::SerialIOImpl() :
     ctx{},
     usb_dev{}
 {
-    cout << "creating usb connector... ";
+    cout << "creating serial io... ";
     libusb_init(&ctx);
     cout << "[OK]" << endl;
 }
