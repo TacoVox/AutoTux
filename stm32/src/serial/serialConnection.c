@@ -131,6 +131,19 @@ static THD_FUNCTION(serialThread, arg) {
 		while (charbuf != Q_TIMEOUT && charbuf != Q_RESET &&
 				bytesReceived < MAX_RECEIVE_BYTES_IN_ITERATION) {
 
+			if (CALIBRATION_MODE == 1) {
+				// CALIBRATION SPECIAL
+				if ((unsigned char)charbuf == 'n') {
+					controlData[CONTROL_BYTE_SPEED] = 1;
+				} else if ((unsigned char)charbuf == 'f') {
+					controlData[CONTROL_BYTE_SPEED] = 2;
+				} if ((unsigned char)charbuf == 'b') {
+					controlData[CONTROL_BYTE_SPEED] = 0;
+				}
+				chprintf((BaseSequentialStream*)&SDU1, "\nCALIBRATION OUT: %i", CTRL_OUT_SPEED_PULSEWIDTHS[controlData[CONTROL_BYTE_SPEED]]);
+				controlOutputSetData(controlData);
+			}
+
 			// Received another byte
 			bytesReceived++;
 
@@ -174,6 +187,7 @@ static THD_FUNCTION(serialThread, arg) {
 					// DEBUG MODE - any received bytes will be seen as active connection
 					receivedValidPacket = TRUE;
 					iterationsWithoutReceive = 0;
+
 				}
 			}
 		}

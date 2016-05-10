@@ -5,7 +5,10 @@
 #ifndef ATCONFIGURATOR_CLIENTCONFERENCEMODULE_H
 #define ATCONFIGURATOR_CLIENTCONFERENCEMODULE_H
 
+#include <opencv2/opencv.hpp>
 #include <opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h>
+#include <opendavinci/odcore/wrapper/SharedMemory.h>
+#include <memory>
 
 namespace od {
     class ConferenceModule
@@ -19,6 +22,10 @@ namespace od {
         ConferenceModule& operator=(const ConferenceModule &);
         virtual void setUp();
         virtual void tearDown();
+        void readSharedImage(odcore::data::Container &);
+        bool m_hasAttachedToSharedImageMemory;
+        std::shared_ptr<odcore::wrapper::SharedMemory> m_sharedImageMemory;
+        cv::Mat m_image;
     };
 }
 

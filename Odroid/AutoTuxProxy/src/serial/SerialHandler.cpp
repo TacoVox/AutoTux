@@ -9,15 +9,12 @@
 #include <thread>
 #include <mutex>
 #include <iostream>
-#include <cstring>
 #include <libusb-1.0/libusb.h>
 #include <serial/SerialIOImpl.h>
 #include "serial/SerialHandler.h"
 
 using namespace std;
 
-// running mutex
-std::mutex m_stop;
 
 /*! constructor */
 serial::SerialHandler::SerialHandler() :
@@ -49,44 +46,63 @@ void serial::SerialHandler::run()
 
     // main loop
     while (running) {
-        cout << "serial handler running" << endl;
-        m_stop.lock();
         // read from usb
-        int read_bytes;
-        unsigned char data[READ_LEN];
-        //std::array<unsigned char, 50> arr;
-        int res1 = pserio->read(data, &read_bytes);
-        if (verbose) {
-            cout << "result from read: " << res1 << endl;
-            cout << "bytes read: " << read_bytes << endl;
+        int res1 = readOp();
+        // if not successful read, check if we need to reconnect
+        if (res1 != 0) {
+            if (serial::is_reconnect(res1))
+                reconnect();
         }
-        // if not successful read, check if we
-        // need to reconnect
-        if (res1 == 0) {
-            // the vector holding the data from the read
-            vector<unsigned char> vec(data, data + read_bytes);
-            // append to the receive buffer
-            pserbuf->appendReceiveBuffer(vec);
-        }
-        else {
-            if (is_reconnect(res1)) reconnect();
-        }
-        //delete [] data;
-        // write it to usb
-        vector<unsigned char> vec = pserbuf->readSendBuffer();
-        int res2 = pserio->write(vec);
-        if (verbose) {
-            cout << "result from write: " << res2 << endl;
-        }
-        // if not successful write, check if we
-        // need to reconnect
+        // write to usb
+        int res2 = writeOp();
+        // if not successful write, check if we need to reconnect
         if (res2 != 0) {
-            if (is_reconnect(res2)) reconnect();
+            if (serial::is_reconnect(res2))
+                reconnect();
         }
-        m_stop.unlock();
         // sleep for 67, approximation to keep the frequency (30)
         this_thread::sleep_for(chrono::milliseconds(67));
     }
+}
+
+
+int serial::SerialHandler::readOp()
+{
+    // actual bytes read from the serial
+    int read_bytes;
+    // the char array where data will be stored
+    unsigned char data[READ_LEN];
+    // read from the serial
+    int res = pserio->read(data, &read_bytes);
+    // print some info if verbose mode
+    if (verbose) {
+        cout << "result from read: " << res << endl;
+        cout << "bytes read: " << read_bytes << endl;
+    }
+    // if success
+    if (res == 0) {
+        // the vector holding the data from the read
+        vector<unsigned char> vec(data, data + read_bytes);
+        // append to the receive buffer
+        pserbuf->appendReceiveBuffer(vec);
+    }
+    // return the result, used to check if reconnection needed
+    return res;
+}
+
+
+int serial::SerialHandler::writeOp()
+{
+    // get the data to write to the serial
+    vector<unsigned char> vec = pserbuf->readSendBuffer();
+    // send it for write
+    int res = pserio->write(vec);
+    // print info if verbose
+    if (verbose) {
+        cout << "result from write: " << res << endl;
+    }
+    // return the result, used to check if reconnection needed
+    return res;
 }
 
 
@@ -94,9 +110,7 @@ void serial::SerialHandler::run()
 void serial::SerialHandler::stop()
 {
     cout << "*** calling stop ***" << endl;
-    m_stop.lock();
     running = false;
-    m_stop.unlock();
 }
 
 
@@ -123,26 +137,22 @@ void serial::SerialHandler::set_verbose(bool a_ver)
 }
 
 
-bool serial::SerialHandler::get_running()
-{
-    return running;
-}
-
-
 /*! reconnects the usb */
-void serial::SerialHandler::reconnect()
+bool serial::SerialHandler::reconnect()
 {
-    cout << "reconnecting..." << endl; 
+    cout << "reconnecting..." << endl;
     pserio->disconnect();
     while (1) {       
-        if (pserio->connect()) break;
+        if (pserio->connect()) {
+            return true;
+        }
         this_thread::sleep_for(chrono::seconds(2));
     }
 }
 
 
 /*! returns true if reconnection needed, false otherwise*/
-bool serial::SerialHandler::is_reconnect(int error_code)
+bool serial::is_reconnect(int error_code)
 {
     switch (error_code) {
     case LIBUSB_ERROR_IO:

@@ -8,6 +8,8 @@
 #include <vector>
 #include <gmock/gmock.h>
 
+using ::testing::_;
+
 class MockSerialInterface : public serial::SerialIOInterface
 {
 public:

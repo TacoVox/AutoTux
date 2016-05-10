@@ -5,8 +5,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 PROJECT(ATConfigurator)
 
 SET(CMAKE_MODULE_PATH "/opt/od/share/cmake-2.8/Modules" ${CMAKE_MODULE_PATH})
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${CXX_OPTIONS} -pipe -std=c++11 -lncurses -lmenu")
-# SET warning flags here and append them to the CMAKE_CXX_FLAGS -Weffc++
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${CXX_OPTIONS} -pipe -std=c++11 -lncurses -lmenu -lopencv_core")
+# SET warning flags here and append them to the CMAKE_CXX_FLAGS -Weffc++ -Wunsafe-loop-optimizations
 SET(WARN "${WARN} -g -O -Wall -pedantic -Wvolatile-register-var")
 SET(WARN "${WARN} -Wconversion -Wcast-align -Wwrite-strings -Wunused-variable")
 SET(WARN "${WARN} -Wcast-qual -Wchar-subscripts -Wvariadic-macros -Wimport")
@@ -14,7 +14,7 @@ SET(WARN "${WARN} -Wcomment -Wunused-parameter -Wextra -Wdisabled-optimization")
 SET(WARN "${WARN} -Wfloat-equal -Wformat=2 -Wformat-nonliteral")
 SET(WARN "${WARN} -Wformat-security -Wformat-y2k -Wwrite-strings")
 SET(WARN "${WARN} -Winit-self -Wformat -Winline -Winvalid-pch -Wmissing-braces")
-SET(WARN "${WARN} -Wunsafe-loop-optimizations -Wlong-long -Wreturn-type")
+SET(WARN "${WARN} -Wlong-long -Wreturn-type")
 SET(WARN "${WARN} -Wmissing-field-initializers -Wmissing-format-attribute")
 SET(WARN "${WARN} -Wmissing-include-dirs -Wpacked -Wparentheses -Wunused-value")
 SET(WARN "${WARN} -Wmissing-noreturn -Wsequence-point -Wshadow -Wsign-compare")
@@ -32,6 +32,10 @@ FIND_PACKAGE (OpenDaVINCI REQUIRED)
 SET(AUTOMOTIVEDATA_DIR "/opt/od")
 FIND_PACKAGE(AutomotiveData REQUIRED)
 
+# Find OpenCV
+SET(OpenCV_ROOT_DIR "/usr")
+FIND_PACKAGE(OpenCV REQUIRED)
+
 #Find ncurses
 FIND_PACKAGE(Curses REQUIRED)
 SET(CURSES_USE_NCURSES TRUE)
@@ -40,10 +44,11 @@ SET(CURSES_USE_NCURSES TRUE)
 INCLUDE_DIRECTORIES(SYSTEM ${OPENDAVINCI_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(SYSTEM ${AUTOMOTIVEDATA_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(SYSTEM ${CURSES_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(SYSTEM ${OpenCV_INCLUDE_DIR})
 # Set include directory.
 INCLUDE_DIRECTORIES(include)
 
-SET(LIBRARIES ${OPENDAVINCI_LIBRARIES} ${AUTOMOTIVEDATA_LIBRARIES} ${CURSES_LIBRARIES})
+SET(LIBRARIES ${OPENDAVINCI_LIBRARIES} ${AUTOMOTIVEDATA_LIBRARIES} ${CURSES_LIBRARIES} ${OpenCV_LIBRARIES})
 
 FILE(GLOB_RECURSE thisproject-sources "${CMAKE_CURRENT_SOURCE_DIR}/src/*/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/*/*.h")
 ADD_LIBRARY(${PROJECT_NAME}lib-static STATIC ${thisproject-sources})

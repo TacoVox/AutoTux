@@ -12,6 +12,7 @@ namespace ui {
     public:
         Header(void);
         Header(int, int);
+        void refresh(void);
     private:
         int xsize;
         int ysize;
