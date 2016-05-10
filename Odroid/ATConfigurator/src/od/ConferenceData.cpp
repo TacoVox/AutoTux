@@ -47,8 +47,6 @@ std::shared_ptr<odcore::data::Container> od::ConferenceData::genDecisionMakerCon
     return dmc;
 }
 
-
-
 double od::ConferenceData::getSpeed(void) { return this->speed; }
 
 void od::ConferenceData::setSpeed(double s) { this->speed = s; }
@@ -78,7 +76,7 @@ double od::ConferenceData::getIR3(void) { return this->ir3; }
 void od::ConferenceData::setIR3(double ir) { this->ir3 = ir; }
 
 double od::ConferenceData::getRec_angle(void) { return this->rec_angle; }
-(char)269
+
 void od::ConferenceData::setRec_angle(double ra) { this->rec_angle = ra; }
 
 double od::ConferenceData::getDistance_to_line(void) { return this->distance_to_line; }

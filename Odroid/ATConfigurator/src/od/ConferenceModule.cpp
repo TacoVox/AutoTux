@@ -5,14 +5,18 @@
 #include "od/ConferenceModule.h"
 
 #include "od/ConferenceData.h"
+#include <opendavinci/GeneratedHeaders_OpenDaVINCI.h>
+#include <opendavinci/odcore/wrapper/SharedMemoryFactory.h>
 #include <automotivedata/generated/automotive/VehicleControl.h>
 #include <automotivedata/generated/automotive/miniature/SensorBoardData.h>
 #include <automotivedata/generated/autotux/config/LaneFollowerMSG.h>
 #include <automotivedata/generated/autotux/LaneRecommendationMSG.h>
 
 using namespace std;
-using namespace odcore::base::module;
 using namespace odcore::data;
+using namespace odcore::data::image;
+using namespace odcore::base::module;
+using namespace odcore::wrapper;
 using namespace automotive;
 using namespace automotive::miniature;
 using namespace autotux;
@@ -54,6 +58,11 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode od::ConferenceModule::
         ConferenceData::instance()->setDistance_to_line(laneRecommendationMSG.getDistance_to_line());
         ConferenceData::instance()->setQuality(laneRecommendationMSG.getQuality());
 
+        //Get the shared image address
+        Container image_container = getKeyValueDataStore().get(SharedImage::ID());
+        if (image_container.getDataType() == SharedImage::ID())
+            readSharedImage(image_container);
+
         //Send out the configured vals
         getConference().send(*od::ConferenceData::instance()->genLaneFollowerContainer());
 
@@ -62,4 +71,29 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode od::ConferenceModule::
     }
 
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
+}
+
+void od::ConferenceModule::readSharedImage(Container &c) {
+    SharedImage si = c.getData<SharedImage>();
+    if (si.getName() == "WebCam") {
+        if (!m_hasAttachedToSharedImageMemory) {
+            m_sharedImageMemory = SharedMemoryFactory::attachToSharedMemory(si.getName());
+
+            m_hasAttachedToSharedImageMemory = true;
+        }
+
+        // Did we successfully connect?
+        if (m_sharedImageMemory->isValid()) {
+            m_sharedImageMemory->lock();
+            // Create image(cv::Mat) if empty.
+            if (m_image.empty()) {
+                m_image.create(si.getHeight(), si.getWidth(), CV_8UC3);
+            } else {
+                // Copy image data form SharedImageMemory
+                memcpy(m_image.data, m_sharedImageMemory->getSharedMemory(),
+                       si.getHeight() * si.getWidth() * si.getBytesPerPixel());
+            }
+            m_sharedImageMemory->unlock();
+        }
+    }
 }
