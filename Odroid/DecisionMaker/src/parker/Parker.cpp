@@ -204,13 +204,13 @@ bool isCloseToBack = false;
 VehicleControl Parker::getParallelInSpot(SensorBoardData sbd, VehicleData vd, double add){
         if(carPosition + add > vd.getAbsTraveledPath()){
             checkIfInSpot(sbd);
-            if(!isInSpot){
+            if(!isInSpot && sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > 0.07){
                 reversing = true;
                 controlTemp.setSteeringWheelAngle(-0.5); // 45
                 controlTemp.setBrakeLights(false);
                 controlTemp.setSpeed(-1);
             }
-            else if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > IRSENSOR_DISTANCE_MIN && !isCloseToBack){
+            else if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > 0.07 && !isCloseToBack){
                 reversing = true;
                 controlTemp.setSteeringWheelAngle(-0.5); // 45
                 controlTemp.setBrakeLights(false);
@@ -218,7 +218,7 @@ VehicleControl Parker::getParallelInSpot(SensorBoardData sbd, VehicleData vd, do
             }
             else
                 isCloseToBack = true;
-            if(sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) > ULTRASENSOR_DISTANCE_MIN && isCloseToBack){
+            if(sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) > 0.07 && isCloseToBack){
                 reversing = false;
                 controlTemp.setSteeringWheelAngle(0.5); // 45
                 controlTemp.setBrakeLights(false);
