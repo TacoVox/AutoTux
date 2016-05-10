@@ -42,14 +42,14 @@ void ui::CamSettings::printVals(void) {
 
     if(selectedItem == 3 && active)
         wattron(_camsettings, A_STANDOUT);
-    mvwaddstr(_camsettings, 2, 20, "Road Offset:     ");
-    mvwprintw(_camsettings, 2, 36, "%u", od::ConferenceData::instance()->getRoadOffset());
+    mvwaddstr(_camsettings, 1, 20, "Road Width:     ");
+    mvwprintw(_camsettings, 1, 36, "%u", od::ConferenceData::instance()->getRoadWidth());
     wattroff(_camsettings, A_STANDOUT);
 
     if(selectedItem == 4 && active)
         wattron(_camsettings, A_STANDOUT);
-    mvwaddstr(_camsettings, 1, 20, "Road Width:     ");
-    mvwprintw(_camsettings, 1, 36, "%u", od::ConferenceData::instance()->getRoadWidth());
+    mvwaddstr(_camsettings, 2, 20, "Road Offset:     ");
+    mvwprintw(_camsettings, 2, 36, "%u", od::ConferenceData::instance()->getRoadOffset());
     wattroff(_camsettings, A_STANDOUT);
 
     if(selectedItem == 5 && active)
