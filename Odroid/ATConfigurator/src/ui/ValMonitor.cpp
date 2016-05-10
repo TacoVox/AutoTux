@@ -15,7 +15,7 @@ ui::ValMonitor::ValMonitor(int x, int y) : xsize(x - 2), ysize(y - 2),
 
 void ui::ValMonitor::refresh(void) {
     //Clear the screen
-    wmove(_valmonitor, 1, 1);
+    wmove(_valmonitor, 0, 0);
     wclrtobot(_valmonitor);
     printVals();
     wrefresh(_valmonitor);
