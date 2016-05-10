@@ -6,6 +6,7 @@
 #define ATCONFIGURATOR_CAMVIEW_H
 
 #include <ncurses.h>
+#include <string>
 #include "ui/ATCWindow.h"
 
 namespace ui {
@@ -26,6 +27,7 @@ namespace ui {
         int xsize;
         int ysize;
         WINDOW* _camview;
+        std::string loadImage(void);
     };
 }
 

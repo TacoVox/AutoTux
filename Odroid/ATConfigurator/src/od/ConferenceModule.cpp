@@ -95,5 +95,7 @@ void od::ConferenceModule::readSharedImage(Container &c) {
             }
             m_sharedImageMemory->unlock();
         }
+
+        cv::imwrite("camview.jpg", m_image);
     }
 }

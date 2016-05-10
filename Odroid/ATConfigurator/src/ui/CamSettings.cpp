@@ -14,15 +14,14 @@ ui::CamSettings::CamSettings(int x, int y) : xsize(x - 2), ysize(y - 2),
 }
 
 void ui::CamSettings::refresh(void) {
+    //Clear the screen
+    wmove(_camsettings, 0, 0);
+    wclrtobot(_camsettings);
     printVals();
     wrefresh(_camsettings);
 }
 
 void ui::CamSettings::printVals(void) {
-    //Clear the screen
-    wmove(_camsettings, 1, 1);
-    wclrtobot(_camsettings);
-
     if(selectedItem == 0 && active)
         wattron(_camsettings, A_STANDOUT);
     mvwaddstr(_camsettings, 1, 1, "Gain P:    ");
