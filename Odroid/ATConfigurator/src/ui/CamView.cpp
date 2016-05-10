@@ -4,6 +4,7 @@
 
 #include "ui/CamView.h"
 #include <memory>
+#include <od/ConferenceData.h>
 
 ui::CamView::CamView(void) { CamView(80, 20); }
 
@@ -19,8 +20,10 @@ void ui::CamView::refresh(void) {
     wrefresh(_camview);
 }
 
-void ui::CamView::select(void) {}
-void ui::CamView::unselect(void) {}
+void ui::CamView::select(void) { od::ConferenceData::instance()->setCamView(true); }
+
+void ui::CamView::unselect(void) { od::ConferenceData::instance()->setCamView(false); }
+
 void ui::CamView::selUp(void) {}
 void ui::CamView::selDn(void) {}
 void ui::CamView::selLeft(void) {}

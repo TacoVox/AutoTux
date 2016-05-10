@@ -66,7 +66,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode od::ConferenceModule::
 
         //Get the shared image address
         Container image_container = getKeyValueDataStore().get(SharedImage::ID());
-        if (image_container.getDataType() == SharedImage::ID())
+        if (image_container.getDataType() == SharedImage::ID() && od::ConferenceData::instance()->isCamView())
             readSharedImage(image_container);
 
         //Send out the configured vals

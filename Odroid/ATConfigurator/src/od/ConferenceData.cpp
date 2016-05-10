@@ -48,6 +48,10 @@ std::shared_ptr<odcore::data::Container> od::ConferenceData::genDecisionMakerCon
     return dmc;
 }
 
+bool od::ConferenceData::isCamView(void) { return this->camView; }
+
+void od::ConferenceData::setCamView(bool cw) { this->camView = cw; }
+
 double od::ConferenceData::getSpeed(void) { return this->speed; }
 
 void od::ConferenceData::setSpeed(double s) { this->speed = s; }

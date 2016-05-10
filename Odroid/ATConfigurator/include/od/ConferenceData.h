@@ -17,6 +17,8 @@ namespace od {
         static ConferenceData* instance(void);
         std::shared_ptr<odcore::data::Container> genLaneFollowerContainer(void);
         std::shared_ptr<odcore::data::Container> genDecisionMakerContainer(void);
+        bool isCamView(void);
+        void setCamView(bool);
         double getSpeed(void);
         void setSpeed(double);
         double getAngle(void);
@@ -59,6 +61,7 @@ namespace od {
         ConferenceData();
         ConferenceData(const ConferenceData&);
         ~ConferenceData();
+        bool camView;
         double speed;
         double angle;
         double us1;
