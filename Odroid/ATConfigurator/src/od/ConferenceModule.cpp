@@ -82,7 +82,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode od::ConferenceModule::
 
 void od::ConferenceModule::readSharedImage(Container &c) {
     SharedImage si = c.getData<SharedImage>();
-    if (si.getName() == "ProcessedImage") {
+    if (si.getName() == "WebCam") {
         if (!m_hasAttachedToSharedImageMemory) {
             m_sharedImageMemory = SharedMemoryFactory::attachToSharedMemory(si.getName());
 
