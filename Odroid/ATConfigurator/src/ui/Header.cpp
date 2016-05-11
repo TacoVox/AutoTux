@@ -18,7 +18,7 @@ void ui::Header::refresh(void) {
     //Clear the screen
     wmove(_header, 0, 0);
     wclrtobot(_header);
-    std::string title = "AutoTux Configurator - v0.2";
+    std::string title = "AutoTux Configurator - v1.0";
     int startpos = (xsize - (int)title.size()) / 2;
     mvwaddstr(_header, 0, startpos, title.c_str());
     wrefresh(_header);
