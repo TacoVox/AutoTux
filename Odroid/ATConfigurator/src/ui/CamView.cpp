@@ -10,19 +10,23 @@
 ui::CamView::CamView(void) { CamView(80, 20); }
 
 ui::CamView::CamView(int x, int y) : xsize(x - 2), ysize(y - 2),
-                                             _camview(newwin(ysize - 2, xsize - 16, 1, 16)) {}
+                                     _camview(newwin(ysize - 2, xsize - 16, 1, 16)),
+                                     image("No image available.") {}
 
 void ui::CamView::refresh(void) {
     wmove(_camview, 0, 0);
     wclrtobot(_camview);
-    if(od::ConferenceData::instance()->isCamView()) {
-        if (std::ifstream("camview.jpg"))
-            mvwaddstr(_camview, 1, 0, loadImage().c_str());
-        else
-            mvwaddstr(_camview, 1, 1, "No image available.");
+    if(od::ConferenceData::instance()->isCamView() && std::ifstream("camview.jpg")) {
+        std::string tempimg = loadImage();
+
+        if(tempimg != "Premature end of JPEG file" && tempimg != "Empty input file")
+            image = tempimg;
+
+        mvwaddstr(_camview, 1, 0, image.c_str());
     } else {
-        mvwaddstr(_camview, 1, 1, "To load up an image press ENTER!");
+        mvwaddstr(_camview, 1, 1, "To load up an image press ENTER!"); //Premature end of JPEG file //Empty input file
     }
+
     wrefresh(_camview);
 }
 

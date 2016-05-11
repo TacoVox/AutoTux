@@ -27,6 +27,7 @@ namespace ui {
         int xsize;
         int ysize;
         WINDOW* _camview;
+        std::string image;
         std::string loadImage(void);
     };
 }
