@@ -12,7 +12,7 @@ od::ConferenceData::ConferenceData() : camView(false), speed(0.0), angle(0.0),
                                        us1(0.0), us2(0.0), ir1(0.0), ir2(0.0),
                                        ir3(0.0), rec_angle(0), distance_to_line(0),
                                        quality(false), absPath(0), roadWidth(230),
-                                       roadOffset(0), gainP(1.1), gainI(0.0),
+                                       roadOffset(30), gainP(1.3), gainI(0.01),
                                        gainD(0.1), thresholdB(200),
                                        thresholdD(50),  state(DRIVING) { }
 od::ConferenceData::ConferenceData(const ConferenceData &) { }
