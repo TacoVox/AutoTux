@@ -19,12 +19,12 @@ void ui::CamView::refresh(void) {
     if(od::ConferenceData::instance()->isCamView() && std::ifstream("camview.jpg")) {
         std::string tempimg = loadImage();
 
-        if(tempimg != "Premature end of JPEG file" && tempimg != "Empty input file")
+        if(tempimg.compare("Premature end of JPEG file") != 0 && tempimg.compare("Empty input file") != 0)
             image = tempimg;
 
         mvwaddstr(_camview, 1, 0, image.c_str());
     } else {
-        mvwaddstr(_camview, 1, 1, "To load up an image press ENTER!"); //Premature end of JPEG file //Empty input file
+        mvwaddstr(_camview, 1, 1, "To load up an image press ENTER!");
     }
 
     wrefresh(_camview);
