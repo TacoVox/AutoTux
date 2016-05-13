@@ -7,7 +7,6 @@
 
 
 #include <thread>
-#include <mutex>
 #include <iostream>
 #include <libusb-1.0/libusb.h>
 #include <serial/SerialIOImpl.h>
@@ -68,11 +67,9 @@ void serial::SerialHandler::run()
         end = chrono::system_clock::now();
         // get the elapsed time
         chrono::duration<double> duration = end - start;
-        cout << "elapsed time: " << duration.count() << endl;
         auto millisec = duration.count();
         if (millisec < 50) {
             int sleep = 50 - (int) millisec;
-            cout << "sleep: " << sleep << endl;
             this_thread::sleep_for(chrono::milliseconds(sleep));
         }
     }

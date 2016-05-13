@@ -1,6 +1,8 @@
 /**
  * Implementation of the USBConnector.h. Responsible for reading and
- * writing from/to the usb serial connection.
+ * writing from/to the usb serial connection. As reference for creating
+ * this class, the libusb API was used:
+ * http://libusb.sourceforge.net/api-1.0/
  *
  * @author Ivo
  */
