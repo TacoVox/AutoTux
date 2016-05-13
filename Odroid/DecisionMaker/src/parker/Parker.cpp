@@ -126,16 +126,16 @@ VehicleControl Parker::midOfSpot(SensorBoardData sbd, VehicleData vd) {
  * If the car dosn't have an object infront of it it executes this
  */
 void Parker::objectBehind(SensorBoardData sbd, VehicleData vd) {
-    if ((sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > IRSENSOR_DISTANCE_MIN &&
-         sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) < IRSENSOR_DISTANCE_MAX)) {
-        isAccurate++;
-    }
-    else
-        isAccurate = 0;
+    //if ((sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > IRSENSOR_DISTANCE_MIN &&
+    //     sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) < IRSENSOR_DISTANCE_MAX)) {
+    //    isAccurate++;
+    //}
+    //else
+    //    isAccurate = 0;
 
     double backSensor = sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK);
 
-    if (isAccurate == ACCURENCE) {
+    //if (isAccurate == ACCURENCE) {
         if (backSensor > SENSOR_DIFFERENCE_NO_FRONT){
             controlTemp.setSpeed(0);
             controlTemp.setBrakeLights(true);
@@ -155,7 +155,7 @@ void Parker::objectBehind(SensorBoardData sbd, VehicleData vd) {
             controlTemp.setSpeed(-1);
             reversing = true;
         }
-    }
+    //}
 }
 /*
  * When it is parking in between two object this is executed
@@ -216,7 +216,7 @@ VehicleControl Parker::getParallelInSpot(SensorBoardData sbd, VehicleData vd, do
                 controlTemp.setBrakeLights(false);
                 controlTemp.setSpeed(-1);
             }*/
-            if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > 0.16 && !isCloseToBack){
+            if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > 0.19 && !isCloseToBack){
                 reversing = true;
                 controlTemp.setSteeringWheelAngle(-0.5); // 45
                 controlTemp.setBrakeLights(false);
@@ -225,7 +225,7 @@ VehicleControl Parker::getParallelInSpot(SensorBoardData sbd, VehicleData vd, do
             }
             else
                 isCloseToBack = true;
-            if(sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) > 0.16 && isCloseToBack){
+            if(sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) > 0.19 && isCloseToBack){
                 reversing = false;
                 controlTemp.setSteeringWheelAngle(0.5); // 45
                 controlTemp.setBrakeLights(false);

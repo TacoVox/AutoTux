@@ -227,11 +227,11 @@ static THD_FUNCTION(serialThread, arg) {
 		
 		if (ST2MS(chVTGetSystemTime()) > itTime) {
 			// itTime - ST2MS(chTimeNow()) is the time in MS of this iteration.
-			// Sleep 100 - this value to get 10Hz.
-			 chThdSleepMilliseconds(67 - (itTime - ST2MS(chVTGetSystemTime())));
+			// Sleep 100 - this value to get 10Hz. 67 to get 15 hz.
+			 chThdSleepMilliseconds(50 - (itTime - ST2MS(chVTGetSystemTime())));
 		} else {
 			// System timer recently overflowed, rare but can happen. Sleep a fixed amount
-			chThdSleepMilliseconds(60);
+			chThdSleepMilliseconds(50);
 		}
 	}
 }
