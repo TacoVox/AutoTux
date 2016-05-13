@@ -30,11 +30,11 @@ namespace  overtaker{
 		const double OVT_TRIGGER = 0.70;
 		// *** On straight a straight, left switch distance needs to be longer ***
 		const double LEFT_SWITCH_DIST = 0.00;
-		const double ADJUST_L_S_DIST = 0.30;
-		const double RIGHT_SWITCH_DIST = 0.50;
-		const double ADJUST_R_S_DIST = 0.1;
+		const double ADJUST_L_S_DIST = 0.15;
+		const double RIGHT_SWITCH_DIST = 0.45;
+		const double ADJUST_R_S_DIST = 0.15;
 		const double US_SENSOR_RANGE = 0.40;
-		const double US_FRONT_RIGHT_RANGE = 0.30;
+		const double US_FRONT_RIGHT_RANGE = 0.3;
 
 		const double IR_SENSOR_LIMIT = 0.28;
 		const double US_SENSOR_LIMIT = 0.90;
@@ -51,11 +51,13 @@ namespace  overtaker{
     public:
         Overtaker();
         virtual ~Overtaker();
-        void obstacleDetection(automotive::miniature::SensorBoardData, automotive::VehicleData, automotive::VehicleControl);
+        void obstacleDetection(automotive::miniature::SensorBoardData, automotive::VehicleData);
+		void newObstacleDetection(automotive::miniature::SensorBoardData, automotive::VehicleData);
 
         bool getIsOverriding();
         bool isLeftLane();
         VehicleControl getOvtControl();
+		void setLaneFollowerAngle(double);
 
     private:
         VehicleControl ovtControl;
@@ -64,12 +66,13 @@ namespace  overtaker{
 
 		double traveledPath, totalTraveled;
         enum STATE {FREE_LANE, INIT_LEFT_SWITCH, LEFT_SWITCH, ADJUST_LEFT_SWITCH, SEARCH_END,
-					REACH_END, RIGHT_SWITCH, ADJUST_RIGHT_SWITCH};
+					REACH_END, COMPUTE_ANGLE, RIGHT_SWITCH, ADJUST_RIGHT_SWITCH};
         enum STATE state;
         bool leftLane;
-        int consecReadings, idle_frame_counter;
+        int consecReadings, idle_frame_counter, average_counter;
         double min_us_fr;
-
+		double laneFollowerAngle;
+	double laneRecommendation;
 		void stopCar();
 		bool isObstacleDetected(automotive::miniature::SensorBoardData, const double, const double);
 
@@ -84,9 +87,10 @@ namespace  overtaker{
 
 		bool detectEndOfObstacle(automotive::miniature::SensorBoardData);
         bool isRightLaneClear(automotive::miniature::SensorBoardData);
-        bool switchToRightLane(automotive::VehicleData, const double, const double);
+        bool switchToRightLane(automotive::VehicleData, const double, const double, const double);
         bool adjustRightSwitch(automotive::VehicleData, const double, const double);
 		void resetFSM(automotive::VehicleData, const double, const int);
+	void sumTotalAngle(double);
     };
 }// overtaker
 

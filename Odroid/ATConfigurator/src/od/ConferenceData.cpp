@@ -8,9 +8,11 @@
 
 od::ConferenceData* od::ConferenceData::_instance = 0;
 
-od::ConferenceData::ConferenceData() : speed(0.0), angle(0.0), us1(0.0),
-                                       us2(0.0), ir1(0.0), ir2(0.0), ir3(0.0),
-                                       roadWidth(230), gainP(1.1), gainI(0.0),
+od::ConferenceData::ConferenceData() : camView(false), speed(0.0), angle(0.0),
+                                       us1(0.0), us2(0.0), ir1(0.0), ir2(0.0),
+                                       ir3(0.0), rec_angle(0), distance_to_line(0),
+                                       quality(false), absPath(0), roadWidth(230),
+                                       roadOffset(30), gainP(1.3), gainI(0.01),
                                        gainD(0.1), thresholdB(200),
                                        thresholdD(50),  state(DRIVING) { }
 od::ConferenceData::ConferenceData(const ConferenceData &) { }
@@ -27,6 +29,7 @@ std::shared_ptr<odcore::data::Container> od::ConferenceData::genLaneFollowerCont
     lfm.setThresholdB(this->thresholdB);
     lfm.setThresholdD(this->thresholdD);
     lfm.setRoadWidth(this->roadWidth);
+    lfm.setLightThreshold(this->roadOffset);
     lfm.setGainD(this->gainD);
     lfm.setGainI(this->gainI);
     lfm.setGainP(this->gainP);
@@ -46,6 +49,10 @@ std::shared_ptr<odcore::data::Container> od::ConferenceData::genDecisionMakerCon
 
     return dmc;
 }
+
+bool od::ConferenceData::isCamView(void) { return this->camView; }
+
+void od::ConferenceData::setCamView(bool cw) { this->camView = cw; }
 
 double od::ConferenceData::getSpeed(void) { return this->speed; }
 
@@ -94,6 +101,10 @@ void od::ConferenceData::setAbsPath(double ap) { this->absPath = ap; }
 uint32 od::ConferenceData::getRoadWidth() { return this->roadWidth; }
 
 void od::ConferenceData::setRoadWidth(uint32 rw) { this->roadWidth = rw; }
+
+uint8 od::ConferenceData::getRoadOffset(void) { return this->roadOffset; }
+
+void od::ConferenceData::setRoadOffset(uint8 ro) { this->roadOffset = ro; }
 
 double od::ConferenceData::getGainP() { return this->gainP; }
 

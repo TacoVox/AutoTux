@@ -60,8 +60,8 @@ void serial::SerialHandler::run()
             if (serial::is_reconnect(res2))
                 reconnect();
         }
-        // sleep for 67, approximation to keep the frequency (30)
-        this_thread::sleep_for(chrono::milliseconds(67));
+        // sleep for 50, approximation to keep the frequency (20)
+        this_thread::sleep_for(chrono::milliseconds(50));
     }
 }
 

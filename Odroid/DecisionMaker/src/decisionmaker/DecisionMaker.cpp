@@ -29,7 +29,8 @@ VehicleControl vehicleControl;
  */
 DecisionMaker::DecisionMaker(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "DecisionMaker"),
-        state(DRIVING),ovt(), parker(), vd(), sbd(), dmMSG(), lrMSG(),
+        state(PARKING),ovt(), parker(), vd(), sbd(), dmMSG(), lrMSG(),
+
         speed(), isStopLine(false), stopCounter(0), printCounter(0) {}
 
 DecisionMaker::~DecisionMaker() {}
@@ -45,35 +46,30 @@ void DecisionMaker::tearDown(){
 */
 void DecisionMaker::laneFollowing() {
 
+    if(state == LANE_FOLLOWING) { 
     if(stopCounter > 0) {
 
         if(stopCounter == 50) {
-            //cout << "WAKING UP" << endl;
+            cout << "WAKING UP" << endl;
             stopCounter = 0;
             isStopLine = false;
             vehicleControl.setBrakeLights(false);
         }
 
         else {
-            //cout << "SLEEPING..." << endl;
+            cout << "SLEEPING..." << endl;
             stopCounter++;
         }
     }
 
-    else if(getDistanceToLine() < 30 && getDistanceToLine() != -1) {
-        //cout << "STOPPING!" << endl;
-        //vehicleControl.setBrakeLights(true);
-        //speed = 0;
-        //stopCounter = 1;
-        //isStopLine = true;
+    else if(getDistanceToLine() < 60 && getDistanceToLine() != -1) {
+        cout << "STOPPING!" << endl;
+        vehicleControl.setBrakeLights(true);
+        speed = 0;
+        stopCounter = 1;
+        isStopLine = true;
     }
-
-    else if(getDistanceToLine() < 50 && getDistanceToLine() != -1) {
-        //cout << "Slowing down..." << endl;
-        vehicleControl.setBrakeLights(false);
-        speed = 1;
-    }
-
+}
     vehicleControl.setSpeed(speed);
     vehicleControl.setSteeringWheelAngle(getAngle());
 }
@@ -115,6 +111,12 @@ void DecisionMaker::printDebug() {
         cout << " | US FRONT: " << sbd.getValueForKey_MapOfDistances(3);
         cout << " | US FRONT RIGHT: " << sbd.getValueForKey_MapOfDistances(4);
         cout << " | TRAVELED: " << vd.getAbsTraveledPath() << endl;
+
+	cout << "CURRENT STATE: ";	
+	printf("%u", state);
+	cout << " RECEIVED STATE: ";
+	printf("%u\n", dmMSG.getState()); 
+
         // Reset counter
         printCounter = 0;
     }
@@ -124,8 +126,6 @@ void DecisionMaker::printDebug() {
 }
 
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() {
-    LIFOQueue lifoQueue;
-    addDataStoreFor(lifoQueue);
 
     Container containerSensorBoardData, containerVehicleData, containerDecisionMakerMSG, containerLaneRecommendationMSG;
     OvertakingMSG ovtMSG;
@@ -151,9 +151,8 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
         containerLaneRecommendationMSG = getKeyValueDataStore().get(autotux::LaneRecommendationMSG::ID());
         lrMSG = containerLaneRecommendationMSG.getData<LaneRecommendationMSG>();
 
-      //  state = static_cast<DecisionMaker::STATE>(dmMSG.getState());
+      	//state = static_cast<DecisionMaker::STATE>(dmMSG.getState());
 	
-	//	cout << "THis is State:  " << state << endl;
         if(!ovt.isLeftLane()){
             ovtMSG.setLeftlane(NOTLEFTLANE);
         }
@@ -174,17 +173,18 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
             }
             // Lane follower + overtaker
             case DRIVING:{
-                ovt.obstacleDetection(sbd, vd, vehicleControl);
+
+                ovt.setLaneFollowerAngle(getAngle());
+                //ovt.obstacleDetection(sbd, vd);
+                ovt.newObstacleDetection(sbd, vd);
 
                 // If overtaker is overriding control values...
                 if(ovt.getIsOverriding()) {
-                    //cout << "DM: OVERTAKER is OVERRIDING" << endl;
                     vehicleControl = ovt.getOvtControl();
 
 				}
                 //... else follow lane-follower instructions...
                 else{
-                    //cout <<"DM: LANE FOLLOWER Instructions" << endl;
 
                     if(!isStopLine) {
                         speed = 1;

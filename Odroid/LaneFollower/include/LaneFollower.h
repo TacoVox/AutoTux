@@ -91,7 +91,9 @@ namespace lane {
             int32_t m_stopScanline;
             int32_t  m_threshold1;
             int32_t  m_threshold2;
-
+		
+			uint8_t m_roadOffset;
+	
             // For introduction to algorithm see
             // https://www.youtube.com/watch?v=4Y7zG48uHRo
             // Proportional gain. Values above 1 amplifies e and vice versa.

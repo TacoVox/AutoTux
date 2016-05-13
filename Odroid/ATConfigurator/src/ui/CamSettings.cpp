@@ -14,15 +14,14 @@ ui::CamSettings::CamSettings(int x, int y) : xsize(x - 2), ysize(y - 2),
 }
 
 void ui::CamSettings::refresh(void) {
+    //Clear the screen
+    wmove(_camsettings, 0, 0);
+    wclrtobot(_camsettings);
     printVals();
     wrefresh(_camsettings);
 }
 
 void ui::CamSettings::printVals(void) {
-    //Clear the screen
-    wmove(_camsettings, 1, 1);
-    wclrtobot(_camsettings);
-
     if(selectedItem == 0 && active)
         wattron(_camsettings, A_STANDOUT);
     mvwaddstr(_camsettings, 1, 1, "Gain P:    ");
@@ -49,14 +48,20 @@ void ui::CamSettings::printVals(void) {
 
     if(selectedItem == 4 && active)
         wattron(_camsettings, A_STANDOUT);
-    mvwaddstr(_camsettings, 2, 20, "Threshold Low:     ");
-    mvwprintw(_camsettings, 2, 36, "%u", od::ConferenceData::instance()->getThresholdD());
+    mvwaddstr(_camsettings, 2, 20, "Road Offset:     ");
+    mvwprintw(_camsettings, 2, 36, "%u", od::ConferenceData::instance()->getRoadOffset());
     wattroff(_camsettings, A_STANDOUT);
 
     if(selectedItem == 5 && active)
         wattron(_camsettings, A_STANDOUT);
-    mvwaddstr(_camsettings, 3, 20, "Threshold High:     ");
-    mvwprintw(_camsettings, 3, 36, "%u", od::ConferenceData::instance()->getThresholdB());
+    mvwaddstr(_camsettings, 3, 20, "Threshold Low:     ");
+    mvwprintw(_camsettings, 3, 36, "%u", od::ConferenceData::instance()->getThresholdD());
+    wattroff(_camsettings, A_STANDOUT);
+
+    if(selectedItem == 6 && active)
+        wattron(_camsettings, A_STANDOUT);
+    mvwaddstr(_camsettings, 4, 20, "Threshold High:     ");
+    mvwprintw(_camsettings, 4, 36, "%u", od::ConferenceData::instance()->getThresholdB());
     wattroff(_camsettings, A_STANDOUT);
 }
 
@@ -66,13 +71,13 @@ void ui::CamSettings::unselect(void) { active = false; }
 
 void ui::CamSettings::selUp(void) {
     if(selectedItem == 0)
-        selectedItem = 5;
+        selectedItem = 6;
     else
         selectedItem--;
 }
 
 void ui::CamSettings::selDn(void) {
-    if(selectedItem == 5)
+    if(selectedItem == 6)
         selectedItem = 0;
     else
         selectedItem++;
@@ -102,8 +107,10 @@ void ui::CamSettings::incr(void) {
     } else if(selectedItem == 3) {
         od::ConferenceData::instance()->setRoadWidth((uint32)(od::ConferenceData::instance()->getRoadWidth() + 1));
     } else if(selectedItem == 4) {
-        od::ConferenceData::instance()->setThresholdD((uint8)(od::ConferenceData::instance()->getThresholdD() + 1));
+        od::ConferenceData::instance()->setRoadOffset((uint8)(od::ConferenceData::instance()->getRoadOffset() + 1));
     } else if(selectedItem == 5) {
+        od::ConferenceData::instance()->setThresholdD((uint8)(od::ConferenceData::instance()->getThresholdD() + 1));
+    } else if(selectedItem == 6) {
         od::ConferenceData::instance()->setThresholdB((uint8)(od::ConferenceData::instance()->getThresholdB() + 1));
     }
 }
@@ -118,8 +125,10 @@ void ui::CamSettings::decr(void) {
     } else if(selectedItem == 3) {
         od::ConferenceData::instance()->setRoadWidth((uint32)(od::ConferenceData::instance()->getRoadWidth() - 1));
     } else if(selectedItem == 4) {
-        od::ConferenceData::instance()->setThresholdD((uint8)(od::ConferenceData::instance()->getThresholdD() - 1));
+        od::ConferenceData::instance()->setRoadOffset((uint8)(od::ConferenceData::instance()->getRoadOffset() - 1));
     } else if(selectedItem == 5) {
+        od::ConferenceData::instance()->setThresholdD((uint8)(od::ConferenceData::instance()->getThresholdD() - 1));
+    } else if(selectedItem == 6) {
         od::ConferenceData::instance()->setThresholdB((uint8)(od::ConferenceData::instance()->getThresholdB() - 1));
     }
 }

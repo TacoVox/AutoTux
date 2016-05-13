@@ -22,11 +22,11 @@ namespace lane {
 
         // SET TO TRUE WHEN USING THE SIMULATOR
         // Do we want this in the configuration file?
-        const bool SIMMODE = true;
+        const bool SIMMODE = false;
 		
 		Mat m_image_grey; 
 		TimeStamp startTime, endTime;
-		double realDistanceToStopline;
+		double realDistanceToStopline;		
 
         TimeStamp configContainerTimeStamp = TimeStamp();
 
@@ -47,11 +47,12 @@ namespace lane {
                 m_eSum(0),
                 m_eOld(0),
                 m_distance(190),
-                m_controlScanline(222),
+		m_controlScanline(222),
                 m_stopScanline(50),
-                m_threshold1(50),
+	        m_threshold1(50),
                 m_threshold2(200),
-                P_GAIN(0.80),
+		m_roadOffset(30),
+         	P_GAIN(0.80),
                 I_GAIN(0.0),
                 D_GAIN(0.0),
                 printCounter(0) {}
@@ -196,8 +197,8 @@ namespace lane {
             double e = 0;
 
             // Lane detection loop
-            for(int32_t y = m_image_grey.rows - 8; y > m_image_grey.rows * .5; y -= 10) {
-                // Find red pixels
+             	int32_t y = m_controlScanline;
+				  // Find red pixels
                 uchar pixelLeft, pixelRight;
                 Point left, right;
 
@@ -207,7 +208,7 @@ namespace lane {
                 // Find first red pixel to the left (left line)
                 for (int x = m_image_grey.cols / 2; x > 0; x--) {
                     pixelLeft = m_image_grey.at<uchar>(Point(x, y));
-                    if (pixelLeft == 120) {
+                    if (pixelLeft > 120) {
                         left.x = x;
                         break;
                     }
@@ -236,6 +237,9 @@ namespace lane {
                     else {
                         m_laneRecommendation.setQuality(true);
                     }
+
+					if (right.x > 0) right.x += m_roadOffset;
+					if (left.x > 0) left.x += m_roadOffset;
 
                     // Right lane logic (prefer right line following)
                     if (!inLeftLane) {
@@ -275,7 +279,6 @@ namespace lane {
                                 0.5, CV_RGB(255, 0, 0));
                     }
                 }
-            } // for loop
 
             uchar pixelFrontLeft, pixelFrontRight;
             Point stop_left, stop_right;
@@ -320,9 +323,17 @@ namespace lane {
                 }
             }
 
-            if((left_dist - right_dist > -15) && (left_dist - right_dist < 15)) {
-                m_laneRecommendation.setDistance_to_line(left_dist);
-            }
+	    static int counter = 0;
+
+            if(counter < 4 && (left_dist - right_dist > -15) && (left_dist - right_dist < 15)) {
+                counter ++;
+            } else {
+		counter = 0;
+	    }
+
+	    if(counter > 3) {
+		m_laneRecommendation.setDistance_to_line(left_dist);
+            } 
 
             return e;
         }
@@ -365,7 +376,7 @@ namespace lane {
             if (desiredSteering < -0.5) desiredSteering = -0.5;
 			
 			realDistanceToStopline = m_laneRecommendation.getDistance_to_line();
-            if(m_laneRecommendation.getDistance_to_line() < 10 || m_laneRecommendation.getDistance_to_line() > 50)
+            if(m_laneRecommendation.getDistance_to_line() < 10 || m_laneRecommendation.getDistance_to_line() > 60)
                 // Set distance to line to -1 if it's too far away or too close
                 m_laneRecommendation.setDistance_to_line(-1);
 
@@ -385,6 +396,7 @@ namespace lane {
                 cout << "QUALITY: " << m_laneRecommendation.getQuality() << endl;
                 cout << "IN LEFT LANE: " << m_overtaking.getLeftlane() << endl;
            		cout << "TIME IN BODY: " << (endTime.toMicroseconds() - startTime.toMicroseconds()) << endl;
+		cout << "ROADWIDTH: " << m_distance << endl;
 			   	cout << "-----------------------------------" << endl;
 
                 // Reset counter
@@ -426,7 +438,7 @@ namespace lane {
                     	D_GAIN = m_config.getGainD();
 
                     	configContainerTimeStamp = TimeStamp();
-
+			m_roadOffset = m_config.getLightThreshold();
                     	LaneFollower::toLogger(LogMessage::DEBUG, m_config.toString());
                 	}
 				}

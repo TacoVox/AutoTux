@@ -7,6 +7,7 @@
 #include "od/ConferenceData.h"
 #include <opendavinci/GeneratedHeaders_OpenDaVINCI.h>
 #include <opendavinci/odcore/wrapper/SharedMemoryFactory.h>
+#include <automotivedata/generated/automotive/VehicleData.h>
 #include <automotivedata/generated/automotive/VehicleControl.h>
 #include <automotivedata/generated/automotive/miniature/SensorBoardData.h>
 #include <automotivedata/generated/autotux/config/LaneFollowerMSG.h>
@@ -23,7 +24,8 @@ using namespace autotux;
 using namespace autotux::config;
 
 od::ConferenceModule::ConferenceModule(const int32_t &argc, char **argv) :
-        TimeTriggeredConferenceClientModule(argc, argv, "Configurator") {}
+        TimeTriggeredConferenceClientModule(argc, argv, "Configurator"),
+        m_hasAttachedToSharedImageMemory(false), m_sharedImageMemory(), m_image() {}
 
 od::ConferenceModule::~ConferenceModule() {}
 
@@ -58,9 +60,14 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode od::ConferenceModule::
         ConferenceData::instance()->setDistance_to_line(laneRecommendationMSG.getDistance_to_line());
         ConferenceData::instance()->setQuality(laneRecommendationMSG.getQuality());
 
+        //Get the current Vehicle Data
+        Container vdc = getKeyValueDataStore().get(VehicleData::ID());
+        VehicleData vehicleData = vdc.getData<VehicleData>();
+        ConferenceData::instance()->setAbsPath(vehicleData.getAbsTraveledPath());
+
         //Get the shared image address
         Container image_container = getKeyValueDataStore().get(SharedImage::ID());
-        if (image_container.getDataType() == SharedImage::ID())
+        if (image_container.getDataType() == SharedImage::ID() && od::ConferenceData::instance()->isCamView())
             readSharedImage(image_container);
 
         //Send out the configured vals
@@ -95,5 +102,7 @@ void od::ConferenceModule::readSharedImage(Container &c) {
             }
             m_sharedImageMemory->unlock();
         }
+
+        cv::imwrite("camview.jpg", m_image);
     }
 }
