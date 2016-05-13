@@ -17,7 +17,7 @@ serial::SerialIOImpl::SerialIOImpl() :
     ctx{},
     usb_dev{}
 {
-    cout << "creating usb connector... ";
+    cout << "creating serial io... ";
     libusb_init(&ctx);
     cout << "[OK]" << endl;
 }
@@ -142,25 +142,11 @@ bool serial::SerialIOImpl::connect()
 /*! reads from the usb stream */
 int serial::SerialIOImpl::read(unsigned char *data, int *transferred)
 {
-    // allocate memory for use when reading from the usb
-    //unsigned char *data = new unsigned char[READ_LEN];
-    // actual bytes read
-    //int transferred;
     // pass to the transfer the usb device, the endpoint (read in),
     // the char array to store the data read, the size, an int for
     // the actual bytes read and the timeout for the operation
     int res = libusb_bulk_transfer(usb_dev, USB_ENDPOINT_IN,
-                                   data, READ_LEN, transferred, 20);
-    /*
-    if (res == 0) {
-        // the vector holding the data from the read
-        vector<unsigned char> vec(data, data + transferred);
-        // append to the receive buffer
-        pserialbuf->appendReceiveBuffer(vec);
-    }
-     */
-    // delete the allocated memory
-    //delete [] data;
+                                   data, READ_LEN, transferred, 10);
     // return the result from the read
     return res;
 }
@@ -169,8 +155,6 @@ int serial::SerialIOImpl::read(unsigned char *data, int *transferred)
 /*! writes to the usb stream */
 int serial::SerialIOImpl::write(vector<unsigned char> vec)
 {
-    // get data from the send buffer
-    //vector<unsigned char> vec = pserialbuf->readSendBuffer();
     // get length
     long unsigned int len{vec.size()};
     // check for length, if 0 return
@@ -186,7 +170,7 @@ int serial::SerialIOImpl::write(vector<unsigned char> vec)
     // the char array to write, the size, an int for
     // the actual bytes written and the timeout for the operation
     int res = libusb_bulk_transfer(usb_dev, USB_ENDPOINT_OUT,
-                                   data, (unsigned int)len, &transferred, 20);
+                                   data, (unsigned int)len, &transferred, 10);
     // delete allocated memory
     delete [] data;
     // return result from the write
