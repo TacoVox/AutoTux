@@ -46,6 +46,10 @@ void serial::SerialHandler::run()
 
     // main loop
     while (running) {
+        // for measuring time for operations and adjust the frequency
+        chrono::time_point<chrono::system_clock> start, end;
+        // get the start time
+        start = chrono::system_clock::now();
         // read from usb
         int res1 = readOp();
         // if not successful read, check if we need to reconnect
@@ -60,17 +64,23 @@ void serial::SerialHandler::run()
             if (serial::is_reconnect(res2))
                 reconnect();
         }
-        // sleep for 50, approximation to keep the frequency (20)
-        this_thread::sleep_for(chrono::milliseconds(50));
+        // get the end time
+        end = chrono::system_clock::now();
+        // get the elapsed time
+        chrono::duration<double> duration = end - start;
+        cout << "elapsed time: " << duration.count() << endl;
+        auto millisec = duration.count();
+        if (millisec < 50) {
+            int sleep = 50 - (int) millisec;
+            cout << "sleep: " << sleep << endl;
+            this_thread::sleep_for(chrono::milliseconds(sleep));
+        }
     }
 }
 
 
 int serial::SerialHandler::readOp()
 {
-    chrono::time_point<chrono::system_clock> start, end;
-    // get the current time
-    start =chrono::system_clock::now();
     // actual bytes read from the serial
     int read_bytes;
     // the char array where data will be stored

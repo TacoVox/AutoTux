@@ -89,6 +89,7 @@ void serial::SerialBuffer::appendReceiveBuffer(vector<unsigned char> data)
                 {us1, us2, ir1, ir2, ir3, wheel, dis1, dis2, dis3, dis4, light};
             // check if correct checksum
             if (check == checksum(valid_pkt)) {
+                buffer_in.clear();
                 buffer_in.push_front(valid_pkt);
                 break;
             }
@@ -119,7 +120,9 @@ vector<unsigned char> serial::SerialBuffer::readReceiveBuffer()
         // get 3the most recent packet, always in first position
         std::vector<unsigned char> vec = buffer_in.at(0);
         // clear the buffer
-        buffer_in.clear();
+        //buffer_in.clear();
+        // put the packet back
+        //buffer_in.push_front(vec);
         rrm.unlock();
         return vec;
     }
@@ -136,6 +139,7 @@ void serial::SerialBuffer::appendSendBuffer(vector<unsigned char> vec)
 {
     // lock mutex
     asb.lock();
+    buffer_out.clear();
     buffer_out.push_front(vec);
     // and unlock after append
     asb.unlock();
@@ -150,11 +154,13 @@ vector<unsigned char> serial::SerialBuffer::readSendBuffer()
     if(buffer_out.size() != 0)
     {
         // get the most recent packet, always in first position
-        vector<unsigned char> v = buffer_out.at(0);
+        vector<unsigned char> vec = buffer_out.at(0);
         // clear the buffer
-        buffer_out.clear();
+        //buffer_out.clear();
+        // put the packet back
+        //buffer_out.push_front(vec);
         rsm.unlock();
-        return v;
+        return vec;
     }
     else
     {
