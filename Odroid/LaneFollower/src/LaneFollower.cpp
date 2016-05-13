@@ -325,13 +325,13 @@ namespace lane {
 
 	    static int counter = 0;
 
-            if(counter < 5 && (left_dist - right_dist > -15) && (left_dist - right_dist < 15)) {
+            if(counter < 4 && (left_dist - right_dist > -15) && (left_dist - right_dist < 15)) {
                 counter ++;
             } else {
 		counter = 0;
 	    }
 
-	    if(counter > 4) {
+	    if(counter > 3) {
 		m_laneRecommendation.setDistance_to_line(left_dist);
             } 
 
@@ -376,7 +376,7 @@ namespace lane {
             if (desiredSteering < -0.5) desiredSteering = -0.5;
 			
 			realDistanceToStopline = m_laneRecommendation.getDistance_to_line();
-            if(m_laneRecommendation.getDistance_to_line() < 10 || m_laneRecommendation.getDistance_to_line() > 50)
+            if(m_laneRecommendation.getDistance_to_line() < 10 || m_laneRecommendation.getDistance_to_line() > 60)
                 // Set distance to line to -1 if it's too far away or too close
                 m_laneRecommendation.setDistance_to_line(-1);
 

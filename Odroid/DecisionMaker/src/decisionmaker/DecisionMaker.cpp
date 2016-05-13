@@ -29,7 +29,8 @@ VehicleControl vehicleControl;
  */
 DecisionMaker::DecisionMaker(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "DecisionMaker"),
-        state(LANE_FOLLOWING),ovt(), parker(), vd(), sbd(), dmMSG(), lrMSG(),
+        state(PARKING),ovt(), parker(), vd(), sbd(), dmMSG(), lrMSG(),
+
         speed(), isStopLine(false), stopCounter(0), printCounter(0) {}
 
 DecisionMaker::~DecisionMaker() {}
@@ -45,6 +46,7 @@ void DecisionMaker::tearDown(){
 */
 void DecisionMaker::laneFollowing() {
 
+    if(state == LANE_FOLLOWING) { 
     if(stopCounter > 0) {
 
         if(stopCounter == 50) {
@@ -60,20 +62,14 @@ void DecisionMaker::laneFollowing() {
         }
     }
 
-    else if(getDistanceToLine() < 40 && getDistanceToLine() != -1) {
+    else if(getDistanceToLine() < 60 && getDistanceToLine() != -1) {
         cout << "STOPPING!" << endl;
         vehicleControl.setBrakeLights(true);
         speed = 0;
         stopCounter = 1;
         isStopLine = true;
     }
-
-    else if(getDistanceToLine() < 50 && getDistanceToLine() != -1) {
-        cout << "Slowing down..." << endl;
-        vehicleControl.setBrakeLights(false);
-        speed = 1;
-    }
-
+}
     vehicleControl.setSpeed(speed);
     vehicleControl.setSteeringWheelAngle(getAngle());
 }
@@ -115,8 +111,11 @@ void DecisionMaker::printDebug() {
         cout << " | US FRONT: " << sbd.getValueForKey_MapOfDistances(3);
         cout << " | US FRONT RIGHT: " << sbd.getValueForKey_MapOfDistances(4);
         cout << " | TRAVELED: " << vd.getAbsTraveledPath() << endl;
-	
-	printf("%u\n", state);
+
+	cout << "CURRENT STATE: ";	
+	printf("%u", state);
+	cout << " RECEIVED STATE: ";
+	printf("%u\n", dmMSG.getState()); 
 
         // Reset counter
         printCounter = 0;
