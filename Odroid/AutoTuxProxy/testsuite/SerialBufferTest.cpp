@@ -1,17 +1,23 @@
-
+/**
+ * Test suite for the serial buffer. Googletest documentation used as
+ * reference when creating these test suites:
+ * https://github.com/google/googletest/tree/master/googletest/docs
+ *
+ * @author Ivo
+ */
 #include "serial/SerialBuffer.h"
-#include <iostream>
-//#include <memory>
 #include <gtest/gtest.h>
-//#include <gmock/gmock.h>
 
 
 #define STREAM_LEN 128
 
 using namespace std;
 
+/**
+ * Test fixture for this test suite.
+ */
 namespace {
-    class BufferWrapperTest : public ::testing::Test
+    class SerialBufferTest : public ::testing::Test
     {
     public:
         serial::SerialBuffer bw;
@@ -19,14 +25,14 @@ namespace {
         vector<unsigned char> invalid_data;
         vector<unsigned char> test_vec;
 
-        BufferWrapperTest() :
+        SerialBufferTest() :
             bw{false},
             valid_data{},
             invalid_data{},
             test_vec{}
         {}
 
-        virtual ~BufferWrapperTest()
+        virtual ~SerialBufferTest()
         {
             valid_data.clear();
             invalid_data.clear();
@@ -36,7 +42,7 @@ namespace {
         //virtual void SetUp() {}
         //virtual void TearDown() {}
 
-        /*! returns a valid stream data */
+        /* returns a valid stream data */
         void fill_valid(void) {
             for (int i = 0; i < STREAM_LEN; i += SBDPKTSIZE) {
                 if (i + SBDPKTSIZE > STREAM_LEN) break;
@@ -59,7 +65,7 @@ namespace {
             }
         }
 
-        /*! returns an invalid stream data */
+        /* returns an invalid stream data */
         void fill_invalid(unsigned char first_del,
                           unsigned char second_del,
                           unsigned char third_del,
@@ -85,10 +91,12 @@ namespace {
                 invalid_data.push_back(end_del);
             }
         }
-    }; // BufferWrapperTest
+    }; // SerialBufferTest
 
-    /*! tests that checksum works in buffer wrapper */
-    TEST_F(BufferWrapperTest, CheckSumZero) {
+    /**
+     * Tests that checksum works in buffer wrapper.
+     */
+    TEST_F(SerialBufferTest, CheckSumZero) {
         test_vec.push_back('0');      // us1
         test_vec.push_back('0');      // us2
         test_vec.push_back('0');      // ir1
@@ -104,8 +112,10 @@ namespace {
         ASSERT_EQ((unsigned char) 48, bw.checksum(test_vec));
     }
 
-    /*! tests that checksum works in buffer wrapper */
-    TEST_F(BufferWrapperTest, CheckSumNonZero) {
+    /**
+     * Tests that checksum works in buffer wrapper.
+     */
+    TEST_F(SerialBufferTest, CheckSumNonZero) {
         test_vec.push_back('2');      // us1
         test_vec.push_back('3');      // us2
         test_vec.push_back('4');      // ir1
@@ -121,8 +131,10 @@ namespace {
         ASSERT_EQ((unsigned char) 54, bw.checksum(test_vec));
     }
 
-    /*! tests append valid data stream to receive buffer */
-    TEST_F(BufferWrapperTest, AppendValidStreamAndRead) {
+    /**
+     * Tests append valid data stream to receive buffer.
+     */
+    TEST_F(SerialBufferTest, AppendValidStreamAndRead) {
         fill_valid();
         bw.appendReceiveBuffer(valid_data);
         vector<unsigned char> v = bw.readReceiveBuffer();
@@ -134,8 +146,10 @@ namespace {
         ASSERT_TRUE(v.at(4) == '6');
     }
 
-    /*! tests append invalid data stream to receive buffer */
-    TEST_F(BufferWrapperTest, AppendInvalidStreamCheckSumAndRead) {
+    /**
+     * Tests append invalid data stream to receive buffer.
+     */
+    TEST_F(SerialBufferTest, AppendInvalidStreamCheckSumAndRead) {
         // wrong checksum
         fill_invalid(DEL_ONE, DEL_TWO, DEL_DBCOLON, '8', DEL_COMMA);
         bw.appendReceiveBuffer(invalid_data);
@@ -143,8 +157,10 @@ namespace {
         ASSERT_TRUE(v.size() == 0);
     }
 
-    /*! tests append invalid data stream to receive buffer */
-    TEST_F(BufferWrapperTest, AppendInvalidStreamStartDelAndRead) {
+    /**
+     * Tests append invalid data stream to receive buffer.
+     */
+    TEST_F(SerialBufferTest, AppendInvalidStreamStartDelAndRead) {
         // wrong start delimiter
         fill_invalid(DEL_TWO, DEL_TWO, DEL_DBCOLON, '6', DEL_COMMA);
         bw.appendReceiveBuffer(invalid_data);
@@ -152,8 +168,10 @@ namespace {
         ASSERT_TRUE(v.size() == 0);
     }
 
-    /*! tests append invalid data stream to receive buffer */
-    TEST_F(BufferWrapperTest, AppendInvalidStreamSecondDelAndRead) {
+    /**
+     * Tests append invalid data stream to receive buffer.
+     */
+    TEST_F(SerialBufferTest, AppendInvalidStreamSecondDelAndRead) {
         // wrong second delimiter
         fill_invalid(DEL_ONE, DEL_ONE, DEL_DBCOLON, '6', DEL_COMMA);
         bw.appendReceiveBuffer(invalid_data);
@@ -161,8 +179,10 @@ namespace {
         ASSERT_TRUE(v.size() == 0);
     }
 
-    /*! tests append invalid data stream to receive buffer */
-    TEST_F(BufferWrapperTest, AppendInvalidStreamThirdDelAndRead) {
+    /**
+     * Tests append invalid data stream to receive buffer.
+     */
+    TEST_F(SerialBufferTest, AppendInvalidStreamThirdDelAndRead) {
         // wrong third delimiter
         fill_invalid(DEL_ONE, DEL_TWO, DEL_COMMA, '6', DEL_COMMA);
         bw.appendReceiveBuffer(invalid_data);
@@ -170,8 +190,10 @@ namespace {
         ASSERT_TRUE(v.size() == 0);
     }
 
-    /*! tests append invalid data stream to receive buffer */
-    TEST_F(BufferWrapperTest, AppendInvalidStreamEndDelAndRead) {
+    /**
+     * Tests append invalid data stream to receive buffer.
+     */
+    TEST_F(SerialBufferTest, AppendInvalidStreamEndDelAndRead) {
         // wrong end delimiter
         fill_invalid(DEL_TWO, DEL_TWO, DEL_DBCOLON, '6', DEL_DBCOLON);
         bw.appendReceiveBuffer(invalid_data);
@@ -179,16 +201,20 @@ namespace {
         ASSERT_TRUE(v.size() == 0);
     }
 
-    /*! tests append invalid data stream to receive buffer */
-    TEST_F(BufferWrapperTest, AppendInvalidStreamEmptyAndRead) {
+    /**
+     * Tests append invalid data stream to receive buffer.
+     */
+    TEST_F(SerialBufferTest, AppendInvalidStreamEmptyAndRead) {
         // empty data stream
         bw.appendReceiveBuffer({});
         vector<unsigned char> v = bw.readReceiveBuffer();
         ASSERT_TRUE(v.size() == 0);
     }
 
-    /*! tests appending empty data to send buffer */
-    TEST_F(BufferWrapperTest, AppendEmptyToSendBuffer) {
+    /**
+     * Tests appending empty data to send buffer.
+     */
+    TEST_F(SerialBufferTest, AppendEmptyToSendBuffer) {
         bw.appendSendBuffer({});
         invalid_data = bw.readSendBuffer();
         ASSERT_TRUE(invalid_data.size() == 0);
@@ -197,8 +223,9 @@ namespace {
 } // namespace
 
 
+/*
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-
+*/
