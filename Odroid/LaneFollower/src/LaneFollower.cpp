@@ -47,12 +47,12 @@ namespace lane {
                 m_eSum(0),
                 m_eOld(0),
                 m_distance(190),
-		m_controlScanline(222),
+		        m_controlScanline(222),
                 m_stopScanline(50),
-	        m_threshold1(50),
+	            m_threshold1(50),
                 m_threshold2(200),
-		m_roadOffset(30),
-         	P_GAIN(0.80),
+		        m_roadOffset(30),
+         	    P_GAIN(0.80),
                 I_GAIN(0.0),
                 D_GAIN(0.0),
                 printCounter(0) {}
@@ -94,20 +94,22 @@ namespace lane {
 
             if (c.getDataType() == SharedImage::ID()) {
                 SharedImage si = c.getData<SharedImage>();
-                if (si.getName() == "WebCam") { // Make this read from configuration file as the proxy does?
+                if (si.getName() == "WebCam" || si.getName() == "odsimcamera") { // Make this read from configuration file as the proxy does?
                     // Have we already attached to the shared memory containing the image?
                     if (!m_hasAttachedToSharedImageMemory) {
                         m_sharedImageMemory = SharedMemoryFactory::attachToSharedMemory(si.getName());
 
                         // Set processed image things
-                        m_sharedProcessedImageMemory = SharedMemoryFactory::createSharedMemory("ProcessedImage",
-                                                                                               si.getHeight() *
-                                                                                               si.getWidth());
-                        m_sharedProcessedImage.setName("ProcessedImage");
-                        m_sharedProcessedImage.setWidth(si.getWidth());
-                        m_sharedProcessedImage.setHeight(si.getHeight());
-                        m_sharedProcessedImage.setBytesPerPixel(1);
-                        m_sharedProcessedImage.setSize(si.getWidth() * si.getHeight());
+                        if (!SIMMODE) {
+                            m_sharedProcessedImageMemory = SharedMemoryFactory::createSharedMemory("ProcessedImage",
+                                                                                                   si.getHeight() *
+                                                                                                   si.getWidth());
+                            m_sharedProcessedImage.setName("ProcessedImage");
+                            m_sharedProcessedImage.setWidth(si.getWidth());
+                            m_sharedProcessedImage.setHeight(si.getHeight());
+                            m_sharedProcessedImage.setBytesPerPixel(1);
+                            m_sharedProcessedImage.setSize(si.getWidth() * si.getHeight());
+                        }
 
                         // We have now attached to the shared image memory.
                         m_hasAttachedToSharedImageMemory = true;
@@ -153,41 +155,14 @@ namespace lane {
             cvtColor(m_image, m_image_grey, COLOR_BGR2GRAY);
 
             Canny(m_image_grey, m_image_grey, m_threshold1, m_threshold2, 3);
-			
-     	    if(m_sharedProcessedImageMemory.get() && m_sharedProcessedImageMemory->isValid()) {
-                m_sharedProcessedImageMemory->lock();
-                memcpy(m_sharedProcessedImageMemory->getSharedMemory(), m_image_grey.data, 640*240); // Set size dynamically?
-                m_sharedProcessedImageMemory->unlock();
+
+            if(!SIMMODE) {
+                if (m_sharedProcessedImageMemory.get() && m_sharedProcessedImageMemory->isValid()) {
+                    m_sharedProcessedImageMemory->lock();
+                    memcpy(m_sharedProcessedImageMemory->getSharedMemory(), m_image_grey.data, 640*240); // Set size dynamically?
+                    m_sharedProcessedImageMemory->unlock();
+                }
             }
-
-            /**
-             * TODO Look into Hough Lines to find edges.
-             * Example below.
-             */
-
-            /*vector<Vec2f> contours;
-            HoughLines(m_image_grey, contours, 1, CV_PI/180, 100, 0, 1);
-
-            for(size_t i = 0; i < contours.size(); i++) {
-                float rho = contours[i][0], theta = contours[i][1];
-                Point pt1, pt2;
-                double a = cos(theta), b = sin(theta);
-                double x0 = a*rho, y0 = b*rho;
-                pt1.x = cvRound(x0 + 1000*(-b));
-                pt1.y = cvRound(y0 + 1000*(a));
-                pt2.x = cvRound(x0 - 1000*(-b));
-                pt2.y = cvRound(y0 - 1000*(a));
-                line(m_image, pt1, pt2, Scalar(0,0,255), 3, CV_AA);
-            }*/
-
-            // Find contours on the image
-            //vector<vector<Point>> contours;
-            //findContours(m_image_grey, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
-
-            // Draw the contours red
-            //for(size_t idx = 0; idx < contours.size(); idx++) {
-            //    drawContours(m_image, contours, (int)idx, Scalar(0,0,255));
-            //}
         }
 
         double LaneFollower::laneDetection() {
@@ -388,7 +363,6 @@ namespace lane {
          */
         void LaneFollower::printDebug() {
             if(printCounter == 25) {
-
                 // Print values sent through to the DM
                 cout << "STOPLINE: " << m_laneRecommendation.getDistance_to_line() << endl;
     			cout << "REAL STOPLINE: " << realDistanceToStopline << endl;
@@ -396,7 +370,7 @@ namespace lane {
                 cout << "QUALITY: " << m_laneRecommendation.getQuality() << endl;
                 cout << "IN LEFT LANE: " << m_overtaking.getLeftlane() << endl;
            		cout << "TIME IN BODY: " << (endTime.toMicroseconds() - startTime.toMicroseconds()) << endl;
-		cout << "ROADWIDTH: " << m_distance << endl;
+		        cout << "ROADWIDTH: " << m_distance << endl;
 			   	cout << "-----------------------------------" << endl;
 
                 // Reset counter
@@ -438,7 +412,7 @@ namespace lane {
                     	D_GAIN = m_config.getGainD();
 
                     	configContainerTimeStamp = TimeStamp();
-			m_roadOffset = m_config.getLightThreshold();
+			            m_roadOffset = m_config.getLightThreshold();
                     	LaneFollower::toLogger(LogMessage::DEBUG, m_config.toString());
                 	}
 				}
@@ -455,8 +429,10 @@ namespace lane {
                     laneFollowing(detection);
                 }
                 Container laneRecommendationContainer(m_laneRecommendation);
-                Container processedImageContainer(m_sharedProcessedImage);
-                getConference().send(processedImageContainer);
+                if(!SIMMODE) {
+                    Container processedImageContainer(m_sharedProcessedImage);
+                    getConference().send(processedImageContainer);
+                }
                 getConference().send(laneRecommendationContainer);
 				endTime = TimeStamp();
                 printDebug();
