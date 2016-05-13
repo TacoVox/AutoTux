@@ -238,7 +238,7 @@ static const ioportmask_t RC_PIN_NUMBERS[] = {4, 6};
 /**
  * Ticks per meter. Used for distance and speed calculation.
  */
-#define WE_TICKS_PER_METER 42 // 68.49 // 44.07
+#define WE_TICKS_PER_METER 41 // 68.49 // 44.07
 
 /**
  * Pin for wheel encoder. Currently A2.
@@ -281,9 +281,8 @@ typedef enum {SPEED_REVERSE, SPEED_STOP, SPEED_FORWARD_LOW, SPEED_FORWARD_CRUISE
 /**
  * Pulse widths for each speed step. Calibrated as 1400 neutral, 800 rev, 2400 max forward
  */
-//static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1120, 1350, 1415, 1416};
-//static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1131, 1360, 1425, 1426};
-static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1150, 1400, 1482, 1482};
+static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1124, 1400, 1486, 1487};
+// REALLY LOW BATTERY: static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1115, 1400, 1486, 1487};
 
 
 /**
@@ -339,8 +338,8 @@ static const int CTRL_OUT_SPEED_PULSEWIDTHS[CTRL_OUT_SPEED_STEPS] = {1150, 1400,
  * Flash light configuration.
  */
 #define LIGHT_ITERATIONS_PER_FLASH_STATE 4
-#define LIGHT_FLASHLEFT_LEDS LED(7) | LED(8)
-#define LIGHT_FLASHRIGHT_LEDS LED(0) | LED(15)
+#define LIGHT_FLASHLEFT_LEDS LED(0) | LED(8)
+#define LIGHT_FLASHRIGHT_LEDS LED(7) | LED(15)
 #define LIGHT_FLASH_R 230
 #define LIGHT_FLASH_G 90
 #define LIGHT_FLASH_B 0
