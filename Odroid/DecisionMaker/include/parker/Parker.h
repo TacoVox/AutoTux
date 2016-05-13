@@ -20,10 +20,10 @@ namespace parker {
 
         //REAL CAR
         const double SPOT_SIZE = 0.60;
-        const double ADJUST_BEFORE_PARKING = 0.16;
-        const double BACK_AROUND_CORNER = 0.53;
+        const double ADJUST_BEFORE_PARKING = 0.20;
+        const double BACK_AROUND_CORNER = 0.56;
         const double BACKING_STRAIGHT = 0.00;
-        const double PARALLEL_IN_SPOT = 0.63;
+        const double PARALLEL_IN_SPOT = 0.66;
 
         const double SENSOR_SAFETY_MIN = 0.04;
         const double SENSOR_SAFETY_MAX = 0.06;
@@ -33,10 +33,10 @@ namespace parker {
 
         const double ULTRASENSOR_DISTANCE_MIN = 0.05;
         const double ULTRASENSOR_DISTANCE_MAX = 0.90;
-        const double ENOUGH_SPACE_DISTANCE = 0.95;
+        const double ENOUGH_SPACE_DISTANCE = 1.05;
 
         const double SENSOR_DIFFERENCE_INBETWEEN = 0.15;
-        const double SENSOR_DIFFERENCE_NO_FRONT = 0.08;
+        const double SENSOR_DIFFERENCE_NO_FRONT = 0.15;
 
         const double DISTANCE_FROM_BACK_OBJECT = 0.08;
 
