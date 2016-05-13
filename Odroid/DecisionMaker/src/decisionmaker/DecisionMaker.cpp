@@ -29,7 +29,7 @@ VehicleControl vehicleControl;
  */
 DecisionMaker::DecisionMaker(const int32_t &argc, char **argv) :
         TimeTriggeredConferenceClientModule(argc, argv, "DecisionMaker"),
-        state(PARKING),ovt(), parker(), vd(), sbd(), dmMSG(), lrMSG(),
+        state(DRIVING),ovt(), parker(), vd(), sbd(), dmMSG(), lrMSG(),
 
         speed(), isStopLine(false), stopCounter(0), printCounter(0) {}
 

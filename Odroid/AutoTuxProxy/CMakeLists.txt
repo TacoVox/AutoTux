@@ -70,8 +70,7 @@ SET(GMOCK_MAINLIB  "${GMOCK_LOCATION}/${LIBPREFIX}gmock_main${LIBSUFFIX}")
 INCLUDE_DIRECTORIES(SYSTEM ${GTEST_INCLUDES})
 INCLUDE_DIRECTORIES(SYSTEM ${GMOCK_INCLUDES})
 
-# Link runTests with what we want to test and the GTest and pthread library
-#ADD_EXECUTABLE(runTests "${CMAKE_CURRENT_SOURCE_DIR}/testsuite/BufferWrapperTest.cpp")
-ADD_EXECUTABLE(runTests "${CMAKE_CURRENT_SOURCE_DIR}/testsuite/USBHandlerTest.cpp")
+# Link runTests with what we want to test
+ADD_EXECUTABLE(runTests "${CMAKE_CURRENT_SOURCE_DIR}/testsuite/SerialBufferTest.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/testsuite/SerialHandlerTest.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/testsuite/TestMain.cpp")
 TARGET_LINK_LIBRARIES(runTests ${PROJECT_NAME}lib-static ${LIBUSB_LIBRARIES} ${GTEST_LIBRARY} ${GTEST_MAINLIB} ${GMOCK_LIBRARY} ${GMOCK_MAINLIB} pthread usb-1.0)
 
