@@ -22,7 +22,7 @@ namespace lane {
 
         // SET TO TRUE WHEN USING THE SIMULATOR
         // Do we want this in the configuration file?
-        const bool SIMMODE = false;
+        const bool SIMMODE = true;
 		
 		Mat m_image_grey; 
 		TimeStamp startTime, endTime;
