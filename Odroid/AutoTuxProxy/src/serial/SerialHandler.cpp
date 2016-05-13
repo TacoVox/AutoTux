@@ -1,13 +1,12 @@
-/*!
- * Implementation of the USBHandler.h. Responsible for managing the thread
- * to read and write to/from the usb.
+/**
+ * Implementation of the SerialHandler.h. Responsible for managing the thread
+ * to read and write from/to the serial io.
  *
  * @author Ivo
  */
 
 
 #include <thread>
-#include <mutex>
 #include <iostream>
 #include <libusb-1.0/libusb.h>
 #include <serial/SerialIOImpl.h>
@@ -16,7 +15,7 @@
 using namespace std;
 
 
-/*! constructor */
+/* constructor */
 serial::SerialHandler::SerialHandler() :
     verbose{false},
     running{true},
@@ -28,7 +27,7 @@ serial::SerialHandler::SerialHandler() :
 }
 
 
-/*! destructor */
+/* destructor */
 serial::SerialHandler::~SerialHandler()
 {
     cout << "destroying serial handler... ";
@@ -36,7 +35,7 @@ serial::SerialHandler::~SerialHandler()
 }
 
 
-/*! run */
+/* run */
 void serial::SerialHandler::run()
 {
     // call connect until true
@@ -50,14 +49,14 @@ void serial::SerialHandler::run()
         chrono::time_point<chrono::system_clock> start, end;
         // get the start time
         start = chrono::system_clock::now();
-        // read from usb
+        // read
         int res1 = readOp();
         // if not successful read, check if we need to reconnect
         if (res1 != 0) {
             if (serial::is_reconnect(res1))
                 reconnect();
         }
-        // write to usb
+        // write
         int res2 = writeOp();
         // if not successful write, check if we need to reconnect
         if (res2 != 0) {
@@ -68,24 +67,25 @@ void serial::SerialHandler::run()
         end = chrono::system_clock::now();
         // get the elapsed time
         chrono::duration<double> duration = end - start;
-        cout << "elapsed time: " << duration.count() << endl;
         auto millisec = duration.count();
         if (millisec < 50) {
+            // adjust the sleep time accordingly to keep the
+            // required frequency
             int sleep = 50 - (int) millisec;
-            cout << "sleep: " << sleep << endl;
             this_thread::sleep_for(chrono::milliseconds(sleep));
         }
     }
 }
 
 
+/* read operation */
 int serial::SerialHandler::readOp()
 {
     // actual bytes read from the serial
     int read_bytes;
     // the char array where data will be stored
     unsigned char data[READ_LEN];
-    // read from the serial
+    // read from the serial io
     int res = pserio->read(data, &read_bytes);
     // print some info if verbose mode
     if (verbose) {
@@ -104,11 +104,12 @@ int serial::SerialHandler::readOp()
 }
 
 
+/* write operation */
 int serial::SerialHandler::writeOp()
 {
     // get the data to write to the serial
     vector<unsigned char> vec = pserbuf->readSendBuffer();
-    // send it for write
+    // send it for write to serial io
     int res = pserio->write(vec);
     // print info if verbose
     if (verbose) {
@@ -119,7 +120,7 @@ int serial::SerialHandler::writeOp()
 }
 
 
-/*! stops the handler, sets the loop control variable to false */
+/* stops the handler */
 void serial::SerialHandler::stop()
 {
     cout << "*** calling stop ***" << endl;
@@ -127,7 +128,7 @@ void serial::SerialHandler::stop()
 }
 
 
-/*! sets the usb connector for this handler */
+/* sets the serial io for this handler */
 void serial::SerialHandler::set_serialio(
         shared_ptr<serial::SerialIOInterface> p)
 {
@@ -135,7 +136,7 @@ void serial::SerialHandler::set_serialio(
 }
 
 
-/*! sets the usb connector for this handler */
+/*! sets the serial buffer for this handler */
 void serial::SerialHandler::set_buffer(
         shared_ptr<serial::SerialBuffer> p)
 {
@@ -143,14 +144,14 @@ void serial::SerialHandler::set_buffer(
 }
 
 
-/*! sets verbose */
+/* sets verbose */
 void serial::SerialHandler::set_verbose(bool a_ver)
 {
     verbose = a_ver;
 }
 
 
-/*! reconnects the usb */
+/* reconnects */
 bool serial::SerialHandler::reconnect()
 {
     cout << "reconnecting..." << endl;
@@ -164,7 +165,7 @@ bool serial::SerialHandler::reconnect()
 }
 
 
-/*! returns true if reconnection needed, false otherwise*/
+/* returns true if reconnection needed, false otherwise*/
 bool serial::is_reconnect(int error_code)
 {
     switch (error_code) {

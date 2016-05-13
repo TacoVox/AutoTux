@@ -20,8 +20,7 @@ namespace lane {
         // Debugging use only
         using namespace odtools::player;
 
-        // SET TO TRUE WHEN USING THE SIMULATOR
-        // Do we want this in the configuration file?
+        // Set to true when running simulator.
         const bool SIMMODE = true;
 		
 		Mat m_image_grey; 
@@ -94,7 +93,7 @@ namespace lane {
 
             if (c.getDataType() == SharedImage::ID()) {
                 SharedImage si = c.getData<SharedImage>();
-                if (si.getName() == "WebCam" || si.getName() == "odsimcamera") { // Make this read from configuration file as the proxy does?
+                if (si.getName() == "WebCam" || si.getName() == "odsimcamera") {
                     // Have we already attached to the shared memory containing the image?
                     if (!m_hasAttachedToSharedImageMemory) {
                         m_sharedImageMemory = SharedMemoryFactory::attachToSharedMemory(si.getName());
@@ -144,9 +143,6 @@ namespace lane {
         // Do magic to the image around here.
         void LaneFollower::processImage() {
 
-            // Copy the image to a matrix (this is the one we use for detection)
-            //m_image_grey = m_image.clone();
-			
 			// Make a new greyscale matrix that will hold a greyscale copy
 			// of the original image
 			m_image_grey = Mat(m_image.rows, m_image.cols, CV_8UC1);
@@ -157,6 +153,8 @@ namespace lane {
             Canny(m_image_grey, m_image_grey, m_threshold1, m_threshold2, 3);
 
             if(!SIMMODE) {
+                // Copy the processed image to a sharedmemory location.
+                // Used to see the image from within odcockpit.
                 if (m_sharedProcessedImageMemory.get() && m_sharedProcessedImageMemory->isValid()) {
                     m_sharedProcessedImageMemory->lock();
                     memcpy(m_sharedProcessedImageMemory->getSharedMemory(), m_image_grey.data, 640*240); // Set size dynamically?
@@ -171,16 +169,16 @@ namespace lane {
 
             double e = 0;
 
-            // Lane detection loop
-             	int32_t y = m_controlScanline;
-				  // Find red pixels
+                // Lane detection loop
+                int32_t y = m_controlScanline;
+                // Pixel points used in the lane detection.
                 uchar pixelLeft, pixelRight;
                 Point left, right;
 
                 left.y = y;
                 left.x = -1;
 
-                // Find first red pixel to the left (left line)
+                // Find first grey pixel to the left (left line)
                 for (int x = m_image_grey.cols / 2; x > 0; x--) {
                     pixelLeft = m_image_grey.at<uchar>(Point(x, y));
                     if (pixelLeft > 120) {
@@ -192,7 +190,7 @@ namespace lane {
                 right.y = y;
                 right.x = -1;
 
-                // Find first red pixel to the right (right line)
+                // Find first grey pixel to the right (right line)
                 for (int x = m_image_grey.cols / 2; x < m_image_grey.cols; x++) {
                     pixelRight = m_image_grey.at<uchar>(Point(x, y));
                     if (pixelRight > 120) {
@@ -233,9 +231,8 @@ namespace lane {
                     }
                 }
 
-                // Draw debug lines
+                // Draw debug lines if debug flag is set
                 if (m_debug) {
-
                     // Draw lines from middle to the discovered left pixels
                     if (left.x > 0) {
                         line(m_image, Point(m_image.cols / 2, y), left, Scalar(0, 255, 0));
@@ -288,6 +285,7 @@ namespace lane {
                 }
             }
 
+            // Draw stopline location if debug flag is set
             if(m_debug) {
                 if(stop_left.y < m_controlScanline) {
                     line(m_image, Point(stop_left.x, m_controlScanline), stop_left, Scalar(128, 0, 0));
@@ -298,16 +296,17 @@ namespace lane {
                 }
             }
 
-	    static int counter = 0;
+            // TODO Comment this part. Jerker, Dennis?
+	        static int counter = 0;
 
             if(counter < 4 && (left_dist - right_dist > -15) && (left_dist - right_dist < 15)) {
                 counter ++;
             } else {
-		counter = 0;
-	    }
+		    counter = 0;
+	        }
 
-	    if(counter > 3) {
-		m_laneRecommendation.setDistance_to_line(left_dist);
+	        if(counter > 3) {
+		        m_laneRecommendation.setDistance_to_line(left_dist);
             } 
 
             return e;
@@ -324,7 +323,7 @@ namespace lane {
                 m_eSum += e;
             }
 
-
+            // Twiddle algorithm, values described in the header file.
             const double p = P_GAIN * e;
             const double i = I_GAIN * timeStep * m_eSum;
             const double d = D_GAIN * (e - m_eOld)/timeStep;
@@ -386,7 +385,7 @@ namespace lane {
             KeyValueConfiguration kv = getKeyValueConfiguration();
             m_debug = kv.getValue<int32_t>("lanefollower.debug") == 1;
 
-            // ?
+            // Loop while in the RUNNING state.
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() == ModuleStateMessage::RUNNING) {
                 startTime = TimeStamp();
 				bool has_next_frame = false;
@@ -395,11 +394,9 @@ namespace lane {
                
                 Container config_container = getKeyValueDataStore().get(LaneFollowerMSG::ID());
                 Container overtaking_container = getKeyValueDataStore().get(OvertakingMSG::ID());
-				//cout << "ts: "<< config_container.getReceivedTimeStamp() <<endl;
 
-
-                // TODO We are receiving values all the time.
-                // Implement check if changed.
+                // Set received values only if we actually have received a container.
+                // Otherwise run with values from the constructor.
                 if(config_container.getReceivedTimeStamp() > configContainerTimeStamp) {
                     m_config = config_container.getData<LaneFollowerMSG>();
 					if (m_config.getThresholdD() > 0) {
@@ -416,13 +413,15 @@ namespace lane {
                     	LaneFollower::toLogger(LogMessage::DEBUG, m_config.toString());
                 	}
 				}
+
                 m_overtaking = overtaking_container.getData<OvertakingMSG>();
 
-
+                // Check if we have received a new image.
                 if (image_container.getDataType() == SharedImage::ID()) {
                     has_next_frame = readSharedImage(image_container);
                 }
 
+                // If we have a new image, run the processing and detection.
                 if (has_next_frame) {
                     processImage();
                     double detection = laneDetection();
