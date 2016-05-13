@@ -1,6 +1,6 @@
-//
-// Created by jonas on 5/9/16.
-//
+/**
+ * @author Jonas Kahler // jonas@derkahler.de
+ */
 
 #include "ui/State.h"
 #include "od/ConferenceData.h"

@@ -1,6 +1,6 @@
-//
-// Created by Jonas Kahler on 4/27/16.
-//
+/**
+ * @author Jonas Kahler // jonas@derkahler.de
+ */
 
 #include <od/ConferenceData.h>
 #include "ui/Menu.h"

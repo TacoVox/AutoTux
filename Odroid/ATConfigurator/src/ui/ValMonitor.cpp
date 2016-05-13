@@ -1,6 +1,6 @@
-//
-// Created by Jonas Kahler on 4/26/16.
-//
+/**
+ * @author Jonas Kahler // jonas@derkahler.de
+ */
 
 #include "ui/ValMonitor.h"
 #include "od/ConferenceData.h"
