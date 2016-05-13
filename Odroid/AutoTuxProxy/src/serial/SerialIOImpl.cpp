@@ -1,5 +1,5 @@
 /**
- * Implementation of the USBConnector.h. Responsible for reading and
+ * Implementation of the SerialIOImpl.h. Responsible for reading and
  * writing from/to the usb serial connection. As reference for creating
  * this class, the libusb API was used:
  * http://libusb.sourceforge.net/api-1.0/
@@ -8,13 +8,12 @@
  */
 
 #include <iostream>
-#include <thread>
 #include "serial/SerialIOImpl.h"
 
 using namespace std;
 
 
-/*! constructor */
+/* constructor */
 serial::SerialIOImpl::SerialIOImpl() :
     ctx{},
     usb_dev{}
@@ -25,14 +24,14 @@ serial::SerialIOImpl::SerialIOImpl() :
 }
 
 
-/*! copy constructor */
+/* copy constructor */
 serial::SerialIOImpl::SerialIOImpl(const serial::SerialIOImpl &usb) :
     ctx(usb.ctx),
     usb_dev(usb.usb_dev)
 {}
 
 
-/*! copy constructor */
+/* copy constructor */
 serial::SerialIOImpl &
 serial::SerialIOImpl::operator=(const serial::SerialIOImpl &usb)
 {
@@ -42,7 +41,7 @@ serial::SerialIOImpl::operator=(const serial::SerialIOImpl &usb)
 }
 
 
-/*! destructor */
+/* destructor */
 serial::SerialIOImpl::~SerialIOImpl()
 {
     cout << "destroying serial io... ";
@@ -61,7 +60,7 @@ serial::SerialIOImpl::~SerialIOImpl()
 serial::SerialIOInterface::~SerialIOInterface() {}
 
 
-/*! gets a list of the devices and opens the one we need */
+/* gets a list of the devices and opens the one we need */
 bool serial::SerialIOImpl::open_device()
 {
     // to return
@@ -99,7 +98,7 @@ bool serial::SerialIOImpl::open_device()
 }
 
 
-/*! claims the conninter of the USB for I/O operations */
+/* claims the interface of the USB for I/O operations */
 bool serial::SerialIOImpl::claim_interface()
 {
     // to return
@@ -111,7 +110,7 @@ bool serial::SerialIOImpl::claim_interface()
         libusb_detach_kernel_driver(usb_dev, 1);
     }
     cout << "claiming interface... ";
-    // claim the conninter for the device, this will let us
+    // claim the interface for the device, this will let us
     // send and receive data
     int r = libusb_claim_interface(usb_dev, 1);
     if (r == 0) {
@@ -125,7 +124,7 @@ bool serial::SerialIOImpl::claim_interface()
 }
 
 
-/*! connects to usb */
+/* connects to the usb */
 bool serial::SerialIOImpl::connect()
 {
     cout << "usb connecting..." << endl;
@@ -141,7 +140,7 @@ bool serial::SerialIOImpl::connect()
 }
 
 
-/*! reads from the usb stream */
+/* reads from the usb stream */
 int serial::SerialIOImpl::read(unsigned char *data, int *transferred)
 {
     // pass to the transfer the usb device, the endpoint (read in),
@@ -154,15 +153,15 @@ int serial::SerialIOImpl::read(unsigned char *data, int *transferred)
 }
 
 
-/*! writes to the usb stream */
+/* writes to the usb stream */
 int serial::SerialIOImpl::write(vector<unsigned char> vec)
 {
-    // get length
+    // get the length of the passed vector
     long unsigned int len{vec.size()};
-    // check for length, if 0 return
+    // check the length, if 0 return
     if (len == 0) return EMPTY_DATA;
     // allocate memory for the data to write, we get a vector
-    // from the buffer but need to send char array
+    // from the buffer but need to send an unsigned char array
     unsigned char *data = new unsigned char[len];
     // copy data from vector to array
     copy(vec.begin(), vec.end(), data);
@@ -180,7 +179,7 @@ int serial::SerialIOImpl::write(vector<unsigned char> vec)
 }
 
 
-/*! disconnects and closes the usb stream */
+/* disconnects and closes the usb stream */
 bool serial::SerialIOImpl::disconnect()
 {
     cout << "disconnecting from usb stream... ";

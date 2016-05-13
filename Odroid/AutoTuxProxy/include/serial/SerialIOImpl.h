@@ -1,17 +1,18 @@
-//
-// Created by ivo on 5/5/16.
-//
+/**
+ * Serial io implementation header. Declares the functions and member variables.
+ *
+ * @author Ivo
+ */
 
 #ifndef AUTOTUXPROXY_SERIALIOIMPL_H
 #define AUTOTUXPROXY_SERIALIOIMPL_H
 
 
-#include <memory>
 #include <libusb-1.0/libusb.h>
 #include "serial/SerialIOInterface.h"
 #include "serial/SerialBuffer.h"
 
-// STM
+// STM vendor and product id, used for connecting to the USB
 #define USB_VENDOR_ID	    0x0483
 #define USB_PRODUCT_ID	    0x5740
 // endpoints for reading and writing
@@ -28,31 +29,67 @@ namespace serial
     class SerialIOImpl : public serial::SerialIOInterface
     {
     public:
-        /*! constructor */
+        /**
+         * Default constructor.
+         */
         SerialIOImpl();
-        /*! destructor */
+        /**
+         * Destructor.
+         */
         ~SerialIOImpl();
-        /*! copy constructor */
+        /**
+         * Copy constructor.
+         */
         SerialIOImpl(const SerialIOImpl&);
-        /*! copy constructor */
+        /**
+         * Copy constructor.
+         */
         SerialIOImpl & operator=(const SerialIOImpl&);
-        /*! connects to usb */
+        /**
+         * Connects to the usb.
+         *
+         * @return  True on success, false otherwise.
+         */
         bool connect() override;
-        /*! disconnects and closes the usb stream */
+        /**
+         * Disconnects and closes the usb stream.
+         *
+         * @return  True on success, false otherwise.
+         */
         bool disconnect() override;
-        /*! reads from the usb stream */
-        int read(unsigned char *, int *) override;
-        /*! writes to the usb stream */
-        int write(std::vector<unsigned char>) override;
+        /**
+         * Reads from the usb stream. Takes a pointer to the char array
+         * where data will stored and an int pointer for the actual bytes
+         * read from the stream.
+         *
+         * @param data  A pointer to the char array where to store data.
+         * @param transferred   An int pointer for the actual bytes read.
+         */
+        int read(unsigned char *data, int *transferred) override;
+        /**
+         * Writes to the usb stream. Takes a vector holding the data to be
+         * written.
+         *
+         * @param v     The vector holding the data to write.
+         */
+        int write(std::vector<unsigned char> v) override;
     private:
-        /*! gets a list of the devices and opens the one we need */
+        /**
+         * Gets a list of the devices and opens the one we need.
+         *
+         * @return  True on success, false otherwise.
+         */
         bool open_device();
-        /*! claims the interface of the USB for I/O operations */
+        /**
+         * Claims the interface of the USB for I/O operations.
+         *
+         * @return  True on success, false otherwise.
+         */
         bool claim_interface();
     private:
-        /*! libusb context */
+        /* libusb context */
         struct libusb_context *ctx;
-        /*! libusb device handle */
+        /* libusb device handle */
         struct libusb_device_handle *usb_dev;
     };
  } // namespace serial

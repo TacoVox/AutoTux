@@ -1,5 +1,7 @@
-/*!
- * BufferWrapper header. Declares the functions and member variables.
+/**
+ * Serial buffer header. Declares the functions and member variables.
+ * Each buffer (i.e., in and out) is a deque holding vectors as elements.
+ * Each packet (i.e., sensor board data and control data) is presented as a vector.
  *
  * @author Ivo
  */
@@ -9,12 +11,11 @@
 #define AUTOTUXPROXY_SERIALBUFFER_H
 
 // include
-// ==================================================
 #include <vector>
 #include <deque>
 #include <memory>
 
-// packet values positions
+// packet size and values positions
 #define SBDPKTSIZE      16
 #define DEL_TWO_POS     1
 #define DEL_DBCOLON_POS 2
@@ -47,26 +48,55 @@ namespace serial
     class SerialBuffer
     {
     public:
-        /*! constructor */
-        SerialBuffer(bool);
-        /*! destructor */
+        /**
+         * Constructor. Takes verbose mode as parameter.
+         *
+         * @param verbose   True for verbose, false otherwise.
+         */
+        SerialBuffer(bool verbose);
+        /**
+         * Destructor.
+         */
         ~SerialBuffer();
-        /*! appends data read from the serial to the receive buffer */
-        void appendReceiveBuffer(std::vector<unsigned char>);
-        /*! returns a valid packet from the receive buffer */
+        /**
+         * Appends data read from the serial to the receive buffer.
+         * Takes a vector containing the read data.
+         *
+         * @param v     The vector containing the stream data.
+         */
+        void appendReceiveBuffer(std::vector<unsigned char> v);
+        /**
+         * Returns a valid packet from the receive buffer. Each element
+         * in the vector is an unsigned char holding a sensor board data.
+         *
+         * @return  A vector holding a valid sensor board data.
+         */
         std::vector<unsigned char> readReceiveBuffer();
-        /*! appends to the send buffer data to write to the serial */
-        void appendSendBuffer(std::vector<unsigned char>);
-        /*! returns a valid packet to write to the serial */
+        /**
+         * Appends to the send buffer control data to write to the serial.
+         *
+         * @param v     The vector holding the control data.
+         */
+        void appendSendBuffer(std::vector<unsigned char> v);
+        /**
+         * Returns a valid packet to write to the serial.
+         *
+         * @return  A vector holding valid control data.
+         */
         std::vector<unsigned char> readSendBuffer();
-        /*! returns the checksum for a valid packet */
-        unsigned char checksum(const std::vector<unsigned char>);
+        /**
+         * Returns the checksum for a packet. Takes the vector holding
+         * the sensor board data as parameter.
+         *
+         * @return  Checksum as unsigned char.
+         */
+        unsigned char checksum(const std::vector<unsigned char> v);
     private:
-        /*! is it verbose mode */
+        /* verbose mode */
         bool verbose;
-        /*! the receive buffer */
+        /* the receive buffer */
         std::deque<std::vector<unsigned char>> buffer_in;
-        /*! the send buffer */
+        /* the send buffer */
         std::deque<std::vector<unsigned char>> buffer_out;
     };
 } // namespace serial

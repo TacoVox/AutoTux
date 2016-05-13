@@ -1,5 +1,5 @@
-/*!
- * USBConnector mock.
+/**
+ * Serial interface mock. Used in the SerialHandlerTest.cpp
  *
  * @author Ivo
  */
@@ -8,7 +8,6 @@
 #include <vector>
 #include <gmock/gmock.h>
 
-using ::testing::_;
 
 class MockSerialInterface : public serial::SerialIOInterface
 {
