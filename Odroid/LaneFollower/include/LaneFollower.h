@@ -31,16 +31,12 @@ namespace lane {
             /**
              * Forbidden.
              *
-             * TODO Describe why
-             *
              * @param obj References an object of this class.
              */
             LaneFollower(const LaneFollower &/*obj*/);
 
             /**
              * Forbidden
-             *
-             * TODO Describe why
              *
              * @param obj References an object of this class.
              * @return Reference to this instance.
