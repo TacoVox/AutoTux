@@ -68,6 +68,9 @@ void serial::SerialHandler::run()
 
 int serial::SerialHandler::readOp()
 {
+    chrono::time_point<chrono::system_clock> start, end;
+    // get the current time
+    start =chrono::system_clock::now();
     // actual bytes read from the serial
     int read_bytes;
     // the char array where data will be stored
