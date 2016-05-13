@@ -23,7 +23,7 @@ Parker::Parker() :
         gapEnd(0),
         isSpot(false),
         isParked(false),
-        isAccurate(0),
+        expectedValue(0),
         controlTemp(),
         objInFront(false),
         turningCounter(0),
@@ -40,6 +40,7 @@ void Parker::findSpot(SensorBoardData sbd, VehicleData vd, VehicleControl dmVehi
     //Check if the car has been turning for a time which means it has been in a curve, then start to find a object again
     if(dmVehicleControl.getSteeringWheelAngle() >  0.42 || dmVehicleControl.getSteeringWheelAngle() < -0.42){
         turningCounter++;
+        //If it has done that for a second
         if(turningCounter == 30) {
             cout << "There has been a curve" << endl;
             state = FINDOBJECT;
@@ -71,7 +72,7 @@ void Parker::findSpot(SensorBoardData sbd, VehicleData vd, VehicleControl dmVehi
 }
 
 /**
- * This executes a hardcoded procedure for parking the car
+ * This executes a parking procedure for parking the car
  */
 VehicleControl Parker::parallelPark(SensorBoardData sbd, VehicleData vd){
     //This is a safety check if there is something getting close to the car within the parking and happens
@@ -81,6 +82,7 @@ VehicleControl Parker::parallelPark(SensorBoardData sbd, VehicleData vd){
         if(isNotSafe(sbd))
         parkstate = SAFETYSTOP;
     }
+    //Switch case for the parking procedure
     switch(parkstate){
         case PHASE0:{
             vc = adjustBeforeParking(vd, ADJUST_BEFORE_PARKING);
@@ -110,7 +112,9 @@ VehicleControl Parker::parallelPark(SensorBoardData sbd, VehicleData vd){
     }
     return vc;
 }
-
+/**
+ * Get the car to a good distance from the objects infront and back of the car
+ */
 VehicleControl Parker::midOfSpot(SensorBoardData sbd, VehicleData vd) {
     if(objInFront) {
         inBetweenObjects(sbd, vd);
@@ -126,120 +130,88 @@ VehicleControl Parker::midOfSpot(SensorBoardData sbd, VehicleData vd) {
  * If the car dosn't have an object infront of it it executes this
  */
 void Parker::objectBehind(SensorBoardData sbd, VehicleData vd) {
-    //if ((sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > IRSENSOR_DISTANCE_MIN &&
-    //     sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) < IRSENSOR_DISTANCE_MAX)) {
-    //    isAccurate++;
-    //}
-    //else
-    //    isAccurate = 0;
-
     double backSensor = sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK);
-
-    //if (isAccurate == ACCURENCE) {
-        if (backSensor > SENSOR_DIFFERENCE_NO_FRONT){
-            controlTemp.setSpeed(0);
-            controlTemp.setBrakeLights(true);
-            carPosition = vd.getAbsTraveledPath();
-            isParked = true;
-            reversing = false;
-        }
-        else if(DISTANCE_FROM_BACK_OBJECT >
-                backSensor){
-            isAccurate = 0;
-            controlTemp.setSpeed(1);
-            reversing = false;
-        }
-        else if(DISTANCE_FROM_BACK_OBJECT <
-                backSensor) {
-            isAccurate = 0;
-            controlTemp.setSpeed(-1);
-            reversing = true;
-        }
-    //}
+    //Checks if the car is in a good distance from the object behind
+    if (backSensor > SENSOR_DIFFERENCE_NO_FRONT){
+        controlTemp.setSpeed(0);
+        controlTemp.setBrakeLights(true);
+        carPosition = vd.getAbsTraveledPath();
+        isParked = true;
+        reversing = false;
+    }
+        //Go more forward until it gets into a good place infront of the object
+    else if(DISTANCE_FROM_BACK_OBJECT > backSensor){
+        expectedValue = 0;
+        controlTemp.setSpeed(1);
+        reversing = false;
+    }
+    else if(DISTANCE_FROM_BACK_OBJECT < backSensor) {
+        expectedValue = 0;
+        controlTemp.setSpeed(-1);
+        reversing = true;
+    }
 }
 /*
  * When it is parking in between two object this is executed
  */
 void Parker::inBetweenObjects(SensorBoardData sbd, VehicleData vd) {
-/*	cout << "Get into the middle" << endl;
-    if ((sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) > SENSOR_SAFETY_MIN &&
-         sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) < ULTRASENSOR_DISTANCE_MAX)
-        && (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > SENSOR_SAFETY_MIN &&
-            sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) < IRSENSOR_DISTANCE_MAX)) {
-        isAccurate++;
-    }
-    else
-        isAccurate = 0;
-*/
     double frontSensor = sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD);
     double backSensor = sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK);
-	
-   // if (isAccurate == ACCURENCE) {
-	cout << "Correct values" << endl;
-        if(std::abs(frontSensor - backSensor) < SENSOR_DIFFERENCE_INBETWEEN) {
-	cout << "In the middle" << endl;            
-controlTemp.setSpeed(0);
-            controlTemp.setBrakeLights(true);
-            carPosition = vd.getAbsTraveledPath();
-            isParked = true;
-            reversing = false;
-	cout << "Front sensor: " << frontSensor << " Back Sensor" << backSensor << endl;
-        }
-        else if(frontSensor >
-                 backSensor) {
-	cout << "Going Forward" << endl;           
-isAccurate = 0;
-            controlTemp.setSpeed(1);
-            reversing = false;
-        }
-        else if(frontSensor <
-                 backSensor) {
-        	cout << "Going backwards" << endl; 
-	   isAccurate = 0;
-            controlTemp.setSpeed(-1);
-            reversing = true;
-        }
- //   }
+    //If the car is in the accepted range between the object
+    if(std::abs(frontSensor - backSensor) < SENSOR_DIFFERENCE_INBETWEEN) {
+        cout << "In the middle" << endl;
+        controlTemp.setSpeed(0);
+        controlTemp.setBrakeLights(true);
+        carPosition = vd.getAbsTraveledPath();
+        isParked = true;
+        reversing = false;
+
+    }
+        //Go more forward to get to the accepted place
+    else if(frontSensor > backSensor) {
+        expectedValue = 0;
+        controlTemp.setSpeed(1);
+        reversing = false;
+    }
+        //Go more back to get to the accepted place
+    else if(frontSensor < backSensor) {
+	   expectedValue = 0;
+        controlTemp.setSpeed(-1);
+        reversing = true;
+    }
 }
 
+bool isCloseToBack = false; // Bool for making it go forward of backwards in method getParallelInSpot()
 /**
  * Drives the car back into the spot for straighting it up in the hardcoded procedure
  */
-bool isCloseToBack = false;
-
 VehicleControl Parker::getParallelInSpot(SensorBoardData sbd, VehicleData vd, double add){
+        //Do this until it has traveled enough to get in parallel
         if(carPosition + add > vd.getAbsTraveledPath()){
-            checkIfInSpot(sbd);
-            /*if(!isInSpot && sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > 0.1){
+            //If the IR back sensor is bigger than the limit then go back else switch to go forward
+            if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > SENSORS_IN_SPOT && !isCloseToBack){
                 reversing = true;
                 controlTemp.setSteeringWheelAngle(-0.5); // 45
                 controlTemp.setBrakeLights(false);
                 controlTemp.setSpeed(-1);
-            }*/
-            if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_BACK) > 0.19 && !isCloseToBack){
-                reversing = true;
-                controlTemp.setSteeringWheelAngle(-0.5); // 45
-                controlTemp.setBrakeLights(false);
-                controlTemp.setSpeed(-1);
-		cout << "Going back now" << endl;
             }
             else
                 isCloseToBack = true;
-            if(sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) > 0.19 && isCloseToBack){
+            //If the US front sensor is biiger than the limit then go forward else switch to go reversing
+            if(sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_FORWARD) > SENSORS_IN_SPOT && isCloseToBack){
                 reversing = false;
                 controlTemp.setSteeringWheelAngle(0.5); // 45
                 controlTemp.setBrakeLights(false);
                 controlTemp.setSpeed(1);
-		cout << "Going forward now" << endl;
             }
             else
                 isCloseToBack = false;
         }
+            //If the car has traveled enough for being parallel to the road
         else if(carPosition + add < vd.getAbsTraveledPath()){
             controlTemp.setSpeed(0);
             controlTemp.setBrakeLights(true);
             controlTemp.setSteeringWheelAngle(0);
-            carPosition = carPosition + add;
             cout << "Go to get into middle of spot" << endl;
             parkstate = PHASE4;
         }
@@ -247,7 +219,9 @@ VehicleControl Parker::getParallelInSpot(SensorBoardData sbd, VehicleData vd, do
 
     return controlTemp;
 }
-
+/*
+ * Makes the car go straight back (is used in the simulation but not on the real car)
+ */
 VehicleControl Parker::backingStraight(VehicleData vd, double add) {
     if(carPosition + add > vd.getAbsTraveledPath()){
         controlTemp.setSpeed(-1);
@@ -264,7 +238,7 @@ VehicleControl Parker::backingStraight(VehicleData vd, double add) {
 }
 
 /**
- * The car backs around the first corner of the object in the hardcoded procedure
+ * The car backs around the first corner of the object in the parking procedure
  */
 VehicleControl Parker::backAroundCorner(VehicleData vd, double add){
     reversing = true;
@@ -283,7 +257,7 @@ VehicleControl Parker::backAroundCorner(VehicleData vd, double add){
     return controlTemp;
 }
 /**
- * Adjust the car for the front object before starting the hardcoded procedure
+ * Adjust the car for the front object before starting the parking procedure
  */
 VehicleControl Parker::adjustBeforeParking(VehicleData vd, double add) {
     if(gapEnd + add > vd.getAbsTraveledPath()){
@@ -316,15 +290,15 @@ void Parker::enoughSpace(){
 }
 
 /**
- * Finds end of the gap
+ * Looks for the end of the gap
  */
 void Parker::findGapEnd(SensorBoardData sbd, VehicleData vd){
-    //This is outcommented because it neeeds to be futher tested in simulation because it dosn't work
+    //If the car has traveled enough to be able to park without a object in front
     if(vd.getAbsTraveledPath() > (gapStart + ENOUGH_SPACE_DISTANCE)){
-        isAccurate = 0;
+        expectedValue = 0;
         objInFront = false;
         isSpot = true;
-        carPosition = vd.getAbsTraveledPath();
+        carPosition = vd.getAbsTraveledPath(); //Sets the car position
         parkstate = PHASE1;
         cout << "Found enough space to park" << endl;
     }
@@ -332,56 +306,55 @@ void Parker::findGapEnd(SensorBoardData sbd, VehicleData vd){
         //To check if the sensors are in the ranges of where it can find a object
         if ((sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT)) > IRSENSOR_DISTANCE_MIN &&
             (sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < IRSENSOR_DISTANCE_MAX)) {
-            isAccurate++;
+            expectedValue++;
         }
         else
-            isAccurate = 0;
+            expectedValue = 0;
         //To check if the readings are Accurate
-        if (isAccurate == ACCURENCE) {
+        if (expectedValue == OCCURRENCE) {
             cout << "*********END OF GAP IS DETECTED****************" << endl;
-            gapEnd = vd.getAbsTraveledPath();
-            isAccurate = 0;
+            gapEnd = vd.getAbsTraveledPath(); // Sets the end of the gap for the calculation of the gap size
+            expectedValue = 0;
             objInFront = true;
             state = CHECKSPACE;
         }
     }
 }
 /**
- * Finds the start of the gap
+ * Looks for the start of the gap
  */
 void Parker::findGapStart(SensorBoardData sbd, VehicleData vd) {
     //To check if the sensors are in the ranges of where it can find a gap
     if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < IRSENSOR_DISTANCE_MIN ||
             sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > IRSENSOR_DISTANCE_MAX){
-        isAccurate++;
+        expectedValue++;
     }
     else
-        isAccurate = 0;
+        expectedValue = 0;
     //To check if the readings are Accurate
-    if(isAccurate == ACCURENCE){
+    if(expectedValue == OCCURRENCE){
         cout << "*********STARTGAP HAS BEEN DETECTED****************" << endl;
-        gapStart = vd.getAbsTraveledPath();
-        isAccurate = 0;
+        gapStart = vd.getAbsTraveledPath(); //Sets where the start of the gap is for the calculation of the gap size
+        expectedValue = 0;
         state = FINDGAPEND;
     }
 }
 /**
- * Finds the object
+ * Looks for an object
  */
 void Parker::findObject(SensorBoardData sbd) {
     //To check if the sensors are in the ranges of where it can find a object
     if(sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) > IRSENSOR_DISTANCE_MIN &&
             sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT) < IRSENSOR_DISTANCE_MAX){
-	cout << isAccurate << endl;
-        isAccurate++;
+        expectedValue++;
     }
     else
-        isAccurate = 0;
+        expectedValue = 0;
     //To check if the readings are Accurate and have no noise
-    if(isAccurate == ACCURENCE){
-        isAccurate = 0;
+    if(expectedValue == OCCURRENCE){
+        expectedValue = 0;
         cout << "********OBJECT HAS BEEN FOUND************" << endl;
-        state = FINDGAPSTART;
+        state = FINDGAPSTART; //Change state to find the end of the object
     }
 }
 /**
@@ -391,15 +364,20 @@ bool Parker::getFoundSpot() {
     return isSpot;
 }
 /**
- * Returns if the car has finished parking
+ * If the car is parked or not
  */
 bool Parker::getIsParked() {
     return isParked;
 }
-
+/**
+ * If the car is reversing or not
+ */
 bool Parker::isReversing(){
     return reversing;
 }
+/**
+ * If the car is back on the lane
+ */
 bool Parker::isOutOfSpot() {
     return outOfSpot;
 }
@@ -407,7 +385,6 @@ bool Parker::isOutOfSpot() {
 /**
  * Method to check if the car is to close to the back object
  */
-
 bool Parker::isNotSafe(SensorBoardData sbd){
     if((sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT) > SENSOR_SAFETY_MIN) &&
        (sbd.getValueForKey_MapOfDistances(ULTRASONIC_FRONT_RIGHT) < SENSOR_SAFETY_MAX)){
@@ -448,11 +425,11 @@ void Parker::checkIfInSpot(SensorBoardData sbd){
     double ir_back_right = sbd.getValueForKey_MapOfDistances(INFRARED_REAR_RIGHT);
 
     if(sensorClear(us_front_right) && sensorClear(ir_front_right) && sensorClear(ir_back_right)){
-        isAccurate++;
+        expectedValue++;
     }
     else
-        isAccurate = 0;
-    if(isAccurate == 3){
+        expectedValue = 0;
+    if(expectedValue == 3){
         isInSpot = true;
     }
 }

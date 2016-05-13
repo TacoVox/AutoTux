@@ -1,9 +1,10 @@
-//
-// Created by Jonas Kahler on 4/28/16.
-//
+/**
+ * @author Jonas Kahler // jonas@derkahler.de
+ * Class connecting to the OpenDaVINCI session (TimeTriggered) and getting and
+ * receiving data from it.
+ */
 
 #include "od/ConferenceModule.h"
-
 #include "od/ConferenceData.h"
 #include <opendavinci/GeneratedHeaders_OpenDaVINCI.h>
 #include <opendavinci/odcore/wrapper/SharedMemoryFactory.h>
@@ -29,8 +30,8 @@ od::ConferenceModule::ConferenceModule(const int32_t &argc, char **argv) :
 
 od::ConferenceModule::~ConferenceModule() {}
 
+// Implemented OpenDaVINCI methods
 void od::ConferenceModule::setUp() {}
-
 void od::ConferenceModule::tearDown() {}
 
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode od::ConferenceModule::body() {
@@ -67,6 +68,8 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode od::ConferenceModule::
 
         //Get the shared image address
         Container image_container = getKeyValueDataStore().get(SharedImage::ID());
+        //Just IF the CamView is selected we will fetch store the image on the
+        //drive to save some processing power.
         if (image_container.getDataType() == SharedImage::ID() && od::ConferenceData::instance()->isCamView())
             readSharedImage(image_container);
 
@@ -80,6 +83,11 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode od::ConferenceModule::
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
 }
 
+/**
+ * Modified method (from Max' code) to fetch the image out of the shared memory.
+ * After fetching it is stored in a jpg file which gets read out by our jp2a
+ * executable to create an ASCII representation.
+ */
 void od::ConferenceModule::readSharedImage(Container &c) {
     SharedImage si = c.getData<SharedImage>();
     if (si.getName() == "WebCam") {
@@ -103,6 +111,7 @@ void od::ConferenceModule::readSharedImage(Container &c) {
             m_sharedImageMemory->unlock();
         }
 
+        // Store image in the folder of execution as camview.jpg
         cv::imwrite("camview.jpg", m_image);
     }
 }

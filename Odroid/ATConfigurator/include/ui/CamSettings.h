@@ -1,6 +1,6 @@
-//
-// Created by jonas on 5/3/16.
-//
+/**
+ * @author Jonas Kahler // jonas@derkahler.de
+ */
 
 #ifndef ATCONFIGURATOR_CAMSETTINGS_H
 #define ATCONFIGURATOR_CAMSETTINGS_H

@@ -1,6 +1,8 @@
-//
-// Created by jonas on 5/3/16.
-//
+/**
+ * @author Jonas Kahler // jonas@derkahler.de
+ * Class to represent a ncurses window for showing and modifying camera setup
+ * values.
+ */
 
 #include "ui/CamSettings.h"
 #include "od/ConferenceData.h"

@@ -14,30 +14,29 @@ namespace  overtaker{
     class Overtaker {
     private:
         // SIMULATOR VALUES
-     	//const double OVT_TRIGGER = 7.0;
-		//const double LEFT_SWITCH_DIST = 3.6;
-		//const double ADJUST_L_S_DIST = 3.6;
-		//const double RIGHT_SWITCH_DIST = 4.0;
-		//const double ADJUST_R_S_DIST = 2.0;
-		//const double US_SENSOR_RANGE = 8.0;
-		//const double US_FRONT_RIGHT_RANGE = 3.0;
-
-		//const double IR_SENSOR_LIMIT = 7.0;
+     	const double OVT_TRIGGER = 7.0;
+		const double LEFT_SWITCH_DIST = 3.6;
+		const double ADJUST_L_S_DIST = 3.6;
+		const double RIGHT_SWITCH_DIST = 4.0;
+		const double ADJUST_R_S_DIST = 2.0;
+		const double US_SENSOR_RANGE = 8.0;
+		const double US_FRONT_RIGHT_RANGE = 3.0;
+		const double IR_SENSOR_LIMIT = 7.0;
 		//const double US_SENSOR_LIMIT = 15.0;
 
 		//CAR VALUES
 		// *** On a straight, it needs to look further ahead, less if it's in a turn ***
-		const double OVT_TRIGGER = 0.70;
+		//const double OVT_TRIGGER = 0.70;
 		// *** On straight a straight, left switch distance needs to be longer ***
-		const double LEFT_SWITCH_DIST = 0.00;
-		const double ADJUST_L_S_DIST = 0.15;
-		const double RIGHT_SWITCH_DIST = 0.45;
-		const double ADJUST_R_S_DIST = 0.15;
-		const double US_SENSOR_RANGE = 0.40;
-		const double US_FRONT_RIGHT_RANGE = 0.3;
+		//const double LEFT_SWITCH_DIST = 0.00;
+		//const double ADJUST_L_S_DIST = 0.15;
+		//const double RIGHT_SWITCH_DIST = 0.45;
+		//const double ADJUST_R_S_DIST = 0.15;
+		//const double US_SENSOR_RANGE = 0.40;
+		//const double US_FRONT_RIGHT_RANGE = 0.3;
 
-		const double IR_SENSOR_LIMIT = 0.28;
-		const double US_SENSOR_LIMIT = 0.90;
+		//const double IR_SENSOR_LIMIT = 0.28;
+		//const double US_SENSOR_LIMIT = 0.90;
 
 		// *** GENERAL VALUES
         const int NUM_OF_READINGS = 1;
@@ -72,7 +71,7 @@ namespace  overtaker{
         int consecReadings, idle_frame_counter, average_counter;
         double min_us_fr;
 		double laneFollowerAngle;
-	double laneRecommendation;
+	    double laneRecommendation;
 		void stopCar();
 		bool isObstacleDetected(automotive::miniature::SensorBoardData, const double, const double);
 

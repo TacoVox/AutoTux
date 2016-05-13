@@ -1,6 +1,6 @@
-//
-// Created by jonas on 4/25/16.
-//
+/**
+ * @author Jonas Kahler // jonas@derkahler.de
+ */
 
 #ifndef ATCONFIGURATOR_MAINUI_H
 #define ATCONFIGURATOR_MAINUI_H
@@ -22,7 +22,6 @@ namespace ui {
         void mainLoop(void);
         void quit(void);
     private:
-        short int mode;
         WINDOW* _window;
         int xsize;
         int ysize;
