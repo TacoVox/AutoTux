@@ -1,23 +1,28 @@
 # AutoTux
 ### Automatic builds on push with [Jenkins](http://www.derkahler.de:8888/)
-[![Build Status](http://www.derkahler.de:8888/job/AutoTux%20-%20STM32/badge/icon)](http://www.derkahler.de:8888/job/AutoTux%20-%20STM32/)
+All AutoTux parts are automatically build with Jenkins on push:<br />
+[![Build Status](http://www.derkahler.de:8888/job/AutoTux%20-%20Odroid%20Integration/badge/icon)](http://www.derkahler.de:8888/job/AutoTux%20-%20Odroid%20Integration/)
 &nbsp;&nbsp;
-[STM32](http://www.derkahler.de:8888/job/AutoTux%20-%20STM32/)
+Odroid Integration Build
 <br />
-[![Build Status](http://www.derkahler.de:8888/job/AutoTux%20-%20Proxy/badge/icon)](http://www.derkahler.de:8888/job/AutoTux%20-%20Proxy/)
+[![Build Status](http://www.derkahler.de:8888/job/AutoTux%20-%20Configurator/badge/icon)](http://www.derkahler.de:8888/job/AutoTux%20-%20Configurator/)
 &nbsp;&nbsp;
-[AutoTuxProxy](http://www.derkahler.de:8888/job/AutoTux%20-%20Proxy/)
-<br />
-[![Build Status](http://www.derkahler.de:8888/job/AutoTux%20-%20LaneFollowing/badge/icon)](http://www.derkahler.de:8888/job/AutoTux%20-%20LaneFollowing/)
-&nbsp;&nbsp;
-[LaneFollowing](http://www.derkahler.de:8888/job/AutoTux%20-%20LaneFollowing/)
+Configurator
 <br />
 [![Build Status](http://www.derkahler.de:8888/job/AutoTux%20-%20DecisionMaker/badge/icon)](http://www.derkahler.de:8888/job/AutoTux%20-%20DecisionMaker/)
 &nbsp;&nbsp;
-[Decision Maker](http://www.derkahler.de:8888/job/AutoTux%20-%20Decision%20Maker/)
+DecisionMaker
 <br />
-[![Build Status](http://www.derkahler.de:8888/job/AutoTux%20-%20Odroid%20Integration%20(dev%20branch)/badge/icon)](http://www.derkahler.de:8888/job/AutoTux%20-%20Odroid%20Integration%20(dev%20branch)/)
+[![Build Status](http://www.derkahler.de:8888/job/AutoTux - LaneFollowing/badge/icon)](http://www.derkahler.de:8888/job/AutoTux - LaneFollowing)
 &nbsp;&nbsp;
-[Integration](http://www.derkahler.de:8888/jobAutoTux%20-%20Odroid%20Integration%20(dev%20branch))
+LaneFollower
+<br />
+[![Build Status](http://www.derkahler.de:8888/job/AutoTux%20-%20Proxy/badge/icon)](http://www.derkahler.de:8888/job/AutoTux%20-%20Proxy/)
+&nbsp;&nbsp;
+Proxy
+<br />
+[![Build Status](http://www.derkahler.de:8888/job/AutoTux%20-%20STM32/badge/icon)](http://www.derkahler.de:8888/job/AutoTux%20-%20STM32/)
+&nbsp;&nbsp;
+STM32
 <br /><br /><br />
 ![Tux is like maniac](http://www.casman.com/images/casman_blog/statn-my-cardestinaion-linux.jpg)
