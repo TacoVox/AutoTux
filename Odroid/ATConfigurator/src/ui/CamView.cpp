@@ -44,7 +44,7 @@ void ui::CamView::decr(void) {}
 std::string ui::CamView::loadImage() {
     std::string cmd = "jp2a --width=";
     cmd.append(std::to_string(xsize - 18));
-    cmd.append(" camview.jpg");
+    cmd.append(" camview.jpg 2> /dev/null");
 
     char buffer[4096];
     std::string result = "";
