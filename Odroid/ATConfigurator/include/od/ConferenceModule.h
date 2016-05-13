@@ -1,5 +1,7 @@
 /**
  * @author Jonas Kahler // jonas@derkahler.de
+ * Time triggered class connecting to the OpenDaVINCI session for getting and
+ * receiving data from it.
  */
 
 #ifndef ATCONFIGURATOR_CLIENTCONFERENCEMODULE_H
@@ -22,7 +24,14 @@ namespace od {
         ConferenceModule& operator=(const ConferenceModule &);
         virtual void setUp();
         virtual void tearDown();
+
+        /**
+        * Modified method (from Max' code) to fetch the image out of the shared memory.
+        * After fetching it is stored in a jpg file which gets read out by our jp2a
+        * executable to create an ASCII representation.
+        */
         void readSharedImage(odcore::data::Container &);
+
         bool m_hasAttachedToSharedImageMemory;
         std::shared_ptr<odcore::wrapper::SharedMemory> m_sharedImageMemory;
         cv::Mat m_image;

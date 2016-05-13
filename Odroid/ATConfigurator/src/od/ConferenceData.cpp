@@ -1,6 +1,5 @@
 /**
  * @author Jonas Kahler // jonas@derkahler.de
- * Singelton which acts as an overall data storage for different data fields
  */
 
 #include "od/ConferenceData.h"
@@ -19,19 +18,12 @@ od::ConferenceData::ConferenceData() : camView(false), speed(0.0), angle(0.0),
 od::ConferenceData::ConferenceData(const ConferenceData &) { }
 od::ConferenceData::~ConferenceData() { }
 
-/**
- * Method returning a pointer to the Singelton instance
- */
 od::ConferenceData* od::ConferenceData::instance(void) {
     if (!_instance)
         _instance = new od::ConferenceData();
     return _instance;
 }
 
-/**
- * Method to create a shared pointer to a container wrapping a LaneFollowerMSG
- * containing the setup values for the camera.
- */
 std::shared_ptr<odcore::data::Container> od::ConferenceData::genLaneFollowerContainer(void) {
     autotux::config::LaneFollowerMSG lfm;
     lfm.setThresholdB(this->thresholdB);
@@ -48,10 +40,6 @@ std::shared_ptr<odcore::data::Container> od::ConferenceData::genLaneFollowerCont
     return lfc;
 }
 
-/**
- * Method to create a pointer to a container around a DecisionMakerMSG. This
- * message contains the state selected in the GUI.
- */
 std::shared_ptr<odcore::data::Container> od::ConferenceData::genDecisionMakerContainer(void) {
     autotux::DecisionMakerMSG dmg;
     dmg.setState(this->state);
@@ -62,7 +50,6 @@ std::shared_ptr<odcore::data::Container> od::ConferenceData::genDecisionMakerCon
     return dmc;
 }
 
-//Different getteres and setters for all fields
 bool od::ConferenceData::isCamView(void) { return this->camView; }
 
 void od::ConferenceData::setCamView(bool cw) { this->camView = cw; }

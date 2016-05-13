@@ -1,7 +1,5 @@
 /**
  * @author Jonas Kahler // jonas@derkahler.de
- * Class to represent a ncurses window for showing and modifying camera setup
- * values.
  */
 
 #include "ui/CamSettings.h"

@@ -1,5 +1,7 @@
 /**
  * @author Jonas Kahler // jonas@derkahler.de
+ * Class to represent a ncurses window for showing and modifying the current
+ * camera setup.
  */
 
 #ifndef ATCONFIGURATOR_CAMSETTINGS_H
@@ -14,6 +16,7 @@ namespace ui {
     public:
         CamSettings(void);
         CamSettings(int, int);
+        // Overriding the virtual methods
         void refresh(void);
         void select(void);
         void unselect(void);

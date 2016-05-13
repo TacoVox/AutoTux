@@ -1,5 +1,6 @@
 /**
  * @author Jonas Kahler // jonas@derkahler.de
+ * Class to represent a ncurses window for showing a header.
  */
 
 #ifndef ATCONFIGURATOR_FOOTER_H

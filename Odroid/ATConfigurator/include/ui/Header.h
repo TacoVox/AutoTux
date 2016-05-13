@@ -1,5 +1,7 @@
 /**
  * @author Jonas Kahler // jonas@derkahler.de
+ * Class to represent a ncurses window for showing a footer with the current
+ * date and time.
  */
 
 #ifndef ATCONFIGURATOR_HEADER_H
