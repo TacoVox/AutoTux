@@ -1,6 +1,6 @@
-//
-// Created by jonas on 4/26/16.
-//
+/**
+ * @author Jonas Kahler // jonas@derkahler.de
+ */
 
 #include "ui/Footer.h"
 

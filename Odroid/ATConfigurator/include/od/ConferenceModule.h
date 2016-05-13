@@ -1,6 +1,6 @@
-//
-// Created by jonas on 4/28/16.
-//
+/**
+ * @author Jonas Kahler // jonas@derkahler.de
+ */
 
 #ifndef ATCONFIGURATOR_CLIENTCONFERENCEMODULE_H
 #define ATCONFIGURATOR_CLIENTCONFERENCEMODULE_H

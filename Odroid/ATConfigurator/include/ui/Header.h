@@ -1,6 +1,6 @@
-//
-// Created by jonas on 4/26/16.
-//
+/**
+ * @author Jonas Kahler // jonas@derkahler.de
+ */
 
 #ifndef ATCONFIGURATOR_HEADER_H
 #define ATCONFIGURATOR_HEADER_H

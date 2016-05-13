@@ -1,6 +1,6 @@
-//
-// Created by jonas on 5/9/16.
-//
+/**
+ * @author Jonas Kahler // jonas@derkahler.de
+ */
 
 #ifndef ATCONFIGURATOR_STATE_H
 #define ATCONFIGURATOR_STATE_H
