@@ -1,6 +1,7 @@
-//
-// Created by jonas on 4/28/16.
-//
+/**
+ * @author Jonas Kahler // jonas@derkahler.de
+ * Singelton which acts as an overall data storage for different data fields
+ */
 
 #ifndef ATCONFIGURATOR_CONFERENCEDATA_H
 #define ATCONFIGURATOR_CONFERENCEDATA_H
@@ -14,9 +15,25 @@ namespace od {
     class ConferenceData {
     public:
         enum STATE {LANE_FOLLOWING, DRIVING, PARKING, RESUME};
+
+        // Method returning a pointer to the Singelton instance
         static ConferenceData* instance(void);
+
+        /**
+        * Method to create a shared pointer to a container wrapping a LaneFollowerMSG
+        * containing the setup values for the camera.
+        */
         std::shared_ptr<odcore::data::Container> genLaneFollowerContainer(void);
+
+        /**
+        * Method to create a pointer to a container around a DecisionMakerMSG. This
+        * message contains the state selected in the GUI.
+        */
         std::shared_ptr<odcore::data::Container> genDecisionMakerContainer(void);
+
+        /**
+         * Different getters and setters for the class fields
+         */
         bool isCamView(void);
         void setCamView(bool);
         double getSpeed(void);
@@ -58,9 +75,15 @@ namespace od {
         STATE getState(void);
         void setState(STATE);
     private:
+        /**
+         * Private constructors and destructor to ensure that just the singelton
+         * itself creates instances
+        */
         ConferenceData();
         ConferenceData(const ConferenceData&);
         ~ConferenceData();
+
+        // Different private fields.
         bool camView;
         double speed;
         double angle;
@@ -81,6 +104,8 @@ namespace od {
         uint8 thresholdB;
         uint8 thresholdD;
         STATE state;
+
+        // Pointer to the actual instance
         static ConferenceData* _instance;
     };
 }

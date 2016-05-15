@@ -6,7 +6,7 @@ PROJECT(ATConfigurator)
 
 SET(CMAKE_MODULE_PATH "/opt/od/share/cmake-2.8/Modules" ${CMAKE_MODULE_PATH})
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${CXX_OPTIONS} -pipe -std=c++11 -lncurses -lmenu -lopencv_core")
-# SET warning flags here and append them to the CMAKE_CXX_FLAGS -Weffc++ -Wunsafe-loop-optimizations
+# SET warning flags here and append them to the CMAKE_CXX_FLAGS
 SET(WARN "${WARN} -g -O -Wall -pedantic -Wvolatile-register-var")
 SET(WARN "${WARN} -Wconversion -Wcast-align -Wwrite-strings -Wunused-variable")
 SET(WARN "${WARN} -Wcast-qual -Wchar-subscripts -Wvariadic-macros -Wimport")

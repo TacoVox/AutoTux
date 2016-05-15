@@ -1,6 +1,6 @@
-//
-// Created by Jonas Kahler on 4/27/16.
-//
+/**
+ * @author Jonas Kahler // jonas@derkahler.de
+ */
 
 #ifndef ATCONFIGURATOR_MENU_H
 #define ATCONFIGURATOR_MENU_H

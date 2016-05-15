@@ -1,6 +1,8 @@
-//
-// Created by jonas on 5/3/16.
-//
+/**
+ * @author Jonas Kahler // jonas@derkahler.de
+ * Class to represent a ncurses window for showing the current WebCam camera
+ * image.
+ */
 
 #ifndef ATCONFIGURATOR_CAMVIEW_H
 #define ATCONFIGURATOR_CAMVIEW_H
@@ -14,6 +16,7 @@ namespace ui {
     public:
         CamView(void);
         CamView(int, int);
+        // Overriding the virtual methods
         void refresh(void);
         void select(void);
         void unselect(void);

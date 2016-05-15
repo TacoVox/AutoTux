@@ -1,6 +1,6 @@
-//
-// Created by jonas on 5/3/16.
-//
+/**
+ * @author Jonas Kahler // jonas@derkahler.de
+ */
 
 #include "ui/CamView.h"
 #include <memory>

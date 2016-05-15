@@ -1,6 +1,7 @@
-//
-// Created by jonas on 5/9/16.
-//
+/**
+ * @author Jonas Kahler // jonas@derkahler.de
+ * Class to represent a ncurses window for changing the state.
+ */
 
 #ifndef ATCONFIGURATOR_STATE_H
 #define ATCONFIGURATOR_STATE_H
@@ -13,6 +14,7 @@ namespace ui {
     public:
         State(void);
         State(int, int);
+        // Overriding the virtual methods
         void refresh(void);
         void select(void);
         void unselect(void);

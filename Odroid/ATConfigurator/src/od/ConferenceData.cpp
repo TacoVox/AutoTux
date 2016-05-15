@@ -1,6 +1,6 @@
-//
-// Created by jonas on 4/28/16.
-//
+/**
+ * @author Jonas Kahler // jonas@derkahler.de
+ */
 
 #include "od/ConferenceData.h"
 #include <automotivedata/generated/autotux/config/LaneFollowerMSG.h>

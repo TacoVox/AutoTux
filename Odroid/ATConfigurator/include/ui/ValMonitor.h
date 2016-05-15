@@ -1,6 +1,8 @@
-//
-// Created by jonas on 4/26/16.
-//
+/**
+ * @author Jonas Kahler // jonas@derkahler.de
+ * Class to represent a ncurses window for showing the current values of the
+ * sessions (like SensorBoard data, etc).
+ */
 
 #ifndef ATCONFIGURATOR_VALMONITOR_H
 #define ATCONFIGURATOR_VALMONITOR_H
@@ -14,6 +16,7 @@ namespace ui {
     public:
         ValMonitor(void);
         ValMonitor(int, int);
+        // Overriding the virtual methods
         void refresh(void);
         void select(void);
         void unselect(void);

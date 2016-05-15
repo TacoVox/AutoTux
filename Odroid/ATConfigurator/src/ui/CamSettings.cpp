@@ -1,6 +1,6 @@
-//
-// Created by jonas on 5/3/16.
-//
+/**
+ * @author Jonas Kahler // jonas@derkahler.de
+ */
 
 #include "ui/CamSettings.h"
 #include "od/ConferenceData.h"

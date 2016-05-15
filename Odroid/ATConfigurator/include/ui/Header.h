@@ -1,6 +1,8 @@
-//
-// Created by jonas on 4/26/16.
-//
+/**
+ * @author Jonas Kahler // jonas@derkahler.de
+ * Class to represent a ncurses window for showing a footer with the current
+ * date and time.
+ */
 
 #ifndef ATCONFIGURATOR_HEADER_H
 #define ATCONFIGURATOR_HEADER_H
