@@ -81,7 +81,7 @@ namespace  overtaker{
 		bool isObstacleDetected(automotive::miniature::SensorBoardData, const double, const double);
 		void stopCar();
 		void resetFSM(automotive::VehicleData, const double, const int);
-		void sumTotalAngle(double);
+		bool computeLaneAngle(double);
     };
 }// overtaker
 

@@ -81,10 +81,8 @@ void Overtaker::obstacleDetection(automotive::miniature::SensorBoardData sensorD
             break;
         }
         case COMPUTE_ANGLE:{
-            sumTotalAngle(laneFollowerAngle);
-            if(average_counter >= 5){
-                laneRecommendation /= 5;
-                cout << "****AVERAGE ANGLE : " << laneRecommendation << endl;
+
+            if(computeLaneAngle(laneFollowerAngle)){
                 isOverridingControls = true;
                 state = RIGHT_SWITCH;
             }
@@ -407,9 +405,18 @@ bool Overtaker::isLeftLane() {
     return leftLane;
 }
 
-/* @doc Helper function for computing average lane angle in COMPUTE_ANGLE state.
+/* @doc Computes the average angle over the five past lane follower
+ *      desired steering angle. Returns true once average is computed.
  * */
-void Overtaker::sumTotalAngle(double val){
-	average_counter++;
-	laneRecommendation += val;	
+bool Overtaker::computeLaneAngle(double val) {
+    average_counter++;
+    laneRecommendation += val;
+
+    if(average_counter >= 5) {
+        laneRecommendation /= 5;
+        cout << "****AVERAGE ANGLE : " << laneRecommendation << endl;
+        return true;
+    }
+
+    return false;
 }
