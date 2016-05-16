@@ -1,0 +1,160 @@
+% LaTeX layout by Jonas Kahler, jonas@derkahler.de
+% HashTux SAD Document
+% Group Tux:
+% Aman Dirar, Jerker Ersare, Jonas Kahler, Dennis Karlberg
+% Niklas le Comte, Marco Trifance, Ivo Vryashkov
+% Chapter 1 - Introduction Chapter
+\chapter{Introduction}
+
+% Product Vision
+\section{Product Vision (Updated)}
+\begin{quote}
+\textit{HashTux is a platform for easy access to multiple social
+media feeds based on user search where the user has the option to filter
+information based on his or her preferences.}
+\end{quote}
+{\it HashTux} is a web based service that displays the latest pictures, videos
+and other social media posts for a given hashtag. Media content is fetched from
+multiple social media sources and displayed in a web interface optimized for
+fullscreen view ideal for a conference or event context, having a screen
+illustrating different viewpoints of the chosen keyword subject. \\
+
+As time passes, the different content objects come and go, new ones fade in
+replacing the old ones. Videos start playing automatically. The objects on the
+screen are ordered automatically so that all space on the screen is used
+properly. \\
+
+There is already successful software that does something similar but with slight
+differences, like including only Twitter (Tweetdeck). Our selling point is that
+we include content from multiple sources (also including Instagram and YouTube,
+designed with a modular implementation that easily allows adding more) and also
+combine it with multiple media formats, including videos automatically playing.
+To fetch older information we want to include a time scroll functionality. \\
+
+To ensure the system is available even in the case of a failure or maintenance
+in one or more servers, our goal is to have the system running on several
+servers. As a part of the constraints, a significant part of the software will
+be implemented in Erlang. We were also encouraged to use a NoSQL database and
+therefore use CouchDB. \newpage
+
+% Target audience
+\section{Target Audience}
+\begin{description}
+  \item[Event and conference hosts] \hfill \\
+  To easily show the latest multimedia from an event.
+  \item[Social media users] \hfill \\
+  For the ease of use, fun experience and the nice overview provided by our
+  all-in-one solution.
+  \item[General commercial use] \hfill \\
+  Illustrate recent updates for a product or company name or other term.
+\end{description}
+
+% Domain
+\section{Domain}
+\begin{itemize}
+  \item Information
+  \item Social Media
+  \item Trends
+\end{itemize}
+Giving internet users easy access to multimedia content for a particular search
+term, as well as information on current trends in search habits and on social
+media.
+
+% Business Cases
+\section{Business Cases}
+\begin{description}
+  \item[Main business case] \hfill \\
+  Our service is free for personal use but requires buying a licence for
+  commercial use. Right now we have the alternatives of buying either a 1-year
+  license for \EUR{9.99} or a lifetime licence for \EUR{29.99}.
+  \item[Secondary business cases] \hfill
+  \begin{itemize}
+    \item Aim for an acquisition by a third party.
+    \item Collect general data about user habits, which could be valuable
+          especially if we choose to integrate with a larger company that tracks
+          user behaviour for marketing purposes or similar. \\
+          Examples: search terms, related search terms, trends.
+   \end{itemize}
+\end{description}
+We also have a donate button that lets users to donate money if they want to.
+
+% Scope
+\section{Scope}
+The main purpose of our application is to provide the users with content
+gathered from several popular social media platforms and show it in an appealing
+way in the user's web browser. \\
+
+For this project we decided to integrate Twitter, Instagram and YouTube as our
+data sources. After the end of this university project, we will possibly add
+more services (see \hyperlink{future}{Future}). \\
+
+The application comes with a history search functionality which supports Twitter
+and YouTube. Instagram is not supported at this time due to API limitations. \\
+
+Our application is easily deployable and uses CouchDB as the data storage for
+user habit data as well as the application's cache. \\
+
+From the beginning we wanted \textit{HashTux} to have a very clean, uncluttered
+user interface to emphasize how easy it is to use. We also wanted to avoid a
+trap we fell into during our last terms project, of adding more and more
+features and not having enough time in the end to wrap up, debug and document
+everything properly. This is why we have focused quite a lot of our attention on
+things like availability tactics and making the whole application resilient,
+instead of adding a lot of flashy features. \\
+
+We also consider improving this product after the scope of this university
+project, which is why we have also put some effort into providing a good
+infrastructure for that, such as using an issue tracker.
+
+% Definitions
+\section{Definitions}
+To make it easier to understand this document, here are some terms we want to
+introduce:
+
+% Components
+\subsection{Components}
+{\tabulinesep=1.4mm
+\begin{tabu}{l l}
+  \textbf{Client UI}
+     & \parbox[t]{8cm}{Runs in the end user's web browser. We use JavaScript for
+     dynamic elements.} \\
+  \hline
+  \textbf{PHP application}
+      & Runs on our Apache web servers. Written in PHP. \\
+  \hline
+  \textbf{Backend server} & \parbox[t]{8cm}{
+     Written in Erlang. Handles contacting external APIs and writing and
+     reading to/from database.}
+\end{tabu}}
+
+% External Components and APIs
+\subsection{External Components and APIs}
+{\tabulinesep=1.4mm
+\begin{tabu}{l l}
+  \textbf{CouchDB}
+     & \parbox[t]{10cm}{Used to cache social media post information as well as
+     user habit data (related to how our system is used).} \\
+   \textbf{Twitter API} & \\
+   \textbf{Instagram API} & \\
+   \textbf{YouTube API} &
+\end{tabu}
+
+% Other Terms
+\subsection{Other Terms}
+{\tabulinesep=1.4mm
+\begin{tabu}{l l}
+  \textbf{DB}
+     & \parbox[t]{8cm}{Short for Database or CouchDB} \\
+  \hline
+  \textbf{Miner}
+     & \parbox[t]{8cm}{Our word for the part of our backend server that connects
+     to an external API to get data.} \\
+  \hline
+  \textbf{Miner component}
+     & \parbox[t]{8cm}{The part of our backend server that relates to the above.
+     We are considering making this itâs own component in a future release.} \\
+  \hline
+  \textbf{DB component}
+     & \parbox[t]{8cm}{The part of our backend server that connects to CouchDB.
+     We are considering making this itâs own component in a future release.}
+\end{tabu}}

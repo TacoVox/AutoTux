@@ -1,0 +1,44 @@
+% Package file for the SAD LaTeX document
+% @author Jonas Kahler, jonas@derkahler.de
+% Titlepic
+%\usepackage[tt]{titlepic}
+
+% Euro symbol
+\usepackage{eurosym}
+
+% For specific chapter titles
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+        {\normalfont\huge\bfseries}
+        {\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{-80pt}{20pt}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=false,
+}
+
+% Header
+\usepackage{fancyhdr}
+\lhead{}
+\chead{}
+\rhead{{\it HashTux} SAD Document}
+\lfoot{Group 5 - {\it Tux}}
+\cfoot{}
+\rfoot{\thepage}
+\renewcommand{\headrulewidth}{0.2pt}
+\renewcommand{\footrulewidth}{0.2pt}
+\pagestyle{fancy}
+
+% For including images
+\usepackage{graphicx}
+\graphicspath{ {img/} }
+
+% Tabu for tables
+\usepackage{tabu}
+
+% For having row merges
+\usepackage{multirow}
+
+% Color tables
+\usepackage[table]{xcolor}
