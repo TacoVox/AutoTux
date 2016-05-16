@@ -2,11 +2,12 @@
  "final_report"
  (lambda ()
    (TeX-add-to-alist 'LaTeX-provided-class-options
-                     '(("report" "11pt" "a4paper")))
+                     '(("report" "12pt" "a4paper")))
    (TeX-run-style-hooks
     "latex2e"
     "tex/title"
+    "tex/ch1"
     "report"
-    "rep11"
+    "rep12"
     "tex/style")))
 
