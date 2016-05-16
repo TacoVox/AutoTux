@@ -211,6 +211,8 @@ namespace lane {
                         m_laneRecommendation.setQuality(true);
                     }
 
+                    // Shift the whole perception of the image 30px to the right,
+                    // this helps with keeping the right lane marking in picture.
 					if (right.x > 0) right.x += m_roadOffset;
 					if (left.x > 0) left.x += m_roadOffset;
 
@@ -260,7 +262,7 @@ namespace lane {
             stop_left.x = (m_image_grey.cols/2) - 50;
             stop_left.y = m_controlScanline;
 
-            // Find first red pixel in front (stopline)
+            // Find first grey pixel in the front of the car (left stopline check - looks a third into the road)
             for(int i = m_controlScanline; i > m_stopScanline; i--) {
                 pixelFrontLeft = m_image_grey.at<uchar>(Point(stop_left.x, i));
                 if(pixelFrontLeft > 120) {
@@ -275,7 +277,7 @@ namespace lane {
             stop_right.x = (m_image_grey.cols/2) + 50;
             stop_right.y = m_controlScanline;
 
-            // Find first red pixel in front (stopline)
+            // Find first grey pixel in front of the car (right stopline check - looks two thirds into the road)
             for(int i = m_controlScanline; i > m_stopScanline; i--) {
                 pixelFrontRight = m_image_grey.at<uchar>(Point(stop_right.x, i));
                 if(pixelFrontRight > 120) {
@@ -296,21 +298,29 @@ namespace lane {
                 }
             }
 
-            // TODO Comment this part. Jerker, Dennis?
+            // This part is for checking the robustness of the stopline throughout
+            // a few iterations to make sure it is infact a stopline
+
 	        static int counter = 0;
 
+            // An additional check to make sure that the stopline is more or less horizontal
             if(counter < 4 && (left_dist - right_dist > -15) && (left_dist - right_dist < 15)) {
                 counter ++;
-            } else {
-		    counter = 0;
+            }
+
+            else {
+		        counter = 0;
 	        }
 
+            // If it goes through all iterations, set the stopline distance in laneRecommenation
 	        if(counter > 3) {
 		        m_laneRecommendation.setDistance_to_line(left_dist);
             } 
 
             return e;
         }
+
+        // TODO Comment this part. Jerker, Dennis?
 
         void LaneFollower::laneFollowing(double e) {
             TimeStamp currentTime;
