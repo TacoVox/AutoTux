@@ -17,6 +17,7 @@
 
 // packet size and values positions
 #define SBDPKTSIZE      16
+#define DEL_ONE_POS     0
 #define DEL_TWO_POS     1
 #define DEL_DBCOLON_POS 2
 #define US1_POS         3
@@ -24,7 +25,7 @@
 #define IR1_POS         5
 #define IR2_POS         6
 #define IR3_POS         7
-#define WHL_POS         8
+#define SPEED_POS       8
 #define DIS_POS_1       9
 #define DIS_POS_2       10
 #define DIS_POS_3       11
