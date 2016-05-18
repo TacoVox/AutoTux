@@ -5,6 +5,8 @@
 % Jonas Kahler, Dennis Karlberg Niklas le Comte, Marco Trifance, Ivo Vryashkov
 % Chapter 6 - Hardware and Software Integration
 \chapter[Hardware and Software Integration]{Hardware and\\Software Integration}
+\hypertarget{hwinttgt}{}
+\label{hwintlbl}
 %% Low-level Board
 \section[Low-level Board]{Low-level Board\textsuperscript{[JE \& TDJ]}}
 \begin{figure}[ht]
@@ -47,16 +49,17 @@ protocol for their digital signal, there are no drivers for it provided by
 ChibiOS. We evaluated third-party drivers but found only one somewhat viable
 option, that happened to require two of the STM32’s timers. Eventually we
 decided to write our own software based bit-banging driver instead, explained
-further in the Implementation section \textbf{[JONAS MAKE LINK]}.\\
+further in section ~\ref{impdetailslbl}: \hyperlink{impdetailstgt}
+{Implementation Details}.\\
 
 \noindent
-As discussed in the Software Architecture section \textbf{[JONAS MAKE LINK]},
-some of the hardware modules for sensor input (wheel encoder, RC input) have
-interrupt callback functions that automatically gets executed whenever values
-change. Others (ultrasonic and infrared) need to initiate the measurement on the
-main thread, running at a frequency of 13.8 Hz. For the infrared ADC
-measurement, a callback is then executed automatically when the conversion is
-finished.\\
+As discussed in the section ~\ref{salbl}: \hyperlink{satgt}
+{Software Architecture}, some of the hardware modules for sensor input (wheel
+encoder, RC input) have interrupt callback functions that automatically gets
+executed whenever values change. Others (ultrasonic and infrared) need to
+initiate the measurement on the main thread, running at a frequency of 13.8 Hz.
+For the infrared ADC measurement, a callback is then executed automatically when
+the conversion is finished.\\
 
 \noindent
 The frequency of 13.8 Hz is somewhat limited by our ultrasonic sensors, that

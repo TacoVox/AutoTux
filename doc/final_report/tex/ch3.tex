@@ -33,7 +33,8 @@ about \textit{Canny}).\\
 Using this we get an acceptable image to work with at almost all times. We
 noticed that the algorithm itself might be a bit resource heavy but not so heavy
 that it would pose as a problem, especially not when we only analyze half the
-image as explained in the Implementation section \textbf{[JONAS MAKE LINK]}.
+image as explained in section ~\ref{impdetailslbl}:
+\hyperlink{impdetailstgt}{Implementation Details}.
 
 %%% Lane Detection by Dennis
 \subsection[Lane Detection]{Lane Detection\textsuperscript{[DK]}}
@@ -90,12 +91,12 @@ the DecisionMaker although it was handled in the Lane Follower.
 \newpage
 \subsection[Ultrasonic Sensors]{Ultrasonic Sensors\textsuperscript{[JE]}}
 The ultrasonic sensors use the I²C protocol for communication. As discussed
-further in the Hardware-Software Integration section \textbf{[JONAS MAKE LINK]},
-this link seems sensitive to fluctuations in voltage, and although we reduced
-this sensitivity by mounting external pull-up resistors connected to the
-I\textsuperscript{2}C bus, the sensors can still respond with unexpected 0's
-occasionally instead of the current distance measured. Therefore, we discard any
-readings of 0 until it occurs at least three consecutive times.\\
+further in section ~\ref{hwintlbl}: \hyperlink{hwinttgt}{Hardware-Software
+Integration}, this link seems sensitive to fluctuations in voltage,
+and although we reduced this sensitivity by mounting external pull-up resistors
+connected to the I\textsuperscript{2}C bus, the sensors can still respond with
+unexpected 0's occasionally instead of the current distance measured. Therefore,
+we discard any readings of 0 until it occurs at least three consecutive times.\\
 
 \noindent
 All values are averaged with a circular buffer, currently having the size of 4

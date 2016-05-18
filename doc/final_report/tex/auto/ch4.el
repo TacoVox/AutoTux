@@ -1,8 +1,6 @@
 (TeX-add-style-hook
- "ch5"
+ "ch4"
  (lambda ()
    (LaTeX-add-labels
-    "salbl"
-    "xtdiagr"
-    "xcompdiagr")))
+    "impdetailslbl")))
 

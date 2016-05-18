@@ -2,6 +2,7 @@
  "ch6"
  (lambda ()
    (LaTeX-add-labels
+    "hwintlbl"
     "blockdiag"
     "sensorlay")))
 

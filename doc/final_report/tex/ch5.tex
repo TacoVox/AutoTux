@@ -5,6 +5,8 @@
 % Jonas Kahler, Dennis Karlberg Niklas le Comte, Marco Trifance, Ivo Vryashkov
 % Chapter 5 - Software Architecture
 \chapter{Software Architecture}
+\hypertarget{satgt}{}
+\label{salbl}
 %% Low-level Board Software Architecture by Jerker
 \section[Low-level Board Software Architecture]
 {Low-level Board Software Architecture\textsuperscript{[JE]}}
@@ -12,8 +14,8 @@ The STM32 software consists of a main thread that reads sensor input values from
 hardware components and forwards control data to the hardware 13.8 times per
 second, and a serial thread that sends the sensor values to and reads control
 data from the Odroid via the USB connection 20 times per second. The interaction
-with hardware is explained further in the Hardware-Software Integration section
-\textbf{[JONAS MAKE LINK]}.\\
+with hardware is explained further in section ~\ref{hwintlbl}:
+\hyperlink{hwinttgt}{Hardware-Software Integration}.\\
 
 \noindent
 The hardware modules all have similar function names, to simplify their use. All
@@ -117,7 +119,8 @@ instant to the user as well as reading the input commands from the keyboard
 (which is non blocking because of the usage of ncurses no-delay mode.\\
 
 \noindent
-As mentioned in [Implementation Details Section link], a Singleton class is used
+As mentioned in section ~\ref{impdetailslbl}: \hyperlink{impdetailstgt}
+{Implementation Details}, a Singleton class is used
 to exchange data between the \textit{TimeTriggeredConferenceClientModule} and
 the TUI. The decision for a Singleton was made to avoid passing around an object
 to every single of the using classes.\\

@@ -1,0 +1,148 @@
+% LaTeX layout by Jonas Kahler, jonas@derkahler.de
+% AutoTux Final Report
+% Group Tux:
+% Max Enelund, Jerker Ersare, Thorsteinn D. Jörundsson,
+% Jonas Kahler, Dennis Karlberg Niklas le Comte, Marco Trifance, Ivo Vryashkov
+% Chapter 8 - Project Retrospective
+\chapter{Project Retrospective}
+\textsuperscript{\textbf{[JK]}}
+Personally I think the group size was way to big considering the scope of this
+project. Due to these circumstances we did some additional stuff like the
+ATConfigurator tool, which was an awesome experience to work at. Especially
+learning about ncurses will be helpful for further UNIX/Linux developing.\\
+When it comes to the Odroid board, we noticed that it would’ve been good to have
+a faster micro SD card available, because of the very low read and write speeds
+we had to and from it.\\
+Another improvement would’ve been a better WiFi module. Both of these
+limitations led to a very slow connection to Odroid (see section ~\ref{tolbl}:
+\hyperlink{totgt}{Toolchain \& Odroid}). It could also be that the Odroid is
+already a bit outdated. A switch to an RPI v3 for the next students could be
+helpful.\\
+Group wise, I would follow a better software process the next time, due to the
+fact that it helps with the communication and tasks splitting in the group. This
+time it felt sometimes a bit unstructured and improvised.\\
+But overall: a fun project and I think a lot of our members will be up for the
+Carolo Cup if asked.\\
+
+\noindent
+\textsuperscript{\textbf{[IV]}}
+Things that went well include the serial connection and the use of several
+testing frameworks. For the usb communication, it was a good experience to work
+with the libusb-1.0 library. It is well developed and tested, and provides a lot
+of freedom to the programmer as to how to implement a usb connection. The
+supported synchronous and asynchronous API is fun to work with and also presents
+a challenge, especially the latter one. At first, the usb connection was
+realized using asynchronous reading and writing, and therefore manually handling
+the callback function from the io operations. However, due to the lack of
+multiple devices and a dedicated thread to the execution of the io, as well as
+the similarity of the two implementations, a switch to using the synchronous API
+was made. Therefore, reducing the complexity of our code. In addition, learning
+how to use CxxTest and Google test framework was a useful and valuable
+experience.\\
+
+\noindent
+Things that we could have done better is to perhaps put more effort into the
+design of the entire system. For example, up until the very end of the project,
+we had a problem when starting up the different components of our application.
+Some components, like the LaneFollower, would start normally and receive values
+from the Proxy whilst others, like the DecisionMaker, would not receive any
+values at all. That led to multiple restarts of the failed component until it
+connected properly and started receiving values.\\
+
+\noindent
+\textsuperscript{\textbf{[TDJ]}}
+We felt that the group size was too large for this project. The project
+progressed at a very acceptable rate and deadlines were met, yet tasks were at
+time too saturated with manpower.\\
+Choosing the STM32 over the Arduino opened a lot of doors, but proved to be a
+bit complex to get up and running.\\
+A number of hardware components were in a poor condition when we received the
+car. The side-rear infrared sensor gave wildly fluctuating values, and the front
+right ultrasonic sensor simply did not work on the STM32 despite intensive
+troubleshooting.\\
+It would’ve been interesting to work with a properly functioning wheel encoder
+as well. Aligning it on its axis was hard, as the wheel did not conform to the
+requirements set by the encoder.\\
+
+\noindent
+\textsuperscript{\textbf{[JE]}}
+In my opinion, the only really challenging part in organizational terms in this
+project has been how to making sure the developers of the respective behavioural
+components (lane following, overtaking and parking) have had enough time with
+the car to test their components. We were warned for this and relatively
+prepared but still it's hard to imagine the extent of this challenge
+beforehand.\\
+
+\noindent
+It would have been interesting to have better hardware, such as better infrared
+sensors with longer range, a wheel encoder suited for the wheel or other way of
+measuring distance, and a faster camera (in terms of exposure time in darker
+conditions). That said, overall I'm happy to have learned a lot about embedded
+systems programming and interacting with hardware.\\
+
+\noindent
+\textsuperscript{\textbf{[MT]}}
+I feel like I could use some extra days to test the overtaking on the real car.
+Working with the simulator was fun and useful at the same time, but the
+transition to the real world required some major changes that could have been
+optimized with some additional time.\\
+
+\noindent
+\textsuperscript{\textbf{[ME]}}
+Personally I felt that the group worked very well, we managed to split the
+different parts of the complete project down to smaller modules and assigned
+these modules to smaller groups.\\
+Although the group size was a minor problem when it came to actually
+implementing parts on the car, as we needed to troubleshoot while running things
+on the car it became hard timewise, also adding to this was the limited amount
+of power on time because of only having one battery.\\
+I also felt that the Odroid board was not really up to par with the rest of the
+hardware, it was sluggish and slow when it came to working on the board. If this
+was because of the WiFi module or something else I don’t know, but being slower
+than a Raspberry Pi One while having better hardware I find a bit weird.\\
+To sum, fun project! Definitely continue doing this, maybe have some extra
+hardware available for failures. Also, make sure that the cars keeps a
+consistent quality amongst groups. Several cars had problems because of poorly
+executed soldering, building etc.\\
+
+\noindent
+\textsuperscript{\textbf{[NLC]}}
+I feel that the group worked well in this project, but it was to big groups to
+work with. Sometimes it felt like some people had nothing to do at some points.
+Me myself had a lot of problems with the OpenDaVINCI and the virtual machine in
+the beginning, when code that had worked one moment ago stopped working and
+getting errors from the OpenDaVINCI. I reinstalled everything around five times
+before choosing to use another laptop with linux installed on it. After that it
+was fun to be able to work and create the parking scenario. The biggest group
+problem we had was that a lot of people wanted to test on the car on the same
+time and finding time for everyone wasn’t easy, and that we had a limit on the
+battery made it even harder. For me I would have liked to have even more time
+for testing the parking, even though the end result was good.\\
+But overall it was a good project that we as a group made and we can be happy
+about how the car came to be.\\
+
+\noindent
+\textsuperscript{\textbf{[DK]}}
+Personally I enjoyed this project a lot more than I anticipated at the start.
+The fact that the project was so hardware adjacent turned me off a bit seeing as
+I enjoy high-level programming a lot more. When I realised that we were allowed
+to split up the work so that people worked on completely separate parts however,
+I quickly jumped on to work on the high-level board, more specifically the Lane
+Following and Detection part. Working on this part of the project was what made
+it enjoyable for me.\\
+The group co-operation worked very well. At the start of the project we split
+the group into smaller teams, even though we ended up co-operating a lot between
+teams towards the end of the project, we did stick to our initial teams
+throughout most of the development process. I would say that I think that the
+size of the group was a bit on the large side. We have worked in groups of about
+six members before, I think groups of that size works a bit better in terms of
+finding sizeable tasks for everyone in the group.\\
+OpenDaVINCI was a big hassle at times, especially the installation process and
+the generation of data structures. Just the fact that we had to recompile
+OpenDaVINCI on all machines including the Odroid every time we wanted to add a
+new data structure felt like our time was a bit wasted. I do not know if there
+is a better way to do this, but it can be something worth looking into for
+further projects like this. Maybe really stress the generated data types early
+in the project.\\
+As I said though, the project was a lot more fun than I expected and I am happy
+with how it turned out.

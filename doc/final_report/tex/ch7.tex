@@ -5,6 +5,54 @@
 % Jonas Kahler, Dennis Karlberg Niklas le Comte, Marco Trifance, Ivo Vryashkov
 % Chapter 7 - Test Results
 \chapter{Test Results}
+%% Sensor Calibratoin by Thorsteinn
+\section[Sensor Calibration]{Sensor Calibration\textsuperscript{[TDJ]}}
+Early in the project, we evaluated the sensor readings and found one faulty IR
+sensor and one faulty US sensor as discussed previously. Once we got a new IR
+sensor, all IR sensors seemed to give reasonable values. The values given after
+applying the conversion formula (returning the distance based on the voltage)
+were not perfect, but had an acceptable accuracy within around +-10\%.\\
+
+\noindent
+When evaluating the averaging mechanisms applied to the US sensor values, we
+realized they had interference problems. We would test this by pointing the car
+up into the air so nothing was in front of the sensors (at least not within
+several meters), and still they would give values such as 70 centimeters. We
+studied the data sheets and lowered the sensor gain to eliminate this problem.\\
+
+\noindent
+After confirming that distance measuring sensors were working as well as
+expected, we moved onto the wheel encoder. All wheel encoder test runs were done
+on a 1 meter test track at three varying speeds: slow, operational speed and
+brisk. Propulsion method varied, and was done by hand or using its motor.\\
+
+\noindent
+As the wheel diameter was 6.5 cm, each full revolution of the wheel would offset
+its distance by 20.4 cm. This gave us what we thought would be a reliable method
+of measuring distance and, by that, speed by using wheel encoder stripes/meter.
+Given that there were 9 stripes marked for the wheel encoder, it should have
+measured 44.1 stripes in a meter. This metric seemed reliable for excruciatingly
+slow speeds where measurements were guaranteed and reliable, yet this was not
+the case at operational speeds.\\
+
+\noindent
+We also discovered that running the wheel encoder in its own thread with a
+predefined sleep interval between each reading of the encoder state was not
+suitable, and later changed it to run using an interrupt routine which was
+triggered every time a new value was read. The tests confirmed our suspicion
+that this method was preferable and gave agreeable results at most times.\\
+
+\noindent
+The stripes/meter value was tampered with in order to increase metric
+reliability. Eventually the value 41 proved to give us the most accurate result
+at operational speeds. This value were found by calculating the difference of
+measured distance and actual distance at the various speeds. Ten runs were made
+with each stripes / meter value in order to gauge reliability and the precision
+was acceptable at best. We believe that a completely different method or setup
+would be required to further increase the accuracy of distance measurement, as
+has been approached in other parts of the report. This would very likely
+increase the quality of maneuvers such as parking and overtaking.
+
 %% Software Tests by Ivo
 \section[Software Tests]{Software Tests\textsuperscript{[IV]}}
 Google Test and Google Mock were used to perform unit testing for the serial
