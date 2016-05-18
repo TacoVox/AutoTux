@@ -11,7 +11,7 @@ To create an autonomous miniature vehicle that could complete scenarios such as
 lane following, overtaking and parking there had to be a place where these parts
 were integrated. That integration point came to be the Decision Maker. The
 communication between the Lane Follower and Decision Maker is done using
-OpenDaVINCI’s containers and broadcast conferences.
+OpenDaVINCI's containers and broadcast conferences.
 
 %% Decision Maker by Marco
 \section[Decision Maker]{Decision Maker\textsuperscript{[MT]}}
@@ -438,15 +438,17 @@ waiting for a new input (resume) or to turn it off.\\
 \textbf{Resume}: This state is for taking the car out from the parking spot and
 then continue to the lane following. This was only an extra feature to make the
 car be more as in the real world where it can continue to drive even if it has
-been parked.
+been parked.\\
+
+\noindent
+We don't know how the realization of the parallel parking could have been done
+in a different way that we made it. The only thing that comes to mind is to have
+used the Gyro instead of the distances inside the spot in phase3 to make it to
+be parallel inside the parking spot. The Gyro wasn't connected because we felt
+that using the distances was good enough to use for completing the task.
 \begin{figure}[ht]
   \centering
   \includegraphics[width=1\textwidth]{ParkingScenario.png}
   \caption{Every stage in the parking can be seen in the sensor value diagram.}
   \label{parkingscen}
 \end{figure}
-We don't know how the realization of the parallel parking could have been done
-in a different way that we made it. The only thing that comes to mind is to have
-used the Gyro instead of the distances inside the spot in phase3 to make it to
-be parallel inside the parking spot. The Gyro wasn't connected because we felt
-that using the distances was good enough to use for completing the task.
