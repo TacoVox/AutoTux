@@ -19,5 +19,6 @@
     "graphicx"
     "tabu"
     "multirow"
-    "xcolor")))
+    "xcolor"
+    "gensymb")))
 

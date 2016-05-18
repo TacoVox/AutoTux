@@ -50,33 +50,31 @@ void serial::SerialBuffer::appendReceiveBuffer(vector<unsigned char> data)
     if (data.size() < SBDPKTSIZE) {
         // unlock mutex
         arb.unlock();
+        cout << "packet too small" << endl;
         return;
     }
 
     // loop through the received data and look for a correct packet
-    for (auto it = data.begin(); it != data.end(); it++) {
-        // break if remaining elements are not enough for a packet
-        if (it + SBDPKTSIZE > data.end()) {
-            break;
-        }
+    for (auto it = data.end() - 1; it != data.begin(); it--) {
+        
         // check delimiters
-        if (*it == DEL_ONE &&
-            *(it+DEL_TWO_POS) == DEL_TWO &&
-            *(it+DEL_DBCOLON_POS) == DEL_DBCOLON &&
-            *(it+DEL_COMMA_POS) == DEL_COMMA) {
+        if (*it == DEL_COMMA &&
+            *(it - (SBDPKTSIZE - DEL_DBCOLON_POS - 1)) == DEL_DBCOLON &&
+            *(it - (SBDPKTSIZE - DEL_TWO_POS - 1)) == DEL_TWO &&
+            *(it - (SBDPKTSIZE - DEL_ONE_POS - 1)) == DEL_ONE) {
             // get values
-            unsigned char us1 = *(it+US1_POS);
-            unsigned char us2 = *(it+US2_POS);
-            unsigned char ir1 = *(it+IR1_POS);
-            unsigned char ir2 = *(it+IR2_POS);
-            unsigned char ir3 = *(it+IR3_POS);
-            unsigned char wheel = *(it+WHL_POS);
-            unsigned char dis1 = *(it+DIS_POS_1);
-            unsigned char dis2 = *(it+DIS_POS_2);
-            unsigned char dis3 = *(it+DIS_POS_3);
-            unsigned char dis4 = *(it+DIS_POS_4);
-            unsigned char light = *(it+LIGHT_SEN);
-            unsigned char check = *(it+CHK_SUM);
+            unsigned char us1 = *(it - ((SBDPKTSIZE - US1_POS) - 1));
+            unsigned char us2 = *(it - ((SBDPKTSIZE - US2_POS) - 1));
+            unsigned char ir1 = *(it - ((SBDPKTSIZE - IR1_POS) - 1));
+            unsigned char ir2 = *(it - ((SBDPKTSIZE - IR2_POS) - 1));
+            unsigned char ir3 = *(it - ((SBDPKTSIZE - IR3_POS) - 1));
+            unsigned char wheel = *(it - ((SBDPKTSIZE - SPEED_POS) - 1));
+            unsigned char dis1 = *(it - ((SBDPKTSIZE - DIS_POS_1) - 1));
+            unsigned char dis2 = *(it - ((SBDPKTSIZE - DIS_POS_2) - 1));
+            unsigned char dis3 = *(it - ((SBDPKTSIZE - DIS_POS_3) - 1));
+            unsigned char dis4 = *(it - ((SBDPKTSIZE - DIS_POS_4) - 1));
+            unsigned char light = *(it - ((SBDPKTSIZE - LIGHT_SEN) - 1));
+            unsigned char check = *(it - ((SBDPKTSIZE - CHK_SUM) - 1));
             // print info if verbose
             if (verbose) {
                 printf("US1:%i US2:%i IR1:%i IR2:%i IR3:%i WHEEL:%i "
@@ -95,12 +93,11 @@ void serial::SerialBuffer::appendReceiveBuffer(vector<unsigned char> data)
                 buffer_in.push_front(valid_pkt);
                 break;
             }
-            else {
-                // find where next packet starts
-                it = find(it+1, data.end(), DEL_ONE);
-                // if not found, break
-                if (it == data.end()) break;
-            }
+
+            // when is a 'proper' packet, i.e. size == 16
+            // then jump over
+            it -= SBDPKTSIZE;
+
         } else {
             // not a valid packet
             if (verbose) {
