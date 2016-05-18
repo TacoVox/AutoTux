@@ -151,7 +151,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DecisionMaker::body() 
         containerLaneRecommendationMSG = getKeyValueDataStore().get(autotux::LaneRecommendationMSG::ID());
         lrMSG = containerLaneRecommendationMSG.getData<LaneRecommendationMSG>();
 
-      	//state = static_cast<DecisionMaker::STATE>(dmMSG.getState());
+      	state = static_cast<DecisionMaker::STATE>(dmMSG.getState());
 	
         if(!ovt.isLeftLane()){
             ovtMSG.setLeftlane(NOTLEFTLANE);
