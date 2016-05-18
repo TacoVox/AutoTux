@@ -1,0 +1,125 @@
+% LaTeX layout by Jonas Kahler, jonas@derkahler.de
+% AutoTux Final Report
+% Group Tux:
+% Max Enelund, Jerker Ersare, Thorsteinn D. Jörundsson,
+% Jonas Kahler, Dennis Karlberg Niklas le Comte, Marco Trifance, Ivo Vryashkov
+% Chapter 1 - Project Organization and Milestone Planning
+\chapter[Project Organization and Milestone Planning]
+{Project Organization and\\ Milestone Planning}
+
+% Product Vision
+\section[Project Organization]{Project Organization\textsuperscript{[TDJ]}}
+At the start of project we conducted a few meetings in order to visualize and
+plan the tasks at hand. A draft of the system architecture was created which in
+turn was used to delegate tasks between the groups. Parts of this draft was
+later revised based on feedback we received as well as realizations made down
+the line.\\\\
+The team was structured into task-oriented groups in the following manner:\\
+\noindent
+{\tabulinesep=1.4mm
+\begin{tabu}{ll}
+\textbf{STM32} & \begin{tabular}[c]{@{}l@{}}Jerker Ersare\\
+   Thorsteinn D. J{\"o}rundsson\end{tabular}\\
+\textbf{Decision Maker, Overtaking and Parking} & \begin{tabular}[c]{@{}l@{}}
+   Niklas Le Comte\\ Marco Trifance\end{tabular}\\
+\textbf{Proxy and Serial} & \begin{tabular}[c]{@{}l@{}}Jonas Kahler\\
+   Ivo Vryashkov\end{tabular}\\
+\textbf{Image Processing and Lane Following} & \begin{tabular}[c]{@{}l@{}}
+   Max Enelund\\ Dennis Karlberg\end{tabular}
+\end{tabu}}
+\\\\
+As the project progressed and tasks were completed, group members participated
+in other efforts where applicable and as needed. Among those, Jerker aided in
+lane-following, Ivo conducted unit tests and Jonas created a configuration tool
+used in development and vehicle testing.
+
+% Milestones and Successfully Completed Tasks
+\newpage
+\section[Milestones and Successfully Completed Tasks]
+{Milestones and Successfully Completed Tasks\textsuperscript{[TEAM]}}
+We always delivered on time except the sensor recording diagram (April 12), due
+to problems with hardware. We received a new ultrasonic sensor the day before
+the presentation and did not manage to make recordings and diagrams in time.\\\\
+\noindent
+{\tabulinesep=1.4mm
+\begin{tabu}{l|l}
+Until Feburary 2 & \begin{tabular}[c]{@{}l@{}}Installed and learned about OD\\
+   Made diagrams for presentation\end{tabular}\\
+\textbf{February 02} & \textbf{Simulation Environment}\\
+Until February 16 & \begin{tabular}[c]{@{}l@{}}Discussed concept and
+   architecture\\Prepared report\end{tabular}\\
+\textbf{February 16} & \textbf{Concept \&Architecture}\\
+March 24 & \begin{tabular}[c]{@{}l@{}}Discussed the team structure, goals,\\
+   tasks and responsibilities\end{tabular}\\
+March 25 & \begin{tabular}[c]{@{}l@{}}Received the car, basic Arduino sketch\\
+   for controlling ESC and servo\end{tabular}\\
+March 28 & \begin{tabular}[c]{@{}l@{}}Sensor readings through Arduino to\\
+   measure sensor ranges and angles\end{tabular}\\
+\textbf{March 29} & \textbf{Revised Concept \& Architecture}\\
+April 1 & STM32 reading IR sensor values\\
+April 4 & \begin{tabular}[c]{@{}l@{}}STM32 reading US sensor values\\
+   Basic connection between boards\end{tabular}\\
+April 6 & \begin{tabular}[c]{@{}l@{}}Basic readings from the Open DaVINCI
+   simulations\\ to own components\\ Camera fully working, saving images to
+   SharedMemory.\end{tabular}\\
+\end{tabu}}
+
+{\tabulinesep=1.4mm
+\begin{tabu}{l|l}
+April 8 &  \begin{tabular}[c]{@{}l@{}}STM32 basic version of wheel encoder reading\\
+Basic reading and writing from/to the usb serial connection\\
+Basic parser for the data packets\\
+Basic lane-following working\end{tabular}\\
+April 11 & Basic parking spot detection with sensors\\
+\textbf{April 12} & \begin{tabular}[c]{@{}l@{}}\textbf{Basic lane-following
+   (simulation)}\\STM32 PWM output\\Stable communication between the boards\\
+   Basic parallel parking done without noise\end{tabular}\\
+April 13 & \begin{tabular}[c]{@{}l@{}}STM32 output based on received packets\\
+   First integration between LaneFollower and Decision Maker\\
+   Camera handling rewritten to use OpenCV2 API.\end{tabular}\\
+April 14 & \begin{tabular}[c]{@{}l@{}}STM32 RC mode\\
+   LaneFollower using new algorithm for lane-following\end{tabular}\\
+April 15 & \begin{tabular}[c]{@{}l@{}}Improved data packets parser and\\
+   communication between boards\end{tabular}\\
+April 18 & Smoother lane-following implemented on the car\\
+\textbf{April 19} & \begin{tabular}[c]{@{}l@{}}\textbf{Lane-following (car)}\\
+   Serial connection running at 15 Hz\\
+   The parking handles noise data\end{tabular}\\
+April 22 & Initial stop-line handling \\
+April 25 & \begin{tabular}[c]{@{}l@{}}STM32 LED driver and basic light logic\\
+   Overtaker handles noise data\end{tabular}\\
+\textbf{April 26} & \textbf{Parking \& Overtaking (Simulation)}\\
+April 27 & CxxTest introduced for the serial module\\
+April 28 & \begin{tabular}[c]{@{}l@{}}First working ATConfigurator version\\
+   Robust stop-line detection\end{tabular}\\
+\end{tabu}}
+
+{\tabulinesep=1.4mm
+\begin{tabu}{l|l}
+April 29 & \begin{tabular}[c]{@{}l@{}}STM32 physical lights switch\\
+   Google testing framework introduced\\
+   Robust communication and data exchange between\\the two boards\\
+   Parking on the real car is okey\end{tabular}\\
+April 31 & Edge Detection changed to use Canny\\
+\textbf{May 3} & \begin{tabular}[c]{@{}l@{}}
+   \textbf{Revised lane-following \& basic parking/overtaking}
+   \\Refactoring and improvement of the serial module\end{tabular}\\
+May 4 & \begin{tabular}[c]{@{}l@{}}
+   STM32 headlights stronger in low surrounding light\\
+   Data quality check added in LaneFollower\\
+   Image optimizations, reduced the memory requirements\end{tabular}\\
+May 5 & Lane follower execution time measured and optimized\\
+May 6 & \begin{tabular}[c]{@{}l@{}}ATConfigurator can send out selected state\\
+   Overtaker refactored to work on car\end{tabular}\\
+May 9 & \begin{tabular}[c]{@{}l@{}}STM32 ESC calibration mode\\
+   Tests completed for the serial module\end{tabular}\\
+May 10 & \begin{tabular}[c]{@{}l@{}}Lane follower road offset (car keeps to\\
+   the right to keep markings in camera view)\\
+   ATConfigurator shows ASCII representation of the\\current webcam image\\
+   Car is working with new logic for the parking inside of\\
+   the spot\\\end{tabular}\\
+\textbf{May 11} & \textbf{Final presentation}\\
+May 13 & Serial connection running at 20 Hz\\
+\end{tabu}}
+
+%\begin{tabular}[c]{@{}l@{}}\end{tabular}\\
