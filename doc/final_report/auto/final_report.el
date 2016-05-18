@@ -13,7 +13,7 @@
    (add-to-list 'LaTeX-verbatim-macros-with-delims-local "path")
    (TeX-run-style-hooks
     "latex2e"
-    "tex/ch3"
+    "tex/ch9"
     "report"
     "rep12"
     "tex/style")))
