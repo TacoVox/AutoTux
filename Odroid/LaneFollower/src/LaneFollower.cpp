@@ -22,10 +22,10 @@ namespace lane {
 
         // Set to true when running simulator.
         const bool SIMMODE = true;
-		
-		Mat m_image_grey; 
-		TimeStamp startTime, endTime;
-		double realDistanceToStopline;		
+
+        Mat m_image_grey;
+        TimeStamp startTime, endTime;
+        double realDistanceToStopline;
 
         TimeStamp configContainerTimeStamp = TimeStamp();
 
@@ -46,14 +46,14 @@ namespace lane {
                 m_eSum(0),
                 m_eOld(0),
                 m_distance(190),
-		        m_controlScanline(222),
+                m_controlScanline(222),
                 m_stopScanline(50),
-	            m_threshold1(50),
+                m_threshold1(50),
                 m_threshold2(200),
-		        m_roadOffset(30),
-         	    P_GAIN(0.80),
-                I_GAIN(0.0),
-                D_GAIN(0.0),
+                m_roadOffset(30),
+                P_GAIN(1.30),
+                I_GAIN(0.01),
+                D_GAIN(0.10),
                 printCounter(0) {}
 
         LaneFollower::~LaneFollower() { }
@@ -143,9 +143,9 @@ namespace lane {
         // Do magic to the image around here.
         void LaneFollower::processImage() {
 
-			// Make a new greyscale matrix that will hold a greyscale copy
-			// of the original image
-			m_image_grey = Mat(m_image.rows, m_image.cols, CV_8UC1);
+            // Make a new greyscale matrix that will hold a greyscale copy
+            // of the original image
+            m_image_grey = Mat(m_image.rows, m_image.cols, CV_8UC1);
 
             // Copy the greyscale information to the new matrix
             cvtColor(m_image, m_image_grey, COLOR_BGR2GRAY);
@@ -213,8 +213,8 @@ namespace lane {
 
                     // Shift the whole perception of the image 30px to the right,
                     // this helps with keeping the right lane marking in picture.
-					if (right.x > 0) right.x += m_roadOffset;
-					if (left.x > 0) left.x += m_roadOffset;
+                    if (right.x > 0) right.x += m_roadOffset;
+                    if (left.x > 0) left.x += m_roadOffset;
 
                     // Right lane logic (prefer right line following)
                     if (!inLeftLane) {
@@ -301,21 +301,19 @@ namespace lane {
             // This part is for checking the robustness of the stopline throughout
             // a few iterations to make sure it is infact a stopline
 
-	        static int counter = 0;
+            static int counter = 0;
 
             // An additional check to make sure that the stopline is more or less horizontal
             if(counter < 4 && (left_dist - right_dist > -15) && (left_dist - right_dist < 15)) {
                 counter ++;
+            } else {
+                counter = 0;
             }
 
-            else {
-		        counter = 0;
-	        }
-
             // If it goes through all iterations, set the stopline distance in laneRecommenation
-	        if(counter > 3) {
-		        m_laneRecommendation.setDistance_to_line(left_dist);
-            } 
+            if(counter > 3) {
+                m_laneRecommendation.setDistance_to_line(left_dist);
+            }
 
             return e;
         }
@@ -358,8 +356,8 @@ namespace lane {
             // Limit max steering angle based on car limits
             if (desiredSteering > 0.5) desiredSteering = 0.5;
             if (desiredSteering < -0.5) desiredSteering = -0.5;
-			
-			realDistanceToStopline = m_laneRecommendation.getDistance_to_line();
+
+            realDistanceToStopline = m_laneRecommendation.getDistance_to_line();
             if(m_laneRecommendation.getDistance_to_line() < 10 || m_laneRecommendation.getDistance_to_line() > 60)
                 // Set distance to line to -1 if it's too far away or too close
                 m_laneRecommendation.setDistance_to_line(-1);
@@ -374,13 +372,13 @@ namespace lane {
             if(printCounter == 25) {
                 // Print values sent through to the DM
                 cout << "STOPLINE: " << m_laneRecommendation.getDistance_to_line() << endl;
-    			cout << "REAL STOPLINE: " << realDistanceToStopline << endl;
-				cout << "DESIRED STEERING: " << m_laneRecommendation.getAngle() << endl;
+                cout << "REAL STOPLINE: " << realDistanceToStopline << endl;
+                cout << "DESIRED STEERING: " << m_laneRecommendation.getAngle() << endl;
                 cout << "QUALITY: " << m_laneRecommendation.getQuality() << endl;
                 cout << "IN LEFT LANE: " << m_overtaking.getLeftlane() << endl;
-           		cout << "TIME IN BODY: " << (endTime.toMicroseconds() - startTime.toMicroseconds()) << endl;
-		        cout << "ROADWIDTH: " << m_distance << endl;
-			   	cout << "-----------------------------------" << endl;
+                cout << "TIME IN BODY: " << (endTime.toMicroseconds() - startTime.toMicroseconds()) << endl;
+                cout << "ROADWIDTH: " << m_distance << endl;
+                cout << "-----------------------------------" << endl;
 
                 // Reset counter
                 printCounter = 0;
@@ -398,10 +396,10 @@ namespace lane {
             // Loop while in the RUNNING state.
             while (getModuleStateAndWaitForRemainingTimeInTimeslice() == ModuleStateMessage::RUNNING) {
                 startTime = TimeStamp();
-				bool has_next_frame = false;
+                bool has_next_frame = false;
 
                 Container image_container = getKeyValueDataStore().get(SharedImage::ID());
-               
+
                 Container config_container = getKeyValueDataStore().get(LaneFollowerMSG::ID());
                 Container overtaking_container = getKeyValueDataStore().get(OvertakingMSG::ID());
 
@@ -409,20 +407,20 @@ namespace lane {
                 // Otherwise run with values from the constructor.
                 if(config_container.getReceivedTimeStamp() > configContainerTimeStamp) {
                     m_config = config_container.getData<LaneFollowerMSG>();
-					if (m_config.getThresholdD() > 0) {
-                    	m_threshold1 = m_config.getThresholdD();
-                    	m_threshold2 = m_config.getThresholdB();
-                    	m_distance = m_config.getRoadWidth();
+                    if (m_config.getThresholdD() > 0) {
+                        m_threshold1 = m_config.getThresholdD();
+                        m_threshold2 = m_config.getThresholdB();
+                        m_distance = m_config.getRoadWidth();
 
-                    	P_GAIN = m_config.getGainP();
-                    	I_GAIN = m_config.getGainI();
-                    	D_GAIN = m_config.getGainD();
+                        P_GAIN = m_config.getGainP();
+                        I_GAIN = m_config.getGainI();
+                        D_GAIN = m_config.getGainD();
 
-                    	configContainerTimeStamp = TimeStamp();
-			            m_roadOffset = m_config.getLightThreshold();
-                    	LaneFollower::toLogger(LogMessage::DEBUG, m_config.toString());
-                	}
-				}
+                        configContainerTimeStamp = TimeStamp();
+                        m_roadOffset = m_config.getLightThreshold();
+                        LaneFollower::toLogger(LogMessage::DEBUG, m_config.toString());
+                    }
+                }
 
                 m_overtaking = overtaking_container.getData<OvertakingMSG>();
 
@@ -443,7 +441,7 @@ namespace lane {
                     getConference().send(processedImageContainer);
                 }
                 getConference().send(laneRecommendationContainer);
-				endTime = TimeStamp();
+                endTime = TimeStamp();
                 printDebug();
             }
             return ModuleExitCodeMessage::OKAY;
