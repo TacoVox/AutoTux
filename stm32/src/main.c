@@ -46,11 +46,11 @@ int main(void) {
 		sensorInputIteration();
 		controlOutputIteration();
 
-		// Above meausred to 72 ms including ADC callback - sleep 8 to achieve 12.5 hertz
-		chThdSleepMilliseconds(8);
-		//chThdSleepMilliseconds(80);
-		// Sleep 28 to achieve 10 hz
-		// chThdSleepMilliseconds(28);
+		// Above meausred to ~72 ms. 
+		// Sleep 8 to achieve 12.5 Hz
+		// Sleep 28 to achieve 10 Hz
+		// Sleep nothing to achieve ~13.8 Hz
+		// chThdSleepMilliseconds(8);
 	}
 
 	return 0;

@@ -96,18 +96,17 @@ void adcCallback(ADCDriver *adcp, adcsample_t *buffer, size_t n) {
 		irAvg[0] = (irSamples[0] + irSamples[3] + irSamples[6] + irSamples[9]) / 4;
 		irAvg[1] = (irSamples[1] + irSamples[4] + irSamples[7] + irSamples[10]) / 4;
 		irAvg[2] = (irSamples[2] + irSamples[5] + irSamples[8] + irSamples[11]) / 4;
-		// Conversion algorithm from arduino. Bit shift to compensate for the higher
+		// Conversion algorithm from Arduino. Bit shift to compensate for the higher
 		// ADC resolution on STM
 		irAvg[0] = irAvg[0] >> 3;
 		irAvg[1] = irAvg[1] >> 3;
 		irAvg[2] = irAvg[2] >> 3;
 		// Formula: irCm[0] = (int)(2914.0f / (irAvg[0] + 5.0f))- 1;
+		// Note: roughly calibrated with -3 as a constant instead of -1
 		// Here we also add the previous value and divide by 2 to average out
 		irCm[0] = (irCm[0] + (int)(2914.0f / (irAvg[0] + 5.0f))- 3) / 2;
 		irCm[1] = (irCm[1] + (int)(2914.0f / (irAvg[1] + 5.0f))- 3) / 2;
 		irCm[2] = (irCm[2] + (int)(2914.0f / (irAvg[2] + 5.0f))- 3) / 2;
-		/*irCm[0] = (int)(2914.0f / (irAvg[0] + 5.0f)) - 3;
-		irCm[1] = (int)(2914.0f / (irAvg[1] + 5.0f)) - 3;
-		irCm[2] = (int)(2914.0f / (irAvg[2] + 5.0f)) - 3;*/
+
   }
 }

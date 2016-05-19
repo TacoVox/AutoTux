@@ -1,10 +1,10 @@
 ##############################################################################
-# NOTE: Makefile provided by ChibiOS.
+# NOTE: Makefile provided by ChibiOS. Adapted to include all AutoTux C files.
 # Build global options
 #
 # Compiler options here.
 ifeq ($(USE_OPT),)
-  USE_OPT = -std=c99 -O0 -ggdb -fomit-frame-pointer -falign-functions=16 -Wall -Wextra 
+  USE_OPT = -std=c99 -O0 -ggdb -fomit-frame-pointer -falign-functions=16 
 #-Werror
 endif
 
@@ -183,7 +183,7 @@ AOPT =
 TOPT = -mthumb -DTHUMB
 
 # Define C warning options here
-CWARN = -Wall -Wextra -Wundef -Wstrict-prototypes
+CWARN = -Werror -Wall -Wextra -Wundef -Wstrict-prototypes -Wfloat-equal -Wshadow
 
 # Define C++ warning options here
 CPPWARN = -Wall -Wextra -Wundef
